@@ -1,0 +1,11 @@
+{
+    "name": "Global",
+    "alias": "global",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Global\\Providers\\GlobalServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,12 @@
+{
+    "Core": true,
+    "Global": true,
+    "School": true,
+    "Campus": true,
+    "Finance": true,
+    "Enrollment": true,
+    "Employee": true,
+    "Library": true,
+    "Procurement": true,
+    "Monitoring": true
+}
