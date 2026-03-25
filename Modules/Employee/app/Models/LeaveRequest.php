@@ -2,21 +2,67 @@
 
 namespace Modules\Employee\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Employee\Database\Factories\LeaveRequestFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Tenant;
+use Modules\Core\Models\User;
 
 class LeaveRequest extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'tenant_id',
+        'employee_id',
+        'substitute_employee_id',
+        'supervisor_id',
+        'approver_id',
+        'leave_type',
+        'start_date',
+        'end_date',
+        'total_days',
+        'reason',
+        'attachment',
+        'status',
+        'supervisor_approved_at',
+        'approved_at',
+        'rejection_reason',
+    ];
 
-    // protected static function newFactory(): LeaveRequestFactory
-    // {
-    //     // return LeaveRequestFactory::new();
-    // }
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'total_days' => 'integer',
+            'supervisor_approved_at' => 'datetime',
+            'approved_at' => 'datetime',
+        ];
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function substituteEmployee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'substitute_employee_id');
+    }
+
+    public function supervisor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approver_id');
+    }
 }

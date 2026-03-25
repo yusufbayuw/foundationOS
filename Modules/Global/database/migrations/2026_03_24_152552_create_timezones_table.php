@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('timezones', function (Blueprint $table) {
             $table->id();
-            
+            $table->string('code')->unique();
+            $table->string('name');
+            $table->string('utc_offset')->nullable();
             $table->timestamps();
         });
     }

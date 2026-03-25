@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('achievement_types', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->string('code');
+            $table->string('name');
+            $table->string('category')->nullable();
+            $table->string('level')->nullable();
+            $table->unsignedInteger('point_weight')->default(1);
+            $table->string('certificate_template')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->unique(['tenant_id', 'organization_id', 'code']);
             $table->timestamps();
         });
     }

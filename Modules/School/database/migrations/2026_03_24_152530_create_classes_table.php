@@ -13,7 +13,20 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('academic_period_id')->constrained('academic_periods')->cascadeOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('homeroom_teacher_id')->nullable()->constrained('teachers')->nullOnDelete();
+            $table->foreignId('assistant_teacher_id')->nullable()->constrained('teachers')->nullOnDelete();
+            $table->string('name');
+            $table->string('code');
+            $table->string('grade_level')->nullable();
+            $table->unsignedInteger('capacity')->nullable();
+            $table->unsignedInteger('student_count')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->text('description')->nullable();
+            $table->unique(['tenant_id', 'academic_period_id', 'code']);
             $table->timestamps();
         });
     }

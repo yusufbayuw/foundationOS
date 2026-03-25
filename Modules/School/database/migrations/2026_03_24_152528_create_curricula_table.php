@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('curricula', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
+            $table->foreignId('academic_period_id')->nullable()->constrained('academic_periods')->nullOnDelete();
+            $table->string('name');
+            $table->string('code');
+            $table->string('type')->nullable();
+            $table->json('grade_levels')->nullable();
+            $table->date('effective_date')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->text('description')->nullable();
+            $table->unique(['tenant_id', 'organization_id', 'code']);
             $table->timestamps();
         });
     }

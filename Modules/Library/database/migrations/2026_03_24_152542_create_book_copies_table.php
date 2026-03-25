@@ -6,21 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('book_copies', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
+            $table->string('copy_number');
+            $table->string('barcode')->nullable();
+            $table->date('acquisition_date')->nullable();
+            $table->string('acquisition_source')->nullable();
+            $table->decimal('price', 10, 2)->nullable();
+            $table->string('condition')->nullable();
+            $table->string('status')->default('available');
+            $table->string('location_shelf')->nullable();
+            $table->text('notes')->nullable();
+            $table->unique(['book_id', 'copy_number']);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('book_copies');

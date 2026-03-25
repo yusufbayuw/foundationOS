@@ -2,21 +2,58 @@
 
 namespace Modules\Employee\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Employee\Database\Factories\PayrollComponentFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\Models\Organization;
+use Modules\Core\Models\Tenant;
 
 class PayrollComponent extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'tenant_id',
+        'organization_id',
+        'code',
+        'name',
+        'type',
+        'category',
+        'calculation_type',
+        'amount',
+        'percentage',
+        'formula',
+        'is_taxable',
+        'is_mandatory',
+        'is_active',
+        'display_order',
+    ];
 
-    // protected static function newFactory(): PayrollComponentFactory
-    // {
-    //     // return PayrollComponentFactory::new();
-    // }
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'decimal:2',
+            'percentage' => 'decimal:2',
+            'is_taxable' => 'boolean',
+            'is_mandatory' => 'boolean',
+            'is_active' => 'boolean',
+            'display_order' => 'integer',
+        ];
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function salarySlipComponents(): HasMany
+    {
+        return $this->hasMany(SalarySlipComponent::class);
+    }
 }

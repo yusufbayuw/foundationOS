@@ -2,21 +2,54 @@
 
 namespace Modules\School\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\School\Database\Factories\AssessmentItemFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\Models\Tenant;
 
 class AssessmentItem extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'tenant_id',
+        'assessment_id',
+        'item_type',
+        'question_number',
+        'question_text',
+        'question_attachment',
+        'answer_options',
+        'correct_answer',
+        'max_score',
+        'weight',
+        'difficulty_level',
+        'cognitive_level',
+        'answer_key_rubric',
+    ];
 
-    // protected static function newFactory(): AssessmentItemFactory
-    // {
-    //     // return AssessmentItemFactory::new();
-    // }
+    protected function casts(): array
+    {
+        return [
+            'question_number' => 'integer',
+            'answer_options' => 'array',
+            'max_score' => 'decimal:2',
+            'weight' => 'decimal:2',
+        ];
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function assessment(): BelongsTo
+    {
+        return $this->belongsTo(Assessment::class);
+    }
+
+    public function studentAssessmentAnswers(): HasMany
+    {
+        return $this->hasMany(StudentAssessmentAnswer::class);
+    }
 }

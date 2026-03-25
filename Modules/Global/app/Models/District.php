@@ -2,21 +2,28 @@
 
 namespace Modules\Global\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Global\Database\Factories\DistrictFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class District extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'city_id',
+        'code',
+        'name',
+    ];
 
-    // protected static function newFactory(): DistrictFactory
-    // {
-    //     // return DistrictFactory::new();
-    // }
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function villages(): HasMany
+    {
+        return $this->hasMany(Village::class);
+    }
 }

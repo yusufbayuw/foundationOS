@@ -2,21 +2,60 @@
 
 namespace Modules\School\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\School\Database\Factories\AttendanceFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Tenant;
+use Modules\Core\Models\User;
 
 class Attendance extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'tenant_id',
+        'schedule_id',
+        'student_id',
+        'verified_by',
+        'entity_type',
+        'status',
+        'entry_method',
+        'attendance_date',
+        'check_in',
+        'check_out',
+        'location_data',
+        'device_info',
+        'photo_proof',
+        'notes',
+    ];
 
-    // protected static function newFactory(): AttendanceFactory
-    // {
-    //     // return AttendanceFactory::new();
-    // }
+    protected function casts(): array
+    {
+        return [
+            'attendance_date' => 'date',
+            'check_in' => 'datetime',
+            'check_out' => 'datetime',
+            'location_data' => 'array',
+        ];
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(Schedule::class);
+    }
+
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
 }

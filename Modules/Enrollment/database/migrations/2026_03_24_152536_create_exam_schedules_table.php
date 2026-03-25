@@ -6,21 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('exam_schedules', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->foreignId('admission_period_id')->constrained('admission_periods')->cascadeOnDelete();
+            $table->string('name');
+            $table->string('type')->nullable();
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->string('location')->nullable();
+            $table->unsignedInteger('room_capacity')->default(50);
+            $table->unsignedInteger('registered_count')->default(0);
+            $table->text('instructions')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('exam_schedules');

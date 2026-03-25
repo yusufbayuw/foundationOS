@@ -2,21 +2,56 @@
 
 namespace Modules\Core\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Core\Database\Factories\UserTenantRoleFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserTenantRole extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'user_id',
+        'tenant_id',
+        'organization_id',
+        'tenant_role_id',
+        'assigned_by',
+        'assigned_at',
+        'expires_at',
+        'is_primary',
+    ];
 
-    // protected static function newFactory(): UserTenantRoleFactory
-    // {
-    //     // return UserTenantRoleFactory::new();
-    // }
+    protected function casts(): array
+    {
+        return [
+            'assigned_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'is_primary' => 'boolean',
+        ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function tenantRole(): BelongsTo
+    {
+        return $this->belongsTo(TenantRole::class);
+    }
+
+    public function assignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
 }

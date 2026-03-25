@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('rfq_items', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('request_for_quotation_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('procurement_item_id')->nullable()->constrained('procurement_items')->nullOnDelete();
+            $table->text('description')->nullable();
+            $table->text('specifications')->nullable();
+            $table->unsignedInteger('quantity')->default(1);
+            $table->string('unit_of_measure')->nullable();
+            $table->decimal('estimated_budget', 18, 2)->default(0);
+            $table->text('technical_requirements')->nullable();
+            $table->json('mandatory_requirements')->nullable();
+            $table->json('scoring_criteria')->nullable();
             $table->timestamps();
         });
     }

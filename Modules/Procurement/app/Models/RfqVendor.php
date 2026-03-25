@@ -2,21 +2,52 @@
 
 namespace Modules\Procurement\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Procurement\Database\Factories\RfqVendorFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Tenant;
 
 class RfqVendor extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'tenant_id',
+        'request_for_quotation_id',
+        'vendor_id',
+        'invitation_date',
+        'response_deadline',
+        'status',
+        'responded_at',
+        'quotation_amount',
+        'quotation_document',
+        'technical_score',
+        'price_score',
+        'total_score',
+        'ranking',
+        'is_shortlisted',
+        'is_awarded',
+        'award_reason',
+        'notes',
+    ];
 
-    // protected static function newFactory(): RfqVendorFactory
-    // {
-    //     // return RfqVendorFactory::new();
-    // }
+    protected function casts(): array
+    {
+        return [
+            'invitation_date' => 'date',
+            'response_deadline' => 'date',
+            'responded_at' => 'datetime',
+            'quotation_amount' => 'decimal:2',
+            'technical_score' => 'decimal:2',
+            'price_score' => 'decimal:2',
+            'total_score' => 'decimal:2',
+            'ranking' => 'integer',
+            'is_shortlisted' => 'boolean',
+            'is_awarded' => 'boolean',
+        ];
+    }
+
+    public function tenant(): BelongsTo { return $this->belongsTo(Tenant::class); }
+    public function requestForQuotation(): BelongsTo { return $this->belongsTo(RequestForQuotation::class); }
+    public function vendor(): BelongsTo { return $this->belongsTo(Vendor::class); }
 }

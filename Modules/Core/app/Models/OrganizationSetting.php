@@ -2,21 +2,24 @@
 
 namespace Modules\Core\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Core\Database\Factories\OrganizationSettingFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrganizationSetting extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
+    protected $fillable = [
+        'organization_id',
+        'group',
+        'key',
+        'value',
+        'type',
+    ];
 
-    // protected static function newFactory(): OrganizationSettingFactory
-    // {
-    //     // return OrganizationSettingFactory::new();
-    // }
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
 }

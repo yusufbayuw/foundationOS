@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('tenant_settings', function (Blueprint $table) {
             $table->id();
-            
+            $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
+            $table->string('group')->nullable();
+            $table->string('key');
+            $table->longText('value')->nullable();
+            $table->string('type')->default('string');
+            $table->unique(['tenant_id', 'key']);
             $table->timestamps();
         });
     }

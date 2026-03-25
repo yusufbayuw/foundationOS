@@ -2,21 +2,16 @@
 
 namespace Modules\Global\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Global\Database\Factories\TimezoneFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Timezone extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
-    protected $fillable = [];
-
-    // protected static function newFactory(): TimezoneFactory
-    // {
-    //     // return TimezoneFactory::new();
-    // }
+    protected $fillable = [
+        'code',
+        'name',
+        'utc_offset',
+    ];
 }
