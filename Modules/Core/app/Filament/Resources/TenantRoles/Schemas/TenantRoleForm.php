@@ -15,10 +15,7 @@ class TenantRoleForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 TextInput::make('name')
                     ->label(\Modules\Core\Support\FilamentUi::field('name'))
                     ->required(),

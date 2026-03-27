@@ -15,10 +15,7 @@ class CourseForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('study_program_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('study_program_id'))
                     ->relationship('studyProgram', 'name'),

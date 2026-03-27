@@ -17,10 +17,7 @@ class StudentAchievementForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('organization_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
                     ->relationship('organization', 'name'),

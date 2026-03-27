@@ -15,10 +15,7 @@ class ClassStudentForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('academic_period_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('academic_period_id'))
                     ->relationship('academicPeriod', 'name'),

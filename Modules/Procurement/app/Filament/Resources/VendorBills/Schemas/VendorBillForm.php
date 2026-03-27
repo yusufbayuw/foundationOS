@@ -16,10 +16,7 @@ class VendorBillForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('vendor_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('vendor_id'))
                     ->relationship('vendor', 'name')

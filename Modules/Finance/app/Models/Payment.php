@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -45,12 +45,6 @@ class Payment extends Model
             'reconciliation_date' => 'date',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function studentInvoice(): BelongsTo
     {
         return $this->belongsTo(StudentInvoice::class);

@@ -13,10 +13,11 @@ use Modules\Core\Models\User;
 use Modules\Workflow\Contracts\ProvidesWorkflowContext;
 use Modules\Workflow\Contracts\StartsWorkflow;
 use Modules\Workflow\Models\WorkflowInstance;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class PurchaseRequisition extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',

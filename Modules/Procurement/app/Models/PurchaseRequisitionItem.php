@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\ChartOfAccount;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class PurchaseRequisitionItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',

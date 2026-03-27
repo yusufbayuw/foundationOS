@@ -16,9 +16,7 @@ class FileUploadForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name'),
+                TenantField::make(),
                 TextInput::make('uploaded_by')
                     ->label(\Modules\Core\Support\FilamentUi::field('uploaded_by'))
                     ->numeric(),

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Organization;
-use Modules\Core\Models\Tenant;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class BookReservation extends Model
 {
@@ -38,12 +38,6 @@ class BookReservation extends Model
             'cancelled_at' => 'datetime',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

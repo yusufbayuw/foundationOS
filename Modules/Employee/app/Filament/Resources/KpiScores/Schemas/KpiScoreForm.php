@@ -15,10 +15,7 @@ class KpiScoreForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('employee_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('employee_id'))
                     ->relationship('employee', 'id')

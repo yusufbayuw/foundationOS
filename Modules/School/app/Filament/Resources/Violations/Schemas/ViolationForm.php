@@ -16,10 +16,7 @@ class ViolationForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('student_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('student_id'))
                     ->relationship('student', 'id')

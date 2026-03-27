@@ -12,6 +12,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Filament\Actions\ExportAction;
+use Modules\School\Filament\Exports\StudentExporter;
 
 class StudentsTable
 {
@@ -144,6 +146,8 @@ class StudentsTable
                 EditAction::make(),
             ])
             ->headerActions([
+                ExportAction::make()
+                    ->exporter(StudentExporter::class),
                 ...ImportTableActions::make(\App\Filament\Imports\StudentImporter::class),
             ])
             ->toolbarActions([

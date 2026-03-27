@@ -13,12 +13,12 @@ use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
 use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\Organization;
-use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Student extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -75,12 +75,6 @@ class Student extends Model
             'distance_km' => 'decimal:2',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

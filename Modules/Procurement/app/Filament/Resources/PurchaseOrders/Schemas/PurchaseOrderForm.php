@@ -16,10 +16,7 @@ class PurchaseOrderForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('request_for_quotation_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('request_for_quotation_id'))
                     ->relationship('requestForQuotation', 'id'),

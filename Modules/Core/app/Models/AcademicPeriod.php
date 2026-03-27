@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class AcademicPeriod extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -34,12 +35,6 @@ class AcademicPeriod extends Model
             'is_locked' => 'boolean',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

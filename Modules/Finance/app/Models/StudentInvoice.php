@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Modules\Core\Models\Tenant;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class StudentInvoice extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -53,12 +53,6 @@ class StudentInvoice extends Model
             'sent_at' => 'datetime',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function tuitionType(): BelongsTo
     {
         return $this->belongsTo(TuitionType::class);

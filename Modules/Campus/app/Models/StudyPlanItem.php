@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Modules\Core\Models\Tenant;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class StudyPlanItem extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -32,12 +32,6 @@ class StudyPlanItem extends Model
             'grade_point' => 'decimal:2',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function studyPlan(): BelongsTo
     {
         return $this->belongsTo(StudyPlan::class);

@@ -11,10 +11,11 @@ use Modules\Employee\Models\KpiTemplate;
 use Modules\Employee\Models\Position;
 use Modules\Enrollment\Models\Applicant;
 use Modules\School\Models\SchoolClass;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Department extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -31,12 +32,6 @@ class Department extends Model
             'is_active' => 'boolean',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

@@ -18,13 +18,7 @@ class PurchaseRequisitionForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->default(Filament::getTenant()?->getKey())
-                    ->disabled(Filament::getTenant() !== null)
-                    ->dehydrated()
-                    ->required(),
+                TenantField::make(),
                 Select::make('user_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('user_id'))
                     ->relationship('user', 'name'),

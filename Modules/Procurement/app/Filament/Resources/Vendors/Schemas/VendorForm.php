@@ -15,10 +15,7 @@ class VendorForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('province_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('province_id'))
                     ->relationship('province', 'name'),

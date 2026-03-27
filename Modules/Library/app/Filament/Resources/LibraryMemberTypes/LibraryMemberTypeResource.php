@@ -33,13 +33,7 @@ class LibraryMemberTypeResource extends LocalizedResource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('tenant_id')
-                ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                ->relationship('tenant', 'name')
-                ->default(Filament::getTenant()?->getKey())
-                ->disabled(Filament::getTenant() !== null)
-                ->dehydrated()
-                ->required(),
+            TenantField::make(),
             Select::make('organization_id')
                 ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
                 ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {

@@ -10,13 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Core\Models\Organization;
-use Modules\Core\Models\Tenant;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Book extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -70,12 +70,6 @@ class Book extends Model
             'is_reference_only' => 'boolean',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

@@ -47,10 +47,11 @@ use Modules\School\Models\StudentAchievement;
 use Modules\School\Models\Subject;
 use Modules\School\Models\Teacher;
 use Modules\School\Models\ViolationType;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Organization extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -94,12 +95,6 @@ class Organization extends Model
             'established_date' => 'date',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function principalUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'principal_user_id');

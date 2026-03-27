@@ -8,15 +8,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class VendorBill extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -55,12 +55,6 @@ class VendorBill extends Model
             'processed_at' => 'datetime',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);

@@ -15,10 +15,7 @@ class ProcurementItemForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('category_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('category_id'))
                     ->relationship('category', 'name'),

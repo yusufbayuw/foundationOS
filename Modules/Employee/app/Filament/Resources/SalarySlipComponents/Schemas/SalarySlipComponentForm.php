@@ -15,10 +15,7 @@ class SalarySlipComponentForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('salary_slip_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('salary_slip_id'))
                     ->relationship('salarySlip', 'id')

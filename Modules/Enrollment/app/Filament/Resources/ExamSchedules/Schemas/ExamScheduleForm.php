@@ -17,10 +17,7 @@ class ExamScheduleForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('admission_period_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('admission_period_id'))
                     ->relationship('admissionPeriod', 'name')

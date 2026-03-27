@@ -16,10 +16,7 @@ class StudyResultForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('study_plan_item_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('study_plan_item_id'))
                     ->relationship('studyPlanItem', 'id'),

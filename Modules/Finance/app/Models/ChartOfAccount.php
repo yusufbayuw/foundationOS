@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\Models\Organization;
-use Modules\Core\Models\Tenant;
 use Modules\Procurement\Models\ProcurementItem;
 use Modules\Procurement\Models\PurchaseRequisitionItem;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class ChartOfAccount extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -48,12 +48,6 @@ class ChartOfAccount extends Model
             'current_balance' => 'decimal:2',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

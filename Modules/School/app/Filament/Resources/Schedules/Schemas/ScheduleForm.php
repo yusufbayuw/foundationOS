@@ -17,36 +17,45 @@ class ScheduleForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('organization_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
                     ->relationship('organization', 'name'),
                 Select::make('academic_period_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('academic_period_id'))
-                    ->relationship('academicPeriod', 'name'),
+                    ->relationship('academicPeriod', 'name')
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                 TextInput::make('class_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('class_id'))
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                 Select::make('subject_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('subject_id'))
                     ->relationship('subject', 'name')
                     ->required(),
                 Select::make('teacher_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('teacher_id'))
-                    ->relationship('teacher', 'id'),
+                    ->relationship('teacher', 'id')
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                 TextInput::make('day_of_week')
                     ->label(\Modules\Core\Support\FilamentUi::field('day_of_week'))
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                 TimePicker::make('start_time')
                     ->label(\Modules\Core\Support\FilamentUi::field('start_time'))
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                 TimePicker::make('end_time')
                     ->label(\Modules\Core\Support\FilamentUi::field('end_time'))
-                    ->required(),
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                 TextInput::make('duration_minutes')
                     ->label(\Modules\Core\Support\FilamentUi::field('duration_minutes'))
                     ->numeric(),
@@ -65,5 +74,46 @@ class ScheduleForm
                     ->label(\Modules\Core\Support\FilamentUi::field('notes'))
                     ->columnSpanFull(),
             ]);
+    }
+
+    protected static function checkConflicts(\Filament\Forms\Get $get, ?string $state, $livewire): void
+    {
+        if (empty($state)) return;
+
+        $data = [
+            'academic_period_id' => $get('academic_period_id'),
+            'class_id' => $get('class_id'),
+            'teacher_id' => $get('teacher_id'),
+            'day_of_week' => $get('day_of_week'),
+            'start_time' => $get('start_time'),
+            'end_time' => $get('end_time'),
+        ];
+
+        // Ensure minimum fields are present before checking
+        if (
+            empty($data['academic_period_id']) ||
+            empty($data['day_of_week']) ||
+            empty($data['start_time']) ||
+            empty($data['end_time'])
+        ) {
+            return;
+        }
+
+        $excludeId = null;
+        if (method_exists($livewire, 'getRecord')) {
+            $record = $livewire->getRecord();
+            $excludeId = $record ? $record->id : null;
+        }
+
+        $checker = new \Modules\School\Services\ScheduleConflictChecker();
+        $conflicts = $checker->checkConflicts($data, $excludeId);
+
+        if (!empty($conflicts)) {
+            \Filament\Notifications\Notification::make()
+                ->warning()
+                ->title('Konflik Jadwal Terdeteksi')
+                ->body(implode('<br>', $conflicts))
+                ->send();
+        }
     }
 }

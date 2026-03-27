@@ -12,10 +12,11 @@ use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',

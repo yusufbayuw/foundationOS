@@ -16,10 +16,7 @@ class RegistrationForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('applicant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('applicant_id'))
                     ->relationship('applicant', 'id')

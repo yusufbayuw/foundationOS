@@ -14,9 +14,7 @@ class AuditLogForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name'),
+                TenantField::make(),
                 Select::make('user_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('user_id'))
                     ->relationship('user', 'name'),

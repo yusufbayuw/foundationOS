@@ -18,13 +18,7 @@ class PaymentForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->default(Filament::getTenant()?->getKey())
-                    ->disabled(Filament::getTenant() !== null)
-                    ->dehydrated()
-                    ->required(),
+                TenantField::make(),
                 Select::make('student_invoice_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('student_invoice_id'))
                     ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function ($query): void {

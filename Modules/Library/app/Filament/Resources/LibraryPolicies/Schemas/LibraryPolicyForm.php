@@ -16,12 +16,7 @@ class LibraryPolicyForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('tenant_id')
-                ->relationship('tenant', 'name')
-                ->default(Filament::getTenant()?->getKey())
-                ->disabled(Filament::getTenant() !== null)
-                ->dehydrated()
-                ->required(),
+            TenantField::make(),
             Select::make('organization_id')
                 ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
                     if (Filament::getTenant()) {

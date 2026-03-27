@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Core\Models\Tenant;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class ExamSchedule extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     public function synchronizeCounters(): void
     {
@@ -44,12 +44,6 @@ class ExamSchedule extends Model
             'is_active' => 'boolean',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function admissionPeriod(): BelongsTo
     {
         return $this->belongsTo(AdmissionPeriod::class);

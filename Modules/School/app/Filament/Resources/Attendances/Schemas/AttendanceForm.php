@@ -16,10 +16,7 @@ class AttendanceForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('schedule_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('schedule_id'))
                     ->relationship('schedule', 'id'),

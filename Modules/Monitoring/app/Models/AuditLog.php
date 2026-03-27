@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Modules\Core\Models\Organization;
-use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class AuditLog extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -39,12 +39,6 @@ class AuditLog extends Model
             'new_values' => 'array',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

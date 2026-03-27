@@ -15,10 +15,7 @@ class TenantModuleForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('module_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('module_id'))
                     ->relationship('module', 'name')

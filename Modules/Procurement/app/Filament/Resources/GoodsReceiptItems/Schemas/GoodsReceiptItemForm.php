@@ -14,10 +14,7 @@ class GoodsReceiptItemForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('goods_receipt_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('goods_receipt_id'))
                     ->relationship('goodsReceipt', 'id')

@@ -10,13 +10,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
-use Modules\Core\Models\Tenant;
 use Modules\Global\Models\City;
 use Modules\Global\Models\Province;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Vendor extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -63,12 +63,6 @@ class Vendor extends Model
             'documents' => 'array',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function province(): BelongsTo
     {
         return $this->belongsTo(Province::class);

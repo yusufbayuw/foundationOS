@@ -14,10 +14,7 @@ class TenantSettingForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 TextInput::make('group')
                     ->label(\Modules\Core\Support\FilamentUi::field('group')),
                 TextInput::make('key')

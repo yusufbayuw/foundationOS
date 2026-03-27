@@ -16,10 +16,7 @@ class StudentAssessmentAnswerForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('assessment_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('assessment_id'))
                     ->relationship('assessment', 'name')

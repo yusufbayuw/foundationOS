@@ -10,15 +10,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Core\Models\Department;
-use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
 use Modules\School\Models\Student;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Applicant extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected ?int $previousAdmissionPeriodId = null;
 
@@ -130,12 +130,6 @@ class Applicant extends Model
             'documents' => 'array',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function admissionPeriod(): BelongsTo
     {
         return $this->belongsTo(AdmissionPeriod::class);

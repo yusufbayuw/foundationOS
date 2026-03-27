@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Organization;
-use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class WorkflowInstance extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToTenant;
 
     protected $fillable = [
         'tenant_id',
@@ -58,12 +58,6 @@ class WorkflowInstance extends Model
             'rejected_at' => 'datetime',
         ];
     }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
