@@ -4,9 +4,11 @@ namespace Modules\Core\Filament\Support;
 
 use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Resources\Resource;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Schema;
 use Modules\Core\Support\FilamentUi;
 use UnitEnum;
 
@@ -147,6 +149,39 @@ abstract class ModuleResource extends Resource
     public static function getPluralModelLabel(): string
     {
         return FilamentUi::text(parent::getPluralModelLabel());
+    }
+
+    /**
+     * Resolve a meaningful record title even when the model has no 'name' column.
+     *
+     * Priority: name → full_name → code → entry_number → invoice_number → payment_number → ID
+     */
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        if (! $record) {
+            return null;
+        }
+
+        $candidates = [
+            'name', 'full_name', 'title', 'code',
+            'entry_number', 'invoice_number', 'payment_number',
+            'employee_number', 'student_number', 'registration_number',
+            'nis', 'nip', 'subject_label',
+        ];
+
+        foreach ($candidates as $attr) {
+            $value = $record->getAttribute($attr);
+            if ($value !== null && $value !== '') {
+                return (string) $value;
+            }
+        }
+
+        // Fallback: try to get the name from the related user
+        if ($record->isRelation('user') && $record->user?->name) {
+            return $record->user->name;
+        }
+
+        return (string) $record->getKey();
     }
 
     protected static function getModuleName(): string

@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class AcademicPeriodForm
 {
@@ -15,13 +16,8 @@ class AcademicPeriodForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
-                    ->relationship('tenant', 'name')
-                    ->required(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name'),
+                TenantField::make(),
+                TenantField::organizationSelect(),
                 Select::make('academic_year_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('academic_year_id'))
                     ->relationship('academicYear', 'name')
@@ -52,3 +48,4 @@ class AcademicPeriodForm
             ]);
     }
 }
+

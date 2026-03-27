@@ -50,6 +50,7 @@ class Teacher extends Model
             'resignation_date' => 'date',
             'is_certified' => 'boolean',
             'subject_specializations' => 'array',
+            'class_advisor_history' => 'array',
             'teaching_hours_per_week' => 'integer',
             'base_salary' => 'decimal:2',
             'allowance' => 'decimal:2',

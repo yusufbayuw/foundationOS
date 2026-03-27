@@ -20,6 +20,7 @@ use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Campus\Models\Course;
 use Modules\Enrollment\Models\Applicant;
+use Modules\Library\Models\Book;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\Vendor;
@@ -59,7 +60,6 @@ class AppServiceProvider extends ServiceProvider
             return null;
         });
 
-        Model::unguard();
 
         Relation::enforceMorphMap([
             'user' => User::class,
@@ -68,6 +68,8 @@ class AppServiceProvider extends ServiceProvider
             'school_student' => Student::class,
             'enrollment_applicant' => Applicant::class,
             'campus_collage_student' => CollageStudent::class,
+            'campus_study_program' => \Modules\Campus\Models\StudyProgram::class,
+            'library_book' => Book::class,
             'procurement_vendor' => Vendor::class,
             'purchase_order' => PurchaseOrder::class,
             'goods_receipt' => GoodsReceipt::class,

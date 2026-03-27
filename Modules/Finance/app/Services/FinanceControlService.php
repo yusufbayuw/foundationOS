@@ -11,6 +11,7 @@ use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Models\StudentInvoice;
+use Modules\Core\Support\NotificationService;
 use Modules\Monitoring\Models\AuditLog;
 use RuntimeException;
 
@@ -63,6 +64,8 @@ class FinanceControlService
                 'status' => $payment->status,
             ]);
 
+            NotificationService::paymentVerified($payment->fresh(['studentInvoice']), $actor);
+
             return $payment->fresh(['studentInvoice', 'chartOfAccount']);
         });
     }
@@ -89,6 +92,8 @@ class FinanceControlService
                 'status' => $payment->status,
             ]);
 
+            NotificationService::paymentRejected($payment, $actor);
+
             return $payment->fresh(['studentInvoice']);
         });
     }
@@ -112,6 +117,8 @@ class FinanceControlService
             $this->audit($budget, $actor, 'finance_budget_approved', [
                 'status' => $budget->status,
             ]);
+
+            NotificationService::budgetApproved($budget, $actor);
 
             return $budget->fresh();
         });

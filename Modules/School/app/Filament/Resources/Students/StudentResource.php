@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Resources\Students;
 
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -26,7 +27,18 @@ class StudentResource extends LocalizedResource
 {
     protected static ?string $model = Student::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = null;
+
+    public static function getRecordTitle(?Model $record): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        if ($record === null) {
+            return null;
+        }
+
+        return $record->user?->name
+            ?? ($record->nis ? 'NIS: ' . $record->nis : null)
+            ?? 'Siswa #' . $record->getKey();
+    }
 
     public static function form(Schema $schema): Schema
     {

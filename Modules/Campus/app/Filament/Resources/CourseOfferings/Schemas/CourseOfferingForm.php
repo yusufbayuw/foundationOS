@@ -5,6 +5,7 @@ namespace Modules\Campus\Filament\Resources\CourseOfferings\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class CourseOfferingForm
 {

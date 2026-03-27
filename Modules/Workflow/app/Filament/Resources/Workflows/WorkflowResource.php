@@ -11,6 +11,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -39,9 +40,7 @@ class WorkflowResource extends LocalizedResource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Select::make('tenant_id')
-                ->label('Tenant')
-                ->relationship('tenant', 'name')
+            TenantField::make()
                 ->default(Filament::getTenant()?->getKey())
                 ->disabled(Filament::getTenant() !== null)
                 ->dehydrated()
