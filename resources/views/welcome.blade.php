@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'FoundationOS') }} — Platform Manajemen Institusi Pendidikan</title>
-    <meta name="description" content="FoundationOS adalah platform SaaS modular untuk manajemen sekolah, kampus, dan lembaga pendidikan. Kelola akademik, keuangan, kepegawaian, dan operasional dalam satu sistem terpadu.">
+    <title>{{ config('app.name', 'FoundationOS') }} — Platform Operasional Institusi Pendidikan</title>
+    <meta name="description" content="FoundationOS merupakan platform modular untuk operasional sekolah, kampus, dan lembaga pendidikan. Kelola akademik, keuangan, SDM, serta proses institusi dalam satu sistem yang terintegrasi.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -14,16 +14,16 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --primary-50: #fffbeb;
-            --primary-100: #fef3c7;
-            --primary-200: #fde68a;
-            --primary-300: #fcd34d;
-            --primary-400: #fbbf24;
-            --primary-500: #f59e0b;
-            --primary-600: #d97706;
-            --primary-700: #b45309;
-            --primary-800: #92400e;
-            --primary-900: #78350f;
+            --primary-50: #eef2ff;
+            --primary-100: #e0e7ff;
+            --primary-200: #c7d2fe;
+            --primary-300: #a5b4fc;
+            --primary-400: #818cf8;
+            --primary-500: #6366f1;
+            --primary-600: #4f46e5;
+            --primary-700: #4338ca;
+            --primary-800: #3730a3;
+            --primary-900: #312e81;
 
             --gray-50: #fafafa;
             --gray-100: #f4f4f5;
@@ -47,7 +47,7 @@
             --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
             --card-shadow-hover: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
             --gradient-start: var(--primary-500);
-            --gradient-end: #ea580c;
+            --gradient-end: #312e81;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -114,7 +114,7 @@
         }
         .btn-primary:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(245,158,11,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
         }
         .btn-secondary {
             display: inline-flex; align-items: center; gap: 0.5rem;
@@ -128,7 +128,7 @@
         }
         .btn-secondary:hover {
             border-color: var(--primary-400);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-400) 15%, transparent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-400) 18%, transparent);
         }
 
         /* ===== HERO ===== */
@@ -485,7 +485,7 @@
         }
         .pricing-card.featured {
             border-color: var(--primary-400);
-            box-shadow: 0 0 0 1px var(--primary-400), 0 10px 25px rgba(245,158,11,0.1);
+            box-shadow: 0 0 0 1px var(--primary-400), 0 10px 25px rgba(79,70,229,0.12);
         }
         .pricing-card.featured::before {
             content: 'Paling Populer';
@@ -602,7 +602,7 @@
         }
         .cta-box {
             max-width: 700px; margin: 0 auto;
-            background: linear-gradient(135deg, var(--primary-600), #ea580c);
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-900));
             border-radius: 1rem;
             padding: 3.5rem 2rem;
             position: relative;
@@ -701,7 +701,7 @@
                 <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
                     <rect width="32" height="32" rx="8" fill="url(#brand-grad)"/>
                     <path d="M8 12h16v2H8zm0 4h12v2H8zm0 4h14v2H8z" fill="#fff" opacity="0.9"/>
-                    <defs><linearGradient id="brand-grad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#f59e0b"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs>
+                    <defs><linearGradient id="brand-grad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs>
                 </svg>
                 {{ config('app.name', 'FoundationOS') }}
             </a>
@@ -712,8 +712,8 @@
                     <a href="#modules" class="nav-link">Modul</a>
                     <a href="#features" class="nav-link">Fitur</a>
                     <a href="#pricing" class="nav-link">Harga</a>
-                    <a href="{{ url('/admin/login') }}" class="nav-link">Login</a>
-                    <a href="{{ url('/admin/login') }}" class="btn-primary">Mulai Gratis</a>
+                    <a href="{{ url('/admin/login') }}" class="nav-link">Masuk</a>
+                    <a href="{{ url('/admin/login') }}" class="btn-primary">Masuk ke Platform</a>
                 @endauth
             </div>
         </div>
@@ -724,20 +724,20 @@
         <div class="hero-content">
             <div class="hero-badge animate-fade-up">
                 <span class="hero-badge-dot"></span>
-                Platform Manajemen Pendidikan Terpadu
+                Platform Operasional Pendidikan Terintegrasi
             </div>
             <h1 class="animate-fade-up delay-1">
-                Kelola Institusi Anda dengan <span class="gradient-text">Satu Platform</span>
+                Satukan Operasional Institusi dalam <span class="gradient-text">Satu Platform</span>
             </h1>
             <p class="animate-fade-up delay-2">
-                FoundationOS menyatukan manajemen akademik, keuangan, kepegawaian, dan operasional dalam satu sistem modular yang dirancang khusus untuk sekolah dan kampus modern.
+                FoundationOS membantu sekolah, kampus, dan lembaga pendidikan mengelola proses akademik, keuangan, SDM, serta layanan operasional melalui arsitektur modular yang siap bertumbuh bersama institusi Anda.
             </p>
             <div class="hero-actions animate-fade-up delay-3">
                 <a href="{{ url('/admin/login') }}" class="btn-primary" style="padding: 0.75rem 2rem; font-size: 0.9375rem;">
-                    Mulai Sekarang →
+                    Masuk ke Platform
                 </a>
                 <a href="#modules" class="btn-secondary" style="padding: 0.75rem 2rem; font-size: 0.9375rem;">
-                    Lihat Fitur
+                    Tinjau Kapabilitas
                 </a>
             </div>
         </div>
@@ -755,7 +755,7 @@
                     <div class="mockup-sidebar">
                         <div class="mockup-sidebar-item active"><span class="mockup-sidebar-icon"></span> Dashboard</div>
                         <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Siswa</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Guru & Staff</div>
+                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Pendidik & Tenaga Kependidikan</div>
                         <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Keuangan</div>
                         <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Kurikulum</div>
                         <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Perpustakaan</div>
@@ -773,7 +773,7 @@
                                 <div class="mockup-stat-value">86</div>
                             </div>
                             <div class="mockup-stat-card">
-                                <div class="mockup-stat-label">Pendapatan Bulan Ini</div>
+                                <div class="mockup-stat-label">Penerimaan Bulan Berjalan</div>
                                 <div class="mockup-stat-value">Rp 432jt</div>
                             </div>
                         </div>
@@ -818,15 +818,15 @@
             </div>
             <div>
                 <div class="stat-number">∞</div>
-                <div class="stat-label">Multi-Tenant</div>
+                <div class="stat-label">Arsitektur Multi-Tenant</div>
             </div>
             <div>
                 <div class="stat-number">100%</div>
-                <div class="stat-label">Modular</div>
+                <div class="stat-label">Modular dan Fleksibel</div>
             </div>
             <div>
                 <div class="stat-number">24/7</div>
-                <div class="stat-label">Akses Kapan Saja</div>
+                <div class="stat-label">Akses Layanan</div>
             </div>
         </div>
     </div>
@@ -835,54 +835,54 @@
     <section class="section" id="modules">
         <div class="section-header">
             <span class="section-label">Modul</span>
-            <h2>Semua yang Anda Butuhkan, dalam Satu Tempat</h2>
-            <p>Pilih dan aktifkan modul sesuai kebutuhan institusi Anda. Setiap modul dirancang untuk bekerja secara mandiri maupun terintegrasi.</p>
+            <h2>Kapabilitas Inti dalam Satu Ekosistem</h2>
+            <p>Aktifkan modul sesuai prioritas institusi Anda. Setiap modul dirancang untuk berjalan mandiri, sekaligus terhubung secara konsisten dalam satu fondasi data.</p>
         </div>
         <div class="modules-grid">
             <div class="module-card">
                 <div class="module-icon">🎓</div>
                 <h3>Akademik Sekolah</h3>
-                <p>Kelola siswa, guru, kelas, kurikulum, jadwal pelajaran, penilaian, catatan pelanggaran, dan prestasi dalam satu modul terpadu.</p>
+                <p>Mengelola peserta didik, tenaga pendidik, kelas, kurikulum, jadwal, penilaian, pembinaan, dan capaian akademik dalam satu alur kerja terpadu.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">🏛️</div>
                 <h3>Akademik Kampus</h3>
-                <p>Fakultas, program studi, dosen, mahasiswa, penawaran mata kuliah, KRS, hasil studi, tesis, dan integrasi Feeder DIKTI.</p>
+                <p>Mendukung pengelolaan fakultas, program studi, dosen, mahasiswa, penawaran mata kuliah, KRS, hasil studi, tesis, hingga integrasi Feeder DIKTI.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">📋</div>
-                <h3>Penerimaan (Enrollment)</h3>
-                <p>Periode penerimaan, pendaftaran online, jadwal ujian, hasil seleksi, dan alur registrasi peserta didik baru.</p>
+                <h3>Penerimaan Peserta Didik</h3>
+                <p>Mengelola periode penerimaan, pendaftaran daring, penjadwalan seleksi, hasil evaluasi, dan proses registrasi secara terstruktur.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">💰</div>
                 <h3>Keuangan</h3>
-                <p>Chart of Accounts, SPP & biaya pendidikan, invoice, pembayaran, jurnal akuntansi, dan anggaran institusi.</p>
+                <p>Mencakup bagan akun, komponen biaya pendidikan, tagihan, pembayaran, jurnal akuntansi, serta pengendalian anggaran institusi.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">👥</div>
                 <h3>Kepegawaian</h3>
-                <p>Data karyawan, jabatan, shift & kontrak kerja, absensi, pengajuan cuti, penggajian (payroll), dan penilaian KPI.</p>
+                <p>Mengelola data pegawai, struktur jabatan, kontrak kerja, absensi, cuti, penggajian, dan evaluasi kinerja secara terpusat.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">📚</div>
                 <h3>Perpustakaan</h3>
-                <p>Katalog & eksemplar buku, manajemen anggota, peminjaman & pengembalian, dan perhitungan denda otomatis.</p>
+                <p>Menyediakan katalog dan eksemplar koleksi, manajemen anggota, sirkulasi pinjam-kembali, serta perhitungan denda otomatis.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">📦</div>
                 <h3>Pengadaan</h3>
-                <p>Vendor, item pengadaan, requisition, permintaan penawaran (RFQ), purchase order, penerimaan barang, dan vendor bill.</p>
+                <p>Mengatur vendor, kebutuhan pengadaan, permintaan penawaran, purchase order, penerimaan barang, dan pencatatan tagihan pemasok.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">📊</div>
                 <h3>Monitoring</h3>
-                <p>Audit trail otomatis untuk setiap perubahan data dan manajemen file attachment yang bersifat lintas domain.</p>
+                <p>Menyediakan audit trail untuk setiap perubahan data serta pengelolaan dokumen pendukung yang digunakan lintas fungsi.</p>
             </div>
             <div class="module-card">
                 <div class="module-icon">🌐</div>
                 <h3>Referensi Global</h3>
-                <p>Database negara, provinsi, kota, kecamatan, desa, dan timezone yang siap digunakan seluruh modul aplikasi.</p>
+                <p>Menyediakan data referensi wilayah, zona waktu, dan master data bersama agar seluruh modul bekerja dengan standar yang seragam.</p>
             </div>
         </div>
     </section>
@@ -892,19 +892,19 @@
         <section class="section" id="features">
             <div class="section-header">
                 <span class="section-label">Keunggulan</span>
-                <h2>Dirancang untuk Skala dan Fleksibilitas</h2>
-                <p>Arsitektur modern yang mendukung pertumbuhan institusi Anda tanpa batas.</p>
+                <h2>Dirancang untuk Skalabilitas dan Tata Kelola</h2>
+                <p>Fondasi teknologi modern untuk mendukung pertumbuhan, kontrol, dan konsistensi proses di seluruh unit institusi.</p>
             </div>
             <div class="features-list">
                 <div class="feature-row">
                     <div class="feature-content">
                         <h3>Multi-Tenancy Bawaan</h3>
-                        <p>Satu instalasi aplikasi dapat melayani banyak institusi sekaligus dengan isolasi data yang ketat antar tenant.</p>
+                        <p>Satu basis aplikasi dapat melayani banyak institusi sekaligus dengan pemisahan data yang ketat dan tata kelola akses yang jelas.</p>
                         <ul class="feature-checks">
-                            <li><span class="feature-check-icon">✓</span> Shared database dengan tenant-scoped queries</li>
-                            <li><span class="feature-check-icon">✓</span> Isolasi data per tenant & organization</li>
-                            <li><span class="feature-check-icon">✓</span> Satu user bisa mengakses banyak tenant</li>
-                            <li><span class="feature-check-icon">✓</span> Role & permission per konteks tenant</li>
+                            <li><span class="feature-check-icon">✓</span> Shared database dengan tenant-scoped query</li>
+                            <li><span class="feature-check-icon">✓</span> Isolasi data per tenant dan organisasi</li>
+                            <li><span class="feature-check-icon">✓</span> Satu pengguna dapat mengakses beberapa tenant</li>
+                            <li><span class="feature-check-icon">✓</span> Role dan permission sesuai konteks tenant</li>
                         </ul>
                     </div>
                     <div class="feature-visual">
@@ -917,11 +917,11 @@
                 <div class="feature-row reverse">
                     <div class="feature-content">
                         <h3>Admin Panel Premium</h3>
-                        <p>Dibangun dengan Filament — framework UI terdepan untuk Laravel. Admin panel yang indah, cepat, dan kaya fitur.</p>
+                        <p>Dibangun di atas Filament untuk menghadirkan admin panel yang responsif, efisien, dan nyaman digunakan oleh tim operasional.</p>
                         <ul class="feature-checks">
-                            <li><span class="feature-check-icon">✓</span> Dashboard interaktif dengan widget & chart</li>
-                            <li><span class="feature-check-icon">✓</span> CRUD otomatis dengan form builder</li>
-                            <li><span class="feature-check-icon">✓</span> Tabel data dengan filter, sort, dan bulk action</li>
+                            <li><span class="feature-check-icon">✓</span> Dashboard interaktif dengan widget dan grafik</li>
+                            <li><span class="feature-check-icon">✓</span> CRUD otomatis melalui form builder</li>
+                            <li><span class="feature-check-icon">✓</span> Tabel data dengan filter, sortir, dan bulk action</li>
                             <li><span class="feature-check-icon">✓</span> Notifikasi real-time dan action modal</li>
                         </ul>
                     </div>
@@ -935,12 +935,12 @@
                 <div class="feature-row">
                     <div class="feature-content">
                         <h3>Keamanan & Kontrol Akses</h3>
-                        <p>Sistem role & permission granular yang terintegrasi dengan tenant boundary. Setiap aksi dapat dikontrol dengan presisi tinggi.</p>
+                        <p>Kontrol akses granular terintegrasi dengan batas tenant sehingga setiap aksi dapat dikelola secara presisi dan dapat diaudit.</p>
                         <ul class="feature-checks">
-                            <li><span class="feature-check-icon">✓</span> Filament Shield untuk permission management</li>
-                            <li><span class="feature-check-icon">✓</span> Super Admin, Admin, dan role custom</li>
-                            <li><span class="feature-check-icon">✓</span> Policy otomatis per resource</li>
-                            <li><span class="feature-check-icon">✓</span> Audit trail di setiap perubahan data</li>
+                            <li><span class="feature-check-icon">✓</span> Filament Shield untuk pengelolaan permission</li>
+                            <li><span class="feature-check-icon">✓</span> Super Admin, Admin, dan role kustom</li>
+                            <li><span class="feature-check-icon">✓</span> Policy otomatis pada setiap resource</li>
+                            <li><span class="feature-check-icon">✓</span> Audit trail pada setiap perubahan data</li>
                         </ul>
                     </div>
                     <div class="feature-visual">
@@ -958,37 +958,37 @@
     <section class="section" id="pricing">
         <div class="section-header">
             <span class="section-label">Harga</span>
-            <h2>Pilih Paket yang Tepat untuk Anda</h2>
-            <p>Mulai dari gratis. Upgrade kapan saja sesuai kebutuhan institusi Anda.</p>
+            <h2>Pilih Paket Sesuai Tahap Pertumbuhan Institusi</h2>
+            <p>Mulai dari tahap implementasi awal hingga kebutuhan operasional skala penuh, tanpa migrasi platform.</p>
         </div>
         <div class="pricing-grid">
             <div class="pricing-card">
                 <div class="pricing-name">Starter</div>
-                <div class="pricing-desc">Untuk institusi kecil yang baru memulai digitalisasi.</div>
+                <div class="pricing-desc">Untuk institusi yang memulai standardisasi proses digital secara bertahap.</div>
                 <div class="pricing-price">Gratis</div>
-                <div class="pricing-period">Selamanya untuk 1 tenant</div>
+                <div class="pricing-period">Untuk 1 tenant tanpa batas waktu</div>
                 <ul class="pricing-features">
                     <li>Hingga 100 siswa/mahasiswa</li>
-                    <li>3 modul dasar</li>
-                    <li>1 admin user</li>
+                    <li>3 modul inti</li>
+                    <li>1 pengguna admin</li>
                     <li>Dukungan komunitas</li>
                 </ul>
-                <a href="{{ url('/admin/login') }}" class="btn-secondary">Mulai Gratis</a>
+                <a href="{{ url('/admin/login') }}" class="btn-secondary">Akses Paket Starter</a>
             </div>
             <div class="pricing-card featured">
                 <div class="pricing-name">Professional</div>
-                <div class="pricing-desc">Untuk sekolah dan kampus yang butuh fitur lengkap.</div>
+                <div class="pricing-desc">Untuk sekolah dan kampus yang memerlukan cakupan modul lengkap dan dukungan operasional prioritas.</div>
                 <div class="pricing-price">Rp 2.5jt <span>/ bulan</span></div>
-                <div class="pricing-period">Per tenant, billed annually</div>
+                <div class="pricing-period">Per tenant, ditagihkan tahunan</div>
                 <ul class="pricing-features">
-                    <li>Siswa/mahasiswa unlimited</li>
-                    <li>Semua 10 modul aktif</li>
-                    <li>Unlimited admin users</li>
-                    <li>Multi-organization</li>
+                    <li>Siswa/mahasiswa tanpa batas</li>
+                    <li>Seluruh modul aktif</li>
+                    <li>Pengguna admin tanpa batas</li>
+                    <li>Mendukung multi-organisasi</li>
                     <li>Dukungan prioritas</li>
                     <li>Integrasi Feeder DIKTI</li>
                 </ul>
-                <a href="{{ url('/admin/login') }}" class="btn-primary">Pilih Professional</a>
+                <a href="{{ url('/admin/login') }}" class="btn-primary">Pilih Paket Professional</a>
             </div>
         </div>
     </section>
@@ -998,11 +998,11 @@
         <section class="section">
             <div class="section-header">
                 <span class="section-label">Testimoni</span>
-                <h2>Dipercaya oleh Pengelola Pendidikan</h2>
+                <h2>Dipercaya oleh Pimpinan Institusi Pendidikan</h2>
             </div>
             <div class="testimonial-card">
                 <p class="testimonial-quote">
-                    FoundationOS mengubah cara kami mengelola operasional sekolah. Dari administrasi siswa hingga keuangan, semuanya terintegrasi dalam satu platform yang mudah digunakan.
+                    FoundationOS membantu kami menata ulang proses operasional sekolah secara lebih tertib. Administrasi peserta didik, keuangan, dan pengelolaan data kini berjalan dalam satu platform yang konsisten dan mudah diawasi.
                 </p>
                 <div class="testimonial-author">Dr. Rina Handayani, M.Pd.</div>
                 <div class="testimonial-role">Kepala Sekolah — SMA Unggulan Nusantara</div>
@@ -1013,9 +1013,9 @@
     <!-- CTA -->
     <section class="cta-section">
         <div class="cta-box">
-            <h2>Siap Mengdigitalkan Institusi Anda?</h2>
-            <p>Bergabung sekarang dan rasakan kemudahan mengelola sekolah atau kampus Anda dengan FoundationOS.</p>
-            <a href="{{ url('/admin/login') }}" class="btn-white">Daftar Sekarang — Gratis →</a>
+            <h2>Siap Memodernisasi Operasional Institusi Anda?</h2>
+            <p>Akses FoundationOS untuk menstandarkan proses, meningkatkan visibilitas data, dan memperkuat tata kelola institusi Anda.</p>
+            <a href="{{ url('/admin/login') }}" class="btn-white">Masuk ke Platform</a>
         </div>
     </section>
 
@@ -1023,7 +1023,7 @@
     <footer class="footer">
         <div class="footer-inner">
             <div class="footer-copy">
-                © {{ date('Y') }} {{ config('app.name', 'FoundationOS') }}. Dibangun dengan Laravel &amp; Filament.
+                © {{ date('Y') }} {{ config('app.name', 'FoundationOS') }}. Dibangun dengan Laravel &amp; Filament untuk operasional pendidikan modern.
             </div>
             <div class="footer-links">
                 <a href="#modules">Modul</a>

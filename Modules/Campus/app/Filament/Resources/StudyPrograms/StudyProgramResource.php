@@ -9,6 +9,11 @@ use Modules\Campus\Filament\Resources\StudyPrograms\Pages\CreateStudyProgram;
 use Modules\Campus\Filament\Resources\StudyPrograms\Pages\EditStudyProgram;
 use Modules\Campus\Filament\Resources\StudyPrograms\Pages\ListStudyPrograms;
 use Modules\Campus\Filament\Resources\StudyPrograms\Pages\ViewStudyProgram;
+use Modules\Campus\Filament\Resources\StudyPrograms\RelationManagers\AuditLogsRelationManager;
+use Modules\Campus\Filament\Resources\StudyPrograms\RelationManagers\CoursesRelationManager;
+use Modules\Campus\Filament\Resources\StudyPrograms\RelationManagers\FileUploadsRelationManager;
+use Modules\Campus\Filament\Resources\StudyPrograms\RelationManagers\LecturersRelationManager;
+use Modules\Campus\Filament\Resources\StudyPrograms\RelationManagers\StudentsRelationManager;
 use Modules\Campus\Filament\Resources\StudyPrograms\Schemas\StudyProgramForm;
 use Modules\Campus\Filament\Resources\StudyPrograms\Schemas\StudyProgramInfolist;
 use Modules\Campus\Filament\Resources\StudyPrograms\Tables\StudyProgramsTable;
@@ -38,7 +43,11 @@ class StudyProgramResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            CoursesRelationManager::class,
+            LecturersRelationManager::class,
+            StudentsRelationManager::class,
+            AuditLogsRelationManager::class,
+            FileUploadsRelationManager::class,
         ];
     }
 

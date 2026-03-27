@@ -9,6 +9,7 @@ use Modules\School\Filament\Resources\AssessmentItems\Pages\CreateAssessmentItem
 use Modules\School\Filament\Resources\AssessmentItems\Pages\EditAssessmentItem;
 use Modules\School\Filament\Resources\AssessmentItems\Pages\ListAssessmentItems;
 use Modules\School\Filament\Resources\AssessmentItems\Pages\ViewAssessmentItem;
+use Modules\School\Filament\Resources\AssessmentItems\RelationManagers\StudentAssessmentAnswersRelationManager;
 use Modules\School\Filament\Resources\AssessmentItems\Schemas\AssessmentItemForm;
 use Modules\School\Filament\Resources\AssessmentItems\Schemas\AssessmentItemInfolist;
 use Modules\School\Filament\Resources\AssessmentItems\Tables\AssessmentItemsTable;
@@ -38,7 +39,7 @@ class AssessmentItemResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            StudentAssessmentAnswersRelationManager::class,
         ];
     }
 

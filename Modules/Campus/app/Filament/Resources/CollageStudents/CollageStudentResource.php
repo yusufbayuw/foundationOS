@@ -9,6 +9,10 @@ use Modules\Campus\Filament\Resources\CollageStudents\Pages\CreateCollageStudent
 use Modules\Campus\Filament\Resources\CollageStudents\Pages\EditCollageStudent;
 use Modules\Campus\Filament\Resources\CollageStudents\Pages\ListCollageStudents;
 use Modules\Campus\Filament\Resources\CollageStudents\Pages\ViewCollageStudent;
+use Modules\Campus\Filament\Resources\CollageStudents\RelationManagers\AuditLogsRelationManager;
+use Modules\Campus\Filament\Resources\CollageStudents\RelationManagers\FileUploadsRelationManager;
+use Modules\Campus\Filament\Resources\CollageStudents\RelationManagers\StudyPlansRelationManager;
+use Modules\Campus\Filament\Resources\CollageStudents\RelationManagers\ThesesRelationManager;
 use Modules\Campus\Filament\Resources\CollageStudents\Schemas\CollageStudentForm;
 use Modules\Campus\Filament\Resources\CollageStudents\Schemas\CollageStudentInfolist;
 use Modules\Campus\Filament\Resources\CollageStudents\Tables\CollageStudentsTable;
@@ -38,7 +42,10 @@ class CollageStudentResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            StudyPlansRelationManager::class,
+            ThesesRelationManager::class,
+            AuditLogsRelationManager::class,
+            FileUploadsRelationManager::class,
         ];
     }
 

@@ -9,6 +9,9 @@ use Modules\School\Filament\Resources\Teachers\Pages\CreateTeacher;
 use Modules\School\Filament\Resources\Teachers\Pages\EditTeacher;
 use Modules\School\Filament\Resources\Teachers\Pages\ListTeachers;
 use Modules\School\Filament\Resources\Teachers\Pages\ViewTeacher;
+use Modules\School\Filament\Resources\Teachers\RelationManagers\AssistantClassesRelationManager;
+use Modules\School\Filament\Resources\Teachers\RelationManagers\HomeroomClassesRelationManager;
+use Modules\School\Filament\Resources\Teachers\RelationManagers\SchedulesRelationManager;
 use Modules\School\Filament\Resources\Teachers\Schemas\TeacherForm;
 use Modules\School\Filament\Resources\Teachers\Schemas\TeacherInfolist;
 use Modules\School\Filament\Resources\Teachers\Tables\TeachersTable;
@@ -38,7 +41,9 @@ class TeacherResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            HomeroomClassesRelationManager::class,
+            AssistantClassesRelationManager::class,
+            SchedulesRelationManager::class,
         ];
     }
 

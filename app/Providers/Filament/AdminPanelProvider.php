@@ -8,6 +8,7 @@ use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -22,6 +23,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Coolsam\Modules\ModulesPlugin;
 use Nwidart\Modules\Facades\Module;
+use Modules\Core\Support\FilamentUi;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -34,7 +36,20 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation(false)
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Indigo,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()->label(FilamentUi::module('Core')),
+                NavigationGroup::make()->label(FilamentUi::module('Global')),
+                NavigationGroup::make()->label(FilamentUi::module('School')),
+                NavigationGroup::make()->label(FilamentUi::module('Campus')),
+                NavigationGroup::make()->label(FilamentUi::module('Workflow')),
+                NavigationGroup::make()->label(FilamentUi::module('Enrollment')),
+                NavigationGroup::make()->label(FilamentUi::module('Employee')),
+                NavigationGroup::make()->label(FilamentUi::module('Finance')),
+                NavigationGroup::make()->label(FilamentUi::module('Procurement')),
+                NavigationGroup::make()->label(FilamentUi::module('Library')),
+                NavigationGroup::make()->label(FilamentUi::module('Monitoring')),
             ])
             ->tenant(\Modules\Core\Models\Tenant::class)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

@@ -9,6 +9,7 @@ use Modules\Core\Filament\Resources\AcademicYears\Pages\CreateAcademicYear;
 use Modules\Core\Filament\Resources\AcademicYears\Pages\EditAcademicYear;
 use Modules\Core\Filament\Resources\AcademicYears\Pages\ListAcademicYears;
 use Modules\Core\Filament\Resources\AcademicYears\Pages\ViewAcademicYear;
+use Modules\Core\Filament\Resources\AcademicYears\RelationManagers\AcademicPeriodsRelationManager;
 use Modules\Core\Filament\Resources\AcademicYears\Schemas\AcademicYearForm;
 use Modules\Core\Filament\Resources\AcademicYears\Schemas\AcademicYearInfolist;
 use Modules\Core\Filament\Resources\AcademicYears\Tables\AcademicYearsTable;
@@ -38,7 +39,7 @@ class AcademicYearResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            AcademicPeriodsRelationManager::class,
         ];
     }
 

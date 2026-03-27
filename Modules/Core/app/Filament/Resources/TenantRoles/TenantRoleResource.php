@@ -9,6 +9,7 @@ use Modules\Core\Filament\Resources\TenantRoles\Pages\CreateTenantRole;
 use Modules\Core\Filament\Resources\TenantRoles\Pages\EditTenantRole;
 use Modules\Core\Filament\Resources\TenantRoles\Pages\ListTenantRoles;
 use Modules\Core\Filament\Resources\TenantRoles\Pages\ViewTenantRole;
+use Modules\Core\Filament\Resources\TenantRoles\RelationManagers\UserTenantRolesRelationManager;
 use Modules\Core\Filament\Resources\TenantRoles\Schemas\TenantRoleForm;
 use Modules\Core\Filament\Resources\TenantRoles\Schemas\TenantRoleInfolist;
 use Modules\Core\Filament\Resources\TenantRoles\Tables\TenantRolesTable;
@@ -38,7 +39,7 @@ class TenantRoleResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            UserTenantRolesRelationManager::class,
         ];
     }
 

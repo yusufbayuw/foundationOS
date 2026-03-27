@@ -2,13 +2,14 @@
 
 namespace Modules\Library\Filament\Resources\BookCategories;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\BookCategories\Pages\CreateBookCategory;
 use Modules\Library\Filament\Resources\BookCategories\Pages\EditBookCategory;
 use Modules\Library\Filament\Resources\BookCategories\Pages\ListBookCategories;
 use Modules\Library\Filament\Resources\BookCategories\Pages\ViewBookCategory;
+use Modules\Library\Filament\Resources\BookCategories\RelationManagers\BooksRelationManager;
 use Modules\Library\Filament\Resources\BookCategories\Schemas\BookCategoryForm;
 use Modules\Library\Filament\Resources\BookCategories\Schemas\BookCategoryInfolist;
 use Modules\Library\Filament\Resources\BookCategories\Tables\BookCategoriesTable;
@@ -38,7 +39,7 @@ class BookCategoryResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            BooksRelationManager::class,
         ];
     }
 

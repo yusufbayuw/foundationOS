@@ -9,6 +9,7 @@ use Modules\Campus\Filament\Resources\Faculties\Pages\CreateFaculty;
 use Modules\Campus\Filament\Resources\Faculties\Pages\EditFaculty;
 use Modules\Campus\Filament\Resources\Faculties\Pages\ListFaculties;
 use Modules\Campus\Filament\Resources\Faculties\Pages\ViewFaculty;
+use Modules\Campus\Filament\Resources\Faculties\RelationManagers\StudyProgramsRelationManager;
 use Modules\Campus\Filament\Resources\Faculties\Schemas\FacultyForm;
 use Modules\Campus\Filament\Resources\Faculties\Schemas\FacultyInfolist;
 use Modules\Campus\Filament\Resources\Faculties\Tables\FacultiesTable;
@@ -38,7 +39,7 @@ class FacultyResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            StudyProgramsRelationManager::class,
         ];
     }
 

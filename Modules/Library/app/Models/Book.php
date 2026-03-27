@@ -4,8 +4,10 @@ namespace Modules\Library\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
@@ -14,7 +16,7 @@ use Modules\Monitoring\Models\FileUpload;
 
 class Book extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -26,12 +28,16 @@ class Book extends Model
         'subtitle',
         'authors',
         'publisher',
+        'publisher_id',
         'publication_year',
         'publication_place',
         'edition',
         'volume',
         'series',
         'language',
+        'gmd_id',
+        'collection_type_id',
+        'frequency_id',
         'pages',
         'dimensions',
         'weight_grams',
@@ -83,6 +89,41 @@ class Book extends Model
     public function copies(): HasMany
     {
         return $this->hasMany(BookCopy::class);
+    }
+
+    public function publisher(): BelongsTo
+    {
+        return $this->belongsTo(LibraryPublisher::class, 'publisher_id');
+    }
+
+    public function gmd(): BelongsTo
+    {
+        return $this->belongsTo(LibraryGmd::class, 'gmd_id');
+    }
+
+    public function collectionType(): BelongsTo
+    {
+        return $this->belongsTo(LibraryCollectionType::class, 'collection_type_id');
+    }
+
+    public function frequency(): BelongsTo
+    {
+        return $this->belongsTo(LibraryFrequency::class, 'frequency_id');
+    }
+
+    public function authorItems(): BelongsToMany
+    {
+        return $this->belongsToMany(LibraryAuthor::class, 'book_author', 'book_id', 'author_id');
+    }
+
+    public function subjectItems(): BelongsToMany
+    {
+        return $this->belongsToMany(LibrarySubject::class, 'book_subject', 'book_id', 'subject_id');
+    }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(BookReservation::class);
     }
 
     public function auditLogs(): MorphMany

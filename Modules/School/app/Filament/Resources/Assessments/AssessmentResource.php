@@ -9,6 +9,9 @@ use Modules\School\Filament\Resources\Assessments\Pages\CreateAssessment;
 use Modules\School\Filament\Resources\Assessments\Pages\EditAssessment;
 use Modules\School\Filament\Resources\Assessments\Pages\ListAssessments;
 use Modules\School\Filament\Resources\Assessments\Pages\ViewAssessment;
+use Modules\School\Filament\Resources\Assessments\RelationManagers\AssessmentItemsRelationManager;
+use Modules\School\Filament\Resources\Assessments\RelationManagers\StudentAssessmentAnswersRelationManager;
+use Modules\School\Filament\Resources\Assessments\RelationManagers\StudentGradesRelationManager;
 use Modules\School\Filament\Resources\Assessments\Schemas\AssessmentForm;
 use Modules\School\Filament\Resources\Assessments\Schemas\AssessmentInfolist;
 use Modules\School\Filament\Resources\Assessments\Tables\AssessmentsTable;
@@ -38,7 +41,9 @@ class AssessmentResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            AssessmentItemsRelationManager::class,
+            StudentGradesRelationManager::class,
+            StudentAssessmentAnswersRelationManager::class,
         ];
     }
 

@@ -9,6 +9,9 @@ use Modules\Core\Filament\Resources\SubscriptionPlans\Pages\CreateSubscriptionPl
 use Modules\Core\Filament\Resources\SubscriptionPlans\Pages\EditSubscriptionPlan;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Pages\ListSubscriptionPlans;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Pages\ViewSubscriptionPlan;
+use Modules\Core\Filament\Resources\SubscriptionPlans\RelationManagers\NewSubscriptionLogsRelationManager;
+use Modules\Core\Filament\Resources\SubscriptionPlans\RelationManagers\PreviousSubscriptionLogsRelationManager;
+use Modules\Core\Filament\Resources\SubscriptionPlans\RelationManagers\TenantsRelationManager;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Schemas\SubscriptionPlanForm;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Schemas\SubscriptionPlanInfolist;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Tables\SubscriptionPlansTable;
@@ -38,7 +41,9 @@ class SubscriptionPlanResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            TenantsRelationManager::class,
+            PreviousSubscriptionLogsRelationManager::class,
+            NewSubscriptionLogsRelationManager::class,
         ];
     }
 

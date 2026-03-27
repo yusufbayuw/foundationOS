@@ -2,13 +2,15 @@
 
 namespace Modules\Library\Filament\Resources\Members;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\Members\Pages\CreateMember;
 use Modules\Library\Filament\Resources\Members\Pages\EditMember;
 use Modules\Library\Filament\Resources\Members\Pages\ListMembers;
 use Modules\Library\Filament\Resources\Members\Pages\ViewMember;
+use Modules\Library\Filament\Resources\Members\RelationManagers\LoansRelationManager;
+use Modules\Library\Filament\Resources\Members\RelationManagers\ReservationsRelationManager;
 use Modules\Library\Filament\Resources\Members\Schemas\MemberForm;
 use Modules\Library\Filament\Resources\Members\Schemas\MemberInfolist;
 use Modules\Library\Filament\Resources\Members\Tables\MembersTable;
@@ -38,7 +40,8 @@ class MemberResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            LoansRelationManager::class,
+            ReservationsRelationManager::class,
         ];
     }
 

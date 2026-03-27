@@ -9,6 +9,7 @@ use Modules\Core\Filament\Resources\Departments\Pages\CreateDepartment;
 use Modules\Core\Filament\Resources\Departments\Pages\EditDepartment;
 use Modules\Core\Filament\Resources\Departments\Pages\ListDepartments;
 use Modules\Core\Filament\Resources\Departments\Pages\ViewDepartment;
+use Modules\Core\Filament\Resources\Departments\RelationManagers\SchoolClassesRelationManager;
 use Modules\Core\Filament\Resources\Departments\Schemas\DepartmentForm;
 use Modules\Core\Filament\Resources\Departments\Schemas\DepartmentInfolist;
 use Modules\Core\Filament\Resources\Departments\Tables\DepartmentsTable;
@@ -38,7 +39,7 @@ class DepartmentResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            SchoolClassesRelationManager::class,
         ];
     }
 

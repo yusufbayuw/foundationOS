@@ -9,6 +9,7 @@ use Modules\School\Filament\Resources\Schedules\Pages\CreateSchedule;
 use Modules\School\Filament\Resources\Schedules\Pages\EditSchedule;
 use Modules\School\Filament\Resources\Schedules\Pages\ListSchedules;
 use Modules\School\Filament\Resources\Schedules\Pages\ViewSchedule;
+use Modules\School\Filament\Resources\Schedules\RelationManagers\AttendancesRelationManager;
 use Modules\School\Filament\Resources\Schedules\Schemas\ScheduleForm;
 use Modules\School\Filament\Resources\Schedules\Schemas\ScheduleInfolist;
 use Modules\School\Filament\Resources\Schedules\Tables\SchedulesTable;
@@ -38,7 +39,7 @@ class ScheduleResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            AttendancesRelationManager::class,
         ];
     }
 

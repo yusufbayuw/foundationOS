@@ -9,6 +9,9 @@ use Modules\School\Filament\Resources\SchoolClasses\Pages\CreateSchoolClass;
 use Modules\School\Filament\Resources\SchoolClasses\Pages\EditSchoolClass;
 use Modules\School\Filament\Resources\SchoolClasses\Pages\ListSchoolClasses;
 use Modules\School\Filament\Resources\SchoolClasses\Pages\ViewSchoolClass;
+use Modules\School\Filament\Resources\SchoolClasses\RelationManagers\AssessmentsRelationManager;
+use Modules\School\Filament\Resources\SchoolClasses\RelationManagers\ClassStudentsRelationManager;
+use Modules\School\Filament\Resources\SchoolClasses\RelationManagers\SchedulesRelationManager;
 use Modules\School\Filament\Resources\SchoolClasses\Schemas\SchoolClassForm;
 use Modules\School\Filament\Resources\SchoolClasses\Schemas\SchoolClassInfolist;
 use Modules\School\Filament\Resources\SchoolClasses\Tables\SchoolClassesTable;
@@ -38,7 +41,9 @@ class SchoolClassResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            ClassStudentsRelationManager::class,
+            SchedulesRelationManager::class,
+            AssessmentsRelationManager::class,
         ];
     }
 

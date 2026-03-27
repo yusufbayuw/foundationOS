@@ -1,0 +1,23 @@
+<?php
+
+namespace Modules\Core\Filament\Resources\Organizations\RelationManagers;
+
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Modules\School\Filament\Resources\Students\StudentResource;
+
+class StudentsRelationManager extends RelationManager
+{
+    protected static string $relationship = 'students';
+
+    public function form(Schema $schema): Schema
+    {
+        return StudentResource::form($schema);
+    }
+
+    public function table(Table $table): Table
+    {
+        return StudentResource::table($table);
+    }
+}

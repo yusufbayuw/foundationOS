@@ -9,6 +9,7 @@ use Modules\School\Filament\Resources\ClassStudents\Pages\CreateClassStudent;
 use Modules\School\Filament\Resources\ClassStudents\Pages\EditClassStudent;
 use Modules\School\Filament\Resources\ClassStudents\Pages\ListClassStudents;
 use Modules\School\Filament\Resources\ClassStudents\Pages\ViewClassStudent;
+use Modules\School\Filament\Resources\ClassStudents\RelationManagers\StudentAssessmentAnswersRelationManager;
 use Modules\School\Filament\Resources\ClassStudents\Schemas\ClassStudentForm;
 use Modules\School\Filament\Resources\ClassStudents\Schemas\ClassStudentInfolist;
 use Modules\School\Filament\Resources\ClassStudents\Tables\ClassStudentsTable;
@@ -38,7 +39,7 @@ class ClassStudentResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            StudentAssessmentAnswersRelationManager::class,
         ];
     }
 

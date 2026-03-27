@@ -9,6 +9,8 @@ use Modules\Core\Filament\Resources\Modules\Pages\CreateModule;
 use Modules\Core\Filament\Resources\Modules\Pages\EditModule;
 use Modules\Core\Filament\Resources\Modules\Pages\ListModules;
 use Modules\Core\Filament\Resources\Modules\Pages\ViewModule;
+use Modules\Core\Filament\Resources\Modules\RelationManagers\TenantModulesRelationManager;
+use Modules\Core\Filament\Resources\Modules\RelationManagers\TenantsRelationManager;
 use Modules\Core\Filament\Resources\Modules\Schemas\ModuleForm;
 use Modules\Core\Filament\Resources\Modules\Schemas\ModuleInfolist;
 use Modules\Core\Filament\Resources\Modules\Tables\ModulesTable;
@@ -38,7 +40,8 @@ class ModuleResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            TenantModulesRelationManager::class,
+            TenantsRelationManager::class,
         ];
     }
 

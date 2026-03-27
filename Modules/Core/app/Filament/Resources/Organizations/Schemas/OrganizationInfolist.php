@@ -3,6 +3,7 @@
 namespace Modules\Core\Filament\Resources\Organizations\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -83,17 +84,21 @@ class OrganizationInfolist
                 TextEntry::make('principalUser.name')
                     ->label(\Modules\Core\Support\FilamentUi::text('Principal user'))
                     ->placeholder('-'),
-                TextEntry::make('logo')
+                ImageEntry::make('logo')
                     ->label(\Modules\Core\Support\FilamentUi::field('logo'))
+                    ->disk('public')
                     ->placeholder('-'),
-                TextEntry::make('stamp')
+                ImageEntry::make('stamp')
                     ->label(\Modules\Core\Support\FilamentUi::field('stamp'))
+                    ->disk('public')
                     ->placeholder('-'),
-                TextEntry::make('signature')
+                ImageEntry::make('signature')
                     ->label(\Modules\Core\Support\FilamentUi::field('signature'))
+                    ->disk('public')
                     ->placeholder('-'),
-                TextEntry::make('letterhead')
+                ImageEntry::make('letterhead')
                     ->label(\Modules\Core\Support\FilamentUi::field('letterhead'))
+                    ->disk('public')
                     ->placeholder('-'),
                 IconEntry::make('is_main')
                     ->boolean(),

@@ -9,6 +9,7 @@ use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\CreatePurc
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\EditPurchaseRequisition;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\ListPurchaseRequisitions;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\ViewPurchaseRequisition;
+use Modules\Procurement\Filament\Resources\PurchaseRequisitions\RelationManagers\WorkflowInstancesRelationManager;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Schemas\PurchaseRequisitionForm;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Schemas\PurchaseRequisitionInfolist;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Tables\PurchaseRequisitionsTable;
@@ -38,7 +39,7 @@ class PurchaseRequisitionResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            WorkflowInstancesRelationManager::class,
         ];
     }
 

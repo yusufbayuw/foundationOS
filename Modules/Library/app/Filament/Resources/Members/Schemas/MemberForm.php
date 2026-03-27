@@ -6,7 +6,10 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Facades\Filament;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use Modules\Core\Models\User;
 
 class MemberForm
 {
@@ -17,14 +20,41 @@ class MemberForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
+                Select::make('organization_id')
+                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+                    ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
+                    ->nullable()
+                    ->helperText('Opsional. Kosongkan untuk member tenant-wide (lintas organisasi).'),
                 Select::make('user_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('user_id'))
-                    ->relationship('user', 'name')
+                    ->relationship('user', 'name', modifyQueryUsing: function (Builder $query): void {
+                        if (Filament::getTenant()) {
+                            $query->whereHas('userTenantRoles', fn (Builder $inner) => $inner->where('tenant_id', Filament::getTenant()->getKey()));
+                        }
+                    })
+                    ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->name . ' (' . $record->email . ')')
+                    ->searchable(['name', 'email'])
+                    ->preload()
                     ->required(),
                 TextInput::make('member_number')
                     ->label(\Modules\Core\Support\FilamentUi::field('member_number'))
                     ->required(),
+                Select::make('member_type_id')
+                    ->label(\Modules\Core\Support\FilamentUi::field('member_type_id'))
+                    ->relationship('memberType', 'name', modifyQueryUsing: function (Builder $query): void {
+                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->helperText('Opsional. Jika diisi, kebijakan peminjaman mengikuti tipe member.'),
                 TextInput::make('member_type')
                     ->label(\Modules\Core\Support\FilamentUi::field('member_type')),
                 DatePicker::make('joined_at')

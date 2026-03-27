@@ -8,6 +8,7 @@ use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -45,7 +46,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasTenants, HasDefaultTenant
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, SoftDeletes, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -62,6 +63,7 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
         'timezone',
         'locale',
         'status',
+        'is_super_admin',
     ];
 
     protected $hidden = [
@@ -76,6 +78,7 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
             'last_login_at' => 'datetime',
             'locked_until' => 'datetime',
             'login_attempts' => 'integer',
+            'is_super_admin' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -120,6 +123,10 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
 
     public function canAccessTenant(Model $tenant): bool
     {
+        if ($this->isGlobalSuperAdmin()) {
+            return $tenant instanceof Tenant;
+        }
+
         return $tenant instanceof Tenant
             && $this->userTenantRoles()
                 ->where('tenant_id', $tenant->getKey())
@@ -128,6 +135,10 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
 
     public function getTenants(Panel $panel): array | Collection
     {
+        if ($this->isGlobalSuperAdmin()) {
+            return Tenant::query()->get();
+        }
+
         return $this->tenants()
             ->select('tenants.*')
             ->distinct()
@@ -136,6 +147,10 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
 
     public function getDefaultTenant(Panel $panel): ?Model
     {
+        if ($this->isGlobalSuperAdmin()) {
+            return Tenant::query()->first();
+        }
+
         $primaryAssignment = $this->userTenantRoles()
             ->where('is_primary', true)
             ->with('tenant')
@@ -336,5 +351,10 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
     protected static function newFactory(): UserFactory
     {
         return UserFactory::new();
+    }
+
+    public function isGlobalSuperAdmin(): bool
+    {
+        return (bool) $this->is_super_admin;
     }
 }

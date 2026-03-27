@@ -4,10 +4,14 @@ namespace Modules\Library\Filament\Resources\Fines\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Modules\Core\Filament\Support\ImportTableActions;
 
 class FinesTable
 {
@@ -17,6 +21,9 @@ class FinesTable
             ->columns([
                 TextColumn::make('tenant.name')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->searchable(),
+                TextColumn::make('organization.name')
+                    ->label(\Modules\Core\Support\FilamentUi::field('organization.name'))
                     ->searchable(),
                 TextColumn::make('loan.id')
                     ->label(\Modules\Core\Support\FilamentUi::field('loan.id'))
@@ -54,14 +61,21 @@ class FinesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->filters([
+                TrashedFilter::make(),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->headerActions([
+                ...ImportTableActions::make(\App\Filament\Imports\FineImporter::class),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                                                         ]),
             ]);
     }

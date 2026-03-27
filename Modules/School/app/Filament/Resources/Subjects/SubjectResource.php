@@ -9,6 +9,8 @@ use Modules\School\Filament\Resources\Subjects\Pages\CreateSubject;
 use Modules\School\Filament\Resources\Subjects\Pages\EditSubject;
 use Modules\School\Filament\Resources\Subjects\Pages\ListSubjects;
 use Modules\School\Filament\Resources\Subjects\Pages\ViewSubject;
+use Modules\School\Filament\Resources\Subjects\RelationManagers\AssessmentsRelationManager;
+use Modules\School\Filament\Resources\Subjects\RelationManagers\SchedulesRelationManager;
 use Modules\School\Filament\Resources\Subjects\Schemas\SubjectForm;
 use Modules\School\Filament\Resources\Subjects\Schemas\SubjectInfolist;
 use Modules\School\Filament\Resources\Subjects\Tables\SubjectsTable;
@@ -38,7 +40,8 @@ class SubjectResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            SchedulesRelationManager::class,
+            AssessmentsRelationManager::class,
         ];
     }
 

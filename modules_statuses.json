@@ -8,5 +8,6 @@
     "Employee": true,
     "Library": true,
     "Procurement": true,
-    "Monitoring": true
+    "Monitoring": true,
+    "Workflow": true
 }

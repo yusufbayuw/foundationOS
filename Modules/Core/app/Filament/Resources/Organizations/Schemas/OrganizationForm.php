@@ -3,6 +3,7 @@
 namespace Modules\Core\Filament\Resources\Organizations\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -75,14 +76,26 @@ class OrganizationForm
                 Select::make('principal_user_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('principal_user_id'))
                     ->relationship('principalUser', 'name'),
-                TextInput::make('logo')
-                    ->label(\Modules\Core\Support\FilamentUi::field('logo')),
-                TextInput::make('stamp')
-                    ->label(\Modules\Core\Support\FilamentUi::field('stamp')),
-                TextInput::make('signature')
-                    ->label(\Modules\Core\Support\FilamentUi::field('signature')),
-                TextInput::make('letterhead')
-                    ->label(\Modules\Core\Support\FilamentUi::field('letterhead')),
+                FileUpload::make('logo')
+                    ->label(\Modules\Core\Support\FilamentUi::field('logo'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('organizations/logos'),
+                FileUpload::make('stamp')
+                    ->label(\Modules\Core\Support\FilamentUi::field('stamp'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('organizations/stamps'),
+                FileUpload::make('signature')
+                    ->label(\Modules\Core\Support\FilamentUi::field('signature'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('organizations/signatures'),
+                FileUpload::make('letterhead')
+                    ->label(\Modules\Core\Support\FilamentUi::field('letterhead'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('organizations/letterheads'),
                 Toggle::make('is_main')
                     ->label(\Modules\Core\Support\FilamentUi::field('is_main'))
                     ->required(),

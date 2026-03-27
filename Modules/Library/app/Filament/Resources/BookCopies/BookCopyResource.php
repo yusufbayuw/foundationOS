@@ -2,13 +2,14 @@
 
 namespace Modules\Library\Filament\Resources\BookCopies;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\BookCopies\Pages\CreateBookCopy;
 use Modules\Library\Filament\Resources\BookCopies\Pages\EditBookCopy;
 use Modules\Library\Filament\Resources\BookCopies\Pages\ListBookCopies;
 use Modules\Library\Filament\Resources\BookCopies\Pages\ViewBookCopy;
+use Modules\Library\Filament\Resources\BookCopies\RelationManagers\LoansRelationManager;
 use Modules\Library\Filament\Resources\BookCopies\Schemas\BookCopyForm;
 use Modules\Library\Filament\Resources\BookCopies\Schemas\BookCopyInfolist;
 use Modules\Library\Filament\Resources\BookCopies\Tables\BookCopiesTable;
@@ -38,7 +39,7 @@ class BookCopyResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            LoansRelationManager::class,
         ];
     }
 

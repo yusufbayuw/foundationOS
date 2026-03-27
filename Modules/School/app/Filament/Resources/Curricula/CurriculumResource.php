@@ -9,6 +9,7 @@ use Modules\School\Filament\Resources\Curricula\Pages\CreateCurriculum;
 use Modules\School\Filament\Resources\Curricula\Pages\EditCurriculum;
 use Modules\School\Filament\Resources\Curricula\Pages\ListCurricula;
 use Modules\School\Filament\Resources\Curricula\Pages\ViewCurriculum;
+use Modules\School\Filament\Resources\Curricula\RelationManagers\SubjectsRelationManager;
 use Modules\School\Filament\Resources\Curricula\Schemas\CurriculumForm;
 use Modules\School\Filament\Resources\Curricula\Schemas\CurriculumInfolist;
 use Modules\School\Filament\Resources\Curricula\Tables\CurriculaTable;
@@ -38,7 +39,7 @@ class CurriculumResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            SubjectsRelationManager::class,
         ];
     }
 

@@ -6,7 +6,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Facades\Filament;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookCategoryForm
 {
@@ -17,11 +19,19 @@ class BookCategoryForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
                 Select::make('organization_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name')
-                    ->required(),
+                    ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
+                    ->nullable()
+                    ->helperText('Kosongkan untuk kategori tenant-wide (terpusat).'),
                 TextInput::make('code')
                     ->label(\Modules\Core\Support\FilamentUi::field('code'))
                     ->required(),
@@ -33,6 +43,7 @@ class BookCategoryForm
                     ->columnSpanFull(),
                 Toggle::make('is_active')
                     ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->default(true)
                     ->required(),
             ]);
     }

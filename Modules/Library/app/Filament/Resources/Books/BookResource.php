@@ -2,13 +2,19 @@
 
 namespace Modules\Library\Filament\Resources\Books;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\Books\Pages\CreateBook;
 use Modules\Library\Filament\Resources\Books\Pages\EditBook;
 use Modules\Library\Filament\Resources\Books\Pages\ListBooks;
 use Modules\Library\Filament\Resources\Books\Pages\ViewBook;
+use Modules\Library\Filament\Resources\Books\RelationManagers\AuditLogsRelationManager;
+use Modules\Library\Filament\Resources\Books\RelationManagers\AuthorItemsRelationManager;
+use Modules\Library\Filament\Resources\Books\RelationManagers\CopiesRelationManager;
+use Modules\Library\Filament\Resources\Books\RelationManagers\FileUploadsRelationManager;
+use Modules\Library\Filament\Resources\Books\RelationManagers\ReservationsRelationManager;
+use Modules\Library\Filament\Resources\Books\RelationManagers\SubjectItemsRelationManager;
 use Modules\Library\Filament\Resources\Books\Schemas\BookForm;
 use Modules\Library\Filament\Resources\Books\Schemas\BookInfolist;
 use Modules\Library\Filament\Resources\Books\Tables\BooksTable;
@@ -18,7 +24,7 @@ class BookResource extends LocalizedResource
 {
     protected static ?string $model = Book::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Schema $schema): Schema
     {
@@ -38,7 +44,12 @@ class BookResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            CopiesRelationManager::class,
+            ReservationsRelationManager::class,
+            AuthorItemsRelationManager::class,
+            SubjectItemsRelationManager::class,
+            AuditLogsRelationManager::class,
+            FileUploadsRelationManager::class,
         ];
     }
 

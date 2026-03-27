@@ -9,6 +9,7 @@ use Modules\Campus\Filament\Resources\StudyPlans\Pages\CreateStudyPlan;
 use Modules\Campus\Filament\Resources\StudyPlans\Pages\EditStudyPlan;
 use Modules\Campus\Filament\Resources\StudyPlans\Pages\ListStudyPlans;
 use Modules\Campus\Filament\Resources\StudyPlans\Pages\ViewStudyPlan;
+use Modules\Campus\Filament\Resources\StudyPlans\RelationManagers\ItemsRelationManager;
 use Modules\Campus\Filament\Resources\StudyPlans\Schemas\StudyPlanForm;
 use Modules\Campus\Filament\Resources\StudyPlans\Schemas\StudyPlanInfolist;
 use Modules\Campus\Filament\Resources\StudyPlans\Tables\StudyPlansTable;
@@ -38,7 +39,7 @@ class StudyPlanResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            ItemsRelationManager::class,
         ];
     }
 

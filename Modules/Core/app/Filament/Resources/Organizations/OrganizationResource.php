@@ -9,6 +9,32 @@ use Modules\Core\Filament\Resources\Organizations\Pages\CreateOrganization;
 use Modules\Core\Filament\Resources\Organizations\Pages\EditOrganization;
 use Modules\Core\Filament\Resources\Organizations\Pages\ListOrganizations;
 use Modules\Core\Filament\Resources\Organizations\Pages\ViewOrganization;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AcademicPeriodsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AcademicYearsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AchievementTypesRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AssessmentsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AttachedFilesRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AuditLogsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AuditableLogsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\CollageStudentsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\CourseOfferingsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\CurriculaRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\DepartmentsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\FacultiesRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\FeederLogsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\FileUploadsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\LecturersRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\OrganizationSettingsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\SchedulesRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\SchoolClassesRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\StudentAchievementsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\StudentsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\StudyProgramsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\SubjectsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\TeachersRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\UserTenantRolesRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\UsersRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\ViolationTypesRelationManager;
 use Modules\Core\Filament\Resources\Organizations\Schemas\OrganizationForm;
 use Modules\Core\Filament\Resources\Organizations\Schemas\OrganizationInfolist;
 use Modules\Core\Filament\Resources\Organizations\Tables\OrganizationsTable;
@@ -38,7 +64,32 @@ class OrganizationResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            OrganizationSettingsRelationManager::class,
+            UserTenantRolesRelationManager::class,
+            AcademicYearsRelationManager::class,
+            AcademicPeriodsRelationManager::class,
+            DepartmentsRelationManager::class,
+            UsersRelationManager::class,
+            CurriculaRelationManager::class,
+            SubjectsRelationManager::class,
+            StudentsRelationManager::class,
+            TeachersRelationManager::class,
+            SchoolClassesRelationManager::class,
+            SchedulesRelationManager::class,
+            AssessmentsRelationManager::class,
+            AchievementTypesRelationManager::class,
+            StudentAchievementsRelationManager::class,
+            ViolationTypesRelationManager::class,
+            FacultiesRelationManager::class,
+            StudyProgramsRelationManager::class,
+            LecturersRelationManager::class,
+            CollageStudentsRelationManager::class,
+            CourseOfferingsRelationManager::class,
+            FeederLogsRelationManager::class,
+            AuditLogsRelationManager::class,
+            FileUploadsRelationManager::class,
+            AuditableLogsRelationManager::class,
+            AttachedFilesRelationManager::class,
         ];
     }
 

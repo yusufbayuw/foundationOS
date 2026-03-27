@@ -4,6 +4,7 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,8 @@ use Modules\Global\Models\Province;
 use Modules\Global\Models\Village;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCategory;
+use Modules\Library\Models\BookReservation;
+use Modules\Library\Models\LibraryPolicy;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
 use Modules\Procurement\Models\ProcurementCategory;
@@ -47,7 +50,7 @@ use Modules\School\Models\ViolationType;
 
 class Organization extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -178,6 +181,8 @@ class Organization extends Model
     public function budgets(): HasMany { return $this->hasMany(Budget::class); }
     public function bookCategories(): HasMany { return $this->hasMany(BookCategory::class); }
     public function books(): HasMany { return $this->hasMany(Book::class); }
+    public function bookReservations(): HasMany { return $this->hasMany(BookReservation::class); }
+    public function libraryPolicies(): HasMany { return $this->hasMany(LibraryPolicy::class); }
     public function positions(): HasMany { return $this->hasMany(Position::class); }
     public function shifts(): HasMany { return $this->hasMany(Shift::class); }
     public function employees(): HasMany { return $this->hasMany(Employee::class); }

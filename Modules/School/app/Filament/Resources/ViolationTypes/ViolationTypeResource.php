@@ -9,6 +9,7 @@ use Modules\School\Filament\Resources\ViolationTypes\Pages\CreateViolationType;
 use Modules\School\Filament\Resources\ViolationTypes\Pages\EditViolationType;
 use Modules\School\Filament\Resources\ViolationTypes\Pages\ListViolationTypes;
 use Modules\School\Filament\Resources\ViolationTypes\Pages\ViewViolationType;
+use Modules\School\Filament\Resources\ViolationTypes\RelationManagers\ViolationsRelationManager;
 use Modules\School\Filament\Resources\ViolationTypes\Schemas\ViolationTypeForm;
 use Modules\School\Filament\Resources\ViolationTypes\Schemas\ViolationTypeInfolist;
 use Modules\School\Filament\Resources\ViolationTypes\Tables\ViolationTypesTable;
@@ -38,7 +39,7 @@ class ViolationTypeResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            ViolationsRelationManager::class,
         ];
     }
 

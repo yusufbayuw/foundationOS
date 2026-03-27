@@ -4,6 +4,7 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -47,7 +48,9 @@ use Modules\Finance\Models\TuitionType;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCategory;
 use Modules\Library\Models\BookCopy;
+use Modules\Library\Models\BookReservation;
 use Modules\Library\Models\Fine;
+use Modules\Library\Models\LibraryPolicy;
 use Modules\Library\Models\Loan;
 use Modules\Library\Models\Member;
 use Modules\Monitoring\Models\AuditLog;
@@ -85,7 +88,7 @@ use Modules\School\Models\ViolationType;
 
 class Tenant extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'uuid',
@@ -232,6 +235,8 @@ class Tenant extends Model
     public function books(): HasMany { return $this->hasMany(Book::class); }
     public function bookCopies(): HasMany { return $this->hasMany(BookCopy::class); }
     public function members(): HasMany { return $this->hasMany(Member::class); }
+    public function bookReservations(): HasMany { return $this->hasMany(BookReservation::class); }
+    public function libraryPolicies(): HasMany { return $this->hasMany(LibraryPolicy::class); }
     public function loans(): HasMany { return $this->hasMany(Loan::class); }
     public function fines(): HasMany { return $this->hasMany(Fine::class); }
     public function positions(): HasMany { return $this->hasMany(Position::class); }

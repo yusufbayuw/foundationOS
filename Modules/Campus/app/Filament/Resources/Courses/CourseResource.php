@@ -9,6 +9,8 @@ use Modules\Campus\Filament\Resources\Courses\Pages\CreateCourse;
 use Modules\Campus\Filament\Resources\Courses\Pages\EditCourse;
 use Modules\Campus\Filament\Resources\Courses\Pages\ListCourses;
 use Modules\Campus\Filament\Resources\Courses\Pages\ViewCourse;
+use Modules\Campus\Filament\Resources\Courses\RelationManagers\CourseOfferingsRelationManager;
+use Modules\Campus\Filament\Resources\Courses\RelationManagers\StudyPlanItemsRelationManager;
 use Modules\Campus\Filament\Resources\Courses\Schemas\CourseForm;
 use Modules\Campus\Filament\Resources\Courses\Schemas\CourseInfolist;
 use Modules\Campus\Filament\Resources\Courses\Tables\CoursesTable;
@@ -38,7 +40,8 @@ class CourseResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            CourseOfferingsRelationManager::class,
+            StudyPlanItemsRelationManager::class,
         ];
     }
 

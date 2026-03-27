@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Resources\Tenants\Schemas;
 
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -23,11 +24,13 @@ class TenantInfolist
                 TextEntry::make('subdomain')
                     ->label(\Modules\Core\Support\FilamentUi::field('subdomain'))
                     ->placeholder('-'),
-                TextEntry::make('logo')
+                ImageEntry::make('logo')
                     ->label(\Modules\Core\Support\FilamentUi::field('logo'))
+                    ->disk('public')
                     ->placeholder('-'),
-                TextEntry::make('favicon')
+                ImageEntry::make('favicon')
                     ->label(\Modules\Core\Support\FilamentUi::field('favicon'))
+                    ->disk('public')
                     ->placeholder('-'),
                 TextEntry::make('primary_color')
                     ->label(\Modules\Core\Support\FilamentUi::field('primary_color'))

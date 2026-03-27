@@ -6,7 +6,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Facades\Filament;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class LoanForm
 {
@@ -17,14 +19,34 @@ class LoanForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
+                Select::make('organization_id')
+                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+                    ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
+                    ->nullable()
+                    ->helperText('Opsional. Kosongkan untuk transaksi tenant-wide.'),
                 Select::make('book_copy_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('book_copy_id'))
-                    ->relationship('bookCopy', 'id')
+                    ->relationship('bookCopy', 'copy_number', modifyQueryUsing: function (Builder $query): void {
+                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
+                    })
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 Select::make('member_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('member_id'))
-                    ->relationship('member', 'id')
+                    ->relationship('member', 'member_number', modifyQueryUsing: function (Builder $query): void {
+                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
+                    })
+                    ->searchable()
+                    ->preload()
                     ->required(),
                 TextInput::make('processed_by')
                     ->label(\Modules\Core\Support\FilamentUi::field('processed_by'))

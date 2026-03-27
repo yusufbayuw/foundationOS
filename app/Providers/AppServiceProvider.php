@@ -2,22 +2,29 @@
 
 namespace App\Providers;
 
+use App\Observers\ClassStudentObserver;
+use App\Observers\CourseObserver;
+use App\Observers\StudentObserver;
+use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Spatie\Permission\PermissionRegistrar;
 use App\Models\Permission;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Campus\Models\Course;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Models\VendorBill;
+use Modules\School\Models\ClassStudent;
 use Modules\School\Models\Student;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,9 +42,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        User::observe(UserObserver::class);
+        Course::observe(CourseObserver::class);
+        Student::observe(StudentObserver::class);
+        ClassStudent::observe(ClassStudentObserver::class);
+
         app(PermissionRegistrar::class)
             ->setPermissionClass(Permission::class)
             ->setRoleClass(Role::class);
+
+        Gate::before(function ($user, string $ability): ?bool {
+            if ($user instanceof User && $user->isGlobalSuperAdmin()) {
+                return true;
+            }
+
+            return null;
+        });
 
         Model::unguard();
 

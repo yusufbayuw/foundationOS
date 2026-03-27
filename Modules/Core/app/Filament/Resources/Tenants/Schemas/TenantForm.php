@@ -3,6 +3,7 @@
 namespace Modules\Core\Filament\Resources\Tenants\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -27,10 +28,16 @@ class TenantForm
                     ->label(\Modules\Core\Support\FilamentUi::field('domain')),
                 TextInput::make('subdomain')
                     ->label(\Modules\Core\Support\FilamentUi::field('subdomain')),
-                TextInput::make('logo')
-                    ->label(\Modules\Core\Support\FilamentUi::field('logo')),
-                TextInput::make('favicon')
-                    ->label(\Modules\Core\Support\FilamentUi::field('favicon')),
+                FileUpload::make('logo')
+                    ->label(\Modules\Core\Support\FilamentUi::field('logo'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('tenants/logos'),
+                FileUpload::make('favicon')
+                    ->label(\Modules\Core\Support\FilamentUi::field('favicon'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('tenants/favicons'),
                 TextInput::make('primary_color')
                     ->label(\Modules\Core\Support\FilamentUi::field('primary_color')),
                 TextInput::make('secondary_color')

@@ -9,6 +9,7 @@ use Modules\School\Filament\Resources\AchievementTypes\Pages\CreateAchievementTy
 use Modules\School\Filament\Resources\AchievementTypes\Pages\EditAchievementType;
 use Modules\School\Filament\Resources\AchievementTypes\Pages\ListAchievementTypes;
 use Modules\School\Filament\Resources\AchievementTypes\Pages\ViewAchievementType;
+use Modules\School\Filament\Resources\AchievementTypes\RelationManagers\StudentAchievementsRelationManager;
 use Modules\School\Filament\Resources\AchievementTypes\Schemas\AchievementTypeForm;
 use Modules\School\Filament\Resources\AchievementTypes\Schemas\AchievementTypeInfolist;
 use Modules\School\Filament\Resources\AchievementTypes\Tables\AchievementTypesTable;
@@ -38,7 +39,7 @@ class AchievementTypeResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            StudentAchievementsRelationManager::class,
         ];
     }
 

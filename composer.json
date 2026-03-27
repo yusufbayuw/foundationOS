@@ -13,6 +13,7 @@
         "bezhansalleh/filament-shield": "^4.2",
         "coolsam/modules": "^5.1",
         "filament/filament": "^5.4",
+        "jwadhams/json-logic-php": "^1.5",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0"
     },

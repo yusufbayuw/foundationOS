@@ -2,9 +2,9 @@
 
 namespace Modules\Library\Filament\Resources\Fines;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\Fines\Pages\CreateFine;
 use Modules\Library\Filament\Resources\Fines\Pages\EditFine;
 use Modules\Library\Filament\Resources\Fines\Pages\ListFines;

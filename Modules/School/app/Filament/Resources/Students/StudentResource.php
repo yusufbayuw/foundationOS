@@ -9,6 +9,14 @@ use Modules\School\Filament\Resources\Students\Pages\CreateStudent;
 use Modules\School\Filament\Resources\Students\Pages\EditStudent;
 use Modules\School\Filament\Resources\Students\Pages\ListStudents;
 use Modules\School\Filament\Resources\Students\Pages\ViewStudent;
+use Modules\School\Filament\Resources\Students\RelationManagers\AttendancesRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\AuditLogsRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\ClassStudentsRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\FileUploadsRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\StudentAchievementsRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\StudentAssessmentAnswersRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\StudentGradesRelationManager;
+use Modules\School\Filament\Resources\Students\RelationManagers\ViolationsRelationManager;
 use Modules\School\Filament\Resources\Students\Schemas\StudentForm;
 use Modules\School\Filament\Resources\Students\Schemas\StudentInfolist;
 use Modules\School\Filament\Resources\Students\Tables\StudentsTable;
@@ -38,7 +46,14 @@ class StudentResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            ClassStudentsRelationManager::class,
+            AttendancesRelationManager::class,
+            StudentGradesRelationManager::class,
+            ViolationsRelationManager::class,
+            StudentAssessmentAnswersRelationManager::class,
+            StudentAchievementsRelationManager::class,
+            AuditLogsRelationManager::class,
+            FileUploadsRelationManager::class,
         ];
     }
 

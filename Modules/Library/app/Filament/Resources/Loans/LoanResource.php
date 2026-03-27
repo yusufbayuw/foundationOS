@@ -2,13 +2,14 @@
 
 namespace Modules\Library\Filament\Resources\Loans;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\Loans\Pages\CreateLoan;
 use Modules\Library\Filament\Resources\Loans\Pages\EditLoan;
 use Modules\Library\Filament\Resources\Loans\Pages\ListLoans;
 use Modules\Library\Filament\Resources\Loans\Pages\ViewLoan;
+use Modules\Library\Filament\Resources\Loans\RelationManagers\FinesRelationManager;
 use Modules\Library\Filament\Resources\Loans\Schemas\LoanForm;
 use Modules\Library\Filament\Resources\Loans\Schemas\LoanInfolist;
 use Modules\Library\Filament\Resources\Loans\Tables\LoansTable;
@@ -38,7 +39,7 @@ class LoanResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            FinesRelationManager::class,
         ];
     }
 

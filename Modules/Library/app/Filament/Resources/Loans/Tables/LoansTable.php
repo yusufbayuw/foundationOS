@@ -4,10 +4,14 @@ namespace Modules\Library\Filament\Resources\Loans\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\TrashedFilter;
+use Modules\Core\Filament\Support\ImportTableActions;
 
 class LoansTable
 {
@@ -17,6 +21,9 @@ class LoansTable
             ->columns([
                 TextColumn::make('tenant.name')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->searchable(),
+                TextColumn::make('organization.name')
+                    ->label(\Modules\Core\Support\FilamentUi::field('organization.name'))
                     ->searchable(),
                 TextColumn::make('bookCopy.id')
                     ->label(\Modules\Core\Support\FilamentUi::field('bookCopy.id'))
@@ -83,14 +90,21 @@ class LoansTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
+            ->filters([
+                TrashedFilter::make(),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
+            ->headerActions([
+                ...ImportTableActions::make(\App\Filament\Imports\LoanImporter::class),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
                                                         ]),
             ]);
     }

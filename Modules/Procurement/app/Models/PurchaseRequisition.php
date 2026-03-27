@@ -4,14 +4,19 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Workflow\Contracts\ProvidesWorkflowContext;
+use Modules\Workflow\Contracts\StartsWorkflow;
+use Modules\Workflow\Models\WorkflowInstance;
 
-class PurchaseRequisition extends Model
+class PurchaseRequisition extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -48,4 +53,35 @@ class PurchaseRequisition extends Model
     public function approver(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
     public function items(): HasMany { return $this->hasMany(PurchaseRequisitionItem::class); }
     public function rfqs(): HasMany { return $this->hasMany(RequestForQuotation::class); }
+    public function workflowInstances(): MorphMany { return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id'); }
+
+    public function workflowCode(): string
+    {
+        return 'purchase-requisition-approval';
+    }
+
+    public function workflowContext(): array
+    {
+        return [
+            'tenant_id' => $this->tenant_id,
+            'requested_by' => $this->requested_by,
+            'request_number' => $this->request_number,
+            'priority' => $this->priority,
+            'status' => $this->status,
+            'total_items' => $this->total_items,
+            'total_estimated_amount' => (float) $this->total_estimated_amount,
+            'justification' => $this->justification,
+            'notes' => $this->notes,
+        ];
+    }
+
+    public function workflowSubjectLabel(): string
+    {
+        return (string) ($this->request_number ?: 'Purchase Requisition #'.$this->getKey());
+    }
+
+    public function workflowSubjectType(): string
+    {
+        return self::class;
+    }
 }
