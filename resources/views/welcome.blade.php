@@ -3,1058 +3,1120 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'FoundationOS') }} — Platform Operasional Institusi Pendidikan</title>
-    <meta name="description" content="FoundationOS merupakan platform modular untuk operasional sekolah, kampus, dan lembaga pendidikan. Kelola akademik, keuangan, SDM, serta proses institusi dalam satu sistem yang terintegrasi.">
-
-    <!-- Fonts -->
+    <title>{{ config('app.name', 'FoundationOS') }} | Sistem Operasional Yayasan Pendidikan untuk Sekolah, Kampus, dan Manajemen Yayasan</title>
+    <meta name="description" content="FoundationOS membantu yayasan pendidikan mengelola sekolah, kampus, dan manajemen yayasan dalam satu sistem yang rapi. Satukan layanan akademik, keuangan, SDM, approval, procurement, dan library dalam pengalaman kerja yang lebih jelas dan terkendali.">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800&family=fraunces:600,700&display=swap" rel="stylesheet" />
+
+    @php
+        $appName = config('app.name', 'FoundationOS');
+        $adminUrl = url('/admin');
+        $loginUrl = url('/admin/login');
+    @endphp
 
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; }
 
         :root {
-            --primary-50: #eef2ff;
-            --primary-100: #e0e7ff;
-            --primary-200: #c7d2fe;
-            --primary-300: #a5b4fc;
-            --primary-400: #818cf8;
-            --primary-500: #6366f1;
-            --primary-600: #4f46e5;
-            --primary-700: #4338ca;
-            --primary-800: #3730a3;
-            --primary-900: #312e81;
-
-            --gray-50: #fafafa;
-            --gray-100: #f4f4f5;
-            --gray-200: #e4e4e7;
-            --gray-300: #d4d4d8;
-            --gray-400: #a1a1aa;
-            --gray-500: #71717a;
-            --gray-600: #52525b;
-            --gray-700: #3f3f46;
-            --gray-800: #27272a;
-            --gray-900: #18181b;
-            --gray-950: #09090b;
-
-            --bg: #ffffff;
-            --bg-alt: var(--gray-50);
-            --text: var(--gray-900);
-            --text-muted: var(--gray-500);
-            --text-heading: var(--gray-950);
-            --border: var(--gray-200);
-            --card-bg: #ffffff;
-            --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-            --card-shadow-hover: 0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
-            --gradient-start: var(--primary-500);
-            --gradient-end: #312e81;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: var(--gray-950);
-                --bg-alt: var(--gray-900);
-                --text: var(--gray-300);
-                --text-muted: var(--gray-500);
-                --text-heading: #ffffff;
-                --border: var(--gray-800);
-                --card-bg: var(--gray-900);
-                --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-                --card-shadow-hover: 0 10px 25px rgba(0,0,0,0.4), 0 4px 10px rgba(0,0,0,0.2);
-            }
+            --indigo-50: #eef2ff;
+            --indigo-100: #e0e7ff;
+            --indigo-200: #c7d2fe;
+            --indigo-300: #a5b4fc;
+            --indigo-400: #818cf8;
+            --indigo-500: #6366f1;
+            --indigo-600: #4f46e5;
+            --indigo-700: #4338ca;
+            --indigo-800: #3730a3;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-500: #64748b;
+            --slate-700: #334155;
+            --slate-900: #0f172a;
+            --amber-400: #fbbf24;
+            --emerald-500: #10b981;
+            --rose-500: #f43f5e;
+            --surface: rgba(255, 255, 255, 0.82);
+            --surface-strong: rgba(255, 255, 255, 0.92);
+            --border: rgba(99, 102, 241, 0.12);
+            --shadow-soft: 0 20px 60px rgba(15, 23, 42, 0.08);
+            --shadow-card: 0 18px 45px rgba(79, 70, 229, 0.12);
+            --text: var(--slate-900);
+            --text-soft: var(--slate-500);
+            --max: 1200px;
         }
 
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-            background: var(--bg);
+            margin: 0;
+            font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
             color: var(--text);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
+            background:
+                radial-gradient(circle at top left, rgba(99, 102, 241, 0.18), transparent 32%),
+                radial-gradient(circle at top right, rgba(15, 23, 42, 0.1), transparent 28%),
+                linear-gradient(180deg, #f9fbff 0%, #f4f7ff 38%, #ffffff 100%);
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* ===== NAV ===== */
-        .nav {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            background: color-mix(in srgb, var(--bg) 80%, transparent);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--border);
-        }
-        .nav-inner {
-            max-width: 1200px; margin: 0 auto;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0.875rem 1.5rem;
-        }
-        .nav-brand {
-            display: flex; align-items: center; gap: 0.625rem;
-            font-weight: 700; font-size: 1.25rem; color: var(--text-heading);
-            text-decoration: none;
-        }
-        .nav-brand svg { flex-shrink: 0; }
-        .nav-links { display: flex; align-items: center; gap: 0.5rem; }
-        .nav-link {
-            display: inline-flex; align-items: center;
-            padding: 0.5rem 1rem; border-radius: 0.5rem;
-            font-size: 0.875rem; font-weight: 500;
-            color: var(--text-muted); text-decoration: none;
-            transition: all 0.15s ease;
-        }
-        .nav-link:hover { color: var(--text-heading); background: var(--bg-alt); }
-        .btn-primary {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.5rem 1.25rem; border-radius: 0.5rem;
-            font-size: 0.875rem; font-weight: 600;
-            color: #fff; text-decoration: none;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.15);
-            transition: all 0.2s ease;
-            border: none; cursor: pointer;
-        }
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79,70,229,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
-        }
-        .btn-secondary {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.5rem 1.25rem; border-radius: 0.5rem;
-            font-size: 0.875rem; font-weight: 600;
-            color: var(--text-heading); text-decoration: none;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .btn-secondary:hover {
-            border-color: var(--primary-400);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-400) 18%, transparent);
+        a { color: inherit; }
+
+        .shell {
+            position: relative;
+            isolation: isolate;
         }
 
-        /* ===== HERO ===== */
-        .hero {
-            padding: 8rem 1.5rem 4rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 900px; height: 900px;
-            background: radial-gradient(circle, color-mix(in srgb, var(--primary-400) 12%, transparent) 0%, transparent 70%);
+        .shell::before,
+        .shell::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            z-index: -1;
+            border-radius: 999px;
+            filter: blur(30px);
+            opacity: 0.75;
             pointer-events: none;
         }
-        .hero-content { max-width: 800px; margin: 0 auto; position: relative; }
-        .hero-badge {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.375rem 1rem; border-radius: 99px;
-            font-size: 0.8125rem; font-weight: 500;
-            color: var(--primary-700);
-            background: var(--primary-50);
-            border: 1px solid var(--primary-200);
-            margin-bottom: 1.5rem;
-        }
-        @media (prefers-color-scheme: dark) {
-            .hero-badge {
-                color: var(--primary-300);
-                background: color-mix(in srgb, var(--primary-900) 40%, transparent);
-                border-color: color-mix(in srgb, var(--primary-700) 40%, transparent);
-            }
-        }
-        .hero-badge-dot {
-            width: 6px; height: 6px; border-radius: 50%;
-            background: var(--primary-500);
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
-        }
-        .hero h1 {
-            font-size: clamp(2.25rem, 5vw, 3.75rem);
-            font-weight: 800; line-height: 1.1;
-            color: var(--text-heading);
-            margin-bottom: 1.25rem;
-            letter-spacing: -0.025em;
-        }
-        .hero h1 .gradient-text {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero p {
-            font-size: 1.125rem; color: var(--text-muted);
-            max-width: 600px; margin: 0 auto 2rem;
-            line-height: 1.7;
-        }
-        .hero-actions {
-            display: flex; gap: 0.75rem;
-            justify-content: center; flex-wrap: wrap;
-        }
-        .hero-visual {
-            max-width: 1000px; margin: 3rem auto 0;
-            position: relative; border-radius: 1rem;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
-        }
-        .hero-visual-mockup {
-            background: var(--card-bg);
-            padding: 1rem;
-            min-height: 400px;
-            display: flex; flex-direction: column;
-        }
-        .mockup-topbar {
-            display: flex; align-items: center; gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            background: var(--bg-alt);
-            border-radius: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-        .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .mockup-dot-red { background: #ef4444; }
-        .mockup-dot-yellow { background: #eab308; }
-        .mockup-dot-green { background: #22c55e; }
-        .mockup-url {
-            flex: 1; margin-left: 0.75rem;
-            padding: 0.375rem 0.75rem;
-            background: var(--card-bg);
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-        }
-        .mockup-body { display: flex; flex: 1; gap: 0.75rem; }
-        .mockup-sidebar {
-            width: 200px; flex-shrink: 0;
-            background: var(--bg-alt);
-            border-radius: 0.5rem;
-            padding: 1rem;
-        }
-        .mockup-sidebar-item {
-            display: flex; align-items: center; gap: 0.5rem;
-            padding: 0.5rem 0.625rem; border-radius: 0.375rem;
-            font-size: 0.75rem; color: var(--text-muted);
-            margin-bottom: 0.25rem;
-        }
-        .mockup-sidebar-item.active {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: #fff;
-        }
-        .mockup-sidebar-icon {
-            width: 16px; height: 16px;
-            border-radius: 3px;
-            background: currentColor;
-            opacity: 0.3;
-        }
-        .mockup-sidebar-item.active .mockup-sidebar-icon { opacity: 0.5; }
-        .mockup-main {
-            flex: 1;
-            background: var(--bg-alt);
-            border-radius: 0.5rem;
-            padding: 1rem;
-        }
-        .mockup-card-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-        .mockup-stat-card {
-            background: var(--card-bg);
-            border-radius: 0.375rem;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
-        }
-        .mockup-stat-label { font-size: 0.625rem; color: var(--text-muted); margin-bottom: 0.25rem; }
-        .mockup-stat-value { font-size: 1.125rem; font-weight: 700; color: var(--text-heading); }
-        .mockup-table {
-            background: var(--card-bg);
-            border-radius: 0.375rem;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-        .mockup-table-header {
-            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
-            padding: 0.5rem 0.75rem;
-            background: var(--bg-alt);
-            border-bottom: 1px solid var(--border);
-        }
-        .mockup-th { font-size: 0.625rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        .mockup-table-row {
-            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
-            padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-        .mockup-table-row:last-child { border-bottom: none; }
-        .mockup-td { font-size: 0.6875rem; color: var(--text); }
-        .mockup-badge {
-            display: inline-block;
-            padding: 0.125rem 0.5rem;
-            border-radius: 99px;
-            font-size: 0.5625rem;
-            font-weight: 600;
-        }
-        .badge-green { background: #dcfce7; color: #166534; }
-        .badge-amber { background: #fef3c7; color: #92400e; }
-        .badge-blue { background: #dbeafe; color: #1e40af; }
-        @media (prefers-color-scheme: dark) {
-            .badge-green { background: #052e16; color: #86efac; }
-            .badge-amber { background: #451a03; color: #fcd34d; }
-            .badge-blue { background: #172554; color: #93c5fd; }
+
+        .shell::before {
+            top: 7rem;
+            left: -7rem;
+            width: 22rem;
+            height: 22rem;
+            background: rgba(99, 102, 241, 0.16);
         }
 
-        @media (max-width: 768px) {
-            .mockup-sidebar { display: none; }
-            .mockup-card-grid { grid-template-columns: 1fr; }
-            .mockup-table-header, .mockup-table-row { grid-template-columns: 1fr 1fr; }
+        .shell::after {
+            top: 18rem;
+            right: -8rem;
+            width: 24rem;
+            height: 24rem;
+            background: rgba(251, 191, 36, 0.11);
         }
 
-        /* ===== SECTIONS GENERIC ===== */
-        .section {
-            padding: 5rem 1.5rem;
-            max-width: 1200px;
+        .container {
+            width: min(calc(100% - 2rem), var(--max));
             margin: 0 auto;
         }
-        .section-alt { background: var(--bg-alt); }
-        .section-alt .section { padding-left: 1.5rem; padding-right: 1.5rem; }
-        .section-header {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 3rem;
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(16px);
+            background: rgba(249, 251, 255, 0.72);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
         }
-        .section-label {
-            display: inline-block;
-            font-size: 0.8125rem; font-weight: 600;
-            color: var(--primary-600);
-            text-transform: uppercase;
+
+        .topbar-inner {
+            width: min(calc(100% - 2rem), var(--max));
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-mark {
+            width: 2.8rem;
+            height: 2.8rem;
+            display: grid;
+            place-items: center;
+            border-radius: 1rem;
+            color: white;
+            font-size: 1rem;
+            background:
+                linear-gradient(145deg, var(--indigo-500), var(--indigo-700));
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.34);
+        }
+
+        .brand-copy {
+            display: grid;
+            gap: 0.1rem;
+        }
+
+        .brand-title {
+            font-size: 1rem;
+            color: var(--slate-900);
+        }
+
+        .brand-subtitle {
+            font-size: 0.72rem;
+            font-weight: 700;
             letter-spacing: 0.08em;
-            margin-bottom: 0.75rem;
-        }
-        @media (prefers-color-scheme: dark) {
-            .section-label { color: var(--primary-400); }
-        }
-        .section-header h2 {
-            font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-            font-weight: 800; line-height: 1.15;
-            color: var(--text-heading);
-            letter-spacing: -0.025em;
-            margin-bottom: 1rem;
-        }
-        .section-header p {
-            font-size: 1.0625rem; color: var(--text-muted);
-            line-height: 1.7;
+            text-transform: uppercase;
+            color: var(--text-soft);
         }
 
-        /* ===== MODULES GRID ===== */
-        .modules-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.25rem;
-        }
-        .module-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            transition: all 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .module-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
-        .module-card:hover {
-            border-color: var(--primary-300);
-            box-shadow: var(--card-shadow-hover);
-            transform: translateY(-2px);
-        }
-        .module-card:hover::before { opacity: 1; }
-        .module-icon {
-            width: 40px; height: 40px;
-            border-radius: 0.5rem;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
-            background: var(--primary-50);
-            color: var(--primary-600);
-        }
-        @media (prefers-color-scheme: dark) {
-            .module-icon {
-                background: color-mix(in srgb, var(--primary-900) 40%, transparent);
-                color: var(--primary-400);
-            }
-        }
-        .module-card h3 {
-            font-size: 1rem; font-weight: 700;
-            color: var(--text-heading);
-            margin-bottom: 0.5rem;
-        }
-        .module-card p {
-            font-size: 0.875rem; color: var(--text-muted);
-            line-height: 1.6;
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-wrap: wrap;
         }
 
-        /* ===== FEATURES ===== */
-        .features-list {
-            display: grid; gap: 4rem;
+        .nav a {
+            text-decoration: none;
+            color: var(--slate-700);
+            font-size: 0.93rem;
+            font-weight: 700;
+            padding: 0.75rem 0.95rem;
+            border-radius: 999px;
+            transition: 0.2s ease;
         }
-        .feature-row {
+
+        .nav a:hover {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--indigo-700);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn,
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            text-decoration: none;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            padding: 0.9rem 1.3rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn {
+            color: white;
+            background: linear-gradient(145deg, var(--indigo-500), var(--indigo-700));
+            box-shadow: 0 18px 30px rgba(79, 70, 229, 0.28);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 22px 34px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-ghost {
+            color: var(--slate-900);
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-ghost:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.96);
+        }
+
+        .hero {
+            padding: 4.5rem 0 2rem;
+        }
+
+        .hero-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: 2rem;
             align-items: center;
         }
-        .feature-row.reverse { direction: rtl; }
-        .feature-row.reverse > * { direction: ltr; }
-        .feature-content { }
-        .feature-content h3 {
-            font-size: 1.5rem; font-weight: 700;
-            color: var(--text-heading);
-            margin-bottom: 0.75rem;
-            letter-spacing: -0.01em;
-        }
-        .feature-content p {
-            font-size: 0.9375rem; color: var(--text-muted);
-            line-height: 1.7; margin-bottom: 1.25rem;
-        }
-        .feature-checks { list-style: none; padding: 0; }
-        .feature-checks li {
-            display: flex; align-items: flex-start; gap: 0.625rem;
-            font-size: 0.875rem; color: var(--text);
-            margin-bottom: 0.625rem;
-        }
-        .feature-check-icon {
-            width: 20px; height: 20px; flex-shrink: 0;
-            border-radius: 50%;
-            background: var(--primary-100);
-            color: var(--primary-600);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.6875rem; font-weight: 700;
-            margin-top: 1px;
-        }
-        @media (prefers-color-scheme: dark) {
-            .feature-check-icon {
-                background: color-mix(in srgb, var(--primary-800) 50%, transparent);
-                color: var(--primary-400);
-            }
-        }
-        .feature-visual {
-            background: var(--bg-alt);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            display: flex; align-items: center; justify-content: center;
-            min-height: 280px;
-        }
-        .feature-visual-content { text-align: center; }
-        .feature-visual-icon {
-            font-size: 3rem; margin-bottom: 1rem;
-            opacity: 0.8;
-        }
-        .feature-visual-label {
-            font-size: 0.8125rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        @media (max-width: 768px) {
-            .feature-row, .feature-row.reverse { grid-template-columns: 1fr; }
-            .feature-row.reverse { direction: ltr; }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--indigo-700);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 1.4rem;
         }
 
-        /* ===== PRICING ===== */
-        .pricing-grid {
+        .eyebrow-dot {
+            width: 0.55rem;
+            height: 0.55rem;
+            border-radius: 999px;
+            background: linear-gradient(145deg, var(--emerald-500), var(--indigo-500));
+            box-shadow: 0 0 0 0.4rem rgba(99, 102, 241, 0.12);
+        }
+
+        .hero h1 {
+            margin: 0;
+            max-width: 11ch;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(3rem, 6vw, 5.2rem);
+            line-height: 0.96;
+            letter-spacing: -0.05em;
+        }
+
+        .hero h1 .accent {
+            color: var(--indigo-700);
+        }
+
+        .hero-lead {
+            margin: 1.5rem 0 0;
+            max-width: 42rem;
+            font-size: 1.16rem;
+            line-height: 1.9;
+            color: var(--slate-700);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        .hero-proof {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            max-width: 900px;
-            margin: 0 auto;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
         }
-        .pricing-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 2rem;
-            position: relative;
-            transition: all 0.25s ease;
+
+        .proof {
+            padding: 1rem 1.1rem;
+            border-radius: 1.25rem;
+            background: var(--surface-strong);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            box-shadow: var(--shadow-soft);
         }
-        .pricing-card.featured {
-            border-color: var(--primary-400);
-            box-shadow: 0 0 0 1px var(--primary-400), 0 10px 25px rgba(79,70,229,0.12);
-        }
-        .pricing-card.featured::before {
-            content: 'Paling Populer';
-            position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%);
-            padding: 0.25rem 1rem; border-radius: 99px;
-            font-size: 0.75rem; font-weight: 600;
-            color: #fff;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-        }
-        .pricing-name {
-            font-size: 1.125rem; font-weight: 700;
-            color: var(--text-heading);
-            margin-bottom: 0.5rem;
-        }
-        .pricing-desc {
-            font-size: 0.875rem; color: var(--text-muted);
-            margin-bottom: 1.5rem; line-height: 1.5;
-        }
-        .pricing-price {
-            font-size: 2.5rem; font-weight: 800;
-            color: var(--text-heading);
-            margin-bottom: 0.25rem;
+
+        .proof strong {
+            display: block;
+            font-size: 1.35rem;
             line-height: 1;
-        }
-        .pricing-price span {
-            font-size: 0.875rem; font-weight: 500;
-            color: var(--text-muted);
-        }
-        .pricing-period {
-            font-size: 0.8125rem; color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
-        .pricing-features {
-            list-style: none; padding: 0;
-            margin-bottom: 1.5rem;
-        }
-        .pricing-features li {
-            display: flex; align-items: flex-start; gap: 0.5rem;
-            font-size: 0.875rem; color: var(--text);
-            padding: 0.375rem 0;
-        }
-        .pricing-features li::before {
-            content: '✓';
-            color: var(--primary-500);
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-        .pricing-card .btn-primary,
-        .pricing-card .btn-secondary {
-            width: 100%;
-            justify-content: center;
-            padding: 0.625rem 1.25rem;
+            color: var(--slate-900);
+            margin-bottom: 0.45rem;
         }
 
-        /* ===== STATS ===== */
-        .stats-section {
-            background: linear-gradient(135deg, var(--gray-900), var(--gray-950));
-            color: #fff;
-            padding: 4rem 1.5rem;
-        }
-        @media (prefers-color-scheme: dark) {
-            .stats-section {
-                background: linear-gradient(135deg, var(--gray-800), var(--gray-900));
-            }
-        }
-        .stats-grid {
-            max-width: 1000px; margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 2.5rem; font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-300), var(--primary-500));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.25rem;
-        }
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--gray-400);
-            font-weight: 500;
-        }
-        @media (max-width: 768px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .proof span {
+            font-size: 0.92rem;
+            color: var(--text-soft);
         }
 
-        /* ===== TESTIMONIAL ===== */
-        .testimonial-card {
-            max-width: 700px; margin: 0 auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 2.5rem;
-            text-align: center;
+        .hero-panel {
             position: relative;
+            padding: 1.1rem;
+            border-radius: 2rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.72));
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            box-shadow: var(--shadow-card);
         }
-        .testimonial-quote {
-            font-size: 1.125rem; color: var(--text);
-            line-height: 1.7; font-style: italic;
-            margin-bottom: 1.5rem;
-        }
-        .testimonial-quote::before { content: '"'; font-size: 3rem; color: var(--primary-400); line-height: 0; vertical-align: -0.75rem; margin-right: 0.25rem; }
-        .testimonial-quote::after { content: '"'; font-size: 3rem; color: var(--primary-400); line-height: 0; vertical-align: -0.75rem; margin-left: 0.25rem; }
-        .testimonial-author { font-size: 0.9375rem; font-weight: 700; color: var(--text-heading); }
-        .testimonial-role { font-size: 0.8125rem; color: var(--text-muted); }
 
-        /* ===== CTA ===== */
-        .cta-section {
-            padding: 5rem 1.5rem;
-            text-align: center;
-        }
-        .cta-box {
-            max-width: 700px; margin: 0 auto;
-            background: linear-gradient(135deg, var(--primary-600), var(--primary-900));
-            border-radius: 1rem;
-            padding: 3.5rem 2rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .cta-box::before {
-            content: '';
-            position: absolute; top: -50%; right: -20%;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(251, 191, 36, 0.15));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
             pointer-events: none;
         }
-        .cta-box h2 {
-            font-size: clamp(1.5rem, 3vw, 2rem);
-            font-weight: 800; color: #fff;
-            margin-bottom: 0.75rem;
-            position: relative;
+
+        .command-bridge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.95rem 1.1rem;
+            border-radius: 1.2rem;
+            background: #111827;
+            color: rgba(255,255,255,0.88);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
         }
-        .cta-box p {
+
+        .command-bridge span:last-child {
+            color: #93c5fd;
+            font-weight: 800;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 1rem;
+        }
+
+        .panel-stack {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 1.5rem;
+            padding: 1.15rem;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .card h3,
+        .card h4 {
+            margin: 0;
+        }
+
+        .card h3 {
             font-size: 1rem;
-            color: rgba(255,255,255,0.85);
+            color: var(--slate-900);
+        }
+
+        .card p {
+            margin: 0.55rem 0 0;
+            color: var(--text-soft);
+            font-size: 0.94rem;
+            line-height: 1.7;
+        }
+
+        .mini-list {
+            display: grid;
+            gap: 0.7rem;
+            margin-top: 1rem;
+        }
+
+        .mini-item {
+            display: grid;
+            gap: 0.18rem;
+            padding: 0.85rem 0.95rem;
+            border-radius: 1rem;
+            background: var(--slate-50);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .mini-item strong {
+            font-size: 0.9rem;
+            color: var(--slate-900);
+        }
+
+        .mini-item span {
+            font-size: 0.85rem;
+            color: var(--text-soft);
+        }
+
+        .signal {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.48rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.79rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .signal-emerald {
+            color: #047857;
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .signal-amber {
+            color: #b45309;
+            background: rgba(251, 191, 36, 0.16);
+        }
+
+        .signal-indigo {
+            color: var(--indigo-700);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .section {
+            padding: 2.5rem 0;
+        }
+
+        .section-head {
+            display: grid;
+            gap: 0.8rem;
+            max-width: 44rem;
             margin-bottom: 2rem;
-            max-width: 500px;
-            margin-left: auto; margin-right: auto;
-            position: relative;
-        }
-        .btn-white {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.625rem 1.75rem; border-radius: 0.5rem;
-            font-size: 0.875rem; font-weight: 700;
-            color: var(--primary-700); text-decoration: none;
-            background: #fff;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-            border: none; cursor: pointer;
-            position: relative;
-        }
-        .btn-white:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        /* ===== FOOTER ===== */
+        .section-kicker {
+            color: var(--indigo-700);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .section h2 {
+            margin: 0;
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 4vw, 3.15rem);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        .section p {
+            margin: 0;
+            font-size: 1.02rem;
+            color: var(--slate-700);
+            line-height: 1.85;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.2rem;
+        }
+
+        .benefit {
+            padding: 1.35rem;
+            border-radius: 1.6rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.84));
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .benefit-icon {
+            width: 3rem;
+            height: 3rem;
+            display: grid;
+            place-items: center;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(145deg, var(--indigo-500), var(--indigo-700));
+        }
+
+        .benefit h3 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .benefit p {
+            margin-top: 0.7rem;
+            font-size: 0.95rem;
+        }
+
+        .journey {
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 1.4rem;
+            align-items: start;
+        }
+
+        .journey-intro,
+        .journey-steps {
+            background: var(--surface-strong);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 1.8rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .journey-steps {
+            display: grid;
+            gap: 0.95rem;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: start;
+            padding: 1rem;
+            border-radius: 1.2rem;
+            background: white;
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .step-index {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            background: var(--indigo-50);
+            color: var(--indigo-700);
+            font-weight: 800;
+        }
+
+        .step h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .step p {
+            margin-top: 0.35rem;
+            font-size: 0.92rem;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .module-card {
+            position: relative;
+            min-height: 12rem;
+            padding: 1.2rem;
+            border-radius: 1.5rem;
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92));
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .module-card strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .module-card span {
+            display: block;
+            color: var(--text-soft);
+            font-size: 0.92rem;
+            line-height: 1.75;
+        }
+
+        .narrative {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .narrative-card {
+            padding: 1.3rem;
+            border-radius: 1.5rem;
+            background: white;
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .quote {
+            margin-top: 0.9rem;
+            padding: 1.3rem;
+            border-radius: 1.5rem;
+            background: linear-gradient(145deg, rgba(67, 56, 202, 0.96), rgba(49, 46, 129, 0.95));
+            color: rgba(255,255,255,0.9);
+            box-shadow: var(--shadow-card);
+        }
+
+        .quote p {
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        .quote strong {
+            display: block;
+            margin-top: 1rem;
+            font-size: 0.88rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .cta {
+            padding: 3rem 0 5rem;
+        }
+
+        .cta-panel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 2rem;
+            padding: 2rem;
+            background:
+                radial-gradient(circle at top left, rgba(129, 140, 248, 0.22), transparent 32%),
+                linear-gradient(135deg, #111827, #1e1b4b 58%, #312e81);
+            color: white;
+            box-shadow: 0 26px 60px rgba(49, 46, 129, 0.28);
+        }
+
+        .cta-panel::after {
+            content: "";
+            position: absolute;
+            right: -6rem;
+            bottom: -6rem;
+            width: 16rem;
+            height: 16rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .cta-inner {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .cta h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 4vw, 3.3rem);
+            line-height: 1.05;
+            margin: 0 0 0.9rem;
+            letter-spacing: -0.04em;
+        }
+
+        .cta p {
+            margin: 0;
+            color: rgba(255,255,255,0.76);
+            font-size: 1.02rem;
+            line-height: 1.85;
+        }
+
+        .cta-list {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .cta-list span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: 700;
+        }
+
+        .cta-list i {
+            width: 1.8rem;
+            height: 1.8rem;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.12);
+            font-style: normal;
+        }
+
         .footer {
-            border-top: 1px solid var(--border);
-            padding: 2.5rem 1.5rem;
+            padding: 0 0 2.5rem;
         }
+
         .footer-inner {
-            max-width: 1200px; margin: 0 auto;
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-top: 1.4rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            color: var(--text-soft);
+            font-size: 0.92rem;
         }
-        .footer-copy {
-            font-size: 0.8125rem; color: var(--text-muted);
-        }
+
         .footer-links {
-            display: flex; gap: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
+
         .footer-links a {
-            font-size: 0.8125rem; color: var(--text-muted);
             text-decoration: none;
-            transition: color 0.15s;
+            color: inherit;
+            font-weight: 700;
         }
-        .footer-links a:hover { color: var(--text-heading); }
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes fade-up {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-up {
-            animation: fade-up 0.6s ease forwards;
-        }
-        .delay-1 { animation-delay: 0.1s; opacity: 0; }
-        .delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .delay-3 { animation-delay: 0.3s; opacity: 0; }
-        .delay-4 { animation-delay: 0.4s; opacity: 0; }
+        @media (max-width: 1080px) {
+            .hero-grid,
+            .journey,
+            .cta-inner {
+                grid-template-columns: 1fr;
+            }
 
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
-        @media (prefers-color-scheme: dark) {
-            ::-webkit-scrollbar-thumb { background: var(--gray-700); }
-            ::-webkit-scrollbar-thumb:hover { background: var(--gray-600); }
+            .benefits-grid,
+            .modules-grid,
+            .narrative,
+            .hero-proof,
+            .panel-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            .topbar-inner,
+            .footer-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 3rem;
+            }
+
+            .hero h1 {
+                max-width: none;
+            }
+
+            .benefits-grid,
+            .modules-grid,
+            .narrative,
+            .hero-proof,
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .command-bridge {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
-
-    <!-- NAV -->
-    <nav class="nav" id="navbar">
-        <div class="nav-inner">
-            <a href="/" class="nav-brand">
-                <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="url(#brand-grad)"/>
-                    <path d="M8 12h16v2H8zm0 4h12v2H8zm0 4h14v2H8z" fill="#fff" opacity="0.9"/>
-                    <defs><linearGradient id="brand-grad" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs>
-                </svg>
-                {{ config('app.name', 'FoundationOS') }}
-            </a>
-            <div class="nav-links">
-                @auth
-                    <a href="{{ url('/admin') }}" class="btn-primary">Dashboard</a>
-                @else
-                    <a href="#modules" class="nav-link">Modul</a>
-                    <a href="#features" class="nav-link">Fitur</a>
-                    <a href="#pricing" class="nav-link">Harga</a>
-                    <a href="{{ url('/admin/login') }}" class="nav-link">Masuk</a>
-                    <a href="{{ url('/admin/login') }}" class="btn-primary">Masuk ke Platform</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
-
-    <!-- HERO -->
-    <section class="hero" id="hero">
-        <div class="hero-content">
-            <div class="hero-badge animate-fade-up">
-                <span class="hero-badge-dot"></span>
-                Platform Operasional Pendidikan Terintegrasi
-            </div>
-            <h1 class="animate-fade-up delay-1">
-                Satukan Operasional Institusi dalam <span class="gradient-text">Satu Platform</span>
-            </h1>
-            <p class="animate-fade-up delay-2">
-                FoundationOS membantu sekolah, kampus, dan lembaga pendidikan mengelola proses akademik, keuangan, SDM, serta layanan operasional melalui arsitektur modular yang siap bertumbuh bersama institusi Anda.
-            </p>
-            <div class="hero-actions animate-fade-up delay-3">
-                <a href="{{ url('/admin/login') }}" class="btn-primary" style="padding: 0.75rem 2rem; font-size: 0.9375rem;">
-                    Masuk ke Platform
+    <div class="shell">
+        <header class="topbar">
+            <div class="topbar-inner">
+                <a href="#hero" class="brand">
+                    <span class="brand-mark">FOS</span>
+                    <span class="brand-copy">
+                        <span class="brand-title">{{ $appName }}</span>
+                        <span class="brand-subtitle">Institution Operating System</span>
+                    </span>
                 </a>
-                <a href="#modules" class="btn-secondary" style="padding: 0.75rem 2rem; font-size: 0.9375rem;">
-                    Tinjau Kapabilitas
-                </a>
-            </div>
-        </div>
 
-        <!-- Dashboard Mockup -->
-        <div class="hero-visual animate-fade-up delay-4">
-            <div class="hero-visual-mockup">
-                <div class="mockup-topbar">
-                    <span class="mockup-dot mockup-dot-red"></span>
-                    <span class="mockup-dot mockup-dot-yellow"></span>
-                    <span class="mockup-dot mockup-dot-green"></span>
-                    <span class="mockup-url">{{ config('app.url', 'https://foundationos.test') }}/admin</span>
+                <nav class="nav" aria-label="Navigasi utama">
+                    <a href="#nilai">Nilai</a>
+                    <a href="#fitur">Fitur</a>
+                    <a href="#alur">Cara Kerja</a>
+                    <a href="#modul">Modul</a>
+                    <a href="#hasil">Hasil</a>
+                </nav>
+
+                <div class="nav-actions">
+                    <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}" class="btn-ghost">
+                        {{ auth()->check() ? 'Buka Dashboard' : 'Masuk Admin' }}
+                    </a>
                 </div>
-                <div class="mockup-body">
-                    <div class="mockup-sidebar">
-                        <div class="mockup-sidebar-item active"><span class="mockup-sidebar-icon"></span> Dashboard</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Siswa</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Pendidik & Tenaga Kependidikan</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Keuangan</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Kurikulum</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Perpustakaan</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Penerimaan</div>
-                        <div class="mockup-sidebar-item"><span class="mockup-sidebar-icon"></span> Pengadaan</div>
-                    </div>
-                    <div class="mockup-main">
-                        <div class="mockup-card-grid">
-                            <div class="mockup-stat-card">
-                                <div class="mockup-stat-label">Total Siswa</div>
-                                <div class="mockup-stat-value">1,247</div>
-                            </div>
-                            <div class="mockup-stat-card">
-                                <div class="mockup-stat-label">Guru Aktif</div>
-                                <div class="mockup-stat-value">86</div>
-                            </div>
-                            <div class="mockup-stat-card">
-                                <div class="mockup-stat-label">Penerimaan Bulan Berjalan</div>
-                                <div class="mockup-stat-value">Rp 432jt</div>
-                            </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero" id="hero">
+                <div class="container hero-grid">
+                    <div>
+                        <span class="eyebrow">
+                            <span class="eyebrow-dot"></span>
+                            Sistem kerja yayasan pendidikan yang lebih elegan dan terkendali
+                        </span>
+                        <h1>
+                            Satu sistem untuk <span class="accent">yayasan, sekolah, dan kampus</span>,
+                            dengan kerja yang lebih rapi
+                            dan keputusan yang lebih terkendali.
+                        </h1>
+                        <p class="hero-lead">
+                            {{ $appName }} dirancang untuk yayasan pendidikan yang mengelola banyak unit sekaligus. Dari manajemen yayasan, operasional sekolah, sampai layanan kampus, semua proses penting hadir dalam satu sistem yang membantu tim bekerja lebih sinkron, pimpinan melihat lebih jelas, dan keputusan bergerak lebih cepat.
+                        </p>
+
+                        <div class="hero-actions">
+                            <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}" class="btn">
+                                {{ auth()->check() ? 'Masuk ke Dashboard' : 'Mulai dari Panel Admin' }}
+                            </a>
+                            <a href="#fitur" class="btn-ghost">Lihat Nilai Produk</a>
                         </div>
-                        <div class="mockup-table">
-                            <div class="mockup-table-header">
-                                <span class="mockup-th">Nama</span>
-                                <span class="mockup-th">Kelas</span>
-                                <span class="mockup-th">Status</span>
-                                <span class="mockup-th">Pembayaran</span>
+
+                        <div class="hero-proof">
+                            <div class="proof">
+                                <strong>Satu ritme untuk semua unit</strong>
+                                <span>Yayasan, sekolah, dan kampus bergerak dalam alur kerja yang lebih selaras.</span>
                             </div>
-                            <div class="mockup-table-row">
-                                <span class="mockup-td">Ahmad Fauzi</span>
-                                <span class="mockup-td">XII IPA 1</span>
-                                <span class="mockup-td"><span class="mockup-badge badge-green">Aktif</span></span>
-                                <span class="mockup-td"><span class="mockup-badge badge-green">Lunas</span></span>
+                            <div class="proof">
+                                <strong>Kontrol manajemen lebih kuat</strong>
+                                <span>Pimpinan yayasan dapat memantau approval, anggaran, dan operasional lintas unit lebih mudah.</span>
                             </div>
-                            <div class="mockup-table-row">
-                                <span class="mockup-td">Siti Nurhaliza</span>
-                                <span class="mockup-td">XI IPS 2</span>
-                                <span class="mockup-td"><span class="mockup-badge badge-green">Aktif</span></span>
-                                <span class="mockup-td"><span class="mockup-badge badge-amber">Cicilan</span></span>
-                            </div>
-                            <div class="mockup-table-row">
-                                <span class="mockup-td">Budi Santoso</span>
-                                <span class="mockup-td">X IPA 3</span>
-                                <span class="mockup-td"><span class="mockup-badge badge-blue">Baru</span></span>
-                                <span class="mockup-td"><span class="mockup-badge badge-amber">Pending</span></span>
+                            <div class="proof">
+                                <strong>Data lebih dapat dipercaya</strong>
+                                <span>Satu sumber informasi untuk kepala sekolah, pimpinan kampus, dan manajemen yayasan.</span>
                             </div>
                         </div>
                     </div>
+
+                    <div class="hero-panel" aria-label="Gambaran manfaat produk">
+                        <div class="command-bridge">
+                            <span>Yayasan yang tertata bukan soal menambah banyak aplikasi</span>
+                            <span>Soal menyatukan sekolah, kampus, dan manajemen yayasan</span>
+                        </div>
+
+                        <div class="panel-grid">
+                            <div class="panel-stack">
+                                <div class="card">
+                                    <span class="signal signal-emerald">Operasional harian</span>
+                                    <h3 style="margin-top: 0.8rem;">Setiap unit bekerja dengan alur yang lebih jelas</h3>
+                                    <p>Manajemen yayasan, sekolah, dan kampus dapat melihat siapa mengerjakan apa, apa yang menunggu persetujuan, dan apa yang sudah selesai tanpa mengejar informasi ke banyak tempat.</p>
+
+                                    <div class="mini-list">
+                                        <div class="mini-item">
+                                            <strong>Layanan sekolah dan kampus lebih terhubung</strong>
+                                            <span>Data siswa, mahasiswa, kelas, studi, dan layanan akademik tidak lagi berjalan sendiri-sendiri.</span>
+                                        </div>
+                                        <div class="mini-item">
+                                            <strong>Keuangan yayasan lebih mudah diawasi</strong>
+                                            <span>Tagihan, pembayaran, anggaran, dan pengeluaran lintas unit dapat dipantau dengan konteks yang lebih utuh.</span>
+                                        </div>
+                                        <div class="mini-item">
+                                            <strong>Approval manajemen tidak lagi kabur</strong>
+                                            <span>Setiap keputusan punya jejak, alasan, dan status yang mudah dibaca oleh level operasional maupun pimpinan.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="panel-stack">
+                                <div class="card">
+                                    <span class="signal signal-indigo">Untuk pimpinan</span>
+                                    <h3 style="margin-top: 0.8rem;">Yayasan melihat lebih cepat, bukan lebih terlambat</h3>
+                                    <p>Masalah di sekolah, kampus, atau unit pendukung tidak baru terlihat saat sudah terlambat. Pimpinan bisa melihat bottleneck, backlog, dan progres dalam tampilan yang lebih ringkas.</p>
+                                </div>
+
+                                <div class="card">
+                                    <span class="signal signal-amber">Untuk pertumbuhan</span>
+                                    <h3 style="margin-top: 0.8rem;">Siap berkembang tanpa kehilangan kendali yayasan</h3>
+                                    <p>Saat jumlah sekolah, kampus, atau unit bertambah, proses tetap dapat ditata dengan jelas tanpa membuat koordinasi yayasan menjadi lebih rumit.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="nilai">
+                <div class="container">
+                    <div class="section-head">
+                        <span class="section-kicker">Nilai Produk</span>
+                        <h2>Bukan sekadar software yang lengkap. Ini fondasi kerja yayasan pendidikan yang terasa lebih tertata.</h2>
+                        <p>{{ $appName }} dirancang untuk pengguna yang setiap hari menghubungkan banyak kepentingan: manajemen yayasan, sekolah, kampus, keuangan, SDM, dan layanan akademik. Fokusnya bukan memamerkan teknologi, tetapi membuat koordinasi lintas unit terasa lebih jelas dan lebih mudah dijalankan.</p>
+                    </div>
+
+                    <div class="benefits-grid">
+                        <article class="benefit">
+                            <div class="benefit-icon">01</div>
+                            <h3>Yayasan, sekolah, dan kampus terasa nyambung</h3>
+                            <p>Tim tidak perlu lagi memindahkan konteks dari satu alat ke alat lain. Data dan tindakan berada di tempat yang sama, sehingga koordinasi antarlembaga bergerak lebih mulus.</p>
+                        </article>
+                        <article class="benefit">
+                            <div class="benefit-icon">02</div>
+                            <h3>Setiap status lebih mudah dibaca lintas level</h3>
+                            <p>Apa yang masih draft, sedang direview, perlu revisi, atau sudah disetujui tampil lebih jelas untuk operator, kepala unit, dan pimpinan yayasan.</p>
+                        </article>
+                        <article class="benefit">
+                            <div class="benefit-icon">03</div>
+                            <h3>Standar kerja yayasan lebih konsisten</h3>
+                            <p>Workflow, approval, dan guardrail membantu seluruh unit menjalankan SOP yang rapi tanpa membuat tim merasa dibebani langkah administratif yang berlebihan.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="fitur">
+                <div class="container">
+                    <div class="section-head">
+                        <span class="section-kicker">Fitur yang Menonjol</span>
+                        <h2>Fitur diposisikan untuk mempermudah tata kelola yayasan, bukan menambah beban belajar sistem.</h2>
+                        <p>Setiap kemampuan utama dibangun untuk menjawab situasi kerja nyata di yayasan pendidikan: data tersebar antar unit, approval lambat, koordinasi sekolah dan kampus tidak sinkron, serta pimpinan membutuhkan visibilitas yang lebih cepat.</p>
+                    </div>
+
+                    <div class="journey">
+                        <div class="journey-intro">
+                            <span class="signal signal-indigo">Kenapa terasa berbeda</span>
+                            <p style="margin-top: 1rem;">Alih-alih menampilkan daftar menu panjang tanpa cerita, {{ $appName }} memusatkan pengalaman pada apa yang ingin dicapai yayasan pendidikan: menjaga sekolah dan kampus tetap selaras, memperjelas kontrol manajemen, dan membuat pelayanan berjalan lebih konsisten.</p>
+
+                            <div class="quote">
+                                <p>"Yang terasa premium bukan hanya tampilannya, tetapi rasa tenang saat yayasan tahu apa yang terjadi di setiap unit, apa yang menunggu keputusan, dan apa yang sudah selesai."</p>
+                                <strong>Product Narrative</strong>
+                            </div>
+                        </div>
+
+                        <div class="journey-steps">
+                            <article class="step">
+                                <div class="step-index">1</div>
+                                <div>
+                                    <h3>Approval yang mudah dipahami</h3>
+                                    <p>Alur persetujuan tidak lagi tersembunyi di chat atau catatan informal. Setiap keputusan yayasan punya jalur, aktor, status, dan riwayat yang jelas.</p>
+                                </div>
+                            </article>
+                            <article class="step">
+                                <div class="step-index">2</div>
+                                <div>
+                                    <h3>Operasional sekolah dan kampus yang lebih sinkron</h3>
+                                    <p>Akademik, keuangan, SDM, procurement, dan library tidak berdiri sendiri. Yayasan dapat melihat efek satu proses terhadap proses lain dengan lebih mudah.</p>
+                                </div>
+                            </article>
+                            <article class="step">
+                                <div class="step-index">3</div>
+                                <div>
+                                    <h3>Pelacakan yang tidak melelahkan untuk manajemen</h3>
+                                    <p>Status penting, histori tindakan, dan backlog pekerjaan hadir dalam tampilan yang mudah dipindai. Pimpinan tidak dipaksa membangun laporan manual hanya untuk tahu kondisi saat ini.</p>
+                                </div>
+                            </article>
+                            <article class="step">
+                                <div class="step-index">4</div>
+                                <div>
+                                    <h3>Siap bertumbuh dengan struktur yayasan</h3>
+                                    <p>Saat jumlah sekolah, kampus, dan unit manajemen bertambah kompleks, pengalaman kerja tetap terjaga rapi tanpa terasa terpecah.</p>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="alur">
+                <div class="container">
+                    <div class="section-head">
+                        <span class="section-kicker">Cara Kerja</span>
+                        <h2>Narasi produknya sederhana: satukan yayasan, sekolah, dan kampus dalam ritme kerja yang sama.</h2>
+                        <p>Ketika satu yayasan memiliki banyak unit dan banyak proses, masalah utamanya biasanya bukan kekurangan menu. Masalahnya adalah kehilangan ritme kerja antar lembaga. Di situlah {{ $appName }} bekerja.</p>
+                    </div>
+
+                    <div class="narrative">
+                        <article class="narrative-card">
+                            <strong>Masuk</strong>
+                            <p>Setiap unit bekerja dari ruang yang sama, dengan akses sesuai peran, struktur organisasi, dan konteks yayasan yang benar.</p>
+                        </article>
+                        <article class="narrative-card">
+                            <strong>Jalankan</strong>
+                            <p>Pengguna fokus pada layanan dan proses yang sedang berjalan: input data, cek status, kirim untuk approval, atau tindak lanjuti backlog lintas unit.</p>
+                        </article>
+                        <article class="narrative-card">
+                            <strong>Pantau</strong>
+                            <p>Pimpinan yayasan dan admin melihat progres, hambatan, dan hasil tanpa menunggu laporan manual dari sekolah, kampus, dan unit pendukung.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="modul">
+                <div class="container">
+                    <div class="section-head">
+                        <span class="section-kicker">Cakupan Produk</span>
+                        <h2>Satu platform untuk proses yayasan yang biasanya tersebar di banyak alat.</h2>
+                        <p>{{ $appName }} menonjol bukan karena banyaknya modul semata, tetapi karena modul-modul itu membantu yayasan membangun pengalaman kerja yang menyatu untuk sekolah, kampus, dan manajemen pusat.</p>
+                    </div>
+
+                    <div class="modules-grid">
+                        <article class="module-card">
+                            <strong>Akademik & Enrollment</strong>
+                            <span>Kelola proses belajar, data siswa dan mahasiswa, kelas, studi, dan layanan akademik dalam alur yang lebih tertib.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>Keuangan Yayasan</strong>
+                            <span>Tagihan, pembayaran, anggaran, jurnal, dan kontrol keuangan lintas unit yang lebih mudah dipantau.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>Workflow & Approval</strong>
+                            <span>Bangun approval yang dapat diandalkan untuk procurement, anggaran, dan keputusan manajemen lintas sekolah maupun kampus.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>Procurement</strong>
+                            <span>Permintaan pembelian, review, sourcing readiness, dan tata kelola pengadaan yang lebih kuat untuk seluruh entitas yayasan.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>Library</strong>
+                            <span>Layanan perpustakaan yang terasa modern, dari katalog publik hingga sirkulasi dan keanggotaan di lingkungan sekolah atau kampus.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>SDM & Operasional Tim</strong>
+                            <span>Kelola struktur kerja yayasan, absensi, KPI, dan proses administrasi internal dengan lebih rapi.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>Monitoring & Audit</strong>
+                            <span>Jejak perubahan, histori aktivitas, dan visibilitas proses untuk yayasan yang menuntut akuntabilitas lintas unit.</span>
+                        </article>
+                        <article class="module-card">
+                            <strong>Siap Diperluas</strong>
+                            <span>Ketika yayasan berkembang, pengalaman kerja tetap bisa dijaga tertib tanpa menambah kerumitan yang tidak perlu.</span>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" id="hasil">
+                <div class="container">
+                    <div class="section-head">
+                        <span class="section-kicker">Hasil yang Dirasakan</span>
+                        <h2>Produk yang baik tidak hanya terlihat meyakinkan. Ia membuat yayasan merasa lebih percaya diri dalam mengelola banyak unit.</h2>
+                        <p>Landing page ini memosisikan {{ $appName }} sebagai sistem operasional yayasan pendidikan yang memberi rasa tenang: lebih sedikit kebingungan antar lembaga, lebih sedikit pekerjaan ganda, dan lebih banyak visibilitas terhadap apa yang benar-benar penting.</p>
+                    </div>
+
+                    <div class="benefits-grid">
+                        <article class="benefit">
+                            <div class="benefit-icon">A</div>
+                            <h3>Lebih sedikit pekerjaan yang tertunda diam-diam</h3>
+                            <p>Karena backlog, approval, dan status utama mudah terlihat oleh sekolah, kampus, maupun manajemen yayasan.</p>
+                        </article>
+                        <article class="benefit">
+                            <div class="benefit-icon">B</div>
+                            <h3>Lebih sedikit keputusan yang kabur</h3>
+                            <p>Karena setiap tindakan penting punya konteks, pencatatan, dan jalur tindak lanjut yang lebih tertata di seluruh entitas yayasan.</p>
+                        </article>
+                        <article class="benefit">
+                            <div class="benefit-icon">C</div>
+                            <h3>Lebih banyak ruang untuk fokus pada layanan pendidikan</h3>
+                            <p>Karena sistem mengambil alih keruwetan administratif yang biasanya menguras perhatian tim di sekolah, kampus, dan kantor yayasan.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta">
+                <div class="container">
+                    <div class="cta-panel">
+                        <div class="cta-inner">
+                            <div>
+                                <h2>Bangun yayasan pendidikan yang bekerja lebih rapi tanpa membuat sekolah dan kampus terasa terpecah.</h2>
+                                <p>{{ $appName }} dirancang untuk yayasan yang ingin bergerak lebih tertib, lebih cepat, dan lebih percaya diri dalam mengambil keputusan sehari-hari di seluruh unitnya.</p>
+
+                                <div class="cta-list">
+                                    <span><i>1</i> Satu tempat untuk yayasan, sekolah, dan kampus</span>
+                                    <span><i>2</i> Approval dan operasional yang lebih mudah dipantau pimpinan</span>
+                                    <span><i>3</i> Pengalaman kerja yang terasa premium bagi tim internal</span>
+                                </div>
+                            </div>
+
+                            <div class="hero-actions" style="justify-content: flex-start;">
+                                <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}" class="btn">
+                                    {{ auth()->check() ? 'Buka Dashboard' : 'Masuk ke FoundationOS' }}
+                                </a>
+                                <a href="#hero" class="btn-ghost">Kembali ke Atas</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="container footer-inner">
+                <div>
+                    © {{ date('Y') }} {{ $appName }}. Sistem operasional yayasan pendidikan untuk sekolah, kampus, dan manajemen yayasan yang lebih rapi dan terkendali.
+                </div>
+
+                <div class="footer-links">
+                    <a href="#fitur">Fitur</a>
+                    <a href="#modul">Modul</a>
+                    <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}">Admin</a>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- STATS -->
-    <div class="stats-section">
-        <div class="stats-grid">
-            <div>
-                <div class="stat-number">10+</div>
-                <div class="stat-label">Modul Terintegrasi</div>
-            </div>
-            <div>
-                <div class="stat-number">∞</div>
-                <div class="stat-label">Arsitektur Multi-Tenant</div>
-            </div>
-            <div>
-                <div class="stat-number">100%</div>
-                <div class="stat-label">Modular dan Fleksibel</div>
-            </div>
-            <div>
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Akses Layanan</div>
-            </div>
-        </div>
+        </footer>
     </div>
-
-    <!-- MODULES -->
-    <section class="section" id="modules">
-        <div class="section-header">
-            <span class="section-label">Modul</span>
-            <h2>Kapabilitas Inti dalam Satu Ekosistem</h2>
-            <p>Aktifkan modul sesuai prioritas institusi Anda. Setiap modul dirancang untuk berjalan mandiri, sekaligus terhubung secara konsisten dalam satu fondasi data.</p>
-        </div>
-        <div class="modules-grid">
-            <div class="module-card">
-                <div class="module-icon">🎓</div>
-                <h3>Akademik Sekolah</h3>
-                <p>Mengelola peserta didik, tenaga pendidik, kelas, kurikulum, jadwal, penilaian, pembinaan, dan capaian akademik dalam satu alur kerja terpadu.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">🏛️</div>
-                <h3>Akademik Kampus</h3>
-                <p>Mendukung pengelolaan fakultas, program studi, dosen, mahasiswa, penawaran mata kuliah, KRS, hasil studi, tesis, hingga integrasi Feeder DIKTI.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">📋</div>
-                <h3>Penerimaan Peserta Didik</h3>
-                <p>Mengelola periode penerimaan, pendaftaran daring, penjadwalan seleksi, hasil evaluasi, dan proses registrasi secara terstruktur.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">💰</div>
-                <h3>Keuangan</h3>
-                <p>Mencakup bagan akun, komponen biaya pendidikan, tagihan, pembayaran, jurnal akuntansi, serta pengendalian anggaran institusi.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">👥</div>
-                <h3>Kepegawaian</h3>
-                <p>Mengelola data pegawai, struktur jabatan, kontrak kerja, absensi, cuti, penggajian, dan evaluasi kinerja secara terpusat.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">📚</div>
-                <h3>Perpustakaan</h3>
-                <p>Menyediakan katalog dan eksemplar koleksi, manajemen anggota, sirkulasi pinjam-kembali, serta perhitungan denda otomatis.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">📦</div>
-                <h3>Pengadaan</h3>
-                <p>Mengatur vendor, kebutuhan pengadaan, permintaan penawaran, purchase order, penerimaan barang, dan pencatatan tagihan pemasok.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">📊</div>
-                <h3>Monitoring</h3>
-                <p>Menyediakan audit trail untuk setiap perubahan data serta pengelolaan dokumen pendukung yang digunakan lintas fungsi.</p>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">🌐</div>
-                <h3>Referensi Global</h3>
-                <p>Menyediakan data referensi wilayah, zona waktu, dan master data bersama agar seluruh modul bekerja dengan standar yang seragam.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- FEATURES -->
-    <div class="section-alt">
-        <section class="section" id="features">
-            <div class="section-header">
-                <span class="section-label">Keunggulan</span>
-                <h2>Dirancang untuk Skalabilitas dan Tata Kelola</h2>
-                <p>Fondasi teknologi modern untuk mendukung pertumbuhan, kontrol, dan konsistensi proses di seluruh unit institusi.</p>
-            </div>
-            <div class="features-list">
-                <div class="feature-row">
-                    <div class="feature-content">
-                        <h3>Multi-Tenancy Bawaan</h3>
-                        <p>Satu basis aplikasi dapat melayani banyak institusi sekaligus dengan pemisahan data yang ketat dan tata kelola akses yang jelas.</p>
-                        <ul class="feature-checks">
-                            <li><span class="feature-check-icon">✓</span> Shared database dengan tenant-scoped query</li>
-                            <li><span class="feature-check-icon">✓</span> Isolasi data per tenant dan organisasi</li>
-                            <li><span class="feature-check-icon">✓</span> Satu pengguna dapat mengakses beberapa tenant</li>
-                            <li><span class="feature-check-icon">✓</span> Role dan permission sesuai konteks tenant</li>
-                        </ul>
-                    </div>
-                    <div class="feature-visual">
-                        <div class="feature-visual-content">
-                            <div class="feature-visual-icon">🏢</div>
-                            <div class="feature-visual-label">Multi-Tenant Architecture</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="feature-row reverse">
-                    <div class="feature-content">
-                        <h3>Admin Panel Premium</h3>
-                        <p>Dibangun di atas Filament untuk menghadirkan admin panel yang responsif, efisien, dan nyaman digunakan oleh tim operasional.</p>
-                        <ul class="feature-checks">
-                            <li><span class="feature-check-icon">✓</span> Dashboard interaktif dengan widget dan grafik</li>
-                            <li><span class="feature-check-icon">✓</span> CRUD otomatis melalui form builder</li>
-                            <li><span class="feature-check-icon">✓</span> Tabel data dengan filter, sortir, dan bulk action</li>
-                            <li><span class="feature-check-icon">✓</span> Notifikasi real-time dan action modal</li>
-                        </ul>
-                    </div>
-                    <div class="feature-visual">
-                        <div class="feature-visual-content">
-                            <div class="feature-visual-icon">⚡</div>
-                            <div class="feature-visual-label">Powered by Filament v5</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="feature-row">
-                    <div class="feature-content">
-                        <h3>Keamanan & Kontrol Akses</h3>
-                        <p>Kontrol akses granular terintegrasi dengan batas tenant sehingga setiap aksi dapat dikelola secara presisi dan dapat diaudit.</p>
-                        <ul class="feature-checks">
-                            <li><span class="feature-check-icon">✓</span> Filament Shield untuk pengelolaan permission</li>
-                            <li><span class="feature-check-icon">✓</span> Super Admin, Admin, dan role kustom</li>
-                            <li><span class="feature-check-icon">✓</span> Policy otomatis pada setiap resource</li>
-                            <li><span class="feature-check-icon">✓</span> Audit trail pada setiap perubahan data</li>
-                        </ul>
-                    </div>
-                    <div class="feature-visual">
-                        <div class="feature-visual-content">
-                            <div class="feature-visual-icon">🔐</div>
-                            <div class="feature-visual-label">Enterprise-Grade Security</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- PRICING -->
-    <section class="section" id="pricing">
-        <div class="section-header">
-            <span class="section-label">Harga</span>
-            <h2>Pilih Paket Sesuai Tahap Pertumbuhan Institusi</h2>
-            <p>Mulai dari tahap implementasi awal hingga kebutuhan operasional skala penuh, tanpa migrasi platform.</p>
-        </div>
-        <div class="pricing-grid">
-            <div class="pricing-card">
-                <div class="pricing-name">Starter</div>
-                <div class="pricing-desc">Untuk institusi yang memulai standardisasi proses digital secara bertahap.</div>
-                <div class="pricing-price">Gratis</div>
-                <div class="pricing-period">Untuk 1 tenant tanpa batas waktu</div>
-                <ul class="pricing-features">
-                    <li>Hingga 100 siswa/mahasiswa</li>
-                    <li>3 modul inti</li>
-                    <li>1 pengguna admin</li>
-                    <li>Dukungan komunitas</li>
-                </ul>
-                <a href="{{ url('/admin/login') }}" class="btn-secondary">Akses Paket Starter</a>
-            </div>
-            <div class="pricing-card featured">
-                <div class="pricing-name">Professional</div>
-                <div class="pricing-desc">Untuk sekolah dan kampus yang memerlukan cakupan modul lengkap dan dukungan operasional prioritas.</div>
-                <div class="pricing-price">Rp 2.5jt <span>/ bulan</span></div>
-                <div class="pricing-period">Per tenant, ditagihkan tahunan</div>
-                <ul class="pricing-features">
-                    <li>Siswa/mahasiswa tanpa batas</li>
-                    <li>Seluruh modul aktif</li>
-                    <li>Pengguna admin tanpa batas</li>
-                    <li>Mendukung multi-organisasi</li>
-                    <li>Dukungan prioritas</li>
-                    <li>Integrasi Feeder DIKTI</li>
-                </ul>
-                <a href="{{ url('/admin/login') }}" class="btn-primary">Pilih Paket Professional</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- TESTIMONIAL -->
-    <div class="section-alt">
-        <section class="section">
-            <div class="section-header">
-                <span class="section-label">Testimoni</span>
-                <h2>Dipercaya oleh Pimpinan Institusi Pendidikan</h2>
-            </div>
-            <div class="testimonial-card">
-                <p class="testimonial-quote">
-                    FoundationOS membantu kami menata ulang proses operasional sekolah secara lebih tertib. Administrasi peserta didik, keuangan, dan pengelolaan data kini berjalan dalam satu platform yang konsisten dan mudah diawasi.
-                </p>
-                <div class="testimonial-author">Dr. Rina Handayani, M.Pd.</div>
-                <div class="testimonial-role">Kepala Sekolah — SMA Unggulan Nusantara</div>
-            </div>
-        </section>
-    </div>
-
-    <!-- CTA -->
-    <section class="cta-section">
-        <div class="cta-box">
-            <h2>Siap Memodernisasi Operasional Institusi Anda?</h2>
-            <p>Akses FoundationOS untuk menstandarkan proses, meningkatkan visibilitas data, dan memperkuat tata kelola institusi Anda.</p>
-            <a href="{{ url('/admin/login') }}" class="btn-white">Masuk ke Platform</a>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-inner">
-            <div class="footer-copy">
-                © {{ date('Y') }} {{ config('app.name', 'FoundationOS') }}. Dibangun dengan Laravel &amp; Filament untuk operasional pendidikan modern.
-            </div>
-            <div class="footer-links">
-                <a href="#modules">Modul</a>
-                <a href="#features">Fitur</a>
-                <a href="#pricing">Harga</a>
-                <a href="{{ url('/admin/login') }}">Login</a>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-
-        // Navbar background on scroll
-        const nav = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 10) {
-                nav.style.borderBottomColor = 'var(--border)';
-            } else {
-                nav.style.borderBottomColor = 'transparent';
-            }
-        });
-    </script>
 </body>
 </html>
