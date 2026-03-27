@@ -2,8 +2,10 @@
 
 namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -18,6 +20,9 @@ class PurchaseRequisitionForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
                 Select::make('user_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('user_id'))
@@ -27,7 +32,8 @@ class PurchaseRequisitionForm
                     ->numeric(),
                 TextInput::make('approved_by')
                     ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
-                    ->numeric(),
+                    ->numeric()
+                    ->disabled(),
                 TextInput::make('request_number')
                     ->label(\Modules\Core\Support\FilamentUi::field('request_number'))
                     ->required(),
@@ -56,8 +62,15 @@ class PurchaseRequisitionForm
                 TextInput::make('status')
                     ->label(\Modules\Core\Support\FilamentUi::field('status'))
                     ->required()
-                    ->default('draft'),
-                DateTimePicker::make('approved_at'),
+                    ->default('draft')
+                    ->disabled()
+                    ->dehydrated(),
+                Toggle::make('ready_for_sourcing')
+                    ->label('Ready For Sourcing')
+                    ->inline(false)
+                    ->disabled(),
+                DateTimePicker::make('approved_at')
+                    ->disabled(),
                 Textarea::make('rejection_reason')
                     ->label(\Modules\Core\Support\FilamentUi::field('rejection_reason'))
                     ->columnSpanFull(),

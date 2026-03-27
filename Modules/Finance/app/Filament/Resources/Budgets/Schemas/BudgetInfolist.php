@@ -21,6 +21,9 @@ class BudgetInfolist
                     ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
                     ->numeric()
                     ->placeholder('-'),
+                TextEntry::make('workflowInstances_count')
+                    ->label('Workflow Instances')
+                    ->state(fn ($record): int => $record->workflowInstances()->count()),
                 TextEntry::make('fiscal_year')
                     ->label(\Modules\Core\Support\FilamentUi::field('fiscal_year')),
                 TextEntry::make('name')

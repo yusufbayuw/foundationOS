@@ -27,6 +27,8 @@ Panduan setup Moodle terpisah tersedia di:
 - [MOODLE_HARDENING_CHECKLIST.md](/Users/yusuf/Herd/foundationOS/MOODLE_HARDENING_CHECKLIST.md)
 - [LIBRARY.md](/Users/yusuf/Herd/foundationOS/LIBRARY.md)
 - [WORKFLOW.md](/Users/yusuf/Herd/foundationOS/WORKFLOW.md)
+- [PROCUREMENT.md](/Users/yusuf/Herd/foundationOS/PROCUREMENT.md)
+- [FINANCE.md](/Users/yusuf/Herd/foundationOS/FINANCE.md)
 
 ## Konfigurasi Dasar Aplikasi
 
@@ -223,6 +225,12 @@ Setup cepat workflow pilot Procurement:
 php artisan fos:workflow:setup-procurement-pilot 1 --manager=10 --finance=11 --executive=12 --finance-threshold=10000000 --executive-threshold=50000000
 ```
 
+Setup cepat workflow Budget:
+
+```bash
+php artisan fos:workflow:setup-budget-workflow 1 --organization=5 --finance=11 --executive=12 --executive-threshold=50000000
+```
+
 Setelah workflow aktif:
 
 - buka Purchase Requisition
@@ -232,6 +240,34 @@ Setelah workflow aktif:
 Untuk setup, tutorial penggunaan, dan troubleshooting lengkap, gunakan:
 
 - [WORKFLOW.md](/Users/yusuf/Herd/foundationOS/WORKFLOW.md)
+
+Command operasional workflow yang paling sering dipakai:
+
+```bash
+php artisan fos:workflow:health-check --tenant=1
+php artisan fos:workflow:retry-sla --tenant=1
+php artisan fos:workflow:retry-automation 123 completed
+```
+
+## Procurement Runbook
+
+Vertical slice Procurement yang saat ini paling matang adalah approval `Purchase Requisition`.
+
+Dokumentasi operasional lengkap:
+
+- [PROCUREMENT.md](/Users/yusuf/Herd/foundationOS/PROCUREMENT.md)
+
+## Finance Golden Path
+
+Golden path Finance yang sudah dihardening saat ini:
+
+- `Student Invoice -> Payment -> Journal`
+- `Budget approval`
+- overview tenant untuk outstanding, verified payment, posted journal, dan budget status
+
+Dokumentasi operasional lengkap:
+
+- [FINANCE.md](/Users/yusuf/Herd/foundationOS/FINANCE.md)
 
 ## Role dan Permission Tenant
 

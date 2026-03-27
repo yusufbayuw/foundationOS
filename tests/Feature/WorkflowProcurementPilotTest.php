@@ -6,7 +6,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
+use Modules\Core\Models\UserTenantRole;
 use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
@@ -78,6 +80,7 @@ class WorkflowProcurementPilotTest extends TestCase
 
         $this->assertSame('completed', $instance->status->value);
         $this->assertSame('approved', $requisition->status);
+        $this->assertTrue((bool) $requisition->ready_for_sourcing);
         $this->assertSame($executive->id, $requisition->approved_by);
     }
 
@@ -106,11 +109,48 @@ class WorkflowProcurementPilotTest extends TestCase
 
         $this->assertSame('completed', $instance->status->value);
         $this->assertSame('approved', $requisition->status);
+        $this->assertTrue((bool) $requisition->ready_for_sourcing);
         $this->assertDatabaseMissing('workflow_assignments', [
             'workflow_instance_id' => $instance->id,
             'assigned_to_id' => $finance->id,
             'status' => 'pending',
         ]);
+    }
+
+    public function test_procurement_return_sets_revision_required_and_not_ready_for_sourcing(): void
+    {
+        [$tenant, $requester, $manager, $finance, $executive] = $this->makeTenantContext();
+
+        $this->artisan('fos:workflow:setup-procurement-pilot', [
+            'tenant' => $tenant->id,
+            '--manager' => $manager->id,
+            '--finance' => $finance->id,
+            '--executive' => $executive->id,
+            '--finance-threshold' => 10000000,
+            '--executive-threshold' => 50000000,
+        ])->assertSuccessful();
+
+        $requisition = $this->makePurchaseRequisition($tenant, $requester, 75000000);
+        $workflow = app(WorkflowResolver::class)->resolveForSubject($requisition->workflowSubjectType(), $requisition, (int) $tenant->id, null);
+        $instance = app(WorkflowInstanceStarter::class)->start($workflow, $requester, $requisition->workflowContext(), $requisition, $requester);
+
+        app(WorkflowEngine::class)->advance($instance, 'approve', [
+            'approval_note' => 'Manager approves and sends to finance.',
+        ], $manager);
+
+        $instance->refresh();
+
+        app(WorkflowEngine::class)->returnToStep($instance, (int) $instance->workflow->steps()->where('code', 'manager_approval')->value('id'), [
+            'approval_note' => 'Please revise the requested amount breakdown.',
+        ], $finance, 'Need a clearer sourcing justification.');
+
+        $instance->refresh();
+        $requisition->refresh();
+
+        $this->assertSame('running', $instance->status->value);
+        $this->assertSame('manager_approval', $instance->currentStep?->code);
+        $this->assertSame('revision_required', $requisition->status);
+        $this->assertFalse((bool) $requisition->ready_for_sourcing);
     }
 
     protected function makeTenantContext(bool $includeExecutive = true): array
@@ -154,6 +194,25 @@ class WorkflowProcurementPilotTest extends TestCase
                 'name' => 'Executive Approver',
                 'email' => 'executive-'.Str::lower(Str::random(6)).'@example.com',
                 'password' => 'password',
+            ]);
+        }
+
+        $role = TenantRole::query()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Workflow Approver',
+            'slug' => 'workflow-approver',
+            'permissions' => ['*'],
+            'is_default' => false,
+        ]);
+
+        foreach (array_filter([$requester, $manager, $finance, $executive]) as $user) {
+            UserTenantRole::query()->create([
+                'user_id' => $user->id,
+                'tenant_id' => $tenant->id,
+                'tenant_role_id' => $role->id,
+                'assigned_by' => $requester->id,
+                'assigned_at' => now(),
+                'is_primary' => $user->is($requester),
             ]);
         }
 

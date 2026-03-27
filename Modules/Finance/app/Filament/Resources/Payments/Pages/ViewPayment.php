@@ -2,9 +2,16 @@
 
 namespace Modules\Finance\Filament\Resources\Payments\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Models\User;
 use Modules\Finance\Filament\Resources\Payments\PaymentResource;
+use Modules\Finance\Models\Payment;
+use Modules\Finance\Services\FinanceControlService;
+use Throwable;
 
 class ViewPayment extends ViewRecord
 {
@@ -12,7 +19,50 @@ class ViewPayment extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var Payment $record */
+        $record = $this->getRecord();
+
         return [
+            Action::make('verifyPayment')
+                ->label('Verify Payment')
+                ->icon('heroicon-o-check-badge')
+                ->color('success')
+                ->visible(fn (): bool => $record->status === 'pending')
+                ->form([
+                    Textarea::make('notes')->label('Verification Notes')->rows(3),
+                ])
+                ->action(function (array $data): void {
+                    try {
+                        /** @var User $user */
+                        $user = auth()->user();
+                        app(FinanceControlService::class)->verifyPayment($this->getRecord(), $user, $data['notes'] ?? null);
+                        Notification::make()->title('Payment verified and journal posted.')->success()->send();
+                        $this->record = $this->getRecord()->fresh();
+                    } catch (Throwable $exception) {
+                        report($exception);
+                        Notification::make()->title('Failed to verify payment.')->body($exception->getMessage())->danger()->send();
+                    }
+                }),
+            Action::make('rejectPayment')
+                ->label('Reject Payment')
+                ->icon('heroicon-o-x-circle')
+                ->color('danger')
+                ->visible(fn (): bool => $record->status === 'pending')
+                ->form([
+                    Textarea::make('notes')->label('Rejection Notes')->rows(3)->required(),
+                ])
+                ->action(function (array $data): void {
+                    try {
+                        /** @var User $user */
+                        $user = auth()->user();
+                        app(FinanceControlService::class)->rejectPayment($this->getRecord(), $user, $data['notes'] ?? null);
+                        Notification::make()->title('Payment rejected.')->success()->send();
+                        $this->record = $this->getRecord()->fresh();
+                    } catch (Throwable $exception) {
+                        report($exception);
+                        Notification::make()->title('Failed to reject payment.')->body($exception->getMessage())->danger()->send();
+                    }
+                }),
             EditAction::make(),
         ];
     }

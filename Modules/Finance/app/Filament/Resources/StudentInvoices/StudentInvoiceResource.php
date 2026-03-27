@@ -9,6 +9,8 @@ use Modules\Finance\Filament\Resources\StudentInvoices\Pages\CreateStudentInvoic
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\EditStudentInvoice;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\ListStudentInvoices;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\ViewStudentInvoice;
+use Modules\Finance\Filament\Resources\StudentInvoices\RelationManagers\ItemsRelationManager;
+use Modules\Finance\Filament\Resources\StudentInvoices\RelationManagers\PaymentsRelationManager;
 use Modules\Finance\Filament\Resources\StudentInvoices\Schemas\StudentInvoiceForm;
 use Modules\Finance\Filament\Resources\StudentInvoices\Schemas\StudentInvoiceInfolist;
 use Modules\Finance\Filament\Resources\StudentInvoices\Tables\StudentInvoicesTable;
@@ -19,6 +21,8 @@ class StudentInvoiceResource extends LocalizedResource
     protected static ?string $model = StudentInvoice::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
     public static function form(Schema $schema): Schema
     {
@@ -38,7 +42,8 @@ class StudentInvoiceResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            ItemsRelationManager::class,
+            PaymentsRelationManager::class,
         ];
     }
 
@@ -50,5 +55,12 @@ class StudentInvoiceResource extends LocalizedResource
             'view' => ViewStudentInvoice::route('/{record}'),
             'edit' => EditStudentInvoice::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return $record instanceof StudentInvoice
+            && ! $record->isLockedForMutation()
+            && parent::canEdit($record);
     }
 }

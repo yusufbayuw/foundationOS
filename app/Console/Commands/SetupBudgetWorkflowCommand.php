@@ -8,25 +8,23 @@ use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
-use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
 use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAutomatedAction;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
+use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
 
-class SetupProcurementWorkflowPilotCommand extends Command
+class SetupBudgetWorkflowCommand extends Command
 {
-    protected $signature = 'fos:workflow:setup-procurement-pilot
+    protected $signature = 'fos:workflow:setup-budget-workflow
         {tenant : Tenant ID}
-        {--organization= : Organization ID (opsional)}
-        {--manager= : User ID approver manager}
+        {--organization= : Organization ID}
         {--finance= : User ID approver finance}
-        {--executive= : User ID approver executive (opsional)}
-        {--finance-threshold=10000000 : Threshold amount untuk step finance}
-        {--executive-threshold=50000000 : Threshold amount untuk step executive}
-        {--replace : Archive active workflow sebelumnya dan buat versi baru}';
+        {--executive= : User ID approver executive (optional)}
+        {--executive-threshold=50000000 : Threshold amount for executive approval}
+        {--replace : Archive active workflow and create a new version}';
 
-    protected $description = 'Create or refresh the tenant-scoped procurement approval pilot workflow';
+    protected $description = 'Create or refresh the tenant-scoped budget approval workflow';
 
     public function handle(WorkflowDefinitionLifecycleService $lifecycle): int
     {
@@ -34,36 +32,26 @@ class SetupProcurementWorkflowPilotCommand extends Command
         $organizationId = $this->option('organization') !== null ? (int) $this->option('organization') : null;
         $organization = $organizationId ? Organization::query()->where('tenant_id', $tenant->id)->findOrFail($organizationId) : null;
 
-        $manager = $this->resolveUserOption('manager', required: true);
         $finance = $this->resolveUserOption('finance', required: true);
         $executive = $this->resolveUserOption('executive', required: false);
-
-        $financeThreshold = (float) $this->option('finance-threshold');
         $executiveThreshold = (float) $this->option('executive-threshold');
-        $actorId = (int) ($manager->id);
+        $actorId = (int) $finance->id;
 
-        $this->assertUserBelongsToScope($manager, $tenant, $organization);
         $this->assertUserBelongsToScope($finance, $tenant, $organization);
 
         if ($executive) {
             $this->assertUserBelongsToScope($executive, $tenant, $organization);
         }
 
-        if ($executive && $executiveThreshold < $financeThreshold) {
-            $this->error('Executive threshold must be greater than or equal to finance threshold.');
-
-            return self::FAILURE;
-        }
-
         $existing = Workflow::query()
             ->where('tenant_id', $tenant->id)
-            ->where('code', 'purchase-requisition-approval')
-            ->when($organization, fn ($query) => $query->where('organization_id', $organization->id), fn ($query) => $query->whereNull('organization_id'))
+            ->where('code', 'budget-approval')
+            ->where('organization_id', $organization?->id)
             ->latest('version')
             ->first();
 
         if ($existing && ! $this->option('replace')) {
-            $this->warn('A procurement pilot workflow already exists for this scope.');
+            $this->warn('A budget approval workflow already exists for this scope.');
             $this->line('Re-run with `--replace` if you want a new version.');
 
             return self::SUCCESS;
@@ -78,11 +66,11 @@ class SetupProcurementWorkflowPilotCommand extends Command
         $workflow = Workflow::query()->create([
             'tenant_id' => $tenant->id,
             'organization_id' => $organization?->id,
-            'code' => 'purchase-requisition-approval',
-            'name' => 'Purchase Requisition Approval',
-            'description' => 'Default amount-based approval workflow for procurement purchase requisitions.',
-            'module' => 'Procurement',
-            'subject_type' => \Modules\Procurement\Models\PurchaseRequisition::class,
+            'code' => 'budget-approval',
+            'name' => 'Budget Approval',
+            'description' => 'Default budget approval workflow for Finance budgets.',
+            'module' => 'Finance',
+            'subject_type' => \Modules\Finance\Models\Budget::class,
             'trigger_mode' => 'manual',
             'version' => $version,
             'status' => WorkflowDefinitionStatus::Draft,
@@ -91,20 +79,12 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'updated_by' => $actorId,
         ]);
 
-        $managerStep = $this->makeStep($workflow, [
-            'code' => 'manager_approval',
-            'name' => 'Manager Approval',
-            'assignee_user_id' => $manager->id,
-            'sort_order' => 1,
-            'is_initial' => true,
-            'action_schema' => $this->defaultApprovalActions(),
-        ]);
-
         $financeStep = $this->makeStep($workflow, [
             'code' => 'finance_approval',
             'name' => 'Finance Approval',
             'assignee_user_id' => $finance->id,
-            'sort_order' => 2,
+            'sort_order' => 1,
+            'is_initial' => true,
             'action_schema' => $this->defaultApprovalActions(),
         ]);
 
@@ -112,14 +92,14 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'code' => 'executive_approval',
             'name' => 'Executive Approval',
             'assignee_user_id' => $executive->id,
-            'sort_order' => 3,
+            'sort_order' => 2,
             'action_schema' => $this->defaultApprovalActions(),
         ]) : null;
 
         $completedStep = $this->makeStep($workflow, [
             'code' => 'approved',
             'name' => 'Approved',
-            'sort_order' => $executive ? 4 : 3,
+            'sort_order' => $executive ? 3 : 2,
             'step_type' => 'end',
             'is_terminal' => true,
             'form_schema' => [],
@@ -128,27 +108,16 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'assignee_value' => null,
         ]);
 
-        $this->makeTransition($workflow, $managerStep, $financeStep, 'approve', [
-            '>=' => [
-                ['var' => 'total_estimated_amount'],
-                $financeThreshold,
-            ],
-        ], 20);
-        $this->makeTransition($workflow, $managerStep, $completedStep, 'approve', null, 0, true);
-        $this->makeTransition($workflow, $managerStep, null, 'reject', null, 0, true);
-
         if ($executiveStep) {
             $this->makeTransition($workflow, $financeStep, $executiveStep, 'approve', [
                 '>=' => [
-                    ['var' => 'total_estimated_amount'],
+                    ['var' => 'allocated_amount'],
                     $executiveThreshold,
                 ],
             ], 20);
-            $this->makeTransition($workflow, $financeStep, $completedStep, 'approve', null, 0, true);
-        } else {
-            $this->makeTransition($workflow, $financeStep, $completedStep, 'approve', null, 0, true);
         }
 
+        $this->makeTransition($workflow, $financeStep, $completedStep, 'approve', null, 0, true);
         $this->makeTransition($workflow, $financeStep, null, 'reject', null, 0, true);
 
         if ($executiveStep) {
@@ -163,8 +132,8 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'action_type' => 'audit_note',
             'name' => 'Audit Start',
             'config' => [
-                'action' => 'procurement_workflow_started',
-                'description' => 'Procurement approval workflow started.',
+                'action' => 'finance_budget_workflow_started',
+                'description' => 'Budget approval workflow started.',
             ],
             'is_active' => true,
             'sort_order' => 1,
@@ -177,8 +146,8 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'action_type' => 'audit_note',
             'name' => 'Audit Complete',
             'config' => [
-                'action' => 'procurement_workflow_completed',
-                'description' => 'Procurement approval workflow completed.',
+                'action' => 'finance_budget_workflow_completed',
+                'description' => 'Budget approval workflow completed.',
             ],
             'is_active' => true,
             'sort_order' => 2,
@@ -186,15 +155,14 @@ class SetupProcurementWorkflowPilotCommand extends Command
 
         $workflow = $lifecycle->publish($workflow, $actorId);
 
-        $this->info('Procurement pilot workflow created successfully.');
+        $this->info('Budget approval workflow created successfully.');
         $this->table(
-            ['Workflow ID', 'Tenant', 'Organization', 'Version', 'Manager', 'Finance', 'Executive'],
+            ['Workflow ID', 'Tenant', 'Organization', 'Version', 'Finance', 'Executive'],
             [[
                 $workflow->id,
                 $tenant->name,
-                $organization?->name ?? 'Tenant-wide',
+                $organization?->name ?? '-',
                 $workflow->version,
-                $manager->name,
                 $finance->name,
                 $executive?->name ?? '-',
             ]]
@@ -254,7 +222,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
                 'type' => 'textarea',
                 'required' => true,
                 'validation' => ['min:10'],
-                'placeholder' => 'Explain the approval decision.',
+                'placeholder' => 'Explain the budget approval decision.',
                 'help_text' => 'This note is stored in the workflow audit log.',
                 'column_span' => 'full',
             ]],

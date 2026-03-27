@@ -26,11 +26,30 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
     protected function baseAssignmentsQuery(): Builder
     {
         $tenant = Filament::getTenant();
+        $user = auth()->user();
+        $organizationIds = $user?->userTenantRoles()
+            ->when($tenant, fn (Builder $query) => $query->where('tenant_id', $tenant->getKey()))
+            ->pluck('organization_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all() ?? [];
 
         return WorkflowAssignment::query()
             ->with(['instance.workflow', 'instance.currentStep', 'instance.requester'])
             ->where('assigned_to_type', 'user')
-            ->when($tenant, fn (Builder $query) => $query->whereHas('instance', fn (Builder $inner) => $inner->where('tenant_id', $tenant->getKey())))
+            ->when($tenant, function (Builder $query) use ($tenant, $organizationIds, $user): void {
+                $query->whereHas('instance', function (Builder $inner) use ($tenant, $organizationIds, $user): void {
+                    $inner->where('tenant_id', $tenant->getKey());
+
+                    if (! $user?->isGlobalSuperAdmin() && $organizationIds !== []) {
+                        $inner->where(function (Builder $scoped) use ($organizationIds): void {
+                            $scoped->whereNull('organization_id')
+                                ->orWhereIn('organization_id', $organizationIds);
+                        });
+                    }
+                });
+            })
             ->when(! $tenant, fn (Builder $query) => $query->whereRaw('1 = 0'));
     }
 }

@@ -8,6 +8,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
@@ -57,7 +58,11 @@ class PurchaseRequisitionsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                    ->badge()
                     ->searchable(),
+                IconColumn::make('ready_for_sourcing')
+                    ->label('Ready For Sourcing')
+                    ->boolean(),
                 TextColumn::make('approved_at')
                     ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
                     ->dateTime()

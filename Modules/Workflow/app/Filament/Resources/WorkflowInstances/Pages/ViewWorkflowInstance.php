@@ -27,12 +27,56 @@ class ViewWorkflowInstance extends ViewRecord
         /** @var WorkflowInstance $record */
         $record = $this->getRecord()->loadMissing(['currentStep', 'assignments']);
         $step = $record->currentStep;
+        $headerActions = [];
+        $subjectUrl = $this->resolveSubjectUrl($record);
 
-        if (! $step || ! $this->hasPendingAssignment($record)) {
-            return [];
+        if ($subjectUrl) {
+            $headerActions[] = Action::make('openSubject')
+                ->label('Open Subject')
+                ->icon('heroicon-o-arrow-top-right-on-square')
+                ->color('gray')
+                ->url($subjectUrl)
+                ->openUrlInNewTab();
         }
 
-        $actions = [];
+        if (! $step || ! $this->hasPendingAssignment($record)) {
+            return $headerActions;
+        }
+
+        $actions = $headerActions;
+
+        if ($this->getReturnTargetOptions($record) !== []) {
+            $actions[] = Action::make('returnToStep')
+                ->label('Return To Step')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->color('warning')
+                ->form([
+                    Select::make('target_step_id')
+                        ->label('Target Step')
+                        ->options($this->getReturnTargetOptions($record))
+                        ->required(),
+                    ...$this->buildDynamicFormSchema($record),
+                ])
+                ->action(function (array $data) use ($record): void {
+                    /** @var User $actor */
+                    $actor = auth()->user();
+
+                    app(WorkflowEngine::class)->returnToStep(
+                        $record,
+                        (int) $data['target_step_id'],
+                        Arr::except($data, ['target_step_id', 'workflow_note']),
+                        $actor,
+                        Arr::get($data, 'workflow_note'),
+                    );
+
+                    $this->record = $record->fresh();
+
+                    Notification::make()
+                        ->title('Workflow returned to the selected step.')
+                        ->success()
+                        ->send();
+                });
+        }
 
         foreach ($this->getAvailableActionNames($record) as $actionName) {
             $actions[] = Action::make($actionName)
@@ -179,5 +223,27 @@ class ViewWorkflowInstance extends ViewRecord
             ->where('assigned_to_type', 'user')
             ->where('assigned_to_id', $user->getKey())
             ->isNotEmpty();
+    }
+
+    protected function getReturnTargetOptions(WorkflowInstance $record): array
+    {
+        return collect(data_get($record->workflow_snapshot, 'steps', []))
+            ->filter(fn (array $step): bool => ($step['id'] ?? null) !== $record->current_step_id && ! ($step['is_terminal'] ?? false))
+            ->sortBy('sort_order')
+            ->mapWithKeys(fn (array $step): array => [(string) $step['id'] => (string) ($step['name'] ?? $step['code'] ?? $step['id'])])
+            ->all();
+    }
+
+    protected function resolveSubjectUrl(WorkflowInstance $record): ?string
+    {
+        if (! $record->subject) {
+            return null;
+        }
+
+        return match ($record->subject_type) {
+            \Modules\Procurement\Models\PurchaseRequisition::class => \Modules\Procurement\Filament\Resources\PurchaseRequisitions\PurchaseRequisitionResource::getUrl('view', ['record' => $record->subject]),
+            \Modules\Finance\Models\Budget::class => \Modules\Finance\Filament\Resources\Budgets\BudgetResource::getUrl('view', ['record' => $record->subject]),
+            default => null,
+        };
     }
 }

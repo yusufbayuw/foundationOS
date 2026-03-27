@@ -69,4 +69,9 @@ class JournalEntry extends Model
     {
         return $this->hasMany(JournalEntryLine::class);
     }
+
+    public function isLockedForMutation(): bool
+    {
+        return (bool) $this->is_posted || (bool) $this->is_reversed;
+    }
 }

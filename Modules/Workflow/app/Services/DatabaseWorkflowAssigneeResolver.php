@@ -5,6 +5,7 @@ namespace Modules\Workflow\Services;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Workflow\Contracts\RuleEngine;
+use Modules\Workflow\Contracts\WorkflowDynamicAssigneeResolver;
 use Modules\Workflow\Contracts\WorkflowAssigneeResolver;
 use Modules\Workflow\Enums\WorkflowAssigneeType;
 use Modules\Workflow\Exceptions\WorkflowConfigurationException;
@@ -24,8 +25,8 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
             WorkflowAssigneeType::User => $this->resolveDirectUser($step),
             WorkflowAssigneeType::Role => $this->resolveRoleUsers($instance, $step),
             WorkflowAssigneeType::SubjectField => $this->resolveSubjectFieldUsers($instance, $step),
-            WorkflowAssigneeType::RequesterManager => throw new WorkflowConfigurationException('Requester manager assignee is reserved for a later phase.'),
-            WorkflowAssigneeType::Resolver => throw new WorkflowConfigurationException('Custom assignee resolvers are not enabled in V1.'),
+            WorkflowAssigneeType::RequesterManager => $this->resolveRequesterManager($instance, $step),
+            WorkflowAssigneeType::Resolver => $this->resolveCustomResolver($instance, $step),
             null => collect(),
         };
     }
@@ -82,5 +83,49 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
         $user = User::query()->find((int) $userId);
 
         return $user ? collect([$user]) : collect();
+    }
+
+    protected function resolveRequesterManager(WorkflowInstance $instance, WorkflowStep $step): Collection
+    {
+        $candidates = array_filter([
+            data_get($step->assignee_config, 'manager_field'),
+            'requester_manager_id',
+            'manager_id',
+            'supervisor_id',
+            'approver_id',
+        ]);
+
+        foreach ($candidates as $field) {
+            $userId = data_get(WorkflowContextData::fromInstance($instance), $field);
+
+            if ($userId && ($user = User::query()->find((int) $userId))) {
+                return collect([$user]);
+            }
+        }
+
+        throw new WorkflowConfigurationException('Requester manager assignee requires a manager user id in workflow context.');
+    }
+
+    protected function resolveCustomResolver(WorkflowInstance $instance, WorkflowStep $step): Collection
+    {
+        $resolverClass = (string) (data_get($step->assignee_config, 'resolver_class') ?: $step->assignee_value);
+
+        if ($resolverClass === '') {
+            throw new WorkflowConfigurationException('Custom assignee resolver class is missing.');
+        }
+
+        $allowedResolvers = (array) config('workflow.allowed_assignee_resolvers', []);
+
+        if (! in_array($resolverClass, $allowedResolvers, true)) {
+            throw new WorkflowConfigurationException("Custom assignee resolver [{$resolverClass}] is not allowed.");
+        }
+
+        $resolver = app($resolverClass);
+
+        if (! $resolver instanceof WorkflowDynamicAssigneeResolver) {
+            throw new WorkflowConfigurationException("Custom assignee resolver [{$resolverClass}] must implement WorkflowDynamicAssigneeResolver.");
+        }
+
+        return $resolver->resolve($instance, $step);
     }
 }

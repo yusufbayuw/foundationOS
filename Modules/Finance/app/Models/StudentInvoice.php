@@ -78,4 +78,9 @@ class StudentInvoice extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function isLockedForMutation(): bool
+    {
+        return in_array((string) $this->status, ['paid', 'void', 'cancelled'], true);
+    }
 }

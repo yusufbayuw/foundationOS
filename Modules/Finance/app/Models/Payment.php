@@ -65,4 +65,9 @@ class Payment extends Model
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    public function isLockedForMutation(): bool
+    {
+        return in_array((string) $this->status, ['verified', 'rejected', 'reversed'], true);
+    }
 }

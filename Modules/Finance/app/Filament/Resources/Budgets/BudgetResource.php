@@ -9,6 +9,7 @@ use Modules\Finance\Filament\Resources\Budgets\Pages\CreateBudget;
 use Modules\Finance\Filament\Resources\Budgets\Pages\EditBudget;
 use Modules\Finance\Filament\Resources\Budgets\Pages\ListBudgets;
 use Modules\Finance\Filament\Resources\Budgets\Pages\ViewBudget;
+use Modules\Finance\Filament\Resources\Budgets\RelationManagers\WorkflowInstancesRelationManager;
 use Modules\Finance\Filament\Resources\Budgets\Schemas\BudgetForm;
 use Modules\Finance\Filament\Resources\Budgets\Schemas\BudgetInfolist;
 use Modules\Finance\Filament\Resources\Budgets\Tables\BudgetsTable;
@@ -19,6 +20,8 @@ class BudgetResource extends LocalizedResource
     protected static ?string $model = Budget::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
     public static function form(Schema $schema): Schema
     {
@@ -38,7 +41,7 @@ class BudgetResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            WorkflowInstancesRelationManager::class,
         ];
     }
 
@@ -50,5 +53,12 @@ class BudgetResource extends LocalizedResource
             'view' => ViewBudget::route('/{record}'),
             'edit' => EditBudget::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return $record instanceof Budget
+            && ! $record->isLockedForMutation()
+            && parent::canEdit($record);
     }
 }

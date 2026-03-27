@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\Budgets\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -17,18 +18,30 @@ class BudgetForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
                 Select::make('organization_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name')
+                    ->relationship('organization', 'name', modifyQueryUsing: function ($query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
                     ->required(),
                 Select::make('chart_of_account_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('chart_of_account_id'))
-                    ->relationship('chartOfAccount', 'name')
+                    ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
                     ->required(),
                 TextInput::make('approved_by')
                     ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
-                    ->numeric(),
+                    ->numeric()
+                    ->disabled(),
                 TextInput::make('fiscal_year')
                     ->label(\Modules\Core\Support\FilamentUi::field('fiscal_year'))
                     ->required(),
@@ -58,7 +71,8 @@ class BudgetForm
                     ->label(\Modules\Core\Support\FilamentUi::field('status'))
                     ->required()
                     ->default('draft'),
-                DateTimePicker::make('approved_at'),
+                DateTimePicker::make('approved_at')
+                    ->disabled(),
             ]);
     }
 }

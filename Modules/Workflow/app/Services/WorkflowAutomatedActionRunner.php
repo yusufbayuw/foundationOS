@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use Throwable;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Monitoring\Models\AuditLog;
@@ -29,12 +30,29 @@ class WorkflowAutomatedActionRunner
         $config = (array) ($action['config'] ?? []);
 
         match ($type) {
-            WorkflowAutomationActionType::InternalNotification->value => $this->sendInternalNotification($instance, $config),
-            WorkflowAutomationActionType::AuditNote->value => $this->writeAuditNote($instance, $config, $context),
-            WorkflowAutomationActionType::DispatchJob->value => $this->dispatchJob($instance, $config),
-            WorkflowAutomationActionType::SetComputedData->value => $this->setComputedData($instance, $config),
+            WorkflowAutomationActionType::InternalNotification->value,
+            WorkflowAutomationActionType::AuditNote->value,
+            WorkflowAutomationActionType::DispatchJob->value,
+            WorkflowAutomationActionType::SetComputedData->value => $this->runMappedAction($instance, $type, $config, $context),
             default => null,
         };
+    }
+
+    protected function runMappedAction(WorkflowInstance $instance, ?string $type, array $config, array $context): void
+    {
+        try {
+            match ($type) {
+                WorkflowAutomationActionType::InternalNotification->value => $this->sendInternalNotification($instance, $config),
+                WorkflowAutomationActionType::AuditNote->value => $this->writeAuditNote($instance, $config, $context),
+                WorkflowAutomationActionType::DispatchJob->value => $this->dispatchJob($instance, $config),
+                WorkflowAutomationActionType::SetComputedData->value => $this->setComputedData($instance, $config),
+                default => null,
+            };
+        } catch (Throwable $exception) {
+            $this->writeFailureAudit($instance, $type, $config, $exception, $context);
+
+            throw $exception;
+        }
     }
 
     protected function sendInternalNotification(WorkflowInstance $instance, array $config): void
@@ -112,5 +130,30 @@ class WorkflowAutomatedActionRunner
         $instance->forceFill([
             'computed_data' => array_replace_recursive($instance->computed_data ?? [], $data),
         ])->save();
+    }
+
+    protected function writeFailureAudit(WorkflowInstance $instance, ?string $type, array $config, Throwable $exception, array $context): void
+    {
+        AuditLog::query()->create([
+            'tenant_id' => $instance->tenant_id,
+            'organization_id' => $instance->organization_id,
+            'user_id' => data_get($context, 'actor_id'),
+            'auditable_type' => $instance->subject_type ?: $instance::class,
+            'auditable_id' => $instance->subject_id ?: $instance->getKey(),
+            'action' => 'workflow_automation_failed',
+            'description' => 'Workflow automated action failed.',
+            'old_values' => null,
+            'new_values' => [
+                'workflow_instance_id' => $instance->getKey(),
+                'trigger_event' => $context['trigger_event'] ?? null,
+                'action_type' => $type,
+                'action_name' => $config['name'] ?? null,
+            ],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'request_id' => request()?->headers->get('X-Request-Id'),
+            'status' => 'failed',
+            'error_message' => $exception->getMessage(),
+        ]);
     }
 }

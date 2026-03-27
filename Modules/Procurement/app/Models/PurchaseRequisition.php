@@ -31,6 +31,7 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
         'total_items',
         'total_estimated_amount',
         'status',
+        'ready_for_sourcing',
         'approved_at',
         'rejection_reason',
         'notes',
@@ -43,6 +44,7 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
             'required_date' => 'date',
             'total_items' => 'integer',
             'total_estimated_amount' => 'decimal:2',
+            'ready_for_sourcing' => 'boolean',
             'approved_at' => 'datetime',
         ];
     }
@@ -68,6 +70,7 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
             'request_number' => $this->request_number,
             'priority' => $this->priority,
             'status' => $this->status,
+            'ready_for_sourcing' => (bool) $this->ready_for_sourcing,
             'total_items' => $this->total_items,
             'total_estimated_amount' => (float) $this->total_estimated_amount,
             'justification' => $this->justification,
@@ -83,5 +86,10 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
     public function workflowSubjectType(): string
     {
         return self::class;
+    }
+
+    public function isLockedForMutation(): bool
+    {
+        return in_array((string) $this->status, ['submitted', 'in_review', 'approved', 'rejected', 'cancelled'], true);
     }
 }

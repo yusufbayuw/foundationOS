@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\Payments\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -19,14 +20,25 @@ class PaymentForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
                 Select::make('student_invoice_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('student_invoice_id'))
-                    ->relationship('studentInvoice', 'id')
+                    ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function ($query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
                     ->required(),
                 Select::make('chart_of_account_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('chart_of_account_id'))
-                    ->relationship('chartOfAccount', 'name')
+                    ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
                     ->required(),
                 TextInput::make('verified_by')
                     ->label(\Modules\Core\Support\FilamentUi::field('verified_by'))

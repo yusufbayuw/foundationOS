@@ -9,6 +9,7 @@ use Modules\Finance\Filament\Resources\JournalEntries\Pages\CreateJournalEntry;
 use Modules\Finance\Filament\Resources\JournalEntries\Pages\EditJournalEntry;
 use Modules\Finance\Filament\Resources\JournalEntries\Pages\ListJournalEntries;
 use Modules\Finance\Filament\Resources\JournalEntries\Pages\ViewJournalEntry;
+use Modules\Finance\Filament\Resources\JournalEntries\RelationManagers\LinesRelationManager;
 use Modules\Finance\Filament\Resources\JournalEntries\Schemas\JournalEntryForm;
 use Modules\Finance\Filament\Resources\JournalEntries\Schemas\JournalEntryInfolist;
 use Modules\Finance\Filament\Resources\JournalEntries\Tables\JournalEntriesTable;
@@ -19,6 +20,8 @@ class JournalEntryResource extends LocalizedResource
     protected static ?string $model = JournalEntry::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
     public static function form(Schema $schema): Schema
     {
@@ -38,7 +41,7 @@ class JournalEntryResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            LinesRelationManager::class,
         ];
     }
 
@@ -50,5 +53,12 @@ class JournalEntryResource extends LocalizedResource
             'view' => ViewJournalEntry::route('/{record}'),
             'edit' => EditJournalEntry::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return $record instanceof JournalEntry
+            && ! $record->isLockedForMutation()
+            && parent::canEdit($record);
     }
 }

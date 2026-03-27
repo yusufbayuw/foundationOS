@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\JournalEntries\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -19,10 +20,17 @@ class JournalEntryForm
                 Select::make('tenant_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('tenant_id'))
                     ->relationship('tenant', 'name')
+                    ->default(Filament::getTenant()?->getKey())
+                    ->disabled(Filament::getTenant() !== null)
+                    ->dehydrated()
                     ->required(),
                 Select::make('organization_id')
                     ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name')
+                    ->relationship('organization', 'name', modifyQueryUsing: function ($query): void {
+                        if (Filament::getTenant()) {
+                            $query->where('tenant_id', Filament::getTenant()->getKey());
+                        }
+                    })
                     ->required(),
                 TextInput::make('posted_by')
                     ->label(\Modules\Core\Support\FilamentUi::field('posted_by'))

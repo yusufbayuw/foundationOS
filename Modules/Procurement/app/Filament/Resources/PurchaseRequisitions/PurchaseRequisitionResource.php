@@ -21,6 +21,8 @@ class PurchaseRequisitionResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+
     public static function form(Schema $schema): Schema
     {
         return PurchaseRequisitionForm::configure($schema);
@@ -51,5 +53,12 @@ class PurchaseRequisitionResource extends LocalizedResource
             'view' => ViewPurchaseRequisition::route('/{record}'),
             'edit' => EditPurchaseRequisition::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return $record instanceof PurchaseRequisition
+            && ! $record->isLockedForMutation()
+            && parent::canEdit($record);
     }
 }

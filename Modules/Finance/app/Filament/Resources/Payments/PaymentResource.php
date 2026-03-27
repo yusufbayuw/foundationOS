@@ -20,6 +20,8 @@ class PaymentResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+
     public static function form(Schema $schema): Schema
     {
         return PaymentForm::configure($schema);
@@ -50,5 +52,12 @@ class PaymentResource extends LocalizedResource
             'view' => ViewPayment::route('/{record}'),
             'edit' => EditPayment::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return $record instanceof Payment
+            && ! $record->isLockedForMutation()
+            && parent::canEdit($record);
     }
 }

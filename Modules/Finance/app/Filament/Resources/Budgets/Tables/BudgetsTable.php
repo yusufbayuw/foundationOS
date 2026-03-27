@@ -55,6 +55,7 @@ class BudgetsTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                    ->badge()
                     ->searchable(),
                 TextColumn::make('approved_at')
                     ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))

@@ -23,13 +23,16 @@ class SyncWorkflowSubjectState
         match (true) {
             $event instanceof WorkflowStarted => $subject->forceFill([
                 'status' => 'submitted',
+                'ready_for_sourcing' => false,
             ])->save(),
             $event instanceof WorkflowReturned => $subject->forceFill([
                 'status' => 'revision_required',
+                'ready_for_sourcing' => false,
                 'notes' => trim(implode("\n\n", array_filter([$subject->notes, $event->notes]))),
             ])->save(),
             $event instanceof WorkflowCancelled => $subject->forceFill([
                 'status' => 'cancelled',
+                'ready_for_sourcing' => false,
                 'notes' => trim(implode("\n\n", array_filter([$subject->notes, $event->reason]))),
             ])->save(),
             $event instanceof WorkflowAdvanced => $this->syncAdvancedState($subject, $instance, $event),
@@ -42,6 +45,7 @@ class SyncWorkflowSubjectState
         if ($instance->status === WorkflowInstanceStatus::Completed) {
             $subject->forceFill([
                 'status' => 'approved',
+                'ready_for_sourcing' => true,
                 'approved_by' => $event->actor->getKey(),
                 'approved_at' => now(),
             ])->save();
@@ -52,6 +56,7 @@ class SyncWorkflowSubjectState
         if ($instance->status === WorkflowInstanceStatus::Rejected) {
             $subject->forceFill([
                 'status' => 'rejected',
+                'ready_for_sourcing' => false,
                 'rejection_reason' => data_get($instance->logs()->latest('logged_at')->first(), 'notes'),
             ])->save();
 
@@ -60,6 +65,7 @@ class SyncWorkflowSubjectState
 
         $subject->forceFill([
             'status' => 'in_review',
+            'ready_for_sourcing' => false,
         ])->save();
     }
 }

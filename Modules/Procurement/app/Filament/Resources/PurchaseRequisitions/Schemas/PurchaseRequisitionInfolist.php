@@ -3,6 +3,7 @@
 namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Schemas\Schema;
 
 class PurchaseRequisitionInfolist
@@ -47,6 +48,9 @@ class PurchaseRequisitionInfolist
                     ->numeric(),
                 TextEntry::make('status')
                     ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                IconEntry::make('ready_for_sourcing')
+                    ->label('Ready For Sourcing')
+                    ->boolean(),
                 TextEntry::make('approved_at')
                     ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
                     ->dateTime()

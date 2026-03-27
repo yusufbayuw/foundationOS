@@ -6,11 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Workflow\Contracts\ProvidesWorkflowContext;
+use Modules\Workflow\Contracts\StartsWorkflow;
+use Modules\Workflow\Models\WorkflowInstance;
 
-class Budget extends Model
+class Budget extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
     use HasFactory, SoftDeletes;
 
@@ -58,5 +62,46 @@ class Budget extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function workflowInstances(): MorphMany
+    {
+        return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');
+    }
+
+    public function isLockedForMutation(): bool
+    {
+        return in_array((string) $this->status, ['submitted', 'in_review', 'approved', 'closed', 'cancelled', 'rejected'], true);
+    }
+
+    public function workflowCode(): string
+    {
+        return 'budget-approval';
+    }
+
+    public function workflowContext(): array
+    {
+        return [
+            'tenant_id' => $this->tenant_id,
+            'organization_id' => $this->organization_id,
+            'budget_code' => $this->code,
+            'budget_name' => $this->name,
+            'fiscal_year' => $this->fiscal_year,
+            'allocated_amount' => (float) $this->allocated_amount,
+            'used_amount' => (float) $this->used_amount,
+            'remaining_amount' => (float) $this->remaining_amount,
+            'status' => $this->status,
+            'description' => $this->description,
+        ];
+    }
+
+    public function workflowSubjectLabel(): string
+    {
+        return (string) ($this->code ?: 'Budget #'.$this->getKey());
+    }
+
+    public function workflowSubjectType(): string
+    {
+        return self::class;
     }
 }

@@ -1,0 +1,93 @@
+<?php
+
+namespace Modules\Workflow\Listeners;
+
+use Modules\Finance\Models\Budget;
+use Modules\Monitoring\Models\AuditLog;
+use Modules\Workflow\Enums\WorkflowInstanceStatus;
+use Modules\Workflow\Events\WorkflowAdvanced;
+use Modules\Workflow\Events\WorkflowCancelled;
+use Modules\Workflow\Events\WorkflowReturned;
+use Modules\Workflow\Events\WorkflowStarted;
+
+class SyncBudgetWorkflowState
+{
+    public function handle(object $event): void
+    {
+        $instance = $event->instance->fresh(['subject']);
+        $subject = $instance->subject;
+
+        if (! $subject instanceof Budget) {
+            return;
+        }
+
+        match (true) {
+            $event instanceof WorkflowStarted => $this->updateBudget($subject, [
+                'status' => 'submitted',
+                'approved_by' => null,
+                'approved_at' => null,
+            ], data_get($event, 'actor.id'), 'finance_budget_workflow_started', 'Budget approval workflow started.'),
+            $event instanceof WorkflowReturned => $this->updateBudget($subject, [
+                'status' => 'revision_required',
+                'description' => trim(implode("\n\n", array_filter([$subject->description, $event->notes]))),
+            ], data_get($event, 'actor.id'), 'finance_budget_workflow_returned', 'Budget returned for revision.'),
+            $event instanceof WorkflowCancelled => $this->updateBudget($subject, [
+                'status' => 'cancelled',
+                'description' => trim(implode("\n\n", array_filter([$subject->description, $event->reason]))),
+            ], data_get($event, 'actor.id'), 'finance_budget_workflow_cancelled', 'Budget workflow cancelled.'),
+            $event instanceof WorkflowAdvanced => $this->syncAdvancedState($subject, $instance, $event),
+            default => null,
+        };
+    }
+
+    protected function syncAdvancedState(Budget $subject, $instance, WorkflowAdvanced $event): void
+    {
+        if ($instance->status === WorkflowInstanceStatus::Completed) {
+            $this->updateBudget($subject, [
+                'status' => 'approved',
+                'approved_by' => $event->actor->getKey(),
+                'approved_at' => now(),
+            ], $event->actor->getKey(), 'finance_budget_workflow_completed', 'Budget workflow completed.');
+
+            return;
+        }
+
+        if ($instance->status === WorkflowInstanceStatus::Rejected) {
+            $this->updateBudget($subject, [
+                'status' => 'rejected',
+                'description' => trim(implode("\n\n", array_filter([
+                    $subject->description,
+                    data_get($instance->logs()->latest('logged_at')->first(), 'notes'),
+                ]))),
+            ], $event->actor->getKey(), 'finance_budget_workflow_rejected', 'Budget workflow rejected.');
+
+            return;
+        }
+
+        $this->updateBudget($subject, [
+            'status' => 'in_review',
+        ], $event->actor->getKey(), 'finance_budget_workflow_in_review', 'Budget workflow is in review.');
+    }
+
+    protected function updateBudget(Budget $budget, array $attributes, ?int $actorId, string $action, string $description): void
+    {
+        $budget->forceFill($attributes)->save();
+
+        AuditLog::query()->create([
+            'tenant_id' => $budget->tenant_id,
+            'organization_id' => $budget->organization_id,
+            'user_id' => $actorId,
+            'auditable_type' => Budget::class,
+            'auditable_id' => $budget->getKey(),
+            'action' => $action,
+            'description' => $description,
+            'old_values' => null,
+            'new_values' => $attributes,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'request_id' => request()?->headers->get('X-Request-Id'),
+            'status' => 'success',
+            'error_message' => null,
+        ]);
+    }
+}

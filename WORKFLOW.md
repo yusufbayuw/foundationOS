@@ -80,10 +80,36 @@ Permission minimum yang biasanya dibutuhkan:
   - `WorkflowTeamInboxPage`
   - `WorkflowTaskHistoryPage`
 
+Untuk health check definisi aktif:
+
+```bash
+php artisan fos:workflow:health-check --tenant=1
+```
+
 Catatan penting:
 
 - `user_tenant_roles` tetap mengatur membership tenant/organization
 - Shield mengatur apa yang boleh dilakukan user di panel
+
+## Command Operasional
+
+Health check:
+
+```bash
+php artisan fos:workflow:health-check --tenant=1
+```
+
+Retry SLA checks:
+
+```bash
+php artisan fos:workflow:retry-sla --tenant=1
+```
+
+Retry automated actions manual:
+
+```bash
+php artisan fos:workflow:retry-automation 123 completed
+```
 
 ## Cara Membuat Workflow via UI
 
@@ -122,6 +148,12 @@ Isi minimal:
 - `placeholder`
 - `help_text`
 - `column_span`
+
+Perilaku runtime:
+
+- field hidden tidak dirender ke approver
+- field disabled tidak diterima sebagai overwrite dari client
+- validasi backend tetap menjadi final authority
 
 Contoh field:
 
@@ -182,6 +214,12 @@ Fungsi:
 - `Workflow Team Inbox`: pending assignments lintas user dalam tenant aktif
 - `Workflow Task History`: histori assignment yang selesai/dibatalkan
 
+Guardrails operasional:
+
+- `Workflow Team Inbox` dibatasi oleh tenant aktif
+- untuk user non-global-super-admin, hasilnya juga dibatasi ke organization membership yang dimiliki user di tenant tersebut
+- semua page tetap mengikuti Shield sebagai source of truth authorization
+
 ## Tutorial Pilot Procurement
 
 Pilot pertama memakai `Purchase Requisition`.
@@ -213,6 +251,30 @@ Jika ingin mengganti versi workflow yang sudah ada:
 ```bash
 php artisan fos:workflow:setup-procurement-pilot 1 --manager=10 --finance=11 --executive=12 --replace
 ```
+
+Command ini sekarang memvalidasi bahwa approver yang dipilih benar-benar member tenant dan, bila dipakai, organization scope yang dimaksud.
+
+## Tutorial Budget Approval
+
+Subject model:
+
+- `Modules\Finance\Models\Budget`
+
+Setup default budget approval workflow:
+
+```bash
+php artisan fos:workflow:setup-budget-workflow 1 --organization=5 --finance=11 --executive=12 --executive-threshold=50000000
+```
+
+Aturan default:
+
+- `allocated_amount < executive-threshold` -> selesai di finance approver
+- `allocated_amount >= executive-threshold` -> finance approve -> executive approve
+
+Di halaman view Budget tersedia tombol:
+
+- `Start Approval Workflow`
+- `Open Active Workflow`
 
 ### Opsi 2: Manual via UI
 
