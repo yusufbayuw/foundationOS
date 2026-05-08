@@ -8,77 +8,81 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Employee\Enums\AttendanceStatus;
 
 class AttendanceLogsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('date', 'desc')
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
-                    ->searchable(),
-                TextColumn::make('employee.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('employee.id'))
-                    ->searchable(),
-                TextColumn::make('shift.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('shift.name'))
-                    ->searchable(),
-                TextColumn::make('approved_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
-                    ->numeric()
+                TextColumn::make('employee.full_name')
+                    ->label('Karyawan')
+                    ->searchable()
                     ->sortable(),
+
                 TextColumn::make('date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('date'))
-                    ->date()
+                    ->label('Tanggal')
+                    ->date('d M Y')
                     ->sortable(),
+
+                TextColumn::make('shift.name')
+                    ->label('Shift')
+                    ->badge()
+                    ->color('gray')
+                    ->placeholder('-'),
+
                 TextColumn::make('check_in')
-                    ->label(\Modules\Core\Support\FilamentUi::field('check_in'))
-                    ->dateTime()
+                    ->label('Masuk')
+                    ->time('H:i')
                     ->sortable(),
+
                 TextColumn::make('check_out')
-                    ->label(\Modules\Core\Support\FilamentUi::field('check_out'))
-                    ->dateTime()
+                    ->label('Keluar')
+                    ->time('H:i')
                     ->sortable(),
+
                 TextColumn::make('work_hours')
-                    ->label(\Modules\Core\Support\FilamentUi::field('work_hours'))
-                    ->numeric()
+                    ->label('Jam Kerja')
+                    ->suffix(' jam')
+                    ->numeric(2)
                     ->sortable(),
+
                 TextColumn::make('overtime_hours')
-                    ->label(\Modules\Core\Support\FilamentUi::field('overtime_hours'))
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->searchable(),
-                TextColumn::make('device_check_in')
-                    ->label(\Modules\Core\Support\FilamentUi::field('device_check_in'))
-                    ->searchable(),
-                TextColumn::make('device_check_out')
-                    ->label(\Modules\Core\Support\FilamentUi::field('device_check_out'))
-                    ->searchable(),
-                TextColumn::make('photo_check_in')
-                    ->label(\Modules\Core\Support\FilamentUi::field('photo_check_in'))
-                    ->searchable(),
-                TextColumn::make('photo_check_out')
-                    ->label(\Modules\Core\Support\FilamentUi::field('photo_check_out'))
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
+                    ->label('Lembur')
+                    ->suffix(' jam')
+                    ->numeric(2)
                     ->sortable()
+                    ->color(fn ($state) => (float) $state > 0 ? 'warning' : null),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (AttendanceStatus $state): string => $state->getColor()),
+
+                TextColumn::make('approvedBy.name')
+                    ->label('Disetujui')
+                    ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
+
+                TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(AttendanceStatus::class),
+
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -93,7 +97,7 @@ class AttendanceLogsTable
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

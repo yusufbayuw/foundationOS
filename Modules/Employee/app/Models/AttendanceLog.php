@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Employee\Enums\AttendanceStatus;
 
 class AttendanceLog extends Model
 {
@@ -41,6 +42,7 @@ class AttendanceLog extends Model
             'check_out' => 'datetime',
             'work_hours' => 'decimal:2',
             'overtime_hours' => 'decimal:2',
+            'status' => AttendanceStatus::class,
             'location_check_in' => 'array',
             'location_check_out' => 'array',
         ];

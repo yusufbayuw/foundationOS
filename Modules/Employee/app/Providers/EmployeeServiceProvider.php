@@ -4,6 +4,9 @@ namespace Modules\Employee\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Employee\Models\AttendanceLog;
+use Modules\Employee\Observers\AttendanceLogObserver;
+use Modules\Employee\Console\Commands\GeneratePayrollCommand;
 
 class EmployeeServiceProvider extends ModuleServiceProvider
 {
@@ -34,13 +37,14 @@ class EmployeeServiceProvider extends ModuleServiceProvider
         RouteServiceProvider::class,
     ];
 
-    /**
-     * Define module schedules.
-     * 
-     * @param $schedule
-     */
-    // protected function configureSchedules(Schedule $schedule): void
-    // {
-    //     $schedule->command('inspire')->hourly();
-    // }
+    protected array $commands = [
+        GeneratePayrollCommand::class,
+    ];
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        AttendanceLog::observe(AttendanceLogObserver::class);
+    }
 }

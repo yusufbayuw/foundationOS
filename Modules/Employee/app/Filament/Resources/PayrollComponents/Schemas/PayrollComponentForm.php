@@ -2,12 +2,15 @@
 
 namespace Modules\Employee\Filament\Resources\PayrollComponents\Schemas;
 
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Employee\Enums\PayrollComponentCalculationType;
+use Modules\Employee\Enums\PayrollComponentType;
 
 class PayrollComponentForm
 {
@@ -16,45 +19,84 @@ class PayrollComponentForm
         return $schema
             ->components([
                 TenantField::make(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name')
-                    ->required(),
-                TextInput::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
-                    ->required(),
-                TextInput::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
-                    ->required(),
-                TextInput::make('type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('type')),
-                TextInput::make('category')
-                    ->label(\Modules\Core\Support\FilamentUi::field('category')),
-                TextInput::make('calculation_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('calculation_type')),
-                TextInput::make('amount')
-                    ->label(\Modules\Core\Support\FilamentUi::field('amount'))
-                    ->numeric(),
-                TextInput::make('percentage')
-                    ->label(\Modules\Core\Support\FilamentUi::field('percentage'))
-                    ->numeric(),
-                Textarea::make('formula')
-                    ->label(\Modules\Core\Support\FilamentUi::field('formula'))
-                    ->columnSpanFull(),
-                Toggle::make('is_taxable')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_taxable'))
-                    ->required(),
-                Toggle::make('is_mandatory')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_mandatory'))
-                    ->required(),
-                Toggle::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
-                    ->required(),
-                TextInput::make('display_order')
-                    ->label(\Modules\Core\Support\FilamentUi::field('display_order'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
+
+                Section::make('Identitas Komponen')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('organization_id')
+                            ->label('Unit/Organisasi')
+                            ->relationship('organization', 'name')
+                            ->required(),
+
+                        TextInput::make('code')
+                            ->label('Kode')
+                            ->required()
+                            ->placeholder('cth: BASIC_SAL'),
+
+                        TextInput::make('name')
+                            ->label('Nama Komponen')
+                            ->required(),
+
+                        TextInput::make('category')
+                            ->label('Kategori')
+                            ->placeholder('cth: allowance, insurance'),
+                    ]),
+
+                Section::make('Tipe & Perhitungan')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('type')
+                            ->label('Tipe')
+                            ->options(PayrollComponentType::class)
+                            ->required(),
+
+                        Select::make('calculation_type')
+                            ->label('Metode Perhitungan')
+                            ->options(PayrollComponentCalculationType::class)
+                            ->required()
+                            ->reactive(),
+
+                        TextInput::make('amount')
+                            ->label('Nominal Tetap')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->visible(fn ($get) => $get('calculation_type') === PayrollComponentCalculationType::Fixed->value),
+
+                        TextInput::make('percentage')
+                            ->label('Persentase dari Gaji Pokok')
+                            ->numeric()
+                            ->suffix('%')
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->visible(fn ($get) => $get('calculation_type') === PayrollComponentCalculationType::Percentage->value),
+
+                        Textarea::make('formula')
+                            ->label('Formula')
+                            ->hint('Gunakan {basic_salary} untuk merujuk gaji pokok. Contoh: {basic_salary} * 0.05')
+                            ->columnSpanFull()
+                            ->visible(fn ($get) => $get('calculation_type') === PayrollComponentCalculationType::Formula->value),
+                    ]),
+
+                Section::make('Pengaturan')
+                    ->columns(4)
+                    ->schema([
+                        Toggle::make('is_taxable')
+                            ->label('Kena Pajak')
+                            ->default(true),
+
+                        Toggle::make('is_mandatory')
+                            ->label('Wajib')
+                            ->default(false),
+
+                        Toggle::make('is_active')
+                            ->label('Aktif')
+                            ->default(true),
+
+                        TextInput::make('display_order')
+                            ->label('Urutan Tampil')
+                            ->numeric()
+                            ->default(0),
+                    ]),
             ]);
     }
 }

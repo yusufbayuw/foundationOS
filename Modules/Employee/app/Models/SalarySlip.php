@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Employee\Enums\SalarySlipStatus;
 
 class SalarySlip extends Model
 {
@@ -56,11 +57,18 @@ class SalarySlip extends Model
             'overtime_hours' => 'decimal:2',
             'leave_days' => 'integer',
             'absent_days' => 'integer',
+            'status' => SalarySlipStatus::class,
             'paid_at' => 'datetime',
             'is_sent' => 'boolean',
             'sent_at' => 'datetime',
         ];
     }
+
+    public function isLockedForMutation(): bool
+    {
+        return $this->status?->isLockedForMutation() ?? false;
+    }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);

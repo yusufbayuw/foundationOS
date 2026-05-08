@@ -3,12 +3,16 @@
 namespace Modules\Employee\Filament\Resources\LeaveRequests\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Models\User;
+use Modules\Employee\Enums\LeaveRequestStatus;
+use Modules\Employee\Enums\LeaveType;
+use Modules\Employee\Models\Employee;
 
 class LeaveRequestForm
 {
@@ -17,46 +21,95 @@ class LeaveRequestForm
         return $schema
             ->components([
                 TenantField::make(),
-                Select::make('employee_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('employee_id'))
-                    ->relationship('employee', 'id')
-                    ->required(),
-                Select::make('substitute_employee_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('substitute_employee_id'))
-                    ->relationship('substituteEmployee', 'id'),
-                Select::make('supervisor_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('supervisor_id'))
-                    ->relationship('supervisor', 'name'),
-                Select::make('approver_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approver_id'))
-                    ->relationship('approver', 'name'),
-                TextInput::make('leave_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('leave_type')),
-                DatePicker::make('start_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('start_date'))
-                    ->required(),
-                DatePicker::make('end_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('end_date'))
-                    ->required(),
-                TextInput::make('total_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_days'))
-                    ->required()
-                    ->numeric(),
-                Textarea::make('reason')
-                    ->label(\Modules\Core\Support\FilamentUi::field('reason'))
-                    ->required()
-                    ->columnSpanFull(),
-                TextInput::make('attachment')
-                    ->label(\Modules\Core\Support\FilamentUi::field('attachment')),
-                TextInput::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->required()
-                    ->default('draft'),
-                DateTimePicker::make('supervisor_approved_at'),
-                DateTimePicker::make('approved_at'),
-                Textarea::make('rejection_reason')
-                    ->label(\Modules\Core\Support\FilamentUi::field('rejection_reason'))
-                    ->columnSpanFull(),
+
+                Section::make('Pengajuan Cuti')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('employee_id')
+                            ->label('Karyawan')
+                            ->options(fn () => Employee::query()
+                                ->orderBy('full_name')
+                                ->pluck('full_name', 'id'))
+                            ->searchable()
+                            ->required(),
+
+                        Select::make('leave_type')
+                            ->label('Jenis Cuti')
+                            ->options(LeaveType::class)
+                            ->required(),
+
+                        DatePicker::make('start_date')
+                            ->label('Tanggal Mulai')
+                            ->required()
+                            ->native(false)
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, $set, $get) => self::recalcDays($set, $get)),
+
+                        DatePicker::make('end_date')
+                            ->label('Tanggal Selesai')
+                            ->required()
+                            ->native(false)
+                            ->reactive()
+                            ->afterStateUpdated(fn ($state, $set, $get) => self::recalcDays($set, $get))
+                            ->minDate(fn ($get) => $get('start_date')),
+
+                        TextInput::make('total_days')
+                            ->label('Jumlah Hari')
+                            ->numeric()
+                            ->suffix('hari')
+                            ->required()
+                            ->hint('Dihitung otomatis dari tanggal'),
+
+                        Textarea::make('reason')
+                            ->label('Alasan')
+                            ->required()
+                            ->columnSpanFull(),
+
+                        TextInput::make('attachment')
+                            ->label('File Pendukung (path/URL)')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Persetujuan')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('substitute_employee_id')
+                            ->label('Karyawan Pengganti')
+                            ->options(fn () => Employee::query()
+                                ->orderBy('full_name')
+                                ->pluck('full_name', 'id'))
+                            ->searchable()
+                            ->nullable(),
+
+                        Select::make('supervisor_id')
+                            ->label('Supervisor')
+                            ->options(fn () => User::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->nullable(),
+
+                        Select::make('approver_id')
+                            ->label('Approver Akhir')
+                            ->options(fn () => User::orderBy('name')->pluck('name', 'id'))
+                            ->searchable()
+                            ->nullable(),
+
+                        Select::make('status')
+                            ->label('Status')
+                            ->options(LeaveRequestStatus::class)
+                            ->required()
+                            ->default(LeaveRequestStatus::Draft->value),
+                    ]),
             ]);
+    }
+
+    private static function recalcDays(\Closure $set, \Closure $get): void
+    {
+        $start = $get('start_date');
+        $end = $get('end_date');
+
+        if ($start && $end) {
+            $days = (int) \Carbon\Carbon::parse($start)->diffInDays(\Carbon\Carbon::parse($end)) + 1;
+            $set('total_days', max(1, $days));
+        }
     }
 }

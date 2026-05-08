@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Employee\Enums\KpiScoreStatus;
 
 class KpiScore extends Model
 {
@@ -37,11 +38,18 @@ class KpiScore extends Model
         return [
             'scores' => 'array',
             'total_score' => 'decimal:2',
+            'status' => KpiScoreStatus::class,
             'submitted_at' => 'datetime',
             'evaluated_at' => 'datetime',
             'approved_at' => 'datetime',
         ];
     }
+
+    public function isLockedForMutation(): bool
+    {
+        return $this->status?->isLockedForMutation() ?? false;
+    }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);

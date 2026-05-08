@@ -9,69 +9,90 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Employee\Enums\KpiScoreStatus;
 
 class KpiScoresTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('period_year', 'desc')
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
-                    ->searchable(),
-                TextColumn::make('employee.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('employee.id'))
-                    ->searchable(),
-                TextColumn::make('kpi_template_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('kpi_template_id'))
-                    ->numeric()
+                TextColumn::make('employee.full_name')
+                    ->label('Karyawan')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('evaluator.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('evaluator.name'))
+
+                TextColumn::make('template.name')
+                    ->label('Template KPI')
+                    ->placeholder('-')
                     ->searchable(),
+
                 TextColumn::make('period_month')
-                    ->label(\Modules\Core\Support\FilamentUi::field('period_month'))
-                    ->searchable(),
-                TextColumn::make('period_year')
-                    ->label(\Modules\Core\Support\FilamentUi::field('period_year'))
-                    ->searchable(),
-                TextColumn::make('total_score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_score'))
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('grade')
-                    ->label(\Modules\Core\Support\FilamentUi::field('grade'))
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->searchable(),
-                TextColumn::make('submitted_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('submitted_at'))
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('evaluated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('evaluated_at'))
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('approved_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
+                    ->label('Bulan')
                     ->sortable()
+                    ->formatStateUsing(fn ($state) => match ((int) $state) {
+                        1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                        5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Ags',
+                        9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des',
+                        default => $state,
+                    }),
+
+                TextColumn::make('period_year')
+                    ->label('Tahun')
+                    ->sortable(),
+
+                TextColumn::make('total_score')
+                    ->label('Total Skor')
+                    ->numeric(2)
+                    ->sortable()
+                    ->color(fn ($state) => match (true) {
+                        $state >= 90 => 'success',
+                        $state >= 70 => 'warning',
+                        default => 'danger',
+                    }),
+
+                TextColumn::make('grade')
+                    ->label('Grade')
+                    ->badge()
+                    ->color(fn ($state) => match ($state) {
+                        'A' => 'success',
+                        'B' => 'info',
+                        'C' => 'warning',
+                        default => 'danger',
+                    }),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (KpiScoreStatus $state): string => $state->getColor()),
+
+                TextColumn::make('evaluator.name')
+                    ->label('Evaluator')
+                    ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
+
+                TextColumn::make('approved_at')
+                    ->label('Disetujui')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->placeholder('-'),
+
+                TextColumn::make('created_at')
+                    ->label('Dibuat')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(KpiScoreStatus::class),
+
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -86,7 +107,7 @@ class KpiScoresTable
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

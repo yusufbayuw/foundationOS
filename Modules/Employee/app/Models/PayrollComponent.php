@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Employee\Enums\PayrollComponentCalculationType;
+use Modules\Employee\Enums\PayrollComponentType;
 
 class PayrollComponent extends Model
 {
@@ -34,6 +36,8 @@ class PayrollComponent extends Model
     protected function casts(): array
     {
         return [
+            'type' => PayrollComponentType::class,
+            'calculation_type' => PayrollComponentCalculationType::class,
             'amount' => 'decimal:2',
             'percentage' => 'decimal:2',
             'is_taxable' => 'boolean',

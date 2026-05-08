@@ -9,72 +9,84 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Employee\Enums\LeaveRequestStatus;
+use Modules\Employee\Enums\LeaveType;
 
 class LeaveRequestsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('start_date', 'desc')
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
-                    ->searchable(),
-                TextColumn::make('employee.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('employee.id'))
-                    ->searchable(),
-                TextColumn::make('substituteEmployee.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('substituteEmployee.id'))
-                    ->searchable(),
-                TextColumn::make('supervisor.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('supervisor.name'))
-                    ->searchable(),
-                TextColumn::make('approver.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approver.name'))
-                    ->searchable(),
+                TextColumn::make('employee.full_name')
+                    ->label('Karyawan')
+                    ->searchable()
+                    ->sortable(),
+
                 TextColumn::make('leave_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('leave_type'))
-                    ->searchable(),
+                    ->label('Jenis Cuti')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state instanceof LeaveType
+                        ? $state->getLabel()
+                        : LeaveType::tryFrom($state ?? '')?->getLabel() ?? $state),
+
                 TextColumn::make('start_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('start_date'))
-                    ->date()
+                    ->label('Mulai')
+                    ->date('d M Y')
                     ->sortable(),
+
                 TextColumn::make('end_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('end_date'))
-                    ->date()
+                    ->label('Selesai')
+                    ->date('d M Y')
                     ->sortable(),
+
                 TextColumn::make('total_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_days'))
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('attachment')
-                    ->label(\Modules\Core\Support\FilamentUi::field('attachment'))
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->searchable(),
-                TextColumn::make('supervisor_approved_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('supervisor_approved_at'))
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('approved_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
+                    ->label('Durasi')
+                    ->suffix(' hari')
                     ->sortable()
+                    ->alignCenter(),
+
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (LeaveRequestStatus $state): string => $state->getColor()),
+
+                TextColumn::make('supervisor.name')
+                    ->label('Supervisor')
+                    ->placeholder('-')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
+
+                TextColumn::make('approver.name')
+                    ->label('Approver')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('approved_at')
+                    ->label('Disetujui')
+                    ->date('d M Y')
+                    ->sortable()
+                    ->placeholder('-'),
+
+                TextColumn::make('created_at')
+                    ->label('Diajukan')
+                    ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(LeaveRequestStatus::class),
+
+                SelectFilter::make('leave_type')
+                    ->label('Jenis Cuti')
+                    ->options(LeaveType::class),
+
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -89,7 +101,7 @@ class LeaveRequestsTable
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

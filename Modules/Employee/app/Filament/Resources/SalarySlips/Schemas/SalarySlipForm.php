@@ -3,12 +3,16 @@
 namespace Modules\Employee\Filament\Resources\SalarySlips\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Employee\Enums\SalarySlipStatus;
+use Modules\Employee\Models\Employee;
 
 class SalarySlipForm
 {
@@ -17,88 +21,139 @@ class SalarySlipForm
         return $schema
             ->components([
                 TenantField::make(),
-                Select::make('employee_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('employee_id'))
-                    ->relationship('employee', 'id')
-                    ->required(),
-                TextInput::make('period_month')
-                    ->label(\Modules\Core\Support\FilamentUi::field('period_month'))
-                    ->required(),
-                TextInput::make('period_year')
-                    ->label(\Modules\Core\Support\FilamentUi::field('period_year'))
-                    ->required(),
-                TextInput::make('period_label')
-                    ->label(\Modules\Core\Support\FilamentUi::field('period_label'))
-                    ->required(),
-                TextInput::make('basic_salary')
-                    ->label(\Modules\Core\Support\FilamentUi::field('basic_salary'))
-                    ->required()
-                    ->numeric(),
-                Textarea::make('earnings_details')
-                    ->label(\Modules\Core\Support\FilamentUi::field('earnings_details'))
-                    ->required()
-                    ->columnSpanFull(),
-                Textarea::make('deductions_details')
-                    ->label(\Modules\Core\Support\FilamentUi::field('deductions_details'))
-                    ->required()
-                    ->columnSpanFull(),
-                TextInput::make('total_earnings')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_earnings'))
-                    ->required()
-                    ->numeric(),
-                TextInput::make('total_deductions')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_deductions'))
-                    ->required()
-                    ->numeric(),
-                TextInput::make('net_salary')
-                    ->label(\Modules\Core\Support\FilamentUi::field('net_salary'))
-                    ->required()
-                    ->numeric(),
-                Textarea::make('tax_details')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tax_details'))
-                    ->columnSpanFull(),
-                Textarea::make('bpjs_details')
-                    ->label(\Modules\Core\Support\FilamentUi::field('bpjs_details'))
-                    ->columnSpanFull(),
-                TextInput::make('working_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('working_days'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('working_hours')
-                    ->label(\Modules\Core\Support\FilamentUi::field('working_hours'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('overtime_hours')
-                    ->label(\Modules\Core\Support\FilamentUi::field('overtime_hours'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('leave_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('leave_days'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('absent_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('absent_days'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                TextInput::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->required()
-                    ->default('draft'),
-                DateTimePicker::make('paid_at'),
-                TextInput::make('paid_via')
-                    ->label(\Modules\Core\Support\FilamentUi::field('paid_via')),
-                Textarea::make('notes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('notes'))
-                    ->columnSpanFull(),
-                Toggle::make('is_sent')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_sent'))
-                    ->required(),
-                DateTimePicker::make('sent_at'),
+
+                Section::make('Identitas Slip Gaji')
+                    ->columns(3)
+                    ->schema([
+                        Select::make('employee_id')
+                            ->label('Karyawan')
+                            ->options(fn () => Employee::query()
+                                ->orderBy('full_name')
+                                ->pluck('full_name', 'id'))
+                            ->searchable()
+                            ->required(),
+
+                        Select::make('period_month')
+                            ->label('Bulan')
+                            ->options([
+                                '1' => 'Januari', '2' => 'Februari', '3' => 'Maret',
+                                '4' => 'April', '5' => 'Mei', '6' => 'Juni',
+                                '7' => 'Juli', '8' => 'Agustus', '9' => 'September',
+                                '10' => 'Oktober', '11' => 'November', '12' => 'Desember',
+                            ])
+                            ->required(),
+
+                        TextInput::make('period_year')
+                            ->label('Tahun')
+                            ->numeric()
+                            ->minValue(2000)
+                            ->maxValue(2099)
+                            ->default(now()->year)
+                            ->required(),
+
+                        TextInput::make('period_label')
+                            ->label('Label Periode')
+                            ->placeholder('cth: Januari 2025')
+                            ->columnSpanFull(),
+
+                        Select::make('status')
+                            ->label('Status')
+                            ->options(SalarySlipStatus::class)
+                            ->required()
+                            ->default(SalarySlipStatus::Draft->value),
+                    ]),
+
+                Section::make('Komponen Gaji')
+                    ->columns(3)
+                    ->description('Diisi otomatis saat menggunakan fitur Generate Payroll')
+                    ->schema([
+                        TextInput::make('basic_salary')
+                            ->label('Gaji Pokok')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required()
+                            ->default(0),
+
+                        TextInput::make('total_earnings')
+                            ->label('Total Pendapatan')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required()
+                            ->default(0),
+
+                        TextInput::make('total_deductions')
+                            ->label('Total Potongan')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required()
+                            ->default(0),
+
+                        TextInput::make('net_salary')
+                            ->label('Gaji Bersih (Take-Home Pay)')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required()
+                            ->default(0)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Rekap Kehadiran')
+                    ->columns(5)
+                    ->schema([
+                        TextInput::make('working_days')
+                            ->label('Hari Kerja')
+                            ->numeric()
+                            ->suffix('hari')
+                            ->default(0),
+
+                        TextInput::make('working_hours')
+                            ->label('Jam Kerja')
+                            ->numeric()
+                            ->suffix('jam')
+                            ->default(0),
+
+                        TextInput::make('overtime_hours')
+                            ->label('Lembur')
+                            ->numeric()
+                            ->suffix('jam')
+                            ->default(0),
+
+                        TextInput::make('leave_days')
+                            ->label('Hari Cuti')
+                            ->numeric()
+                            ->suffix('hari')
+                            ->default(0),
+
+                        TextInput::make('absent_days')
+                            ->label('Hari Absen')
+                            ->numeric()
+                            ->suffix('hari')
+                            ->default(0),
+                    ]),
+
+                Section::make('Pembayaran')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        DateTimePicker::make('paid_at')
+                            ->label('Dibayar Pada')
+                            ->native(false),
+
+                        TextInput::make('paid_via')
+                            ->label('Metode Pembayaran')
+                            ->placeholder('cth: Transfer BCA'),
+
+                        Toggle::make('is_sent')
+                            ->label('Slip sudah dikirim ke karyawan'),
+
+                        DateTimePicker::make('sent_at')
+                            ->label('Dikirim Pada')
+                            ->native(false),
+
+                        Textarea::make('notes')
+                            ->label('Catatan')
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }

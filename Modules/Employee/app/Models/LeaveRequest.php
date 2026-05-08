@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Employee\Enums\LeaveRequestStatus;
+use Modules\Employee\Enums\LeaveType;
 
 class LeaveRequest extends Model
 {
@@ -34,6 +36,8 @@ class LeaveRequest extends Model
     protected function casts(): array
     {
         return [
+            'leave_type' => LeaveType::class,
+            'status' => LeaveRequestStatus::class,
             'start_date' => 'date',
             'end_date' => 'date',
             'total_days' => 'integer',
@@ -41,6 +45,12 @@ class LeaveRequest extends Model
             'approved_at' => 'datetime',
         ];
     }
+
+    public function isLockedForMutation(): bool
+    {
+        return $this->status?->isLockedForMutation() ?? false;
+    }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
