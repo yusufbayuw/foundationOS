@@ -2,14 +2,17 @@
 
 namespace Modules\Library\Filament\Resources\BookCopies\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
-use Filament\Facades\Filament;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Modules\Core\Filament\Support\TenantField;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
+use Modules\Library\Support\LibraryScopeResolver;
 
 class BookCopyForm
 {
@@ -17,70 +20,94 @@ class BookCopyForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
-                        if (Filament::getTenant()) {
-                            $query->where('tenant_id', Filament::getTenant()->getKey());
-                        }
-                    })
-                    ->nullable()
-                    ->helperText('Opsional. Kosongkan untuk copy tenant-wide.'),
-                Select::make('book_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('book_id'))
-                    ->relationship('book', 'title', modifyQueryUsing: function (Builder $query): void {
-                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-                TextInput::make('copy_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('copy_number'))
-                    ->required(),
-                TextInput::make('barcode')
-                    ->label(\Modules\Core\Support\FilamentUi::field('barcode')),
-                DatePicker::make('acquisition_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('acquisition_date')),
-                TextInput::make('acquisition_source')
-                    ->label(\Modules\Core\Support\FilamentUi::field('acquisition_source')),
-                TextInput::make('price')
-                    ->label(\Modules\Core\Support\FilamentUi::field('price'))
-                    ->numeric()
-                    ->prefix('Rp'),
-                TextInput::make('condition')
-                    ->label(\Modules\Core\Support\FilamentUi::field('condition')),
-                Select::make('item_status_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('item_status_id'))
-                    ->relationship('itemStatus', 'name', modifyQueryUsing: function (Builder $query): void {
-                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
-                    })
-                    ->searchable()
-                    ->preload(),
-                Select::make('collection_type_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('collection_type_id'))
-                    ->relationship('collectionType', 'name', modifyQueryUsing: function (Builder $query): void {
-                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
-                    })
-                    ->searchable()
-                    ->preload(),
-                TextInput::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->required()
-                    ->default('available'),
-                Select::make('location_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('location_id'))
-                    ->relationship('location', 'name', modifyQueryUsing: function (Builder $query): void {
-                        app(\Modules\Library\Support\LibraryScopeResolver::class)->apply($query, auth()->user());
-                    })
-                    ->searchable()
-                    ->preload(),
-                TextInput::make('location_shelf')
-                    ->label(\Modules\Core\Support\FilamentUi::field('location_shelf'))
-                    ->helperText('Opsional. Isi jika lokasi belum terdaftar di master data.'),
-                Textarea::make('notes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('notes'))
-                    ->columnSpanFull(),
+                Section::make('Scope')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('organization_id')
+                            ->label(FilamentUi::field('organization_id'))
+                            ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
+                                if (Filament::getTenant()) {
+                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                }
+                            })
+                            ->nullable()
+                            ->helperText('Opsional. Kosongkan untuk copy tenant-wide.'),
+                        Select::make('book_id')
+                            ->label(FilamentUi::field('book_id'))
+                            ->relationship('book', 'title', modifyQueryUsing: function (Builder $query): void {
+                                app(LibraryScopeResolver::class)->apply($query, auth()->user());
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                    ]),
+
+                Section::make('Identification')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('copy_number')
+                            ->label(FilamentUi::field('copy_number'))
+                            ->required(),
+                        TextInput::make('barcode')
+                            ->label(FilamentUi::field('barcode')),
+                    ]),
+
+                Section::make('Acquisition')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('acquisition_date')
+                            ->label(FilamentUi::field('acquisition_date')),
+                        TextInput::make('acquisition_source')
+                            ->label(FilamentUi::field('acquisition_source')),
+                        TextInput::make('price')
+                            ->label(FilamentUi::field('price'))
+                            ->numeric()
+                            ->prefix('Rp'),
+                        TextInput::make('condition')
+                            ->label(FilamentUi::field('condition')),
+                    ]),
+
+                Section::make('Classification & Status')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('item_status_id')
+                            ->label(FilamentUi::field('item_status_id'))
+                            ->relationship('itemStatus', 'name', modifyQueryUsing: function (Builder $query): void {
+                                app(LibraryScopeResolver::class)->apply($query, auth()->user());
+                            })
+                            ->searchable()
+                            ->preload(),
+                        Select::make('collection_type_id')
+                            ->label(FilamentUi::field('collection_type_id'))
+                            ->relationship('collectionType', 'name', modifyQueryUsing: function (Builder $query): void {
+                                app(LibraryScopeResolver::class)->apply($query, auth()->user());
+                            })
+                            ->searchable()
+                            ->preload(),
+                        TextInput::make('status')
+                            ->label(FilamentUi::field('status'))
+                            ->required()
+                            ->default('available'),
+                    ]),
+
+                Section::make('Location & Notes')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('location_id')
+                            ->label(FilamentUi::field('location_id'))
+                            ->relationship('location', 'name', modifyQueryUsing: function (Builder $query): void {
+                                app(LibraryScopeResolver::class)->apply($query, auth()->user());
+                            })
+                            ->searchable()
+                            ->preload(),
+                        TextInput::make('location_shelf')
+                            ->label(FilamentUi::field('location_shelf'))
+                            ->helperText('Opsional. Isi jika lokasi belum terdaftar di master data.'),
+                        Textarea::make('notes')
+                            ->label(FilamentUi::field('notes'))
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }
