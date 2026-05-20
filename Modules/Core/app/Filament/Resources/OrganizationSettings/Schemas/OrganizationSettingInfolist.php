@@ -3,7 +3,9 @@
 namespace Modules\Core\Filament\Resources\OrganizationSettings\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class OrganizationSettingInfolist
 {
@@ -11,27 +13,41 @@ class OrganizationSettingInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Organization')),
-                TextEntry::make('group')
-                    ->label(\Modules\Core\Support\FilamentUi::field('group'))
-                    ->placeholder('-'),
-                TextEntry::make('key')
-                    ->label(\Modules\Core\Support\FilamentUi::field('key')),
-                TextEntry::make('value')
-                    ->label(\Modules\Core\Support\FilamentUi::field('value'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('type')),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('Basic Info')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('organization.name')
+                            ->label(FilamentUi::text('Organization')),
+                        TextEntry::make('group')
+                            ->label(FilamentUi::field('group'))
+                            ->placeholder('-'),
+                        TextEntry::make('key')
+                            ->label(FilamentUi::field('key')),
+                        TextEntry::make('type')
+                            ->label(FilamentUi::field('type')),
+                    ]),
+
+                Section::make('Value')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('value')
+                            ->label(FilamentUi::field('value'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Timestamps')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label(FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }

@@ -2,12 +2,13 @@
 
 namespace Modules\Core\Filament\Resources\TenantRoles\Schemas;
 
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class TenantRoleForm
 {
@@ -15,29 +16,43 @@ class TenantRoleForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                TextInput::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
-                    ->required(),
-                TextInput::make('slug')
-                    ->label(\Modules\Core\Support\FilamentUi::field('slug'))
-                    ->required(),
-                Textarea::make('description')
-                    ->label(\Modules\Core\Support\FilamentUi::field('description'))
-                    ->columnSpanFull(),
-                TextInput::make('level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('level')),
-                Textarea::make('permissions')
-                    ->label(\Modules\Core\Support\FilamentUi::field('permissions'))
-                    ->columnSpanFull(),
-                Toggle::make('is_default')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_default'))
-                    ->required(),
-                Toggle::make('is_super_admin')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_super_admin'))
-                    ->required(),
-                TextInput::make('dashboard_route')
-                    ->label(\Modules\Core\Support\FilamentUi::field('dashboard_route'))
+                Section::make('Basic Info')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        TextInput::make('name')
+                            ->label(FilamentUi::field('name'))
+                            ->required(),
+                        TextInput::make('slug')
+                            ->label(FilamentUi::field('slug'))
+                            ->required(),
+                        TextInput::make('level')
+                            ->label(FilamentUi::field('level')),
+                        Textarea::make('description')
+                            ->label(FilamentUi::field('description'))
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Permissions')
+                    ->columns(2)
+                    ->schema([
+                        Textarea::make('permissions')
+                            ->label(FilamentUi::field('permissions'))
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Settings')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('is_default')
+                            ->label(FilamentUi::field('is_default'))
+                            ->required(),
+                        Toggle::make('is_super_admin')
+                            ->label(FilamentUi::field('is_super_admin'))
+                            ->required(),
+                        TextInput::make('dashboard_route')
+                            ->label(FilamentUi::field('dashboard_route')),
+                    ]),
             ]);
     }
 }
