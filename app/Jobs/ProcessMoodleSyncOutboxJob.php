@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Concerns\InteractsWithTenant;
 use App\Integrations\Moodle\MoodleSyncRetry;
 use App\Integrations\Moodle\MoodleSyncService;
 use App\Models\MoodleSyncOutbox;
@@ -11,7 +12,7 @@ use Throwable;
 
 class ProcessMoodleSyncOutboxJob implements ShouldQueue
 {
-    use Queueable;
+    use InteractsWithTenant, Queueable;
 
     public int $tries;
 
@@ -19,6 +20,7 @@ class ProcessMoodleSyncOutboxJob implements ShouldQueue
     {
         $this->onQueue((string) config('moodle.queue', 'moodle-sync'));
         $this->tries = max(1, (int) config('moodle.max_attempts', 7));
+        $this->captureCurrentTenant();
     }
 
     public function handle(MoodleSyncService $syncService, MoodleSyncRetry $retry): void
@@ -69,4 +71,3 @@ class ProcessMoodleSyncOutboxJob implements ShouldQueue
         }
     }
 }
-

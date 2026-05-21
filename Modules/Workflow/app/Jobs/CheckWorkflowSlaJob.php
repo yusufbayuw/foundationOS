@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Jobs;
 
+use App\Concerns\InteractsWithTenant;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Workflow\Contracts\WorkflowSlaService;
@@ -9,11 +10,12 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 class CheckWorkflowSlaJob implements ShouldQueue
 {
-    use Queueable;
+    use InteractsWithTenant, Queueable;
 
     public function __construct(public int $instanceId)
     {
         $this->onQueue((string) config('workflow.sla_queue', 'workflow-sla'));
+        $this->captureCurrentTenant();
     }
 
     public function handle(WorkflowSlaService $slaService): void

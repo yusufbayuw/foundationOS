@@ -237,7 +237,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 4.2 — Queue & Console Tenant Context
+### Fase 4.2 — Queue & Console Tenant Context `[x]`
 
 **Deliverable.**
 - Trait: `App\Concerns\InteractsWithTenant` untuk Job classes — serialize `tenant_id`, restore ke `CurrentTenant` saat `handle()` jalan.
