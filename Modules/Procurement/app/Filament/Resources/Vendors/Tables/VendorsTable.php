@@ -11,6 +11,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
@@ -122,6 +123,16 @@ class VendorsTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('is_active')
+                    ->options([
+                        '1' => 'Active',
+                        '0' => 'Inactive',
+                    ]),
+                SelectFilter::make('is_blacklisted')
+                    ->options([
+                        '1' => 'Blacklisted',
+                        '0' => 'Not Blacklisted',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),

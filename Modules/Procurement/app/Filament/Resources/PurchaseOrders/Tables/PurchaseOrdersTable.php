@@ -10,6 +10,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
@@ -110,6 +111,15 @@ class PurchaseOrdersTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                        'cancelled' => 'Cancelled',
+                        'completed' => 'Completed',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),

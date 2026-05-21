@@ -11,6 +11,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
@@ -82,6 +83,15 @@ class PurchaseRequisitionsTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'submitted' => 'Submitted',
+                        'in_review' => 'In Review',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                        'cancelled' => 'Cancelled',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),

@@ -11,6 +11,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
@@ -142,6 +143,14 @@ class StudentsTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('status')
+                    ->options([
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
+                        'graduated' => 'Graduated',
+                        'transferred' => 'Transferred',
+                        'dropped_out' => 'Dropped Out',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),

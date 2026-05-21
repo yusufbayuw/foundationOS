@@ -10,6 +10,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
@@ -71,6 +72,14 @@ class AttendancesTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('status')
+                    ->options([
+                        'present' => 'Present',
+                        'absent' => 'Absent',
+                        'sick' => 'Sick',
+                        'late' => 'Late',
+                        'excused' => 'Excused',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),
