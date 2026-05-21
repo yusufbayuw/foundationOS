@@ -2,17 +2,19 @@
 
 namespace Modules\Procurement\Filament\Resources\Vendors\Tables;
 
+use App\Filament\Imports\VendorImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class VendorsTable
 {
@@ -21,99 +23,99 @@ class VendorsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('province.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('province.name'))
+                    ->label(FilamentUi::field('province.name'))
                     ->searchable(),
                 TextColumn::make('city.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('city.name'))
+                    ->label(FilamentUi::field('city.name'))
                     ->searchable(),
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('type'))
+                    ->label(FilamentUi::field('type'))
                     ->searchable(),
                 TextColumn::make('business_field')
-                    ->label(\Modules\Core\Support\FilamentUi::field('business_field'))
+                    ->label(FilamentUi::field('business_field'))
                     ->searchable(),
                 TextColumn::make('npwp')
-                    ->label(\Modules\Core\Support\FilamentUi::field('npwp'))
+                    ->label(FilamentUi::field('npwp'))
                     ->searchable(),
                 TextColumn::make('nib')
-                    ->label(\Modules\Core\Support\FilamentUi::field('nib'))
+                    ->label(FilamentUi::field('nib'))
                     ->searchable(),
                 TextColumn::make('siup')
-                    ->label(\Modules\Core\Support\FilamentUi::field('siup'))
+                    ->label(FilamentUi::field('siup'))
                     ->searchable(),
                 TextColumn::make('tdp')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tdp'))
+                    ->label(FilamentUi::field('tdp'))
                     ->searchable(),
                 TextColumn::make('postal_code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('postal_code'))
+                    ->label(FilamentUi::field('postal_code'))
                     ->searchable(),
                 TextColumn::make('phone')
-                    ->label(\Modules\Core\Support\FilamentUi::field('phone'))
+                    ->label(FilamentUi::field('phone'))
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Email address'))
+                    ->label(FilamentUi::text('Email address'))
                     ->searchable(),
                 TextColumn::make('website')
-                    ->label(\Modules\Core\Support\FilamentUi::field('website'))
+                    ->label(FilamentUi::field('website'))
                     ->searchable(),
                 TextColumn::make('contact_person')
-                    ->label(\Modules\Core\Support\FilamentUi::field('contact_person'))
+                    ->label(FilamentUi::field('contact_person'))
                     ->searchable(),
                 TextColumn::make('contact_position')
-                    ->label(\Modules\Core\Support\FilamentUi::field('contact_position'))
+                    ->label(FilamentUi::field('contact_position'))
                     ->searchable(),
                 TextColumn::make('contact_phone')
-                    ->label(\Modules\Core\Support\FilamentUi::field('contact_phone'))
+                    ->label(FilamentUi::field('contact_phone'))
                     ->searchable(),
                 TextColumn::make('contact_email')
-                    ->label(\Modules\Core\Support\FilamentUi::field('contact_email'))
+                    ->label(FilamentUi::field('contact_email'))
                     ->searchable(),
                 TextColumn::make('bank_name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('bank_name'))
+                    ->label(FilamentUi::field('bank_name'))
                     ->searchable(),
                 TextColumn::make('bank_account')
-                    ->label(\Modules\Core\Support\FilamentUi::field('bank_account'))
+                    ->label(FilamentUi::field('bank_account'))
                     ->searchable(),
                 TextColumn::make('bank_account_holder')
-                    ->label(\Modules\Core\Support\FilamentUi::field('bank_account_holder'))
+                    ->label(FilamentUi::field('bank_account_holder'))
                     ->searchable(),
                 TextColumn::make('tax_status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tax_status'))
+                    ->label(FilamentUi::field('tax_status'))
                     ->searchable(),
                 IconColumn::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->label(FilamentUi::field('is_active'))
                     ->boolean(),
                 IconColumn::make('is_blacklisted')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_blacklisted'))
+                    ->label(FilamentUi::field('is_blacklisted'))
                     ->boolean(),
                 TextColumn::make('performance_rating')
-                    ->label(\Modules\Core\Support\FilamentUi::field('performance_rating'))
+                    ->label(FilamentUi::field('performance_rating'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_transactions')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_transactions'))
+                    ->label(FilamentUi::field('total_transactions'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_transaction_value')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_transaction_value'))
+                    ->label(FilamentUi::field('total_transaction_value'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -126,14 +128,14 @@ class VendorsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\VendorImporter::class),
+                ...ImportTableActions::make(VendorImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }
