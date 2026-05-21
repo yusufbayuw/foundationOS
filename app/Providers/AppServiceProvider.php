@@ -2,23 +2,23 @@
 
 namespace App\Providers;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Observers\ClassStudentObserver;
 use App\Observers\CourseObserver;
 use App\Observers\StudentObserver;
 use App\Observers\UserObserver;
+use App\Support\CurrentTenant;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Spatie\Permission\PermissionRegistrar;
-use App\Models\Permission;
-use App\Models\Role;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Campus\Models\CollageStudent;
+use Modules\Campus\Models\Course;
+use Modules\Campus\Models\StudyProgram;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
-use Modules\Campus\Models\Course;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Library\Models\Book;
 use Modules\Procurement\Models\GoodsReceipt;
@@ -27,6 +27,7 @@ use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Models\VendorBill;
 use Modules\School\Models\ClassStudent;
 use Modules\School\Models\Student;
+use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(CurrentTenant::class);
     }
 
     /**
@@ -60,7 +61,6 @@ class AppServiceProvider extends ServiceProvider
             return null;
         });
 
-
         Relation::enforceMorphMap([
             'user' => User::class,
             'tenant' => Tenant::class,
@@ -68,7 +68,7 @@ class AppServiceProvider extends ServiceProvider
             'school_student' => Student::class,
             'enrollment_applicant' => Applicant::class,
             'campus_collage_student' => CollageStudent::class,
-            'campus_study_program' => \Modules\Campus\Models\StudyProgram::class,
+            'campus_study_program' => StudyProgram::class,
             'library_book' => Book::class,
             'procurement_vendor' => Vendor::class,
             'purchase_order' => PurchaseOrder::class,
@@ -76,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
             'vendor_bill' => VendorBill::class,
         ]);
 
-        if (config("app.env") === "production") {
+        if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
     }

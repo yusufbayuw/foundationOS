@@ -2,9 +2,11 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Http\Middleware\Authenticate;
-use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
+use App\Http\Middleware\BindTenantToContainer;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
+use Coolsam\Modules\ModulesPlugin;
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -21,9 +23,9 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Coolsam\Modules\ModulesPlugin;
-use Nwidart\Modules\Facades\Module;
+use Modules\Core\Models\Tenant;
 use Modules\Core\Support\FilamentUi;
+use Nwidart\Modules\Facades\Module;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -51,7 +53,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()->label(FilamentUi::module('Library')),
                 NavigationGroup::make()->label(FilamentUi::module('Monitoring')),
             ])
-            ->tenant(\Modules\Core\Models\Tenant::class)
+            ->tenant(Tenant::class)
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -84,6 +86,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->tenantMiddleware([
                 SyncShieldTenant::class,
+                BindTenantToContainer::class,
             ], isPersistent: true);
 
         foreach (Module::allEnabled() as $module) {

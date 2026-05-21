@@ -213,7 +213,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** Mengurangi ketergantungan pada disiplin developer (manual `tenant_id` di setiap query) menjadi enforcement otomatis di level framework.
 
-### Fase 4.1 — Global Scope Otomatis (Pendekatan In-House)
+### Fase 4.1 — Global Scope Otomatis (Pendekatan In-House) `[x]`
 
 **Konteks.** Bukan adopsi package eksternal dulu — minimize blast radius. Pakai trait sendiri.
 
