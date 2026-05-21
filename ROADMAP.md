@@ -371,7 +371,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** Integrasi Moodle saat ini lebih cocok untuk K-12. Untuk universitas (modul Campus), banyak konsep yang belum ditangani: course catalog dengan prerequisite, study plan (KRS) sync, lecturer assignment, gradebook level-mata-kuliah dengan komponen, thesis tracking, semester academic calendar.
 
-### Fase 6.1 — Course Catalog & Prerequisite Sync
+### Fase 6.1 — Course Catalog & Prerequisite Sync `[x]`
 
 **Deliverable.**
 - Mapping `Modules\Campus\Models\Course` → Moodle Course **Template** (category `fos_template_{tenant}`).
