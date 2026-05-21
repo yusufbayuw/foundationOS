@@ -398,7 +398,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 6.2 — Study Plan (KRS) Sync ke Moodle
+### Fase 6.2 — Study Plan (KRS) Sync ke Moodle `[x]`
 
 **Konteks.** Mahasiswa di Indonesia memilih mata kuliah per semester (KRS). Setelah KRS approved, mahasiswa harus terenroll otomatis di Moodle course offering yang dipilih.
 
@@ -415,6 +415,14 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 **Dependensi.** Fase 6.1, Fase 3 (enrollment reconcile) untuk safety net.
 
 **Risiko.** Mahasiswa pindah KRS tengah semester — perlu audit trail.
+
+**Selesai.** 2026-05-22. Implementasi:
+- Outbox entity `study_plan_enrollment` (action `enroll`/`unenroll`) + `MoodleSyncService::syncStudyPlanEnrollmentOutbox`: resolves Moodle course via `resolveMoodleCourseIdForOffering` (Fase 6.1), enroll user student role.
+- `StudyPlanItemObserver` enqueue saat status `approved`/`enrolled`/`active` (enroll) atau `cancelled`/`dropped`/`withdrawn`/soft-delete (unenroll). Hanya bereaksi pada perubahan kolom relevan.
+- Command `php artisan fos:moodle:bulk-enroll-semester {period} [--tenant=] [--dry-run]` untuk rollover semester — enqueue outbox untuk semua StudyPlanItem yang sudah approved di periode tersebut.
+- Test `ApprovedStudyPlanEnrollsStudentInMoodleTest` (5 tests) cover enroll, draft tidak enqueue, cancel → unenroll, delete → unenroll, dan bulk command.
+
+Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal — saat ini unenroll terjadi langsung. Untuk kebutuhan grace period spesifik, gunakan workflow approval sebelum mengubah status item, atau tunda perubahan status di sisi kaprodi.
 
 ---
 

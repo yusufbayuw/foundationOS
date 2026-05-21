@@ -13,6 +13,7 @@ use Modules\Campus\Models\CourseOffering;
 use Modules\Campus\Models\CourseOfferingLecturer;
 use Modules\Campus\Models\CoursePrerequisite;
 use Modules\Campus\Models\Lecturer;
+use Modules\Campus\Models\StudyPlanItem;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
@@ -36,6 +37,7 @@ class MoodleSyncService
             MoodleOutboxService::ENTITY_ENROLLMENT => $this->syncEnrollmentOutbox($outbox),
             MoodleOutboxService::ENTITY_LECTURER_ASSIGNMENT => $this->syncLecturerAssignmentOutbox($outbox),
             MoodleOutboxService::ENTITY_COURSE_OFFERING => $this->syncCourseOfferingOutbox($outbox),
+            MoodleOutboxService::ENTITY_STUDY_PLAN_ENROLLMENT => $this->syncStudyPlanEnrollmentOutbox($outbox),
             default => throw new MoodleIntegrationException("Unsupported outbox entity type: {$outbox->entity_type}"),
         };
     }
@@ -562,6 +564,51 @@ class MoodleSyncService
         })->all();
 
         return "Prerequisites (FOS-managed):\n".implode("\n", $lines);
+    }
+
+    protected function syncStudyPlanEnrollmentOutbox(MoodleSyncOutbox $outbox): void
+    {
+        $payload = is_array($outbox->payload) ? $outbox->payload : [];
+        $itemId = (int) $outbox->entity_id;
+
+        $item = StudyPlanItem::withoutTenantScope()
+            ->withTrashed()
+            ->with([
+                'studyPlan' => fn ($q) => $q->withTrashed()->with(['collageStudent' => fn ($qq) => $qq->withTrashed()->with('user')]),
+                'courseOffering' => fn ($q) => $q->withTrashed()->with(['course' => fn ($qq) => $qq->withTrashed()->with('tenant'), 'academicPeriod' => fn ($qq) => $qq->withTrashed()]),
+            ])
+            ->find($itemId);
+
+        $tenantId = (int) ($payload['tenant_id'] ?? $item?->tenant_id ?? 0);
+        $offeringId = (int) ($payload['course_offering_id'] ?? $item?->course_offering_id ?? 0);
+        $userId = (int) ($payload['user_id'] ?? $item?->studyPlan?->collageStudent?->user_id ?? 0);
+
+        if ($tenantId <= 0 || $offeringId <= 0 || $userId <= 0) {
+            throw new MoodleIntegrationException("StudyPlan enrollment payload incomplete for outbox {$outbox->id}.");
+        }
+
+        $offering = $item?->courseOffering ?: CourseOffering::withoutTenantScope()->withTrashed()->find($offeringId);
+        if (! $offering) {
+            throw new MoodleIntegrationException("CourseOffering {$offeringId} not found.");
+        }
+
+        $user = $item?->studyPlan?->collageStudent?->user ?: User::withTrashed()->find($userId);
+        if (! $user) {
+            throw new MoodleIntegrationException("User {$userId} not found.");
+        }
+
+        $moodleUserId = $this->upsertUser($user);
+        $moodleCourseId = $this->resolveMoodleCourseIdForOffering($offering);
+        $this->syncTenantCohortMembership($tenantId, $moodleUserId);
+
+        if ($outbox->action === MoodleOutboxService::ACTION_UNENROLL) {
+            $this->unenrollUser($moodleUserId, $moodleCourseId);
+
+            return;
+        }
+
+        $roleId = (int) config('moodle.role_map.student', 5);
+        $this->enrollUser($moodleUserId, $moodleCourseId, $roleId);
     }
 
     public function resolveMoodleCourseIdForOffering(CourseOffering $offering): int

@@ -9,6 +9,7 @@ use App\Observers\CourseObserver;
 use App\Observers\CourseOfferingLecturerObserver;
 use App\Observers\CourseOfferingObserver;
 use App\Observers\StudentObserver;
+use App\Observers\StudyPlanItemObserver;
 use App\Observers\UserObserver;
 use App\Support\CurrentTenant;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -19,6 +20,7 @@ use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
 use Modules\Campus\Models\CourseOfferingLecturer;
+use Modules\Campus\Models\StudyPlanItem;
 use Modules\Campus\Models\StudyProgram;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
@@ -54,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
         ClassStudent::observe(ClassStudentObserver::class);
         CourseOffering::observe(CourseOfferingObserver::class);
         CourseOfferingLecturer::observe(CourseOfferingLecturerObserver::class);
+        StudyPlanItem::observe(StudyPlanItemObserver::class);
 
         app(PermissionRegistrar::class)
             ->setPermissionClass(Permission::class)

@@ -200,7 +200,29 @@ Prerequisite (POC): `course_prerequisites` di FOS disisipkan ke `summary` Moodle
 
 Trade-off: jumlah course Moodle bertambah linier dengan semester × offering. Untuk universitas dengan 1000+ offering/semester, pastikan Moodle DB dan kapasitas storage memadai.
 
-## 12) Lecturer Assignment (Multi-Teacher per Course Offering)
+## 12) Study Plan (KRS) Enrollment Sync
+
+Sejak Roadmap Epic 6 Fase 6.2, FOS otomatis meng-enroll mahasiswa ke Moodle course offering berdasarkan KRS:
+
+- `StudyPlanItemObserver` mengamati perubahan kolom `status`/`course_offering_id`/`study_plan_id`/`tenant_id`/`deleted_at`.
+- Status yang **memicu enroll**: `approved`, `enrolled`, `active`.
+- Status yang **memicu unenroll**: `cancelled`, `dropped`, `withdrawn`; juga soft-delete pada `StudyPlanItem`.
+- Outbox entity: `study_plan_enrollment` dengan action `enroll`/`unenroll`. Resolve Moodle course via `resolveMoodleCourseIdForOffering` (prefer mapping `course_offering` dari Fase 6.1).
+- Role default: `MOODLE_ROLE_STUDENT` (5).
+
+Bulk operations:
+
+```bash
+# Preview (tidak mengubah outbox)
+php artisan fos:moodle:bulk-enroll-semester {period_id} --dry-run
+
+# Enqueue enroll outbox untuk semua KRS item approved di periode tersebut
+php artisan fos:moodle:bulk-enroll-semester {period_id} [--tenant=ID]
+```
+
+Gunakan ini saat semester rollover untuk memastikan semua mahasiswa dengan KRS approved ter-enroll ke Moodle course offering yang baru tanpa harus menunggu observer pada perubahan status berikutnya.
+
+## 13) Lecturer Assignment (Multi-Teacher per Course Offering)
 
 Sejak Roadmap Epic 6 Fase 6.3, FOS mendukung penugasan **banyak dosen** ke satu `CourseOffering` (mata kuliah ditawarkan per semester) dengan dua peran:
 
@@ -222,7 +244,7 @@ Alur sinkronisasi:
 
 Idempotency dijaga via unique index `(course_offering_id, lecturer_id)` di pivot, dan dedupe-key outbox `lecturer_assignment:{id}:{action}:{updated_at}`.
 
-## 13) Guardrail untuk Tim Operasional Moodle
+## 14) Guardrail untuk Tim Operasional Moodle
 
 Agar tidak terjadi kebocoran antar-tenant:
 
