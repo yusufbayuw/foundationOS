@@ -3,11 +3,13 @@
 namespace Modules\School\Filament\Resources\ViolationTypes\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class ViolationTypeForm
 {
@@ -15,37 +17,51 @@ class ViolationTypeForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name'),
-                TextInput::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
-                    ->required(),
-                TextInput::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
-                    ->required(),
-                TextInput::make('category')
-                    ->label(\Modules\Core\Support\FilamentUi::field('category')),
-                TextInput::make('severity_level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('severity_level')),
-                Textarea::make('default_sanctions')
-                    ->label(\Modules\Core\Support\FilamentUi::field('default_sanctions'))
-                    ->columnSpanFull(),
-                TextInput::make('point_weight')
-                    ->label(\Modules\Core\Support\FilamentUi::field('point_weight'))
-                    ->required()
-                    ->numeric()
-                    ->default(1),
-                Textarea::make('description')
-                    ->label(\Modules\Core\Support\FilamentUi::field('description'))
-                    ->columnSpanFull(),
-                Textarea::make('prevention_measures')
-                    ->label(\Modules\Core\Support\FilamentUi::field('prevention_measures'))
-                    ->columnSpanFull(),
-                Toggle::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
-                    ->required(),
+                Section::make('General Information')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('organization_id')
+                            ->label(FilamentUi::field('organization_id'))
+                            ->relationship('organization', 'name'),
+                        TextInput::make('code')
+                            ->label(FilamentUi::field('code'))
+                            ->required(),
+                        TextInput::make('name')
+                            ->label(FilamentUi::field('name'))
+                            ->required(),
+                    ]),
+
+                Section::make('Classification')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('category')
+                            ->label(FilamentUi::field('category')),
+                        TextInput::make('severity_level')
+                            ->label(FilamentUi::field('severity_level')),
+                        TextInput::make('point_weight')
+                            ->label(FilamentUi::field('point_weight'))
+                            ->required()
+                            ->numeric()
+                            ->default(1),
+                        Toggle::make('is_active')
+                            ->label(FilamentUi::field('is_active'))
+                            ->required(),
+                    ]),
+
+                Section::make('Details & Actions')
+                    ->columns(2)
+                    ->schema([
+                        Textarea::make('default_sanctions')
+                            ->label(FilamentUi::field('default_sanctions'))
+                            ->columnSpanFull(),
+                        Textarea::make('description')
+                            ->label(FilamentUi::field('description'))
+                            ->columnSpanFull(),
+                        Textarea::make('prevention_measures')
+                            ->label(FilamentUi::field('prevention_measures'))
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }
