@@ -119,7 +119,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 2.2 — RFQ → PO Pipeline
+### Fase 2.2 — RFQ → PO Pipeline `[x]`
 
 **Konteks.** Setelah vendor terpilih di RFQ, PO masih dibuat manual.
 
