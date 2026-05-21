@@ -166,7 +166,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** Saat ini reconcile hanya level user/course (`MOODLE.md:172`). Enrollment drift (mahasiswa di Moodle tapi tidak di FOS, atau sebaliknya) belum terdeteksi otomatis.
 
-### Fase 3.1 — Enrollment Drift Detection
+### Fase 3.1 — Enrollment Drift Detection `[x]`
 
 **Deliverable.**
 - Tabel baru: `moodle_enrollment_drifts` — `tenant_id`, `class_id`, `course_moodle_id`, `user_moodle_id`, `drift_type` (`missing_in_fos`, `missing_in_moodle`, `mismatched_role`), `detected_at`, `resolved_at`.
