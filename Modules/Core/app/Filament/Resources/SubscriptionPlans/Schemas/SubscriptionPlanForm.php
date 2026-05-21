@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Resources\SubscriptionPlans\Schemas;
 
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -67,13 +68,29 @@ class SubscriptionPlanForm
                 Section::make('Features')
                     ->columns(2)
                     ->schema([
-                        Textarea::make('included_modules')
+                        Repeater::make('included_modules')
                             ->label(FilamentUi::field('included_modules'))
                             ->required()
-                            ->columnSpanFull(),
-                        Textarea::make('features')
+                            ->schema([
+                                TextInput::make('code')
+                                    ->label('Module Code'),
+                                TextInput::make('name')
+                                    ->label('Module Name'),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
+                        Repeater::make('features')
                             ->label(FilamentUi::field('features'))
-                            ->columnSpanFull(),
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Feature'),
+                                Textarea::make('description')
+                                    ->label('Description'),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
                     ]),
 
                 Section::make('Status')
