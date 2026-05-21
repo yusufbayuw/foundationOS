@@ -259,6 +259,7 @@ php artisan make:super-admin
 | Topic | File |
 |-------|------|
 | Application overview | `README.md` |
+| Development roadmap (Workflow V3, Procurement automation, Moodle reconcile, Tenancy hardening, Public API, Moodle campus) | `ROADMAP.md` |
 | Moodle setup | `MOODLE.md`, `MOODLE_HARDENING_CHECKLIST.md` |
 | Workflow details | `WORKFLOW.md` |
 | Procurement runbook | `PROCUREMENT.md` |
