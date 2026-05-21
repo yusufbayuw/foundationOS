@@ -3,7 +3,9 @@
 namespace Modules\Procurement\Filament\Resources\GoodsReceipts\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class GoodsReceiptInfolist
 {
@@ -11,52 +13,71 @@ class GoodsReceiptInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
-                TextEntry::make('purchaseOrder.id')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Purchase order'))
-                    ->placeholder('-'),
-                TextEntry::make('received_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('received_by'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('inspected_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('inspected_by'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('receipt_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('receipt_number')),
-                TextEntry::make('receipt_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('receipt_date'))
-                    ->date(),
-                TextEntry::make('delivery_note_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('delivery_note_number'))
-                    ->placeholder('-'),
-                TextEntry::make('supplier_delivery_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('supplier_delivery_number'))
-                    ->placeholder('-'),
-                TextEntry::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status')),
-                TextEntry::make('notes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('notes'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('inspection_notes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('inspection_notes'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('received_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('received_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('Receipt Information')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('tenant.name')
+                            ->label(FilamentUi::text('Tenant')),
+                        TextEntry::make('purchaseOrder.id')
+                            ->label(FilamentUi::text('Purchase order'))
+                            ->placeholder('-'),
+                        TextEntry::make('receipt_number')
+                            ->label(FilamentUi::field('receipt_number')),
+                        TextEntry::make('receipt_date')
+                            ->label(FilamentUi::field('receipt_date'))
+                            ->date(),
+                        TextEntry::make('delivery_note_number')
+                            ->label(FilamentUi::field('delivery_note_number'))
+                            ->placeholder('-'),
+                        TextEntry::make('supplier_delivery_number')
+                            ->label(FilamentUi::field('supplier_delivery_number'))
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Personnel & Status')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('received_by')
+                            ->label(FilamentUi::field('received_by'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('inspected_by')
+                            ->label(FilamentUi::field('inspected_by'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('status')
+                            ->label(FilamentUi::field('status')),
+                        TextEntry::make('received_at')
+                            ->label(FilamentUi::field('received_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Notes')
+                    ->columns(1)
+                    ->schema([
+                        TextEntry::make('notes')
+                            ->label(FilamentUi::field('notes'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('inspection_notes')
+                            ->label(FilamentUi::field('inspection_notes'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Timestamps')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label(FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }
