@@ -4,27 +4,33 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Augment `course_prerequisites` (created by 2026_05_21_140100) with optional
+ * fields used by the per-tenant prerequisite hint generator.
+ */
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('course_prerequisites', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('course_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('prerequisite_course_id')->constrained('courses')->cascadeOnDelete();
-            $table->decimal('min_grade', 4, 2)->nullable();
-            $table->boolean('is_required')->default(true);
-            $table->string('note')->nullable();
-            $table->timestamps();
-
-            $table->unique(['course_id', 'prerequisite_course_id'], 'course_prerequisites_unique');
-            $table->index(['tenant_id', 'course_id']);
+        Schema::table('course_prerequisites', function (Blueprint $table): void {
+            if (! Schema::hasColumn('course_prerequisites', 'is_required')) {
+                $table->boolean('is_required')->default(true)->after('is_strict');
+            }
+            if (! Schema::hasColumn('course_prerequisites', 'note')) {
+                $table->string('note')->nullable()->after('is_required');
+            }
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('course_prerequisites');
+        Schema::table('course_prerequisites', function (Blueprint $table): void {
+            if (Schema::hasColumn('course_prerequisites', 'note')) {
+                $table->dropColumn('note');
+            }
+            if (Schema::hasColumn('course_prerequisites', 'is_required')) {
+                $table->dropColumn('is_required');
+            }
+        });
     }
 };

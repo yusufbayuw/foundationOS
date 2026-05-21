@@ -17,6 +17,7 @@ class CoursePrerequisite extends Model
         'course_id',
         'prerequisite_course_id',
         'min_grade',
+        'is_strict',
         'is_required',
         'note',
     ];
@@ -25,6 +26,7 @@ class CoursePrerequisite extends Model
     {
         return [
             'min_grade' => 'decimal:2',
+            'is_strict' => 'boolean',
             'is_required' => 'boolean',
         ];
     }
