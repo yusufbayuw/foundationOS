@@ -3,12 +3,16 @@
 namespace Modules\Procurement\Filament\Resources\Vendors\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class VendorForm
 {
@@ -21,26 +25,29 @@ class VendorForm
                     ->schema([
                         TenantField::make(),
                         TextInput::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code')),
+                            ->label(FilamentUi::field('code')),
                         TextInput::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                            ->label(FilamentUi::field('name'))
                             ->required(),
                         TextInput::make('type')
-                            ->label(\Modules\Core\Support\FilamentUi::field('type'))
+                            ->label(FilamentUi::field('type'))
                             ->required()
                             ->default('company'),
                         TextInput::make('business_field')
-                            ->label(\Modules\Core\Support\FilamentUi::field('business_field')),
+                            ->label(FilamentUi::field('business_field')),
                         Select::make('province_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('province_id'))
-                            ->relationship('province', 'name'),
+                            ->label(FilamentUi::field('province_id'))
+                            ->relationship('province', 'name')
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('city_id', null)),
                         Select::make('city_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('city_id'))
-                            ->relationship('city', 'name'),
+                            ->label(FilamentUi::field('city_id'))
+                            ->relationship('city', 'name', fn (Builder $query, Get $get) => $query->when($get('province_id'), fn ($q, $id) => $q->where('province_id', $id))
+                            ),
                         TextInput::make('postal_code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('postal_code')),
+                            ->label(FilamentUi::field('postal_code')),
                         Textarea::make('address')
-                            ->label(\Modules\Core\Support\FilamentUi::field('address'))
+                            ->label(FilamentUi::field('address'))
                             ->columnSpanFull(),
                     ]),
 
@@ -48,28 +55,28 @@ class VendorForm
                     ->columns(2)
                     ->schema([
                         TextInput::make('npwp')
-                            ->label(\Modules\Core\Support\FilamentUi::field('npwp')),
+                            ->label(FilamentUi::field('npwp')),
                         TextInput::make('nib')
-                            ->label(\Modules\Core\Support\FilamentUi::field('nib')),
+                            ->label(FilamentUi::field('nib')),
                         TextInput::make('siup')
-                            ->label(\Modules\Core\Support\FilamentUi::field('siup')),
+                            ->label(FilamentUi::field('siup')),
                         TextInput::make('tdp')
-                            ->label(\Modules\Core\Support\FilamentUi::field('tdp')),
+                            ->label(FilamentUi::field('tdp')),
                         TextInput::make('tax_status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('tax_status')),
+                            ->label(FilamentUi::field('tax_status')),
                     ]),
 
                 Section::make('Contact')
                     ->columns(2)
                     ->schema([
                         TextInput::make('phone')
-                            ->label(\Modules\Core\Support\FilamentUi::field('phone'))
+                            ->label(FilamentUi::field('phone'))
                             ->tel(),
                         TextInput::make('email')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Email address'))
+                            ->label(FilamentUi::text('Email address'))
                             ->email(),
                         TextInput::make('website')
-                            ->label(\Modules\Core\Support\FilamentUi::field('website'))
+                            ->label(FilamentUi::field('website'))
                             ->url(),
                     ]),
 
@@ -77,14 +84,14 @@ class VendorForm
                     ->columns(2)
                     ->schema([
                         TextInput::make('contact_person')
-                            ->label(\Modules\Core\Support\FilamentUi::field('contact_person')),
+                            ->label(FilamentUi::field('contact_person')),
                         TextInput::make('contact_position')
-                            ->label(\Modules\Core\Support\FilamentUi::field('contact_position')),
+                            ->label(FilamentUi::field('contact_position')),
                         TextInput::make('contact_phone')
-                            ->label(\Modules\Core\Support\FilamentUi::field('contact_phone'))
+                            ->label(FilamentUi::field('contact_phone'))
                             ->tel(),
                         TextInput::make('contact_email')
-                            ->label(\Modules\Core\Support\FilamentUi::field('contact_email'))
+                            ->label(FilamentUi::field('contact_email'))
                             ->email(),
                     ]),
 
@@ -92,40 +99,40 @@ class VendorForm
                     ->columns(2)
                     ->schema([
                         TextInput::make('bank_name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('bank_name')),
+                            ->label(FilamentUi::field('bank_name')),
                         TextInput::make('bank_account')
-                            ->label(\Modules\Core\Support\FilamentUi::field('bank_account')),
+                            ->label(FilamentUi::field('bank_account')),
                         TextInput::make('bank_account_holder')
-                            ->label(\Modules\Core\Support\FilamentUi::field('bank_account_holder')),
+                            ->label(FilamentUi::field('bank_account_holder')),
                     ]),
 
                 Section::make('Status')
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                            ->label(FilamentUi::field('is_active'))
                             ->required(),
                         Toggle::make('is_blacklisted')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_blacklisted'))
+                            ->label(FilamentUi::field('is_blacklisted'))
                             ->required(),
                         Textarea::make('blacklist_reason')
-                            ->label(\Modules\Core\Support\FilamentUi::field('blacklist_reason'))
+                            ->label(FilamentUi::field('blacklist_reason'))
                             ->columnSpanFull(),
                         TextInput::make('performance_rating')
-                            ->label(\Modules\Core\Support\FilamentUi::field('performance_rating'))
+                            ->label(FilamentUi::field('performance_rating'))
                             ->numeric(),
                         TextInput::make('total_transactions')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_transactions'))
+                            ->label(FilamentUi::field('total_transactions'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         TextInput::make('total_transaction_value')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_transaction_value'))
+                            ->label(FilamentUi::field('total_transaction_value'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         Textarea::make('documents')
-                            ->label(\Modules\Core\Support\FilamentUi::field('documents'))
+                            ->label(FilamentUi::field('documents'))
                             ->columnSpanFull(),
                     ]),
             ]);

@@ -9,7 +9,10 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Filament\Support\TenantField;
 use Modules\Core\Support\FilamentUi;
 
@@ -71,10 +74,13 @@ class OrganizationForm
                             ->columnSpanFull(),
                         Select::make('province_id')
                             ->label(FilamentUi::field('province_id'))
-                            ->relationship('province', 'name'),
+                            ->relationship('province', 'name')
+                            ->live()
+                            ->afterStateUpdated(fn (Set $set) => $set('city_id', null)),
                         Select::make('city_id')
                             ->label(FilamentUi::field('city_id'))
-                            ->relationship('city', 'name'),
+                            ->relationship('city', 'name', fn (Builder $query, Get $get) => $query->when($get('province_id'), fn ($q, $id) => $q->where('province_id', $id))
+                            ),
                         Select::make('district_id')
                             ->label(FilamentUi::field('district_id'))
                             ->relationship('district', 'name'),
