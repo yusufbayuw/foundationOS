@@ -2,18 +2,19 @@
 
 namespace Modules\Campus\Filament\Resources\CourseOfferings;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\CourseOfferings\Pages\CreateCourseOffering;
 use Modules\Campus\Filament\Resources\CourseOfferings\Pages\EditCourseOffering;
 use Modules\Campus\Filament\Resources\CourseOfferings\Pages\ListCourseOfferings;
 use Modules\Campus\Filament\Resources\CourseOfferings\Pages\ViewCourseOffering;
+use Modules\Campus\Filament\Resources\CourseOfferings\RelationManagers\LecturerAssignmentsRelationManager;
 use Modules\Campus\Filament\Resources\CourseOfferings\RelationManagers\StudyPlanItemsRelationManager;
 use Modules\Campus\Filament\Resources\CourseOfferings\Schemas\CourseOfferingForm;
 use Modules\Campus\Filament\Resources\CourseOfferings\Schemas\CourseOfferingInfolist;
 use Modules\Campus\Filament\Resources\CourseOfferings\Tables\CourseOfferingsTable;
 use Modules\Campus\Models\CourseOffering;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class CourseOfferingResource extends LocalizedResource
 {
@@ -39,6 +40,7 @@ class CourseOfferingResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
+            LecturerAssignmentsRelationManager::class,
             StudyPlanItemsRelationManager::class,
         ];
     }

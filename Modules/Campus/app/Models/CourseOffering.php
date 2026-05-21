@@ -4,16 +4,17 @@ namespace Modules\Campus\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\AcademicPeriod;
-use Modules\Core\Models\Organization;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\Organization;
 
 class CourseOffering extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -39,6 +40,7 @@ class CourseOffering extends Model
             'enrolled_count' => 'integer',
         ];
     }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -62,5 +64,17 @@ class CourseOffering extends Model
     public function studyPlanItems(): HasMany
     {
         return $this->hasMany(StudyPlanItem::class);
+    }
+
+    public function lecturerAssignments(): HasMany
+    {
+        return $this->hasMany(CourseOfferingLecturer::class);
+    }
+
+    public function lecturers(): BelongsToMany
+    {
+        return $this->belongsToMany(Lecturer::class, 'course_offering_lecturers')
+            ->withPivot(['role', 'is_active', 'assigned_at', 'removed_at'])
+            ->withTimestamps();
     }
 }

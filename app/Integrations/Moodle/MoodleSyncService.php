@@ -9,6 +9,9 @@ use App\Models\MoodleSyncOutbox;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
+use Modules\Campus\Models\CourseOffering;
+use Modules\Campus\Models\CourseOfferingLecturer;
+use Modules\Campus\Models\Lecturer;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
@@ -29,6 +32,7 @@ class MoodleSyncService
             MoodleOutboxService::ENTITY_USER => $this->syncUserOutbox($outbox),
             MoodleOutboxService::ENTITY_COURSE => $this->syncCourseOutbox($outbox),
             MoodleOutboxService::ENTITY_ENROLLMENT => $this->syncEnrollmentOutbox($outbox),
+            MoodleOutboxService::ENTITY_LECTURER_ASSIGNMENT => $this->syncLecturerAssignmentOutbox($outbox),
             default => throw new MoodleIntegrationException("Unsupported outbox entity type: {$outbox->entity_type}"),
         };
     }
@@ -40,6 +44,7 @@ class MoodleSyncService
         if (! $user) {
             if ($outbox->action === MoodleOutboxService::ACTION_DEACTIVATE) {
                 $this->deactivateMissingUser((int) $outbox->entity_id);
+
                 return;
             }
 
@@ -62,6 +67,7 @@ class MoodleSyncService
         if (! $course) {
             if ($outbox->action === MoodleOutboxService::ACTION_DEACTIVATE) {
                 $this->deactivateMissingCourse((int) $outbox->entity_id);
+
                 return;
             }
 
@@ -117,6 +123,7 @@ class MoodleSyncService
 
         if ($outbox->action === MoodleOutboxService::ACTION_UNENROLL) {
             $this->unenrollUser($moodleUserId, $moodleCourseId);
+
             return;
         }
 
@@ -181,7 +188,7 @@ class MoodleSyncService
                 'firstname' => $payload['firstname'],
                 'lastname' => $payload['lastname'],
                 'email' => $payload['email'],
-                'password' => Str::random(20) . 'Aa1!',
+                'password' => Str::random(20).'Aa1!',
             ];
 
             try {
@@ -195,7 +202,7 @@ class MoodleSyncService
                 }
 
                 $fallbackPayload = $createPayload;
-                $fallbackPayload['username'] = 'fos_' . (int) $user->id;
+                $fallbackPayload['username'] = 'fos_'.(int) $user->id;
                 $fallbackPayload['email'] = $this->buildFallbackMoodleEmail((int) $user->id, (string) $payload['email']);
 
                 $created = $this->callMoodle('core_user_create_users', [
@@ -242,6 +249,7 @@ class MoodleSyncService
             [$local, $domain] = explode('@', $email, 2);
             $local = preg_replace('/[^a-zA-Z0-9._+-]/', '', $local) ?: 'user';
             $domain = preg_replace('/[^a-zA-Z0-9.-]/', '', $domain) ?: 'example.invalid';
+
             return "{$local}+fos{$userId}@{$domain}";
         }
 
@@ -305,6 +313,81 @@ class MoodleSyncService
         return $moodleCourseId;
     }
 
+    protected function syncLecturerAssignmentOutbox(MoodleSyncOutbox $outbox): void
+    {
+        $payload = is_array($outbox->payload) ? $outbox->payload : [];
+        $assignmentId = (int) $outbox->entity_id;
+
+        $assignment = CourseOfferingLecturer::withoutTenantScope()
+            ->with([
+                'courseOffering' => fn ($q) => $q->withoutTenantScope()->withTrashed(),
+                'lecturer' => fn ($q) => $q->withoutTenantScope()->withTrashed()->with('user'),
+            ])
+            ->find($assignmentId);
+
+        $courseOfferingId = (int) ($payload['course_offering_id'] ?? $assignment?->course_offering_id ?? 0);
+        $lecturerId = (int) ($payload['lecturer_id'] ?? $assignment?->lecturer_id ?? 0);
+        $tenantId = (int) ($payload['tenant_id'] ?? $assignment?->tenant_id ?? 0);
+        $role = (string) ($payload['role'] ?? $assignment?->role?->value ?? 'primary');
+
+        if ($courseOfferingId <= 0 || $lecturerId <= 0 || $tenantId <= 0) {
+            throw new MoodleIntegrationException("Lecturer assignment payload is incomplete for outbox {$outbox->id}.");
+        }
+
+        /** @var Lecturer|null $lecturer */
+        $lecturer = $assignment?->lecturer ?: Lecturer::withoutTenantScope()->withTrashed()->with('user')->find($lecturerId);
+        if (! $lecturer || ! $lecturer->user) {
+            throw new MoodleIntegrationException("Lecturer {$lecturerId} has no linked user.");
+        }
+
+        /** @var CourseOffering|null $offering */
+        $offering = $assignment?->courseOffering ?: CourseOffering::withoutTenantScope()->withTrashed()->find($courseOfferingId);
+        if (! $offering) {
+            throw new MoodleIntegrationException("CourseOffering {$courseOfferingId} not found.");
+        }
+
+        $moodleUserId = $this->upsertUser($lecturer->user);
+        $moodleCourseId = $this->resolveMoodleCourseIdForOffering($offering);
+        $this->syncTenantCohortMembership($tenantId, $moodleUserId);
+
+        $roleId = $this->resolveLecturerRoleId($role);
+
+        if ($outbox->action === MoodleOutboxService::ACTION_UNASSIGN) {
+            $this->unenrollUser($moodleUserId, $moodleCourseId);
+
+            return;
+        }
+
+        $this->enrollUser($moodleUserId, $moodleCourseId, $roleId);
+    }
+
+    public function resolveMoodleCourseIdForOffering(CourseOffering $offering): int
+    {
+        $courseIdnumber = $this->mapper->courseIdnumber((int) $offering->course_id);
+        $existing = MoodleEntityMapping::query()
+            ->where('entity_type', 'course')
+            ->where('fos_entity_id', (int) $offering->course_id)
+            ->first();
+
+        $moodleCourseId = $existing?->moodle_id ?: $this->findMoodleCourseIdByIdnumber($courseIdnumber);
+
+        if ($moodleCourseId <= 0) {
+            throw new MoodleIntegrationException(
+                "Unable to resolve Moodle course for CourseOffering {$offering->id} (course {$offering->course_id})."
+            );
+        }
+
+        return (int) $moodleCourseId;
+    }
+
+    public function resolveLecturerRoleId(string $role): int
+    {
+        return match ($role) {
+            'assistant' => (int) config('moodle.role_map.assistant_teacher', 4),
+            default => (int) config('moodle.role_map.teacher', 3),
+        };
+    }
+
     public function resolveMoodleCourseIdForClass(int $tenantId, int $classId): int
     {
         $mapping = MoodleClassCourseMapping::query()
@@ -327,6 +410,7 @@ class MoodleSyncService
 
             if ($resolved > 0) {
                 $mapping->forceFill(['moodle_course_id' => $resolved])->save();
+
                 return $resolved;
             }
         }
@@ -336,6 +420,7 @@ class MoodleSyncService
 
             if ($resolved > 0) {
                 $mapping->forceFill(['moodle_course_id' => $resolved])->save();
+
                 return $resolved;
             }
         }

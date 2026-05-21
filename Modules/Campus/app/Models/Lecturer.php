@@ -4,16 +4,17 @@ namespace Modules\Campus\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Lecturer extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -40,6 +41,7 @@ class Lecturer extends Model
             'is_active' => 'boolean',
         ];
     }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -58,6 +60,18 @@ class Lecturer extends Model
     public function courseOfferings(): HasMany
     {
         return $this->hasMany(CourseOffering::class);
+    }
+
+    public function taughtCourseOfferings(): BelongsToMany
+    {
+        return $this->belongsToMany(CourseOffering::class, 'course_offering_lecturers')
+            ->withPivot(['role', 'is_active', 'assigned_at', 'removed_at'])
+            ->withTimestamps();
+    }
+
+    public function courseOfferingAssignments(): HasMany
+    {
+        return $this->hasMany(CourseOfferingLecturer::class);
     }
 
     public function headedStudyPrograms(): HasMany

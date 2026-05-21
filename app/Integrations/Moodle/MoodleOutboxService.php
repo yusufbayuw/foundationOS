@@ -9,13 +9,24 @@ use Illuminate\Database\QueryException;
 class MoodleOutboxService
 {
     public const ENTITY_USER = 'user';
+
     public const ENTITY_COURSE = 'course';
+
     public const ENTITY_ENROLLMENT = 'enrollment';
 
+    public const ENTITY_LECTURER_ASSIGNMENT = 'lecturer_assignment';
+
     public const ACTION_UPSERT = 'upsert';
+
     public const ACTION_DEACTIVATE = 'deactivate';
+
     public const ACTION_ENROLL = 'enroll';
+
     public const ACTION_UNENROLL = 'unenroll';
+
+    public const ACTION_ASSIGN = 'assign';
+
+    public const ACTION_UNASSIGN = 'unassign';
 
     public function enqueue(
         string $entityType,

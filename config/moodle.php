@@ -14,6 +14,7 @@ return [
     'role_map' => [
         'student' => (int) env('MOODLE_ROLE_STUDENT', 5),
         'teacher' => (int) env('MOODLE_ROLE_TEACHER', 3),
+        'assistant_teacher' => (int) env('MOODLE_ROLE_ASSISTANT_TEACHER', 4),
         'manager' => (int) env('MOODLE_ROLE_MANAGER', 1),
     ],
     'calendar_sync_enabled' => (bool) env('MOODLE_CALENDAR_SYNC_ENABLED', false),

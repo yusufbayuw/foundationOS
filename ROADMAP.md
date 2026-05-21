@@ -410,7 +410,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 6.3 — Lecturer Assignment & Multi-Teacher Courses
+### Fase 6.3 — Lecturer Assignment & Multi-Teacher Courses `[x]`
 
 **Deliverable.**
 - Sync `Lecturer` → Moodle teacher role enrollment di course offering yang ditugaskan.
