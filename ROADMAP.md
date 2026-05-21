@@ -426,6 +426,8 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Risiko.** Lecturer global vs per-tenant — beberapa universitas pakai dosen tamu lintas fakultas; pastikan mapping benar.
 
+**Selesai.** 2026-05-21 — commit `7a2538a`. Catatan: karena Fase 6.1 belum dijalankan, `resolveMoodleCourseIdForOffering()` jatuh ke mapping `course` (level master). Saat Fase 6.1 mengisi `moodle_offering_id`, resolver perlu diperluas agar lecturer ter-enroll ke course offering per-semester, bukan course master.
+
 ---
 
 ### Fase 6.4 — Gradebook Granular Pull

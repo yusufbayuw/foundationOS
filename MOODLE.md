@@ -104,6 +104,7 @@ MOODLE_ENROL_ROLE_ID=5
 MOODLE_COHORT_SYNC_ENABLED=true
 MOODLE_ROLE_STUDENT=5
 MOODLE_ROLE_TEACHER=3
+MOODLE_ROLE_ASSISTANT_TEACHER=4
 MOODLE_ROLE_MANAGER=1
 MOODLE_CALENDAR_SYNC_ENABLED=true
 MOODLE_LEARNING_PULL_ENABLED=true
@@ -172,7 +173,29 @@ Batasan yang perlu dipahami:
 - Reconcile inbound saat ini fokus user/course (belum enrollment-level reconciliation dua arah penuh).
 - Attendance pull tergantung plugin Moodle attendance.
 
-## 11) Guardrail untuk Tim Operasional Moodle
+## 11) Lecturer Assignment (Multi-Teacher per Course Offering)
+
+Sejak Roadmap Epic 6 Fase 6.3, FOS mendukung penugasan **banyak dosen** ke satu `CourseOffering` (mata kuliah ditawarkan per semester) dengan dua peran:
+
+| FOS role (`course_offering_lecturers.role`) | Moodle role shortname | Default role id | Hak akses |
+|---|---|---|---|
+| `primary` | `editingteacher` | `MOODLE_ROLE_TEACHER=3` | Dosen pengampu utama, bisa edit konten kursus. |
+| `assistant` | `teacher` (non-editing) | `MOODLE_ROLE_ASSISTANT_TEACHER=4` | Asisten/co-teacher, akses melihat & menilai tanpa edit struktur. |
+
+Alur sinkronisasi:
+
+1. Admin/Kaprodi menambahkan dosen ke `CourseOffering` via Filament panel (relation manager "Lecturers" pada halaman CourseOffering).
+2. `CourseOfferingLecturerObserver` enqueue entri `moodle_sync_outbox` dengan `entity_type=lecturer_assignment`, action `assign`/`unassign`.
+3. Worker `queue:work --queue=moodle-sync` memproses outbox → `MoodleSyncService::syncLecturerAssignmentOutbox()`:
+   - Upsert user Moodle untuk dosen (idnumber `fos_user_{id}`).
+   - Resolve Moodle course id via mapping `course` (fallback: `core_course_get_courses_by_field` dengan idnumber `fos_course_{course_id}`). Saat Fase 6.1 diaktifkan, akan ditambah resolusi via `moodle_offering_id`.
+   - Pastikan keanggotaan cohort tenant.
+   - `enrol_manual_enrol_users` dengan `roleid` sesuai (3 atau 4).
+4. Penghapusan assignment menghasilkan `enrol_manual_unenrol_users` lewat outbox action `unassign`.
+
+Idempotency dijaga via unique index `(course_offering_id, lecturer_id)` di pivot, dan dedupe-key outbox `lecturer_assignment:{id}:{action}:{updated_at}`.
+
+## 12) Guardrail untuk Tim Operasional Moodle
 
 Agar tidak terjadi kebocoran antar-tenant:
 
