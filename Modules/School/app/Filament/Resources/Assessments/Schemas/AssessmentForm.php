@@ -5,11 +5,13 @@ namespace Modules\School\Filament\Resources\Assessments\Schemas;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class AssessmentForm
 {
@@ -17,62 +19,86 @@ class AssessmentForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name'),
-                Select::make('academic_period_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('academic_period_id'))
-                    ->relationship('academicPeriod', 'name'),
-                Select::make('subject_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('subject_id'))
-                    ->relationship('subject', 'name')
-                    ->required(),
-                TextInput::make('class_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('class_id'))
-                    ->required()
-                    ->numeric(),
-                TextInput::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
-                    ->required(),
-                TextInput::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code')),
-                TextInput::make('type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('type')),
-                TextInput::make('assessment_category')
-                    ->label(\Modules\Core\Support\FilamentUi::field('assessment_category')),
-                TextInput::make('weight')
-                    ->label(\Modules\Core\Support\FilamentUi::field('weight'))
-                    ->numeric(),
-                TextInput::make('max_score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_score'))
-                    ->numeric(),
-                TextInput::make('passing_score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('passing_score'))
-                    ->numeric(),
-                DatePicker::make('schedule_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('schedule_date')),
-                DateTimePicker::make('start_time'),
-                DateTimePicker::make('end_time'),
-                TextInput::make('duration_minutes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('duration_minutes'))
-                    ->numeric(),
-                Textarea::make('instructions')
-                    ->label(\Modules\Core\Support\FilamentUi::field('instructions'))
-                    ->columnSpanFull(),
-                Textarea::make('attachments')
-                    ->label(\Modules\Core\Support\FilamentUi::field('attachments'))
-                    ->columnSpanFull(),
-                Toggle::make('is_published')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_published'))
-                    ->required(),
-                DateTimePicker::make('published_at'),
-                Toggle::make('allow_retake')
-                    ->label(\Modules\Core\Support\FilamentUi::field('allow_retake'))
-                    ->required(),
-                TextInput::make('max_attempts')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_attempts'))
-                    ->numeric(),
+                Section::make('Basic Information')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('organization_id')
+                            ->label(FilamentUi::field('organization_id'))
+                            ->relationship('organization', 'name'),
+                        Select::make('academic_period_id')
+                            ->label(FilamentUi::field('academic_period_id'))
+                            ->relationship('academicPeriod', 'name'),
+                        Select::make('subject_id')
+                            ->label(FilamentUi::field('subject_id'))
+                            ->relationship('subject', 'name')
+                            ->required(),
+                        TextInput::make('class_id')
+                            ->label(FilamentUi::field('class_id'))
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('name')
+                            ->label(FilamentUi::field('name'))
+                            ->required(),
+                        TextInput::make('code')
+                            ->label(FilamentUi::field('code')),
+                    ]),
+
+                Section::make('Classification & Scoring')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('type')
+                            ->label(FilamentUi::field('type')),
+                        TextInput::make('assessment_category')
+                            ->label(FilamentUi::field('assessment_category')),
+                        TextInput::make('weight')
+                            ->label(FilamentUi::field('weight'))
+                            ->numeric(),
+                        TextInput::make('max_score')
+                            ->label(FilamentUi::field('max_score'))
+                            ->numeric(),
+                        TextInput::make('passing_score')
+                            ->label(FilamentUi::field('passing_score'))
+                            ->numeric(),
+                    ]),
+
+                Section::make('Schedule')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('schedule_date')
+                            ->label(FilamentUi::field('schedule_date')),
+                        DateTimePicker::make('start_time'),
+                        DateTimePicker::make('end_time'),
+                        TextInput::make('duration_minutes')
+                            ->label(FilamentUi::field('duration_minutes'))
+                            ->numeric(),
+                    ]),
+
+                Section::make('Instructions & Attachments')
+                    ->columns(2)
+                    ->schema([
+                        Textarea::make('instructions')
+                            ->label(FilamentUi::field('instructions'))
+                            ->columnSpanFull(),
+                        Textarea::make('attachments')
+                            ->label(FilamentUi::field('attachments'))
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Publication & Attempts')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('is_published')
+                            ->label(FilamentUi::field('is_published'))
+                            ->required(),
+                        DateTimePicker::make('published_at'),
+                        Toggle::make('allow_retake')
+                            ->label(FilamentUi::field('allow_retake'))
+                            ->required(),
+                        TextInput::make('max_attempts')
+                            ->label(FilamentUi::field('max_attempts'))
+                            ->numeric(),
+                    ]),
             ]);
     }
 }

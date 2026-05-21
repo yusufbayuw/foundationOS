@@ -4,7 +4,9 @@ namespace Modules\Core\Filament\Resources\Modules\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class ModuleInfolist
 {
@@ -12,56 +14,85 @@ class ModuleInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code')),
-                TextEntry::make('slug')
-                    ->label(\Modules\Core\Support\FilamentUi::field('slug')),
-                TextEntry::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name')),
-                TextEntry::make('description')
-                    ->label(\Modules\Core\Support\FilamentUi::field('description'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('icon')
-                    ->label(\Modules\Core\Support\FilamentUi::field('icon'))
-                    ->placeholder('-'),
-                TextEntry::make('color')
-                    ->label(\Modules\Core\Support\FilamentUi::field('color'))
-                    ->placeholder('-'),
-                TextEntry::make('version')
-                    ->label(\Modules\Core\Support\FilamentUi::field('version'))
-                    ->placeholder('-'),
-                IconEntry::make('is_core')
-                    ->boolean(),
-                IconEntry::make('is_active')
-                    ->boolean(),
-                IconEntry::make('is_premium')
-                    ->boolean(),
-                TextEntry::make('price_monthly')
-                    ->label(\Modules\Core\Support\FilamentUi::field('price_monthly'))
-                    ->numeric(),
-                TextEntry::make('price_yearly')
-                    ->label(\Modules\Core\Support\FilamentUi::field('price_yearly'))
-                    ->numeric(),
-                TextEntry::make('settings_schema')
-                    ->label(\Modules\Core\Support\FilamentUi::field('settings_schema'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('required_modules')
-                    ->label(\Modules\Core\Support\FilamentUi::field('required_modules'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('sort_order')
-                    ->label(\Modules\Core\Support\FilamentUi::field('sort_order'))
-                    ->numeric(),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('Basic Info')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('code')
+                            ->label(FilamentUi::field('code')),
+                        TextEntry::make('slug')
+                            ->label(FilamentUi::field('slug')),
+                        TextEntry::make('name')
+                            ->label(FilamentUi::field('name')),
+                        TextEntry::make('description')
+                            ->label(FilamentUi::field('description'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Appearance')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('icon')
+                            ->label(FilamentUi::field('icon'))
+                            ->placeholder('-'),
+                        TextEntry::make('color')
+                            ->label(FilamentUi::field('color'))
+                            ->placeholder('-'),
+                        TextEntry::make('version')
+                            ->label(FilamentUi::field('version'))
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Status')
+                    ->columns(2)
+                    ->schema([
+                        IconEntry::make('is_core')
+                            ->boolean(),
+                        IconEntry::make('is_active')
+                            ->boolean(),
+                        IconEntry::make('is_premium')
+                            ->boolean(),
+                    ]),
+
+                Section::make('Pricing')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('price_monthly')
+                            ->label(FilamentUi::field('price_monthly'))
+                            ->numeric(),
+                        TextEntry::make('price_yearly')
+                            ->label(FilamentUi::field('price_yearly'))
+                            ->numeric(),
+                    ]),
+
+                Section::make('Settings')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('settings_schema')
+                            ->label(FilamentUi::field('settings_schema'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('required_modules')
+                            ->label(FilamentUi::field('required_modules'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('sort_order')
+                            ->label(FilamentUi::field('sort_order'))
+                            ->numeric(),
+                    ]),
+
+                Section::make('Timestamps')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label(FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }
