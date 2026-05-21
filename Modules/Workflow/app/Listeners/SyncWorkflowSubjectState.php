@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Listeners;
 
+use Modules\Procurement\Events\PurchaseRequisitionApproved;
 use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
 use Modules\Workflow\Events\WorkflowAdvanced;
@@ -49,6 +50,8 @@ class SyncWorkflowSubjectState
                 'approved_by' => $event->actor->getKey(),
                 'approved_at' => now(),
             ])->save();
+
+            PurchaseRequisitionApproved::dispatch($subject->fresh(), $event->actor);
 
             return;
         }

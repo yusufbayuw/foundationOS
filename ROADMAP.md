@@ -95,7 +95,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** Setelah workflow approval PR selesai, sistem secara otomatis (dengan persetujuan eksplisit di tiap gate) menggerakkan PR → RFQ → PO → Goods Receipt → Vendor Bill, sehingga tenant tidak perlu input ulang data.
 
-### Fase 2.1 — Auto-create RFQ dari PR Approved
+### Fase 2.1 — Auto-create RFQ dari PR Approved `[x]`
 
 **Konteks.** `PROCUREMENT.md:47` menyebut PR approved **belum** otomatis menghasilkan RFQ. Saat ini procurement officer harus input ulang nominal, item, dan vendor candidate.
 
