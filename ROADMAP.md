@@ -390,7 +390,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 6.2 — Study Plan (KRS) Sync ke Moodle
+### Fase 6.2 — Study Plan (KRS) Sync ke Moodle `[x]`
 
 **Konteks.** Mahasiswa di Indonesia memilih mata kuliah per semester (KRS). Setelah KRS approved, mahasiswa harus terenroll otomatis di Moodle course offering yang dipilih.
 

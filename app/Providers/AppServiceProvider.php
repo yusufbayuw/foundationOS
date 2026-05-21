@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Observers\ClassStudentObserver;
 use App\Observers\CourseObserver;
 use App\Observers\StudentObserver;
+use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
 use App\Support\CurrentTenant;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
+use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyProgram;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
@@ -48,6 +50,7 @@ class AppServiceProvider extends ServiceProvider
         Course::observe(CourseObserver::class);
         Student::observe(StudentObserver::class);
         ClassStudent::observe(ClassStudentObserver::class);
+        StudyPlan::observe(StudyPlanObserver::class);
 
         app(PermissionRegistrar::class)
             ->setPermissionClass(Permission::class)
