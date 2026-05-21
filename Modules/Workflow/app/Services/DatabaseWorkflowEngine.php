@@ -19,6 +19,7 @@ use Modules\Workflow\Exceptions\WorkflowAuthorizationException;
 use Modules\Workflow\Models\WorkflowAssignment;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
+use Modules\Workflow\Models\WorkflowTransition;
 use Modules\Workflow\Support\WorkflowContextData;
 
 class DatabaseWorkflowEngine implements WorkflowEngine
@@ -28,49 +29,150 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         private readonly WorkflowTransitionResolver $transitionResolver,
         private readonly WorkflowAuditLogger $auditLogger,
         private readonly WorkflowSlaService $slaService,
+        private readonly WorkflowParallelCoordinator $parallelCoordinator,
     ) {}
 
     public function advance(WorkflowInstance $instance, string $actionName, array $formData, User $actor, ?string $notes = null): WorkflowInstance
     {
-        $transition = DB::transaction(function () use ($instance, $actionName, $formData, $actor, $notes) {
-            $instance = $instance->fresh(['currentStep', 'assignments', 'workflow']);
+        $result = DB::transaction(function () use ($instance, $actionName, $formData, $actor, $notes): array {
+            // Row-lock the instance to serialize concurrent advance() calls
+            // from parallel approvers.
+            $instance = WorkflowInstance::query()
+                ->whereKey($instance->getKey())
+                ->lockForUpdate()
+                ->first()
+                ->load(['currentStep', 'assignments', 'workflow']);
+
             $this->authorizeActor($instance, $actor);
 
+            $currentStep = $instance->currentStep;
             $currentStepId = $instance->current_step_id;
             $statusBefore = $instance->status->value;
             $incomingContext = WorkflowContextData::fromInstance($instance, $formData);
-            $validated = $this->validator->validate($instance->currentStep, $formData, $incomingContext);
+            $validated = $this->validator->validate($currentStep, $formData, $incomingContext);
             $payloadBefore = $this->payloadSnapshot($instance);
             $mergedFormData = array_replace_recursive($instance->form_data ?? [], $validated);
-            $incoming = WorkflowContextData::fromInstance($instance, $mergedFormData);
-            $transition = $this->transitionResolver->resolve($instance, $instance->currentStep, $actionName, $incoming);
 
-            $nextStep = $transition->toStep;
-            $nextStatus = $this->determineStatus($actionName, $nextStep);
+            if ($currentStep && $this->parallelCoordinator->isParallel($currentStep)) {
+                return $this->advanceParallel(
+                    $instance, $currentStep, $actor, $actionName, $validated,
+                    $mergedFormData, $statusBefore, $payloadBefore, $notes, $currentStepId,
+                );
+            }
 
-            $instance->assignments()
-                ->where('step_id', $instance->current_step_id)
-                ->where('status', WorkflowAssignmentStatus::Pending)
-                ->update([
-                    'status' => WorkflowAssignmentStatus::Completed->value,
-                    'completed_at' => now(),
-                    'updated_at' => now(),
-                ]);
+            return $this->advanceLinear(
+                $instance, $currentStep, $actor, $actionName, $validated,
+                $mergedFormData, $statusBefore, $payloadBefore, $notes, $currentStepId,
+            );
+        });
 
-            $instance->forceFill([
-                'current_step_id' => $nextStep?->getKey(),
-                'form_data' => $mergedFormData,
-                'status' => $nextStatus,
-                'current_assignees' => [],
-                'due_at' => $nextStatus === WorkflowInstanceStatus::Running ? $this->slaService->computeDueAt($nextStep, now()) : null,
-                'completed_at' => $nextStatus === WorkflowInstanceStatus::Completed ? now() : null,
-                'rejected_at' => $nextStatus === WorkflowInstanceStatus::Rejected ? now() : null,
-                'cancelled_at' => $nextStatus === WorkflowInstanceStatus::Cancelled ? now() : null,
-            ])->save();
+        $fresh = $instance->fresh(['currentStep', 'assignments', 'logs']);
 
+        if ($result['advanced'] && $result['transition'] !== null) {
+            WorkflowAdvanced::dispatch($fresh, $result['transition'], $actor);
+        }
+
+        return $fresh;
+    }
+
+    /**
+     * @return array{advanced:bool,transition: WorkflowTransition|null}
+     */
+    protected function advanceLinear(
+        WorkflowInstance $instance,
+        ?WorkflowStep $currentStep,
+        User $actor,
+        string $actionName,
+        array $validated,
+        array $mergedFormData,
+        string $statusBefore,
+        array $payloadBefore,
+        ?string $notes,
+        ?int $currentStepId,
+    ): array {
+        $incoming = WorkflowContextData::fromInstance($instance, $mergedFormData);
+        $transition = $this->transitionResolver->resolve($instance, $currentStep, $actionName, $incoming);
+
+        $nextStep = $transition->toStep;
+        $nextStatus = $this->determineStatus($actionName, $nextStep);
+
+        $instance->assignments()
+            ->where('step_id', $instance->current_step_id)
+            ->where('status', WorkflowAssignmentStatus::Pending)
+            ->update([
+                'status' => WorkflowAssignmentStatus::Completed->value,
+                'outcome' => $actionName,
+                'completed_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        $instance->forceFill([
+            'current_step_id' => $nextStep?->getKey(),
+            'form_data' => $mergedFormData,
+            'status' => $nextStatus,
+            'current_assignees' => [],
+            'due_at' => $nextStatus === WorkflowInstanceStatus::Running ? $this->slaService->computeDueAt($nextStep, now()) : null,
+            'completed_at' => $nextStatus === WorkflowInstanceStatus::Completed ? now() : null,
+            'rejected_at' => $nextStatus === WorkflowInstanceStatus::Rejected ? now() : null,
+            'cancelled_at' => $nextStatus === WorkflowInstanceStatus::Cancelled ? now() : null,
+        ])->save();
+
+        $this->auditLogger->log($instance, WorkflowLogType::Advanced->value, [
+            'step_id' => $currentStepId,
+            'transition_id' => $transition->getKey(),
+            'actor_id' => $actor->getKey(),
+            'action_taken' => $actionName,
+            'status_before' => $statusBefore,
+            'status_after' => $instance->status->value,
+            'payload_before' => $payloadBefore,
+            'payload_after' => $this->payloadSnapshot($instance),
+            'form_data_snapshot' => $validated,
+            'notes' => $notes,
+        ]);
+
+        return ['advanced' => true, 'transition' => $transition];
+    }
+
+    /**
+     * Parallel/quorum step: record actor's outcome, then evaluate quorum.
+     * Only advance once the coordinator says the step has reached a decision.
+     *
+     * @return array{advanced:bool,transition: WorkflowTransition|null}
+     */
+    protected function advanceParallel(
+        WorkflowInstance $instance,
+        WorkflowStep $currentStep,
+        User $actor,
+        string $actionName,
+        array $validated,
+        array $mergedFormData,
+        string $statusBefore,
+        array $payloadBefore,
+        ?string $notes,
+        ?int $currentStepId,
+    ): array {
+        // Record only this actor's vote.
+        $instance->assignments()
+            ->where('step_id', $currentStep->getKey())
+            ->where('assigned_to_type', 'user')
+            ->where('assigned_to_id', $actor->getKey())
+            ->where('status', WorkflowAssignmentStatus::Pending)
+            ->update([
+                'status' => WorkflowAssignmentStatus::Completed->value,
+                'outcome' => $actionName,
+                'completed_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        // Persist merged form data even when still waiting on other approvers.
+        $instance->forceFill(['form_data' => $mergedFormData])->save();
+
+        $verdict = $this->parallelCoordinator->evaluate($instance->fresh(['assignments']), $currentStep);
+
+        if (! $verdict['reached']) {
             $this->auditLogger->log($instance, WorkflowLogType::Advanced->value, [
                 'step_id' => $currentStepId,
-                'transition_id' => $transition->getKey(),
+                'transition_id' => null,
                 'actor_id' => $actor->getKey(),
                 'action_taken' => $actionName,
                 'status_before' => $statusBefore,
@@ -79,15 +181,53 @@ class DatabaseWorkflowEngine implements WorkflowEngine
                 'payload_after' => $this->payloadSnapshot($instance),
                 'form_data_snapshot' => $validated,
                 'notes' => $notes,
+                'parallel' => $verdict + ['quorum_reached' => false],
             ]);
 
-            return $transition;
-        });
+            return ['advanced' => false, 'transition' => null];
+        }
 
-        $fresh = $instance->fresh(['currentStep', 'assignments', 'logs']);
-        WorkflowAdvanced::dispatch($fresh, $transition, $actor);
+        // Quorum reached: cancel any still-pending assignments at this step.
+        $instance->assignments()
+            ->where('step_id', $currentStep->getKey())
+            ->where('status', WorkflowAssignmentStatus::Pending)
+            ->update([
+                'status' => WorkflowAssignmentStatus::Cancelled->value,
+                'updated_at' => now(),
+            ]);
 
-        return $fresh;
+        $incoming = WorkflowContextData::fromInstance($instance, $mergedFormData);
+        $transition = $this->transitionResolver->resolve($instance, $currentStep, $verdict['outcome'], $incoming);
+
+        $nextStep = $transition->toStep;
+        $nextStatus = $this->determineStatus($verdict['outcome'], $nextStep);
+
+        $instance->forceFill([
+            'current_step_id' => $nextStep?->getKey(),
+            'form_data' => $mergedFormData,
+            'status' => $nextStatus,
+            'current_assignees' => [],
+            'due_at' => $nextStatus === WorkflowInstanceStatus::Running ? $this->slaService->computeDueAt($nextStep, now()) : null,
+            'completed_at' => $nextStatus === WorkflowInstanceStatus::Completed ? now() : null,
+            'rejected_at' => $nextStatus === WorkflowInstanceStatus::Rejected ? now() : null,
+            'cancelled_at' => $nextStatus === WorkflowInstanceStatus::Cancelled ? now() : null,
+        ])->save();
+
+        $this->auditLogger->log($instance, WorkflowLogType::Advanced->value, [
+            'step_id' => $currentStepId,
+            'transition_id' => $transition->getKey(),
+            'actor_id' => $actor->getKey(),
+            'action_taken' => $verdict['outcome'],
+            'status_before' => $statusBefore,
+            'status_after' => $instance->status->value,
+            'payload_before' => $payloadBefore,
+            'payload_after' => $this->payloadSnapshot($instance),
+            'form_data_snapshot' => $validated,
+            'notes' => $notes,
+            'parallel' => $verdict + ['quorum_reached' => true],
+        ]);
+
+        return ['advanced' => true, 'transition' => $transition];
     }
 
     public function returnToStep(WorkflowInstance $instance, int $targetStepId, array $formData, User $actor, ?string $notes = null): WorkflowInstance

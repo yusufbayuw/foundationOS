@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Workflow\Enums\WorkflowAssigneeType;
+use Modules\Workflow\Enums\WorkflowGatewayType;
+use Modules\Workflow\Enums\WorkflowQuorumStrategy;
 use Modules\Workflow\Enums\WorkflowStepType;
 
 class WorkflowStep extends Model
@@ -21,6 +23,9 @@ class WorkflowStep extends Model
         'name',
         'description',
         'step_type',
+        'gateway_type',
+        'quorum_strategy',
+        'quorum_value',
         'assignee_type',
         'assignee_value',
         'assignee_config',
@@ -38,6 +43,9 @@ class WorkflowStep extends Model
     {
         return [
             'step_type' => WorkflowStepType::class,
+            'gateway_type' => WorkflowGatewayType::class,
+            'quorum_strategy' => WorkflowQuorumStrategy::class,
+            'quorum_value' => 'integer',
             'assignee_type' => WorkflowAssigneeType::class,
             'assignee_config' => 'array',
             'form_schema' => 'array',

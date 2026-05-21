@@ -18,7 +18,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** Mengangkat Workflow Engine dari approval linear sederhana menjadi engine BPMN-lite yang mendukung percabangan paralel, perancangan visual, dan sumber data dinamis untuk form runtime.
 
-### Fase 1.1 — Parallel Gateway & Quorum Approval
+### Fase 1.1 — Parallel Gateway & Quorum Approval `[x]`
 
 **Konteks.** V2 saat ini hanya mendukung transisi linear (`current_step -> next_step`) dengan satu assignee aktif per langkah. Untuk approval di mana, misalnya, "minimal 2 dari 3 manajer harus approve" atau "Finance dan Legal harus paralel sebelum CEO" — engine belum bisa.
 

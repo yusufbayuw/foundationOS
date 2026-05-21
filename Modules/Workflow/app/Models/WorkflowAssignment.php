@@ -18,6 +18,7 @@ class WorkflowAssignment extends Model
         'assigned_to_id',
         'assignment_role',
         'status',
+        'outcome',
         'assigned_at',
         'claimed_at',
         'completed_at',
