@@ -188,7 +188,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 3.2 — Auto-fix dengan Persetujuan
+### Fase 3.2 — Auto-fix dengan Persetujuan `[x]`
 
 **Deliverable.**
 - Action `--fix` pada command reconcile-enrollment:

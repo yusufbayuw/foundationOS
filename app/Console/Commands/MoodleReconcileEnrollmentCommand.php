@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Integrations\Moodle\MoodleClient;
+use App\Integrations\Moodle\MoodleEnrollmentDriftFixer;
 use App\Integrations\Moodle\MoodleEnrollmentReconciler;
 use App\Models\MoodleClassCourseMapping;
 use Illuminate\Console\Command;
@@ -12,13 +13,14 @@ class MoodleReconcileEnrollmentCommand extends Command
 {
     protected $signature = 'fos:moodle:reconcile-enrollment
         {--tenant= : Filter tenant_id}
+        {--all-tenants : Reconcile across every tenant (cannot combine with --tenant)}
         {--class= : Filter class_id}
         {--dry-run : Audit only, no drift rows written}
-        {--fix : Reserved for Fase 3.2 (auto-remediate via outbox)}';
+        {--fix : Auto-remediate detected drifts per tenant setting moodle.enrollment_drift_auto_fix_mode}';
 
-    protected $description = 'Detect enrollment drift between FOS class_students and Moodle course enrollment.';
+    protected $description = 'Detect and optionally auto-fix enrollment drift between FOS class_students and Moodle course enrollment.';
 
-    public function handle(MoodleClient $client, MoodleEnrollmentReconciler $reconciler): int
+    public function handle(MoodleClient $client, MoodleEnrollmentReconciler $reconciler, MoodleEnrollmentDriftFixer $fixer): int
     {
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync disabled.');
@@ -27,8 +29,21 @@ class MoodleReconcileEnrollmentCommand extends Command
         }
 
         $dryRun = (bool) $this->option('dry-run');
+        $fix = (bool) $this->option('fix');
+        $allTenants = (bool) $this->option('all-tenants');
         $tenantId = $this->option('tenant') !== null ? (int) $this->option('tenant') : null;
         $classId = $this->option('class') !== null ? (int) $this->option('class') : null;
+
+        if ($dryRun && $fix) {
+            $this->error('Cannot combine --dry-run with --fix.');
+
+            return self::FAILURE;
+        }
+        if ($allTenants && $tenantId !== null) {
+            $this->error('Cannot combine --all-tenants with --tenant.');
+
+            return self::FAILURE;
+        }
 
         $query = MoodleClassCourseMapping::query()
             ->where('is_active', true);
@@ -40,7 +55,7 @@ class MoodleReconcileEnrollmentCommand extends Command
         }
 
         $mappings = $query->get();
-        $summary = ['mappings_checked' => 0, 'drifts_detected' => 0];
+        $summary = ['mappings_checked' => 0, 'drifts_detected' => 0, 'drifts_fixed' => 0];
 
         foreach ($mappings as $mapping) {
             $summary['mappings_checked']++;
@@ -62,17 +77,29 @@ class MoodleReconcileEnrollmentCommand extends Command
             );
 
             $summary['drifts_detected'] += $drifts->count();
+
+            if ($fix) {
+                foreach ($drifts as $drift) {
+                    if ($fixer->fix($drift)) {
+                        $summary['drifts_fixed']++;
+                    }
+                }
+            }
+
             $this->line(sprintf(
-                '[mapping #%d] tenant=%d class=%d course=%d → %d drifts%s',
+                '[mapping #%d] tenant=%d class=%d course=%d → %d drifts%s%s',
                 $mapping->id, $mapping->tenant_id, $mapping->class_id,
-                $mapping->moodle_course_id, $drifts->count(), $dryRun ? ' (dry-run)' : '',
+                $mapping->moodle_course_id, $drifts->count(),
+                $dryRun ? ' (dry-run)' : '',
+                $fix ? sprintf(', fixed=%d', $summary['drifts_fixed']) : '',
             ));
         }
 
         $this->info(sprintf(
-            'Done. Mappings checked: %d, drifts detected: %d%s',
+            'Done. Mappings checked: %d, drifts detected: %d%s%s',
             $summary['mappings_checked'], $summary['drifts_detected'],
             $dryRun ? ' (dry-run, not persisted)' : '',
+            $fix ? sprintf(', drifts fixed: %d', $summary['drifts_fixed']) : '',
         ));
 
         return self::SUCCESS;
