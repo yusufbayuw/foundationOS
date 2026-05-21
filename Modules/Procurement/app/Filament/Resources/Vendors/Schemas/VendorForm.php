@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Filament\Resources\Vendors\Schemas;
 
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -131,9 +132,17 @@ class VendorForm
                             ->required()
                             ->numeric()
                             ->default(0),
-                        Textarea::make('documents')
+                        Repeater::make('documents')
                             ->label(FilamentUi::field('documents'))
-                            ->columnSpanFull(),
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Document Name'),
+                                TextInput::make('url')
+                                    ->label('URL or File Path'),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
                     ]),
             ]);
     }

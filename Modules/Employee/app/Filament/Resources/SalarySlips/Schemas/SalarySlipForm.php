@@ -3,6 +3,7 @@
 namespace Modules\Employee\Filament\Resources\SalarySlips\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -64,20 +65,56 @@ class SalarySlipForm
                 Section::make('Details')
                     ->columns(2)
                     ->schema([
-                        Textarea::make('earnings_details')
+                        Repeater::make('earnings_details')
                             ->label(\Modules\Core\Support\FilamentUi::field('earnings_details'))
                             ->required()
-                            ->columnSpanFull(),
-                        Textarea::make('deductions_details')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Component'),
+                                TextInput::make('amount')
+                                    ->label('Amount')
+                                    ->numeric(),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
+                        Repeater::make('deductions_details')
                             ->label(\Modules\Core\Support\FilamentUi::field('deductions_details'))
                             ->required()
-                            ->columnSpanFull(),
-                        Textarea::make('tax_details')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Component'),
+                                TextInput::make('amount')
+                                    ->label('Amount')
+                                    ->numeric(),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
+                        Repeater::make('tax_details')
                             ->label(\Modules\Core\Support\FilamentUi::field('tax_details'))
-                            ->columnSpanFull(),
-                        Textarea::make('bpjs_details')
+                            ->schema([
+                                TextInput::make('bracket')
+                                    ->label('Bracket'),
+                                TextInput::make('amount')
+                                    ->label('Amount')
+                                    ->numeric(),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
+                        Repeater::make('bpjs_details')
                             ->label(\Modules\Core\Support\FilamentUi::field('bpjs_details'))
-                            ->columnSpanFull(),
+                            ->schema([
+                                TextInput::make('type')
+                                    ->label('Type'),
+                                TextInput::make('amount')
+                                    ->label('Amount')
+                                    ->numeric(),
+                            ])
+                            ->columnSpanFull()
+                            ->addActionLabel('Add Item')
+                            ->reorderable(),
                     ]),
 
                 Section::make('Attendance')
