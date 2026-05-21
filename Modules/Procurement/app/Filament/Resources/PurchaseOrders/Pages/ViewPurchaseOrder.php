@@ -2,9 +2,13 @@
 
 namespace Modules\Procurement\Filament\Resources\PurchaseOrders\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Procurement\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
+use Throwable;
 
 class ViewPurchaseOrder extends ViewRecord
 {
@@ -13,6 +17,50 @@ class ViewPurchaseOrder extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('approvePurchaseOrder')
+                ->label('Approve PO')
+                ->icon('heroicon-o-check-circle')
+                ->color('success')
+                ->visible(fn (): bool => $this->record->status === 'draft')
+                ->requiresConfirmation()
+                ->action(function (): void {
+                    try {
+                        $this->record->update([
+                            'status' => 'approved',
+                            'approved_at' => now(),
+                            'approved_by' => auth()->id(),
+                        ]);
+                        Notification::make()->title('Purchase order approved.')->success()->send();
+                        $this->record = $this->getRecord()->fresh();
+                    } catch (Throwable $exception) {
+                        report($exception);
+                        Notification::make()->title('Failed to approve purchase order.')->body($exception->getMessage())->danger()->send();
+                    }
+                }),
+            Action::make('rejectPurchaseOrder')
+                ->label('Reject PO')
+                ->icon('heroicon-o-x-circle')
+                ->color('danger')
+                ->visible(fn (): bool => $this->record->status === 'draft')
+                ->form([
+                    Textarea::make('rejection_reason')
+                        ->label('Rejection Reason')
+                        ->rows(3)
+                        ->required(),
+                ])
+                ->action(function (array $data): void {
+                    try {
+                        $this->record->update([
+                            'status' => 'rejected',
+                            'notes' => $data['rejection_reason'],
+                        ]);
+                        Notification::make()->title('Purchase order rejected.')->success()->send();
+                        $this->record = $this->getRecord()->fresh();
+                    } catch (Throwable $exception) {
+                        report($exception);
+                        Notification::make()->title('Failed to reject purchase order.')->body($exception->getMessage())->danger()->send();
+                    }
+                }),
             EditAction::make(),
         ];
     }
