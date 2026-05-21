@@ -141,7 +141,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 2.3 — PO → Goods Receipt → Vendor Bill
+### Fase 2.3 — PO → Goods Receipt → Vendor Bill `[x]`
 
 **Deliverable.**
 - Action di PO: `Receive Goods` → membuat Goods Receipt draft.
