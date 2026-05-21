@@ -4,13 +4,13 @@ namespace Modules\Campus\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class StudyResult extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -18,9 +18,12 @@ class StudyResult extends Model
         'grade_letter',
         'grade_point',
         'weight_score',
+        'components_breakdown',
         'passed',
         'published_at',
+        'moodle_pulled_at',
         'notes',
+        'source',
     ];
 
     protected function casts(): array
@@ -28,10 +31,13 @@ class StudyResult extends Model
         return [
             'grade_point' => 'decimal:2',
             'weight_score' => 'decimal:2',
+            'components_breakdown' => 'array',
             'passed' => 'boolean',
             'published_at' => 'datetime',
+            'moodle_pulled_at' => 'datetime',
         ];
     }
+
     public function studyPlanItem(): BelongsTo
     {
         return $this->belongsTo(StudyPlanItem::class);

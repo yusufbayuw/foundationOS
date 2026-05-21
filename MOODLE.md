@@ -62,6 +62,7 @@ Minimal function:
 - `core_cohort_search_cohorts`
 - `core_calendar_create_calendar_events`
 - `gradereport_overview_get_course_grades`
+- `gradereport_user_get_grade_items` (Fase 6.4 — detailed grade pull per komponen)
 - `core_completion_get_course_completion_status`
 - `core_completion_get_activities_completion_status`
 
@@ -222,7 +223,63 @@ php artisan fos:moodle:bulk-enroll-semester {period_id} [--tenant=ID]
 
 Gunakan ini saat semester rollover untuk memastikan semua mahasiswa dengan KRS approved ter-enroll ke Moodle course offering yang baru tanpa harus menunggu observer pada perubahan status berikutnya.
 
-## 13) Lecturer Assignment (Multi-Teacher per Course Offering)
+## 13) Gradebook Granular Pull (Per-Komponen ke StudyResult)
+
+Sejak Roadmap Epic 6 Fase 6.4, FOS bisa pull grade Moodle per komponen (UTS/UAS/tugas/kehadiran) ke `study_results.components_breakdown` (JSON), bukan hanya rata-rata course.
+
+Komponen default + bobot (Indonesian PAP convention):
+
+| Component | Weight | Matcher (case-insensitive substring) |
+|---|---:|---|
+| attendance | 10% | absen, attendance, kehadiran |
+| assignment | 20% | tugas, assignment, homework, kuis, quiz |
+| midterm | 30% | uts, midterm, mid |
+| final | 40% | uas, final |
+
+Skala default (Indonesian university):
+
+| Score ≥ | Letter | Point |
+|---:|---|---:|
+| 85 | A | 4.0 |
+| 80 | A- | 3.7 |
+| 75 | B+ | 3.3 |
+| 70 | B | 3.0 |
+| 65 | B- | 2.7 |
+| 60 | C+ | 2.3 |
+| 55 | C | 2.0 |
+| 50 | D | 1.0 |
+| 0 | E | 0.0 |
+
+**Override per tenant** via `tenant_settings` group `campus`:
+
+| Key | Type | Value |
+|---|---|---|
+| `gradebook_components` | json | `{"midterm":{"weight":0.5,"matchers":["uts"]},"final":{"weight":0.5,"matchers":["uas"]}}` |
+| `gradebook_scale` | json | array of `{min,letter,point}` urut menurun |
+| `gradebook_pass_grade_point` | float | default `1.0` |
+
+Cara pakai:
+
+```bash
+# Pull semua periode aktif:
+php artisan fos:moodle:pull-detailed-grades
+
+# Per tenant + semester:
+php artisan fos:moodle:pull-detailed-grades --tenant=5 --semester=12
+```
+
+Pipeline:
+1. Untuk setiap StudyPlanItem dengan status enrolled-like, resolve Moodle user + course (via Fase 6.1 mapping).
+2. Panggil `gradereport_user_get_grade_items` → ambil `usergrades[0].gradeitems`.
+3. Mapper memetakan setiap `itemname` ke komponen via matcher; bila >1 item per komponen, rata-rata diambil.
+4. Weighted score = Σ(componentScore × weight) / Σ(used_weight) — normalisasi otomatis bila ada komponen yang belum ada nilai.
+5. Letter + point dari skala tenant; `passed = point >= pass_grade_point`.
+6. Tulis/Update `study_results` (1-per-StudyPlanItem); `moodle_pulled_at` & `source='moodle'` di-set.
+7. Setelah semua item satu periode di-pull, `CampusGpaCalculator::recalculateForStudent` dipanggil per mahasiswa untuk recompute `collage_students.gpa_cached` (IPK kumulatif weighted credits).
+
+Prasyarat Moodle web service: tambahkan `gradereport_user_get_grade_items` ke external service (selain `core_grades_get_grades` yang sudah ada di section 4 list).
+
+## 14) Lecturer Assignment (Multi-Teacher per Course Offering)
 
 Sejak Roadmap Epic 6 Fase 6.3, FOS mendukung penugasan **banyak dosen** ke satu `CourseOffering` (mata kuliah ditawarkan per semester) dengan dua peran:
 
@@ -244,7 +301,7 @@ Alur sinkronisasi:
 
 Idempotency dijaga via unique index `(course_offering_id, lecturer_id)` di pivot, dan dedupe-key outbox `lecturer_assignment:{id}:{action}:{updated_at}`.
 
-## 14) Guardrail untuk Tim Operasional Moodle
+## 15) Guardrail untuk Tim Operasional Moodle
 
 Agar tidak terjadi kebocoran antar-tenant:
 

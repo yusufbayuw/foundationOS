@@ -446,7 +446,7 @@ Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal 
 
 ---
 
-### Fase 6.4 — Gradebook Granular Pull
+### Fase 6.4 — Gradebook Granular Pull `[x]`
 
 **Konteks.** Saat ini pull grade pakai `gradereport_overview_get_course_grades` (overview saja). Untuk universitas perlu pull per komponen (UTS, UAS, tugas, kuis) untuk masuk ke `StudyResult`.
 
@@ -465,6 +465,14 @@ Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal 
 **Dependensi.** Fase 6.1.
 
 **Risiko.** Skala nilai tiap universitas berbeda — pastikan konfigurable per tenant.
+
+**Selesai.** 2026-05-22. Implementasi:
+- Migrasi: tambah `components_breakdown` (json), `moodle_pulled_at`, `source` ke `study_results`; `gpa_cached` + `gpa_recalculated_at` ke `collage_students`.
+- Service `Modules\Campus\Services\GradebookConfigResolver` — default komponen (attendance 10%, assignment 20%, midterm 30%, final 40%) + skala PAP Indonesia (A/A-/B+/B/B-/C+/C/D/E) + matcher kata kunci (uts, uas, tugas, kuis, kehadiran). Bisa di-override per tenant via `TenantSetting` group `campus`, key `gradebook_components`/`gradebook_scale`/`gradebook_pass_grade_point`.
+- Service `App\Integrations\Moodle\MoodleDetailedGradePullService` — `pullForPeriod()` (orchestration: panggil `gradereport_user_get_grade_items` per StudyPlanItem aktif) + `processGradeItems()` (pure mapper: bangun breakdown, hitung weighted score normalized atas komponen yang terisi, konversi → letter+point).
+- Service `Modules\Campus\Services\CampusGpaCalculator::recalculateForStudent()` — weighted sum credits × grade_point, simpan ke `collage_students.gpa_cached`.
+- Command `php artisan fos:moodle:pull-detailed-grades [--tenant=] [--semester=]` — default ke semua AcademicPeriod `is_active`.
+- Test `DetailedGradePullPopulatesStudyResultTest` (5 tests): mapping ke breakdown, weighted score 84.0 → A-, normalisasi parsial, re-pull update existing, override per tenant, GPA dihitung weighted-by-credits.
 
 ---
 
