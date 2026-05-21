@@ -6,11 +6,13 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class PaymentForm
 {
@@ -18,63 +20,82 @@ class PaymentForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                Select::make('student_invoice_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('student_invoice_id'))
-                    ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function ($query): void {
-                        if (Filament::getTenant()) {
-                            $query->where('tenant_id', Filament::getTenant()->getKey());
-                        }
-                    })
-                    ->required(),
-                Select::make('chart_of_account_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('chart_of_account_id'))
-                    ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
-                        if (Filament::getTenant()) {
-                            $query->where('tenant_id', Filament::getTenant()->getKey());
-                        }
-                    })
-                    ->required(),
-                TextInput::make('verified_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('verified_by'))
-                    ->numeric(),
-                TextInput::make('payment_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('payment_number'))
-                    ->required(),
-                DatePicker::make('payment_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('payment_date'))
-                    ->required(),
-                TextInput::make('amount')
-                    ->label(\Modules\Core\Support\FilamentUi::field('amount'))
-                    ->required()
-                    ->numeric(),
-                TextInput::make('payment_method')
-                    ->label(\Modules\Core\Support\FilamentUi::field('payment_method')),
-                TextInput::make('payment_channel')
-                    ->label(\Modules\Core\Support\FilamentUi::field('payment_channel')),
-                TextInput::make('reference_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('reference_number')),
-                TextInput::make('account_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('account_number')),
-                TextInput::make('account_holder')
-                    ->label(\Modules\Core\Support\FilamentUi::field('account_holder')),
-                TextInput::make('bank_name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('bank_name')),
-                TextInput::make('proof_file')
-                    ->label(\Modules\Core\Support\FilamentUi::field('proof_file')),
-                DateTimePicker::make('verified_at'),
-                Textarea::make('verification_notes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('verification_notes'))
-                    ->columnSpanFull(),
-                TextInput::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
-                    ->required()
-                    ->default('pending'),
-                Toggle::make('is_reconciled')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_reconciled'))
-                    ->required(),
-                DatePicker::make('reconciliation_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('reconciliation_date'))
+                Section::make('Payment Details')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('student_invoice_id')
+                            ->label(FilamentUi::field('student_invoice_id'))
+                            ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function ($query): void {
+                                if (Filament::getTenant()) {
+                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                }
+                            })
+                            ->required(),
+                        Select::make('chart_of_account_id')
+                            ->label(FilamentUi::field('chart_of_account_id'))
+                            ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
+                                if (Filament::getTenant()) {
+                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                }
+                            })
+                            ->required(),
+                        TextInput::make('payment_number')
+                            ->label(FilamentUi::field('payment_number'))
+                            ->required(),
+                        DatePicker::make('payment_date')
+                            ->label(FilamentUi::field('payment_date'))
+                            ->required(),
+                        TextInput::make('amount')
+                            ->label(FilamentUi::field('amount'))
+                            ->required()
+                            ->numeric(),
+                    ]),
+
+                Section::make('Payment Method')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('payment_method')
+                            ->label(FilamentUi::field('payment_method')),
+                        TextInput::make('payment_channel')
+                            ->label(FilamentUi::field('payment_channel')),
+                        TextInput::make('reference_number')
+                            ->label(FilamentUi::field('reference_number')),
+                        TextInput::make('account_number')
+                            ->label(FilamentUi::field('account_number')),
+                        TextInput::make('account_holder')
+                            ->label(FilamentUi::field('account_holder')),
+                        TextInput::make('bank_name')
+                            ->label(FilamentUi::field('bank_name')),
+                        TextInput::make('proof_file')
+                            ->label(FilamentUi::field('proof_file')),
+                    ]),
+
+                Section::make('Verification')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('verified_by')
+                            ->label(FilamentUi::field('verified_by'))
+                            ->numeric(),
+                        DateTimePicker::make('verified_at'),
+                        Textarea::make('verification_notes')
+                            ->label(FilamentUi::field('verification_notes'))
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Reconciliation')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('status')
+                            ->label(FilamentUi::field('status'))
+                            ->required()
+                            ->default('pending'),
+                        Toggle::make('is_reconciled')
+                            ->label(FilamentUi::field('is_reconciled'))
+                            ->required(),
+                        DatePicker::make('reconciliation_date')
+                            ->label(FilamentUi::field('reconciliation_date')),
+                    ]),
             ]);
     }
 }

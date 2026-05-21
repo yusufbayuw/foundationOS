@@ -4,7 +4,9 @@ namespace Modules\Finance\Filament\Resources\TuitionTypes\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class TuitionTypeInfolist
 {
@@ -12,53 +14,72 @@ class TuitionTypeInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
-                TextEntry::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Organization')),
-                TextEntry::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
-                    ->placeholder('-'),
-                TextEntry::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name')),
-                TextEntry::make('education_level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('education_level'))
-                    ->placeholder('-'),
-                TextEntry::make('amount')
-                    ->label(\Modules\Core\Support\FilamentUi::field('amount'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('frequency')
-                    ->label(\Modules\Core\Support\FilamentUi::field('frequency'))
-                    ->placeholder('-'),
-                TextEntry::make('due_day')
-                    ->label(\Modules\Core\Support\FilamentUi::field('due_day'))
-                    ->numeric(),
-                TextEntry::make('grace_period_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('grace_period_days'))
-                    ->numeric(),
-                TextEntry::make('late_fee_percentage')
-                    ->label(\Modules\Core\Support\FilamentUi::field('late_fee_percentage'))
-                    ->numeric(),
-                TextEntry::make('late_fee_fixed')
-                    ->label(\Modules\Core\Support\FilamentUi::field('late_fee_fixed'))
-                    ->numeric(),
-                IconEntry::make('discount_eligible')
-                    ->boolean(),
-                IconEntry::make('is_active')
-                    ->boolean(),
-                TextEntry::make('description')
-                    ->label(\Modules\Core\Support\FilamentUi::field('description'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('General Information')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('tenant.name')
+                            ->label(FilamentUi::text('Tenant')),
+                        TextEntry::make('organization.name')
+                            ->label(FilamentUi::text('Organization')),
+                        TextEntry::make('code')
+                            ->label(FilamentUi::field('code'))
+                            ->placeholder('-'),
+                        TextEntry::make('name')
+                            ->label(FilamentUi::field('name')),
+                        TextEntry::make('education_level')
+                            ->label(FilamentUi::field('education_level'))
+                            ->placeholder('-'),
+                        TextEntry::make('description')
+                            ->label(FilamentUi::field('description'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Billing')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('amount')
+                            ->label(FilamentUi::field('amount'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('frequency')
+                            ->label(FilamentUi::field('frequency'))
+                            ->placeholder('-'),
+                        TextEntry::make('due_day')
+                            ->label(FilamentUi::field('due_day'))
+                            ->numeric(),
+                        TextEntry::make('grace_period_days')
+                            ->label(FilamentUi::field('grace_period_days'))
+                            ->numeric(),
+                    ]),
+
+                Section::make('Late Fees & Discounts')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('late_fee_percentage')
+                            ->label(FilamentUi::field('late_fee_percentage'))
+                            ->numeric(),
+                        TextEntry::make('late_fee_fixed')
+                            ->label(FilamentUi::field('late_fee_fixed'))
+                            ->numeric(),
+                        IconEntry::make('discount_eligible')
+                            ->boolean(),
+                        IconEntry::make('is_active')
+                            ->boolean(),
+                    ]),
+
+                Section::make('Timestamps')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label(FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }
