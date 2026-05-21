@@ -3,7 +3,9 @@
 namespace Modules\Monitoring\Filament\Resources\AuditLogs\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class AuditLogInfolist
 {
@@ -11,60 +13,84 @@ class AuditLogInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Tenant'))
-                    ->placeholder('-'),
-                TextEntry::make('user.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('User'))
-                    ->placeholder('-'),
-                TextEntry::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Organization'))
-                    ->placeholder('-'),
-                TextEntry::make('auditable_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('auditable_type'))
-                    ->placeholder('-'),
-                TextEntry::make('auditable_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('auditable_id'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('action')
-                    ->label(\Modules\Core\Support\FilamentUi::field('action')),
-                TextEntry::make('description')
-                    ->label(\Modules\Core\Support\FilamentUi::field('description'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('old_values')
-                    ->label(\Modules\Core\Support\FilamentUi::field('old_values'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('new_values')
-                    ->label(\Modules\Core\Support\FilamentUi::field('new_values'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('ip_address')
-                    ->label(\Modules\Core\Support\FilamentUi::field('ip_address'))
-                    ->placeholder('-'),
-                TextEntry::make('user_agent')
-                    ->label(\Modules\Core\Support\FilamentUi::field('user_agent'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('request_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('request_id'))
-                    ->placeholder('-'),
-                TextEntry::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status')),
-                TextEntry::make('error_message')
-                    ->label(\Modules\Core\Support\FilamentUi::field('error_message'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('Context')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('tenant.name')
+                            ->label(FilamentUi::text('Tenant'))
+                            ->placeholder('-'),
+                        TextEntry::make('user.name')
+                            ->label(FilamentUi::text('User'))
+                            ->placeholder('-'),
+                        TextEntry::make('organization.name')
+                            ->label(FilamentUi::text('Organization'))
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Audit Target')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('auditable_type')
+                            ->label(FilamentUi::field('auditable_type'))
+                            ->placeholder('-'),
+                        TextEntry::make('auditable_id')
+                            ->label(FilamentUi::field('auditable_id'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('action')
+                            ->label(FilamentUi::field('action')),
+                        TextEntry::make('status')
+                            ->label(FilamentUi::field('status')),
+                        TextEntry::make('description')
+                            ->label(FilamentUi::field('description'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Changed Values')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('old_values')
+                            ->label(FilamentUi::field('old_values'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('new_values')
+                            ->label(FilamentUi::field('new_values'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Request Details')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('ip_address')
+                            ->label(FilamentUi::field('ip_address'))
+                            ->placeholder('-'),
+                        TextEntry::make('request_id')
+                            ->label(FilamentUi::field('request_id'))
+                            ->placeholder('-'),
+                        TextEntry::make('user_agent')
+                            ->label(FilamentUi::field('user_agent'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('error_message')
+                            ->label(FilamentUi::field('error_message'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Timestamps')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label(FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }
