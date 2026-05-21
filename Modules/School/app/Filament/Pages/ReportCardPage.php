@@ -2,28 +2,32 @@
 
 namespace Modules\School\Filament\Pages;
 
-use Filament\Pages\Page;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Select;
+use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Models\Student;
-use Filament\Actions\Action;
 
 class ReportCardPage extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+
     protected static ?string $navigationLabel = 'Rapor Siswa';
+
     protected static ?string $title = 'Rapor Akademik Siswa';
-    
+
     protected string $view = 'school::filament.pages.report-card';
 
     public ?int $academic_period_id = null;
+
     public ?int $class_id = null;
+
     public ?int $student_id = null;
 
     public static function getNavigationGroup(): ?string
@@ -31,10 +35,10 @@ class ReportCardPage extends Page implements HasForms
         return __('school::filament.navigation.groups.academic') ?? 'Akademik';
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('academic_period_id')
                     ->label('Periode Akademik')
                     ->options(AcademicPeriod::pluck('name', 'id'))
@@ -49,9 +53,10 @@ class ReportCardPage extends Page implements HasForms
                     ->label('Siswa')
                     ->options(function (callable $get) {
                         $classId = $get('class_id');
-                        if (!$classId) {
+                        if (! $classId) {
                             return collect();
                         }
+
                         return Student::whereHas('classStudents', function ($q) use ($classId) {
                             $q->where('class_id', $classId);
                         })->with('user')->get()->pluck('user.name', 'id');
@@ -68,10 +73,10 @@ class ReportCardPage extends Page implements HasForms
             Action::make('download')
                 ->label('Download PDF')
                 ->icon('heroicon-o-arrow-down-tray')
-                ->disabled(fn () => !$this->academic_period_id || !$this->student_id)
+                ->disabled(fn () => ! $this->academic_period_id || ! $this->student_id)
                 ->url(fn () => route('school.report-card.download', [
                     'student' => $this->student_id,
-                    'period' => $this->academic_period_id
+                    'period' => $this->academic_period_id,
                 ]))
                 ->openUrlInNewTab(),
         ];
