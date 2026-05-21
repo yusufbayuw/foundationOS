@@ -4,6 +4,7 @@ namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class PurchaseRequisitionInfolist
@@ -12,65 +13,89 @@ class PurchaseRequisitionInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
-                TextEntry::make('user.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('User'))
-                    ->placeholder('-'),
-                TextEntry::make('requested_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('requested_by'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('approved_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('request_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('request_number')),
-                TextEntry::make('request_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('request_date'))
-                    ->date(),
-                TextEntry::make('required_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('required_date'))
-                    ->date()
-                    ->placeholder('-'),
-                TextEntry::make('priority')
-                    ->label(\Modules\Core\Support\FilamentUi::field('priority')),
-                TextEntry::make('justification')
-                    ->label(\Modules\Core\Support\FilamentUi::field('justification'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('total_items')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_items'))
-                    ->numeric(),
-                TextEntry::make('total_estimated_amount')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_estimated_amount'))
-                    ->numeric(),
-                TextEntry::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status')),
-                IconEntry::make('ready_for_sourcing')
-                    ->label('Ready For Sourcing')
-                    ->boolean(),
-                TextEntry::make('approved_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('rejection_reason')
-                    ->label(\Modules\Core\Support\FilamentUi::field('rejection_reason'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('notes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('notes'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('General Information')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('tenant.name')
+                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                        TextEntry::make('user.name')
+                            ->label(\Modules\Core\Support\FilamentUi::text('User'))
+                            ->placeholder('-'),
+                        TextEntry::make('requested_by')
+                            ->label(\Modules\Core\Support\FilamentUi::field('requested_by'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('approved_by')
+                            ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('request_number')
+                            ->label(\Modules\Core\Support\FilamentUi::field('request_number')),
+                        TextEntry::make('priority')
+                            ->label(\Modules\Core\Support\FilamentUi::field('priority')),
+                    ]),
+
+                Section::make('Dates')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('request_date')
+                            ->label(\Modules\Core\Support\FilamentUi::field('request_date'))
+                            ->date(),
+                        TextEntry::make('required_date')
+                            ->label(\Modules\Core\Support\FilamentUi::field('required_date'))
+                            ->date()
+                            ->placeholder('-'),
+                        TextEntry::make('approved_at')
+                            ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Financial Summary')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('total_items')
+                            ->label(\Modules\Core\Support\FilamentUi::field('total_items'))
+                            ->numeric(),
+                        TextEntry::make('total_estimated_amount')
+                            ->label(\Modules\Core\Support\FilamentUi::field('total_estimated_amount'))
+                            ->numeric(),
+                    ]),
+
+                Section::make('Status & Notes')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('status')
+                            ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                        IconEntry::make('ready_for_sourcing')
+                            ->label('Ready For Sourcing')
+                            ->boolean(),
+                        TextEntry::make('justification')
+                            ->label(\Modules\Core\Support\FilamentUi::field('justification'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('rejection_reason')
+                            ->label(\Modules\Core\Support\FilamentUi::field('rejection_reason'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('notes')
+                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Timestamps')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }
