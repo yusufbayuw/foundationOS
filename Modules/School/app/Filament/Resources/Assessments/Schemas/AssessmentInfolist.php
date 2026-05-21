@@ -4,7 +4,9 @@ namespace Modules\School\Filament\Resources\Assessments\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class AssessmentInfolist
 {
@@ -12,86 +14,110 @@ class AssessmentInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
-                TextEntry::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Organization'))
-                    ->placeholder('-'),
-                TextEntry::make('academicPeriod.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Academic period'))
-                    ->placeholder('-'),
-                TextEntry::make('subject.name')
-                    ->label(\Modules\Core\Support\FilamentUi::text('Subject')),
-                TextEntry::make('class_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('class_id'))
-                    ->numeric(),
-                TextEntry::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name')),
-                TextEntry::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
-                    ->placeholder('-'),
-                TextEntry::make('type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('type'))
-                    ->placeholder('-'),
-                TextEntry::make('assessment_category')
-                    ->label(\Modules\Core\Support\FilamentUi::field('assessment_category'))
-                    ->placeholder('-'),
-                TextEntry::make('weight')
-                    ->label(\Modules\Core\Support\FilamentUi::field('weight'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('max_score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_score'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('passing_score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('passing_score'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('schedule_date')
-                    ->label(\Modules\Core\Support\FilamentUi::field('schedule_date'))
-                    ->date()
-                    ->placeholder('-'),
-                TextEntry::make('start_time')
-                    ->label(\Modules\Core\Support\FilamentUi::field('start_time'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('end_time')
-                    ->label(\Modules\Core\Support\FilamentUi::field('end_time'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('duration_minutes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('duration_minutes'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('instructions')
-                    ->label(\Modules\Core\Support\FilamentUi::field('instructions'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                TextEntry::make('attachments')
-                    ->label(\Modules\Core\Support\FilamentUi::field('attachments'))
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                IconEntry::make('is_published')
-                    ->boolean(),
-                TextEntry::make('published_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('published_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                IconEntry::make('allow_retake')
-                    ->boolean(),
-                TextEntry::make('max_attempts')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_attempts'))
-                    ->numeric()
-                    ->placeholder('-'),
-                TextEntry::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
-                    ->dateTime()
-                    ->placeholder('-'),
+                Section::make('Basic Information')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('tenant.name')
+                            ->label(FilamentUi::text('Tenant')),
+                        TextEntry::make('organization.name')
+                            ->label(FilamentUi::text('Organization'))
+                            ->placeholder('-'),
+                        TextEntry::make('academicPeriod.name')
+                            ->label(FilamentUi::text('Academic period'))
+                            ->placeholder('-'),
+                        TextEntry::make('subject.name')
+                            ->label(FilamentUi::text('Subject')),
+                        TextEntry::make('class_id')
+                            ->label(FilamentUi::field('class_id'))
+                            ->numeric(),
+                        TextEntry::make('name')
+                            ->label(FilamentUi::field('name')),
+                        TextEntry::make('code')
+                            ->label(FilamentUi::field('code'))
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Classification & Scoring')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('type')
+                            ->label(FilamentUi::field('type'))
+                            ->placeholder('-'),
+                        TextEntry::make('assessment_category')
+                            ->label(FilamentUi::field('assessment_category'))
+                            ->placeholder('-'),
+                        TextEntry::make('weight')
+                            ->label(FilamentUi::field('weight'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('max_score')
+                            ->label(FilamentUi::field('max_score'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('passing_score')
+                            ->label(FilamentUi::field('passing_score'))
+                            ->numeric()
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Schedule')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('schedule_date')
+                            ->label(FilamentUi::field('schedule_date'))
+                            ->date()
+                            ->placeholder('-'),
+                        TextEntry::make('start_time')
+                            ->label(FilamentUi::field('start_time'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('end_time')
+                            ->label(FilamentUi::field('end_time'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('duration_minutes')
+                            ->label(FilamentUi::field('duration_minutes'))
+                            ->numeric()
+                            ->placeholder('-'),
+                    ]),
+
+                Section::make('Instructions & Attachments')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('instructions')
+                            ->label(FilamentUi::field('instructions'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                        TextEntry::make('attachments')
+                            ->label(FilamentUi::field('attachments'))
+                            ->placeholder('-')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Publication & Attempts')
+                    ->columns(2)
+                    ->schema([
+                        IconEntry::make('is_published')
+                            ->boolean(),
+                        TextEntry::make('published_at')
+                            ->label(FilamentUi::field('published_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        IconEntry::make('allow_retake')
+                            ->boolean(),
+                        TextEntry::make('max_attempts')
+                            ->label(FilamentUi::field('max_attempts'))
+                            ->numeric()
+                            ->placeholder('-'),
+                        TextEntry::make('created_at')
+                            ->label(FilamentUi::field('created_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                        TextEntry::make('updated_at')
+                            ->label(FilamentUi::field('updated_at'))
+                            ->dateTime()
+                            ->placeholder('-'),
+                    ]),
             ]);
     }
 }
