@@ -4,14 +4,14 @@ namespace Modules\Campus\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Course extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -39,6 +39,7 @@ class Course extends Model
             'is_active' => 'boolean',
         ];
     }
+
     public function studyProgram(): BelongsTo
     {
         return $this->belongsTo(StudyProgram::class);
@@ -52,5 +53,10 @@ class Course extends Model
     public function studyPlanItems(): HasMany
     {
         return $this->hasMany(StudyPlanItem::class);
+    }
+
+    public function prerequisites(): HasMany
+    {
+        return $this->hasMany(CoursePrerequisite::class);
     }
 }

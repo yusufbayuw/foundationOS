@@ -173,7 +173,34 @@ Batasan yang perlu dipahami:
 - Reconcile inbound saat ini fokus user/course (belum enrollment-level reconciliation dua arah penuh).
 - Attendance pull tergantung plugin Moodle attendance.
 
-## 11) Lecturer Assignment (Multi-Teacher per Course Offering)
+## 11) Course Offering Sync (Per-Semester Moodle Course)
+
+Sejak Roadmap Epic 6 Fase 6.1, FOS membuat **satu Moodle course per `CourseOffering`** (mata kuliah ditawarkan per semester), bukan per `Course` master. Konvensi idnumber:
+
+| FOS entity | Moodle entity | idnumber |
+|---|---|---|
+| `Tenant` | Category root tenant | `fos_tenant_{id}` |
+| `Tenant` (template root, opsional) | Sub-category templat | `fos_template_{tenant_id}` |
+| `Tenant + AcademicPeriod` | Sub-category semester | `fos_semester_t{tenant}_p{period}` |
+| `Course` (master, legacy) | Course | `fos_course_{id}` |
+| `CourseOffering` | Course per-semester | `fos_offering_{id}` |
+
+Alur:
+
+1. Tenant menambahkan/mengubah `CourseOffering` → `CourseOfferingObserver` enqueue outbox `course_offering` action `upsert`.
+2. Worker mengeksekusi `MoodleSyncService::syncCourseOfferingOutbox`:
+   - Pastikan kategori tenant ada (`fos_tenant_{id}`).
+   - Pastikan kategori semester ada (`fos_semester_t{tenant}_p{period}`).
+   - Buat/Update Moodle course dengan idnumber `fos_offering_{id}`, set `startdate`/`enddate` dari `AcademicPeriod`.
+   - Tulis ke `MoodleEntityMapping` entity_type `course_offering`.
+3. `resolveMoodleCourseIdForOffering` (dipakai oleh enrollment & lecturer assignment) prefer mapping `course_offering`; fallback ke mapping `course` master untuk data lama yang belum dimigrasi.
+4. Status `cancelled`/`archived`/`closed` → outbox action `deactivate` → Moodle course di-set `visible=0`.
+
+Prerequisite (POC): `course_prerequisites` di FOS disisipkan ke `summary` Moodle course offering sebagai daftar teks "Prerequisites (FOS-managed):". Restrict access otomatis tidak diimplementasi karena keterbatasan Moodle web service — dipertimbangkan via plugin terpisah jika diperlukan.
+
+Trade-off: jumlah course Moodle bertambah linier dengan semester × offering. Untuk universitas dengan 1000+ offering/semester, pastikan Moodle DB dan kapasitas storage memadai.
+
+## 12) Lecturer Assignment (Multi-Teacher per Course Offering)
 
 Sejak Roadmap Epic 6 Fase 6.3, FOS mendukung penugasan **banyak dosen** ke satu `CourseOffering` (mata kuliah ditawarkan per semester) dengan dua peran:
 
@@ -195,7 +222,7 @@ Alur sinkronisasi:
 
 Idempotency dijaga via unique index `(course_offering_id, lecturer_id)` di pivot, dan dedupe-key outbox `lecturer_assignment:{id}:{action}:{updated_at}`.
 
-## 12) Guardrail untuk Tim Operasional Moodle
+## 13) Guardrail untuk Tim Operasional Moodle
 
 Agar tidak terjadi kebocoran antar-tenant:
 

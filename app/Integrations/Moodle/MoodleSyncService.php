@@ -11,7 +11,9 @@ use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
 use Modules\Campus\Models\CourseOfferingLecturer;
+use Modules\Campus\Models\CoursePrerequisite;
 use Modules\Campus\Models\Lecturer;
+use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
@@ -33,6 +35,7 @@ class MoodleSyncService
             MoodleOutboxService::ENTITY_COURSE => $this->syncCourseOutbox($outbox),
             MoodleOutboxService::ENTITY_ENROLLMENT => $this->syncEnrollmentOutbox($outbox),
             MoodleOutboxService::ENTITY_LECTURER_ASSIGNMENT => $this->syncLecturerAssignmentOutbox($outbox),
+            MoodleOutboxService::ENTITY_COURSE_OFFERING => $this->syncCourseOfferingOutbox($outbox),
             default => throw new MoodleIntegrationException("Unsupported outbox entity type: {$outbox->entity_type}"),
         };
     }
@@ -361,15 +364,238 @@ class MoodleSyncService
         $this->enrollUser($moodleUserId, $moodleCourseId, $roleId);
     }
 
+    protected function syncCourseOfferingOutbox(MoodleSyncOutbox $outbox): void
+    {
+        $offering = CourseOffering::withoutTenantScope()
+            ->withTrashed()
+            ->with(['course' => fn ($q) => $q->withTrashed()->with('tenant'), 'academicPeriod' => fn ($q) => $q->withTrashed()])
+            ->find($outbox->entity_id);
+
+        if (! $offering) {
+            if ($outbox->action === MoodleOutboxService::ACTION_DEACTIVATE) {
+                $this->deactivateMissingCourseOffering((int) $outbox->entity_id);
+
+                return;
+            }
+
+            throw new MoodleIntegrationException("CourseOffering {$outbox->entity_id} not found.");
+        }
+
+        if (! $offering->course || ! $offering->course->tenant) {
+            throw new MoodleIntegrationException("CourseOffering {$offering->id} has no resolvable course/tenant.");
+        }
+
+        if ($outbox->action === MoodleOutboxService::ACTION_DEACTIVATE) {
+            $moodleCourseId = $this->upsertCourseOfferingAsHidden($offering);
+        } else {
+            $tenant = $offering->course->tenant;
+            $tenantCategoryId = $this->upsertTenantCategory($tenant);
+            $semesterCategoryId = $offering->academicPeriod
+                ? $this->upsertSemesterCategory($tenant, $offering->academicPeriod, $tenantCategoryId)
+                : $tenantCategoryId;
+            $moodleCourseId = $this->upsertCourseOffering($offering, $semesterCategoryId);
+        }
+
+        $this->upsertEntityMapping(
+            MoodleOutboxService::ENTITY_COURSE_OFFERING,
+            (int) $offering->id,
+            (int) $offering->tenant_id,
+            $moodleCourseId,
+            $this->mapper->courseOfferingIdnumber((int) $offering->id),
+        );
+    }
+
+    public function upsertSemesterCategory(Tenant $tenant, AcademicPeriod $period, int $parentCategoryId): int
+    {
+        $idnumber = $this->mapper->semesterCategoryIdnumber((int) $tenant->id, (int) $period->id);
+        $existing = $this->findEntityMapping('semester_category', (int) $period->id, $idnumber);
+        $moodleCategoryId = $existing?->moodle_id ?: $this->findMoodleCategoryIdByIdnumber($idnumber);
+        $payload = $this->mapper->mapSemesterCategory($tenant, $period, $parentCategoryId);
+
+        if (! $moodleCategoryId) {
+            $created = $this->callMoodle('core_course_create_categories', [
+                'categories' => [$payload],
+            ]);
+
+            $moodleCategoryId = (int) Arr::get($created, '0.id', 0);
+        } else {
+            $this->callMoodle('core_course_update_categories', [
+                'categories' => [[
+                    'id' => $moodleCategoryId,
+                    'name' => $payload['name'],
+                    'parent' => $payload['parent'],
+                ]],
+            ]);
+        }
+
+        if ($moodleCategoryId <= 0) {
+            throw new MoodleIntegrationException("Unable to resolve Moodle semester category for period {$period->id}.");
+        }
+
+        $this->upsertEntityMapping('semester_category', (int) $period->id, (int) $tenant->id, $moodleCategoryId, $idnumber);
+
+        return $moodleCategoryId;
+    }
+
+    public function upsertCourseOffering(CourseOffering $offering, int $categoryId): int
+    {
+        $idnumber = $this->mapper->courseOfferingIdnumber((int) $offering->id);
+        $existing = $this->findEntityMapping(MoodleOutboxService::ENTITY_COURSE_OFFERING, (int) $offering->id, $idnumber);
+        $moodleCourseId = $existing?->moodle_id ?: $this->findMoodleCourseIdByIdnumber($idnumber);
+        $prerequisiteHint = $this->buildPrerequisiteHint($offering);
+        $payload = $this->mapper->mapCourseOffering($offering, $categoryId, $prerequisiteHint);
+
+        if (! $moodleCourseId) {
+            $created = $this->callMoodle('core_course_create_courses', [
+                'courses' => [$payload],
+            ]);
+
+            $moodleCourseId = (int) Arr::get($created, '0.id', 0);
+        } else {
+            $this->callMoodle('core_course_update_courses', [
+                'courses' => [[
+                    'id' => $moodleCourseId,
+                    'fullname' => $payload['fullname'],
+                    'shortname' => $payload['shortname'],
+                    'summary' => $payload['summary'],
+                    'categoryid' => $payload['categoryid'],
+                    'visible' => $payload['visible'],
+                    'startdate' => $payload['startdate'],
+                    'enddate' => $payload['enddate'],
+                ]],
+            ]);
+        }
+
+        if ($moodleCourseId <= 0) {
+            throw new MoodleIntegrationException("Unable to resolve Moodle course for CourseOffering {$offering->id}.");
+        }
+
+        $this->upsertEntityMapping(
+            MoodleOutboxService::ENTITY_COURSE_OFFERING,
+            (int) $offering->id,
+            (int) $offering->tenant_id,
+            $moodleCourseId,
+            $idnumber,
+        );
+
+        return $moodleCourseId;
+    }
+
+    public function upsertCourseOfferingAsHidden(CourseOffering $offering): int
+    {
+        $idnumber = $this->mapper->courseOfferingIdnumber((int) $offering->id);
+        $existing = $this->findEntityMapping(MoodleOutboxService::ENTITY_COURSE_OFFERING, (int) $offering->id, $idnumber);
+        $moodleCourseId = $existing?->moodle_id ?: $this->findMoodleCourseIdByIdnumber($idnumber);
+
+        if ($moodleCourseId <= 0) {
+            throw new MoodleIntegrationException("Unable to resolve Moodle course for CourseOffering {$offering->id}.");
+        }
+
+        $this->callMoodle('core_course_update_courses', [
+            'courses' => [[
+                'id' => $moodleCourseId,
+                'visible' => 0,
+            ]],
+        ]);
+
+        $this->upsertEntityMapping(
+            MoodleOutboxService::ENTITY_COURSE_OFFERING,
+            (int) $offering->id,
+            (int) $offering->tenant_id,
+            $moodleCourseId,
+            $idnumber,
+        );
+
+        return $moodleCourseId;
+    }
+
+    protected function deactivateMissingCourseOffering(int $offeringId): void
+    {
+        $idnumber = $this->mapper->courseOfferingIdnumber($offeringId);
+        $existing = $this->findEntityMapping(MoodleOutboxService::ENTITY_COURSE_OFFERING, $offeringId, $idnumber);
+        $moodleCourseId = $existing?->moodle_id ?: $this->findMoodleCourseIdByIdnumber($idnumber);
+
+        if ($moodleCourseId <= 0) {
+            return;
+        }
+
+        $this->callMoodle('core_course_update_courses', [
+            'courses' => [[
+                'id' => $moodleCourseId,
+                'visible' => 0,
+            ]],
+        ]);
+
+        $this->upsertEntityMapping(MoodleOutboxService::ENTITY_COURSE_OFFERING, $offeringId, null, $moodleCourseId, $idnumber);
+    }
+
+    protected function buildPrerequisiteHint(CourseOffering $offering): string
+    {
+        if (! $offering->course_id) {
+            return '';
+        }
+
+        $prerequisites = CoursePrerequisite::withoutTenantScope()
+            ->where('course_id', $offering->course_id)
+            ->with(['prerequisiteCourse' => fn ($q) => $q->withTrashed()])
+            ->get();
+
+        if ($prerequisites->isEmpty()) {
+            return '';
+        }
+
+        $lines = $prerequisites->map(function (CoursePrerequisite $p): string {
+            $course = $p->prerequisiteCourse;
+            $label = $course ? trim("{$course->code} — {$course->name}") : "course #{$p->prerequisite_course_id}";
+            $extras = [];
+            if ($p->min_grade !== null) {
+                $extras[] = "min grade {$p->min_grade}";
+            }
+            if (! $p->is_required) {
+                $extras[] = 'optional';
+            }
+            if ($p->note) {
+                $extras[] = $p->note;
+            }
+
+            return '- '.$label.(count($extras) > 0 ? ' ('.implode(', ', $extras).')' : '');
+        })->all();
+
+        return "Prerequisites (FOS-managed):\n".implode("\n", $lines);
+    }
+
     public function resolveMoodleCourseIdForOffering(CourseOffering $offering): int
     {
-        $courseIdnumber = $this->mapper->courseIdnumber((int) $offering->course_id);
-        $existing = MoodleEntityMapping::query()
+        // DB first: prefer per-semester offering mapping (Fase 6.1).
+        $offeringMapping = MoodleEntityMapping::query()
+            ->where('entity_type', MoodleOutboxService::ENTITY_COURSE_OFFERING)
+            ->where('fos_entity_id', (int) $offering->id)
+            ->first();
+
+        if ($offeringMapping?->moodle_id) {
+            return (int) $offeringMapping->moodle_id;
+        }
+
+        // DB fallback: course-master mapping (legacy).
+        $courseMapping = MoodleEntityMapping::query()
             ->where('entity_type', 'course')
             ->where('fos_entity_id', (int) $offering->course_id)
             ->first();
 
-        $moodleCourseId = $existing?->moodle_id ?: $this->findMoodleCourseIdByIdnumber($courseIdnumber);
+        if ($courseMapping?->moodle_id) {
+            return (int) $courseMapping->moodle_id;
+        }
+
+        // Remote lookup as last resort.
+        $offeringIdnumber = $this->mapper->courseOfferingIdnumber((int) $offering->id);
+        $moodleCourseId = $this->findMoodleCourseIdByIdnumber($offeringIdnumber);
+
+        if ($moodleCourseId > 0) {
+            return $moodleCourseId;
+        }
+
+        $courseIdnumber = $this->mapper->courseIdnumber((int) $offering->course_id);
+        $moodleCourseId = $this->findMoodleCourseIdByIdnumber($courseIdnumber);
 
         if ($moodleCourseId <= 0) {
             throw new MoodleIntegrationException(
@@ -377,7 +603,7 @@ class MoodleSyncService
             );
         }
 
-        return (int) $moodleCourseId;
+        return $moodleCourseId;
     }
 
     public function resolveLecturerRoleId(string $role): int

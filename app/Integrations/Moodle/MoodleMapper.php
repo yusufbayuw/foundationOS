@@ -4,6 +4,8 @@ namespace App\Integrations\Moodle;
 
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
+use Modules\Campus\Models\CourseOffering;
+use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 
@@ -22,6 +24,21 @@ class MoodleMapper
     public function courseIdnumber(int $courseId): string
     {
         return "fos_course_{$courseId}";
+    }
+
+    public function courseTemplateCategoryIdnumber(int $tenantId): string
+    {
+        return "fos_template_{$tenantId}";
+    }
+
+    public function semesterCategoryIdnumber(int $tenantId, int $academicPeriodId): string
+    {
+        return "fos_semester_t{$tenantId}_p{$academicPeriodId}";
+    }
+
+    public function courseOfferingIdnumber(int $offeringId): string
+    {
+        return "fos_offering_{$offeringId}";
     }
 
     public function cohortIdnumber(int $tenantId): string
@@ -67,6 +84,51 @@ class MoodleMapper
         ];
     }
 
+    public function mapTemplateCategory(Tenant $tenant, int $parentCategoryId): array
+    {
+        return [
+            'name' => "Templates — {$tenant->name}",
+            'idnumber' => $this->courseTemplateCategoryIdnumber((int) $tenant->id),
+            'parent' => $parentCategoryId,
+        ];
+    }
+
+    public function mapSemesterCategory(Tenant $tenant, AcademicPeriod $period, int $parentCategoryId): array
+    {
+        $periodLabel = $period->code ?: $period->name ?: "period{$period->id}";
+
+        return [
+            'name' => "{$periodLabel} — {$tenant->name}",
+            'idnumber' => $this->semesterCategoryIdnumber((int) $tenant->id, (int) $period->id),
+            'parent' => $parentCategoryId,
+        ];
+    }
+
+    public function mapCourseOffering(CourseOffering $offering, int $categoryId, string $prerequisiteHint = ''): array
+    {
+        $course = $offering->course;
+        $tenantCode = $course?->tenant?->code ?: "tenant{$offering->tenant_id}";
+        $offeringCode = $offering->class_code ?: "offering{$offering->id}";
+        $courseCode = $course?->code ?: "course{$offering->course_id}";
+        $courseName = $course?->name ?: "Course #{$offering->course_id}";
+
+        $periodLabel = $offering->academicPeriod?->code ?: $offering->academicPeriod?->name ?: '';
+        $fullname = trim("{$courseName} — {$offeringCode}".($periodLabel !== '' ? " ({$periodLabel})" : ''));
+
+        $summary = trim(($course?->description ?: '').($prerequisiteHint !== '' ? "\n\n{$prerequisiteHint}" : ''));
+
+        return [
+            'idnumber' => $this->courseOfferingIdnumber((int) $offering->id),
+            'fullname' => $fullname,
+            'shortname' => $this->shortname($tenantCode, "{$courseCode}-{$offeringCode}-{$offering->id}"),
+            'summary' => $summary,
+            'categoryid' => $categoryId,
+            'visible' => $this->shouldHideOffering($offering) ? 0 : 1,
+            'startdate' => $offering->academicPeriod?->start_date?->timestamp ?: 0,
+            'enddate' => $offering->academicPeriod?->end_date?->timestamp ?: 0,
+        ];
+    }
+
     public function mapEnrollment(int $moodleUserId, int $moodleCourseId, ?int $roleId = null): array
     {
         return [
@@ -104,7 +166,7 @@ class MoodleMapper
 
     protected function shortname(string $tenantCode, string $courseCode): string
     {
-        $value = Str::slug($tenantCode . '-' . $courseCode, '-');
+        $value = Str::slug($tenantCode.'-'.$courseCode, '-');
 
         return Str::limit($value, 100, '');
     }
@@ -136,5 +198,16 @@ class MoodleMapper
         }
 
         return ! (bool) $course->is_active;
+    }
+
+    protected function shouldHideOffering(CourseOffering $offering): bool
+    {
+        if ($offering->trashed()) {
+            return true;
+        }
+
+        $status = strtolower((string) $offering->status);
+
+        return in_array($status, ['cancelled', 'archived', 'closed'], true);
     }
 }

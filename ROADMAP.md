@@ -371,7 +371,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** Integrasi Moodle saat ini lebih cocok untuk K-12. Untuk universitas (modul Campus), banyak konsep yang belum ditangani: course catalog dengan prerequisite, study plan (KRS) sync, lecturer assignment, gradebook level-mata-kuliah dengan komponen, thesis tracking, semester academic calendar.
 
-### Fase 6.1 — Course Catalog & Prerequisite Sync
+### Fase 6.1 — Course Catalog & Prerequisite Sync `[x]`
 
 **Deliverable.**
 - Mapping `Modules\Campus\Models\Course` → Moodle Course **Template** (category `fos_template_{tenant}`).
@@ -387,6 +387,14 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 **Dependensi.** Tidak ada.
 
 **Risiko.** Moodle restriction API tidak lengkap via web service — mungkin perlu kompromi (manual setup atau plugin).
+
+**Selesai.** 2026-05-22. Implementasi:
+- Idnumber convention: `fos_offering_{id}`, semester category `fos_semester_t{tenant}_p{period}`, template category `fos_template_{tenant}` (helper di `MoodleMapper`).
+- Migrasi `course_prerequisites` + model `Modules\Campus\Models\CoursePrerequisite` (relasi `Course::prerequisites`).
+- Outbox entity `course_offering` (action `upsert`/`deactivate`) + `MoodleSyncService::syncCourseOfferingOutbox` yang membuat semester category, lalu Moodle course instance dengan `startdate`/`enddate` dari `AcademicPeriod`.
+- `resolveMoodleCourseIdForOffering` sekarang prefer mapping offering (`course_offering`), fallback ke mapping `course` (legacy), lalu remote lookup — sinkron dengan caveat Fase 6.3.
+- Sync prerequisite (POC) lewat course summary: `buildPrerequisiteHint` menambahkan list prereq + min grade ke description Moodle. Restrict access via Moodle API tidak diimplementasi (limitasi WS) — manual hint sudah cukup untuk audit awal.
+- Observer `CourseOfferingObserver` enqueue outbox saat offering created/updated/restored/deleted.
 
 ---
 

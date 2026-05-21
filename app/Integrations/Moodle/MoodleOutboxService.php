@@ -16,6 +16,8 @@ class MoodleOutboxService
 
     public const ENTITY_LECTURER_ASSIGNMENT = 'lecturer_assignment';
 
+    public const ENTITY_COURSE_OFFERING = 'course_offering';
+
     public const ACTION_UPSERT = 'upsert';
 
     public const ACTION_DEACTIVATE = 'deactivate';
