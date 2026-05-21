@@ -1,3 +1,272 @@
+# FoundationOS — AI Assistant Guide
+
+## What This Application Is
+
+FoundationOS is a modular SaaS ERP for educational institutions built on Laravel 13, Filament v5, and Livewire v4. It uses shared-database multi-tenancy (no `stancl/tenancy`) where one application instance serves many tenants with clear domain boundaries enforced by `tenant_id` on every operational table.
+
+The primary admin panel lives at `/admin` (panel ID: `admin`). The tenant model is `Modules\Core\Models\Tenant`.
+
+---
+
+## Directory Layout
+
+```
+app/                        Core Laravel application layer
+  Console/Commands/         Artisan commands (Moodle sync, workflow ops, library)
+  Filament/Imports/         ~100 Filament importers (one per domain model)
+  Integrations/Moodle/      Moodle API client, mapper, outbox service
+  Jobs/                     Queue jobs (ProcessMoodleSyncOutboxJob)
+  Models/                   app/Models/User is a thin bridge → Modules\Core\Models\User
+  Observers/                Model observers (UserObserver, CourseObserver, etc.)
+  Policies/                 app-level policies
+  Providers/Filament/       AdminPanelProvider — single panel configuration
+
+Modules/                    Feature modules (coolsam/modules v5, nwidart compatible)
+  Core/                     Tenancy, users, organizations, subscription plans
+  Global/                   Countries, provinces, cities, districts, timezones
+  School/                   K-12: curricula, classes, students, attendance, grades
+  Campus/                   Higher-ed: faculties, study programs, lecturers, theses
+  Enrollment/               Admissions, applicants, registrations, exams
+  Employee/                 HR: positions, contracts, payroll, KPI, leave
+  Finance/                  Chart of accounts, student invoices, payments, journals
+  Procurement/              Requisitions, RFQs, purchase orders, vendor bills
+  Library/                  Books, loans, fines, SLIMS import integration
+  Monitoring/               Audit logs, file uploads
+  Workflow/                 Metadata-driven approval engine (V2)
+
+config/                     Standard Laravel + filament-shield, filament-modules, permission, moodle
+database/
+  migrations/               Core (users, jobs, cache) + Filament import/export tables
+  seeders/                  DatabaseSeeder → MvpDemoSeeder
+scripts/                    One-off PHP scripts (Moodle bootstrap, SLIMS import helpers)
+tests/
+  Feature/                  CoreTenancyFoundationTest, WorkflowTests, LibraryTest, etc.
+  Unit/                     ExampleTest
+```
+
+Each module under `Modules/<Name>/` follows this internal structure:
+
+```
+app/
+  Filament/
+    Pages/          Filament custom pages
+    Resources/      Resource directories (one dir per resource)
+      <Model>/
+        Pages/      List/Create/Edit/View pages
+        Schemas/    Form and Infolist schema classes
+        Tables/     Table definition class
+        RelationManagers/
+        <Model>Resource.php
+    Widgets/        Stats overview widgets
+    Support/        Shared Filament helpers (ImportTableActions, ModuleResource, TenantField)
+  Models/
+  Policies/
+  Providers/        <Name>ServiceProvider, EventServiceProvider, RouteServiceProvider
+  Services/         Domain service classes
+  Contracts/        Interfaces (especially in Workflow)
+  Enums/
+  Events/
+  Exceptions/
+  Observers/
+database/
+  migrations/
+  seeders/
+  factories/
+resources/views/
+routes/
+  web.php
+  api.php
+```
+
+---
+
+## Key Architectural Decisions
+
+### User Model
+`app/Models/User` extends `Modules\Core\Models\User` — it is a bridge for ecosystem compatibility only. All business logic lives in the Core module User. Always use `Modules\Core\Models\User` in module code.
+
+### Multi-Tenancy Pattern
+- `Tenant` is the SaaS account boundary.
+- `User` is global; membership to a tenant is via `user_tenant_roles`.
+- Every operational model carries `tenant_id`; many also carry `organization_id`.
+- Filament panel uses `->tenant(Modules\Core\Models\Tenant::class)`.
+- Spatie Permission runs in **teams mode** with `team_foreign_key = tenant_id`.
+
+### Filament Resource Pattern
+All module resources extend `Modules\Core\Filament\Support\ModuleResource` (not the base `Resource`). This base class:
+- Handles tenant scoping safety checks
+- Pulls navigation group/icon/label from `FilamentUi`
+- Excludes `SoftDeletingScope` from queries
+- Prevents mutations on global resources by non-super-admins
+
+Form, infolist, and table definitions are split into dedicated `Schemas/` and `Tables/` classes — do not put them inline in the resource class.
+
+### Labels and Bilingual UI
+All display labels come from `Modules\Core\Support\FilamentUi`. The app is bilingual (`id` / `en`). Never hardcode Indonesian or English labels directly in resource/form code — call `FilamentUi::resource()`, `FilamentUi::text()`, or `FilamentUi::module()`.
+
+### Import / Export
+Every resource has an `ImportAction` and CSV template button via `Modules\Core\Filament\Support\ImportTableActions`. The base importer is `app/Filament/Imports/BaseModelImporter`.
+
+---
+
+## Module Details
+
+| Module | Domain | Key Models |
+|--------|--------|------------|
+| Core | Tenancy, users, orgs | Tenant, Organization, User, TenantRole, AcademicYear, Department |
+| Global | Reference data | Country, Province, City, District, Village, Timezone |
+| School | K-12 education | Curriculum, Subject, SchoolClass, Teacher, Student, Attendance, Assessment |
+| Campus | Higher education | Faculty, StudyProgram, Course, Lecturer, CollageStudent, StudyPlan, Thesis |
+| Enrollment | Admissions | AdmissionPeriod, Applicant, Registration, ExamSchedule |
+| Employee | HR | Position, Employee, EmploymentContract, SalarySlip, KpiTemplate, LeaveRequest |
+| Finance | Accounting | ChartOfAccount, Budget, StudentInvoice, Payment, JournalEntry |
+| Procurement | Purchasing | PurchaseRequisition, RFQ, PurchaseOrder, GoodsReceipt, VendorBill |
+| Library | Library mgmt | Book, BookCopy, Member, Loan, Fine, LibrarySerial |
+| Monitoring | Audit | AuditLog, FileUpload |
+| Workflow | Approvals | Workflow, WorkflowStep, WorkflowInstance, WorkflowAssignment |
+
+---
+
+## Workflow V2 (Metadata-Driven)
+
+The Workflow module is the most complex domain. Key components:
+
+- `WorkflowResolver` — finds the best-matching workflow for a tenant/organization
+- `WorkflowInstanceStarter` — snapshots a workflow definition and creates an instance
+- `WorkflowEngine` — advances, returns, and cancels instances
+- `RuleEngine` — evaluates JSONLogic rules for transition conditions
+- `WorkflowAutomatedActionRunner` — runs database-driven automation hooks
+
+Workflows are `tenant-first`: `tenant_id` required, `organization_id` optional (null = tenant-wide). The resolver picks the most specific match (tenant+org > tenant-wide).
+
+**Artisan commands:**
+```bash
+php artisan fos:workflow:health-check --tenant=1
+php artisan fos:workflow:retry-sla --tenant=1
+php artisan fos:workflow:retry-automation {id} {status}
+```
+
+**Setup pilot workflows:**
+```bash
+# Procurement approval
+php artisan fos:workflow:setup-procurement-pilot 1 --manager=10 --finance=11 --executive=12
+
+# Budget approval
+php artisan fos:workflow:setup-budget-workflow 1 --organization=5 --finance=11 --executive=12
+```
+
+---
+
+## Moodle Integration
+
+FOS → Moodle (one-way master data sync) via an outbox pattern:
+
+- `MoodleOutboxService` queues sync events into `moodle_sync_outbox`
+- `ProcessMoodleSyncOutboxJob` drains the outbox
+- `MoodleClient` wraps the Moodle REST API
+- `MoodleMapper` translates FOS entities to Moodle payloads
+
+Logical partitioning strategy:
+- Tenant → Moodle Course Category (`idnumber = fos_tenant_{id}`)
+- Course → Moodle Course (`idnumber = fos_course_{id}`)
+- User → Moodle User (`idnumber = fos_user_{id}`)
+
+Model observers (`CourseObserver`, `StudentObserver`, `ClassStudentObserver`) trigger sync events automatically.
+
+**Artisan commands:**
+```bash
+php artisan moodle:sync-cohorts
+php artisan moodle:pull-grades
+php artisan moodle:pull-attendance
+php artisan moodle:health-check
+php artisan moodle:reconcile
+```
+
+---
+
+## Filament Shield (Authorization)
+
+Shield + Spatie Permission is the **single source of truth** for panel authorization.
+
+After adding new resources/pages, regenerate permissions:
+```bash
+php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
+php artisan optimize:clear
+```
+
+Assign super admin per tenant:
+```bash
+php artisan shield:super-admin --user=1 --tenant=1 --panel=admin
+```
+
+Important: `TenantRole`/`UserTenantRole` in Core module = domain membership layer. Spatie Permission = panel authorization layer. Both must be correct for the panel to work.
+
+---
+
+## Common Development Commands
+
+```bash
+# Start dev environment (server + queue + logs + vite)
+composer run dev
+
+# Run all tests
+php artisan test --compact
+
+# Run specific test
+php artisan test --compact tests/Feature/CoreTenancyFoundationTest.php
+php artisan test --compact --filter=testName
+
+# Format PHP after changes
+vendor/bin/pint --dirty --format agent
+
+# Clear all caches (required after adding module resources)
+php artisan optimize:clear
+
+# List routes
+php artisan route:list --except-vendor
+
+# Create super admin user
+php artisan make:super-admin
+```
+
+---
+
+## Adding a New Module Resource
+
+1. Use `php artisan make:filament-resource --help` to find options; always pass `--no-interaction`.
+2. Place the resource inside `Modules/<Name>/app/Filament/Resources/<Models>/`.
+3. Extend `Modules\Core\Filament\Support\ModuleResource`, not `Filament\Resources\Resource`.
+4. Split form into `Schemas/<Model>Form.php`, infolist into `Schemas/<Model>Infolist.php`, table into `Tables/<Models>Table.php`.
+5. Add the resource to the `navigationSortMap()` in `ModuleResource.php`.
+6. Add an importer to `app/Filament/Imports/` extending `BaseModelImporter`.
+7. Run `php artisan optimize:clear` and `php artisan shield:generate --all --panel=admin --option=permissions --no-interaction`.
+8. Write a feature test using `RefreshDatabase` and the module model factories.
+
+---
+
+## Testing Conventions
+
+- All tests are PHPUnit classes (no Pest). Use `php artisan make:test --phpunit {Name}`.
+- Feature tests use `RefreshDatabase` and `Modules\Core\Models\*` factories.
+- Always authenticate (`actingAs`) before testing Filament panel functionality.
+- Use `Livewire::test()` for Filament resource/page tests.
+- Reference test files: `tests/Feature/CoreTenancyFoundationTest.php`, `tests/Feature/WorkflowDefinitionLifecycleTest.php`.
+
+---
+
+## Reference Documentation
+
+| Topic | File |
+|-------|------|
+| Application overview | `README.md` |
+| Moodle setup | `MOODLE.md`, `MOODLE_HARDENING_CHECKLIST.md` |
+| Workflow details | `WORKFLOW.md` |
+| Procurement runbook | `PROCUREMENT.md` |
+| Finance golden path | `FINANCE.md` |
+| Library integration | `LIBRARY.md` |
+
+---
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
