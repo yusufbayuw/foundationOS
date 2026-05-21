@@ -6,8 +6,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class ShiftForm
 {
@@ -15,36 +17,50 @@ class ShiftForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name')
-                    ->required(),
-                TextInput::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
-                    ->required(),
-                TextInput::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
-                    ->required(),
-                TimePicker::make('start_time')
-                    ->label(\Modules\Core\Support\FilamentUi::field('start_time'))
-                    ->required(),
-                TimePicker::make('end_time')
-                    ->label(\Modules\Core\Support\FilamentUi::field('end_time'))
-                    ->required(),
-                TextInput::make('break_duration_minutes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('break_duration_minutes'))
-                    ->required()
-                    ->numeric()
-                    ->default(60),
-                TextInput::make('color')
-                    ->label(\Modules\Core\Support\FilamentUi::field('color')),
-                Toggle::make('is_night_shift')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_night_shift'))
-                    ->required(),
-                Toggle::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
-                    ->required(),
+                Section::make('General Information')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('organization_id')
+                            ->label(FilamentUi::field('organization_id'))
+                            ->relationship('organization', 'name')
+                            ->required(),
+                        TextInput::make('code')
+                            ->label(FilamentUi::field('code'))
+                            ->required(),
+                        TextInput::make('name')
+                            ->label(FilamentUi::field('name'))
+                            ->required(),
+                        TextInput::make('color')
+                            ->label(FilamentUi::field('color')),
+                    ]),
+
+                Section::make('Shift Schedule')
+                    ->columns(2)
+                    ->schema([
+                        TimePicker::make('start_time')
+                            ->label(FilamentUi::field('start_time'))
+                            ->required(),
+                        TimePicker::make('end_time')
+                            ->label(FilamentUi::field('end_time'))
+                            ->required(),
+                        TextInput::make('break_duration_minutes')
+                            ->label(FilamentUi::field('break_duration_minutes'))
+                            ->required()
+                            ->numeric()
+                            ->default(60),
+                    ]),
+
+                Section::make('Settings')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('is_night_shift')
+                            ->label(FilamentUi::field('is_night_shift'))
+                            ->required(),
+                        Toggle::make('is_active')
+                            ->label(FilamentUi::field('is_active'))
+                            ->required(),
+                    ]),
             ]);
     }
 }

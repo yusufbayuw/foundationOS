@@ -3,11 +3,13 @@
 namespace Modules\Employee\Filament\Resources\PayrollComponents\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class PayrollComponentForm
 {
@@ -15,46 +17,60 @@ class PayrollComponentForm
     {
         return $schema
             ->components([
-                TenantField::make(),
-                Select::make('organization_id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
-                    ->relationship('organization', 'name')
-                    ->required(),
-                TextInput::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
-                    ->required(),
-                TextInput::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
-                    ->required(),
-                TextInput::make('type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('type')),
-                TextInput::make('category')
-                    ->label(\Modules\Core\Support\FilamentUi::field('category')),
-                TextInput::make('calculation_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('calculation_type')),
-                TextInput::make('amount')
-                    ->label(\Modules\Core\Support\FilamentUi::field('amount'))
-                    ->numeric(),
-                TextInput::make('percentage')
-                    ->label(\Modules\Core\Support\FilamentUi::field('percentage'))
-                    ->numeric(),
-                Textarea::make('formula')
-                    ->label(\Modules\Core\Support\FilamentUi::field('formula'))
-                    ->columnSpanFull(),
-                Toggle::make('is_taxable')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_taxable'))
-                    ->required(),
-                Toggle::make('is_mandatory')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_mandatory'))
-                    ->required(),
-                Toggle::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
-                    ->required(),
-                TextInput::make('display_order')
-                    ->label(\Modules\Core\Support\FilamentUi::field('display_order'))
-                    ->required()
-                    ->numeric()
-                    ->default(0),
+                Section::make('General Information')
+                    ->columns(2)
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('organization_id')
+                            ->label(FilamentUi::field('organization_id'))
+                            ->relationship('organization', 'name')
+                            ->required(),
+                        TextInput::make('code')
+                            ->label(FilamentUi::field('code'))
+                            ->required(),
+                        TextInput::make('name')
+                            ->label(FilamentUi::field('name'))
+                            ->required(),
+                        TextInput::make('type')
+                            ->label(FilamentUi::field('type')),
+                        TextInput::make('category')
+                            ->label(FilamentUi::field('category')),
+                    ]),
+
+                Section::make('Calculation')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('calculation_type')
+                            ->label(FilamentUi::field('calculation_type')),
+                        TextInput::make('amount')
+                            ->label(FilamentUi::field('amount'))
+                            ->numeric(),
+                        TextInput::make('percentage')
+                            ->label(FilamentUi::field('percentage'))
+                            ->numeric(),
+                        Textarea::make('formula')
+                            ->label(FilamentUi::field('formula'))
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Settings')
+                    ->columns(2)
+                    ->schema([
+                        Toggle::make('is_taxable')
+                            ->label(FilamentUi::field('is_taxable'))
+                            ->required(),
+                        Toggle::make('is_mandatory')
+                            ->label(FilamentUi::field('is_mandatory'))
+                            ->required(),
+                        Toggle::make('is_active')
+                            ->label(FilamentUi::field('is_active'))
+                            ->required(),
+                        TextInput::make('display_order')
+                            ->label(FilamentUi::field('display_order'))
+                            ->required()
+                            ->numeric()
+                            ->default(0),
+                    ]),
             ]);
     }
 }
