@@ -2,23 +2,24 @@
 
 namespace Modules\Library\Filament\Resources\LibraryGmds;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
-use Modules\Core\Filament\Support\TenantField;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
-use Filament\Facades\Filament;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
+use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 use Modules\Library\Filament\Resources\LibraryGmds\Pages\CreateLibraryGmd;
 use Modules\Library\Filament\Resources\LibraryGmds\Pages\EditLibraryGmd;
 use Modules\Library\Filament\Resources\LibraryGmds\Pages\ListLibraryGmds;
 use Modules\Library\Filament\Resources\LibraryGmds\Pages\ViewLibraryGmd;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Models\LibraryGmd;
 
 class LibraryGmdResource extends LocalizedResource
@@ -34,24 +35,24 @@ class LibraryGmdResource extends LocalizedResource
         return $schema->components([
             TenantField::make(),
             Select::make('organization_id')
-                ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+                ->label(FilamentUi::field('organization_id'))
                 ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
                     if (Filament::getTenant()) {
                         $query->where('tenant_id', Filament::getTenant()->getKey());
                     }
                 })
                 ->nullable()
-                ->helperText('Opsional. Kosongkan untuk data tenant-wide.'),
+                ->helperText(FilamentUi::text('Optional. Leave blank for tenant-wide data.')),
             TextInput::make('code')
-                ->label(\Modules\Core\Support\FilamentUi::field('code')),
+                ->label(FilamentUi::field('code')),
             TextInput::make('name')
-                ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                ->label(FilamentUi::field('name'))
                 ->required(),
             Toggle::make('is_active')
-                ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                ->label(FilamentUi::field('is_active'))
                 ->default(true),
             Textarea::make('notes')
-                ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                ->label(FilamentUi::field('notes'))
                 ->columnSpanFull(),
         ]);
     }
@@ -61,16 +62,16 @@ class LibraryGmdResource extends LocalizedResource
         return $table
             ->columns([
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 IconColumn::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->label(FilamentUi::field('is_active'))
                     ->boolean(),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

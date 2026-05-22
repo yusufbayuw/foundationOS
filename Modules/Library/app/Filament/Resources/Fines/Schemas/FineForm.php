@@ -32,7 +32,7 @@ class FineForm
                                 }
                             })
                             ->nullable()
-                            ->helperText('Opsional. Kosongkan untuk denda tenant-wide.'),
+                            ->helperText(FilamentUi::text('Optional. Leave blank for tenant-wide fines.')),
                         Select::make('loan_id')
                             ->label(FilamentUi::field('loan_id'))
                             ->relationship('loan', 'id', modifyQueryUsing: function (Builder $query): void {

@@ -32,7 +32,7 @@ class LoanForm
                                 }
                             })
                             ->nullable()
-                            ->helperText('Opsional. Kosongkan untuk transaksi tenant-wide.'),
+                            ->helperText(FilamentUi::text('Optional. Leave blank for tenant-wide transactions.')),
                     ]),
 
                 Section::make(FilamentUi::text('Loan Parties'))

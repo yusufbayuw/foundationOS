@@ -2,19 +2,20 @@
 
 namespace Modules\Library\Filament\Resources\LibraryStockTakes;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
-use Modules\Core\Filament\Support\TenantField;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
-use Filament\Facades\Filament;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\LibraryStockTakes\Pages\CreateLibraryStockTake;
 use Modules\Library\Filament\Resources\LibraryStockTakes\Pages\EditLibraryStockTake;
@@ -36,32 +37,32 @@ class LibraryStockTakeResource extends LocalizedResource
         return $schema->components([
             TenantField::make(),
             Select::make('organization_id')
-                ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+                ->label(FilamentUi::field('organization_id'))
                 ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
                     if (Filament::getTenant()) {
                         $query->where('tenant_id', Filament::getTenant()->getKey());
                     }
                 })
                 ->nullable()
-                ->helperText('Opsional. Kosongkan untuk stock take tenant-wide.'),
+                ->helperText(FilamentUi::text('Optional. Leave blank for tenant-wide stock takes.')),
             Select::make('processed_by')
-                ->label(\Modules\Core\Support\FilamentUi::field('processed_by'))
+                ->label(FilamentUi::field('processed_by'))
                 ->relationship('processedBy', 'name')
                 ->searchable()
                 ->preload()
                 ->nullable(),
             TextInput::make('name')
-                ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                ->label(FilamentUi::field('name'))
                 ->required(),
             DateTimePicker::make('started_at')
-                ->label(\Modules\Core\Support\FilamentUi::field('started_at')),
+                ->label(FilamentUi::field('started_at')),
             DateTimePicker::make('ended_at')
-                ->label(\Modules\Core\Support\FilamentUi::field('ended_at')),
+                ->label(FilamentUi::field('ended_at')),
             TextInput::make('status')
-                ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                ->label(FilamentUi::field('status'))
                 ->default('draft'),
             Toggle::make('status_completed')
-                ->label(\Modules\Core\Support\FilamentUi::text('Completed'))
+                ->label(FilamentUi::text('Completed'))
                 ->default(false)
                 ->dehydrated(false)
                 ->afterStateHydrated(function (Toggle $component, ?LibraryStockTake $record): void {
@@ -71,7 +72,7 @@ class LibraryStockTakeResource extends LocalizedResource
                     $set('status', $state ? 'completed' : 'draft');
                 }),
             Textarea::make('notes')
-                ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                ->label(FilamentUi::field('notes'))
                 ->columnSpanFull(),
         ]);
     }
@@ -81,25 +82,25 @@ class LibraryStockTakeResource extends LocalizedResource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                    ->label(FilamentUi::field('status'))
                     ->searchable(),
                 TextColumn::make('started_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('started_at'))
+                    ->label(FilamentUi::field('started_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('ended_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('ended_at'))
+                    ->label(FilamentUi::field('ended_at'))
                     ->dateTime()
                     ->sortable(),
                 IconColumn::make('processed_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('processed_by'))
+                    ->label(FilamentUi::field('processed_by'))
                     ->state(fn (LibraryStockTake $record) => (bool) $record->processed_by)
                     ->boolean(),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -32,7 +32,7 @@ class BookCopyForm
                                 }
                             })
                             ->nullable()
-                            ->helperText('Opsional. Kosongkan untuk copy tenant-wide.'),
+                            ->helperText(FilamentUi::text('Optional. Leave blank for tenant-wide copies.')),
                         Select::make('book_id')
                             ->label(FilamentUi::field('book_id'))
                             ->relationship('book', 'title', modifyQueryUsing: function (Builder $query): void {
@@ -103,7 +103,7 @@ class BookCopyForm
                             ->preload(),
                         TextInput::make('location_shelf')
                             ->label(FilamentUi::field('location_shelf'))
-                            ->helperText('Opsional. Isi jika lokasi belum terdaftar di master data.'),
+                            ->helperText(FilamentUi::text('Optional. Fill if location is not registered in master data.')),
                         Textarea::make('notes')
                             ->label(FilamentUi::field('notes'))
                             ->columnSpanFull(),

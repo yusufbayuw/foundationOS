@@ -31,7 +31,7 @@ class BookCategoryForm
                                 }
                             })
                             ->nullable()
-                            ->helperText('Kosongkan untuk kategori tenant-wide (terpusat).'),
+                            ->helperText(FilamentUi::text('Leave blank for tenant-wide categories.')),
                     ]),
 
                 Section::make(FilamentUi::text('Category Details'))

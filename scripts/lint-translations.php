@@ -63,6 +63,11 @@ $rules = [
         // Allow: '-', '0', single words that are clearly decorative
         '/^[\-0]$/',
     ],
+    [
+        '->helperText() with hardcoded string (use FilamentUi::text())',
+        '/->helperText\(\s*[\'"][A-Za-z\x{00C0}-\x{024F}][^\'"]{4,}[\'"]\)/u',
+        null,
+    ],
 ];
 
 /** Recursively find PHP files in the given directories */

@@ -162,7 +162,7 @@ class ViewWorkflowInstance extends ViewRecord
 
         $schema[] = Textarea::make('workflow_note')
             ->label(FilamentUi::text('Workflow Note'))
-            ->placeholder('Catatan aksi ini (opsional).');
+            ->placeholder(FilamentUi::text('Note for this action (optional).'));
 
         return $schema;
     }

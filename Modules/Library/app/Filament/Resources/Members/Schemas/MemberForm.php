@@ -33,7 +33,7 @@ class MemberForm
                                 }
                             })
                             ->nullable()
-                            ->helperText('Opsional. Kosongkan untuk member tenant-wide (lintas organisasi).'),
+                            ->helperText(FilamentUi::text('Optional. Leave blank for tenant-wide members.')),
                         Select::make('user_id')
                             ->label(FilamentUi::field('user_id'))
                             ->relationship('user', 'name', modifyQueryUsing: function (Builder $query): void {
@@ -60,7 +60,7 @@ class MemberForm
                             })
                             ->searchable()
                             ->preload()
-                            ->helperText('Opsional. Jika diisi, kebijakan peminjaman mengikuti tipe member.'),
+                            ->helperText(FilamentUi::text('Optional. If filled, loan policy follows member type.')),
                         TextInput::make('member_type')
                             ->label(FilamentUi::field('member_type')),
                         DatePicker::make('joined_at')

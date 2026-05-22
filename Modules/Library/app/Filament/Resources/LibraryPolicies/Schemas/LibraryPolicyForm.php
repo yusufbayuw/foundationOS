@@ -29,7 +29,7 @@ class LibraryPolicyForm
                             }
                         })
                         ->nullable()
-                        ->helperText('Kosongkan agar policy berlaku tenant-wide.'),
+                        ->helperText(FilamentUi::text('Leave blank for tenant-wide policy.')),
                     TextInput::make('name')->required(),
                 ]),
 

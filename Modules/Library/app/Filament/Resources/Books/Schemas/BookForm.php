@@ -33,7 +33,7 @@ class BookForm
                                 }
                             })
                             ->nullable()
-                            ->helperText('Kosongkan untuk kebijakan perpustakaan tenant-wide (terpusat).'),
+                            ->helperText(FilamentUi::text('Leave blank for the tenant-wide library policy.')),
                         Select::make('book_category_id')
                             ->label(FilamentUi::field('book_category_id'))
                             ->relationship('category', 'name', modifyQueryUsing: function (Builder $query): void {
@@ -48,7 +48,7 @@ class BookForm
                             })
                             ->searchable()
                             ->preload()
-                            ->helperText('Opsional. Jika diisi, nama penerbit akan mengikuti master data.'),
+                            ->helperText(FilamentUi::text('Optional. If filled, publisher name follows master data.')),
                     ]),
 
                 Section::make(FilamentUi::text('Identification'))
@@ -66,7 +66,7 @@ class BookForm
                         Textarea::make('authors')
                             ->label(FilamentUi::field('authors'))
                             ->required()
-                            ->helperText('Pisahkan penulis dengan koma.')
+                            ->helperText(FilamentUi::text('Separate authors with commas.'))
                             ->columnSpanFull(),
                         Select::make('authorItems')
                             ->label(FilamentUi::text('Authors (Master Data)'))
@@ -76,7 +76,7 @@ class BookForm
                             ->searchable()
                             ->multiple()
                             ->preload()
-                            ->helperText('Opsional. Pilih penulis dari master data untuk konsistensi laporan.')
+                            ->helperText(FilamentUi::text('Optional. Select authors from master data for report consistency.'))
                             ->columnSpanFull(),
                     ]),
 
@@ -111,7 +111,7 @@ class BookForm
                             })
                             ->searchable()
                             ->preload()
-                            ->helperText('General Material Designation (GMD).'),
+                            ->helperText(FilamentUi::text('General Material Designation (GMD).')),
                         Select::make('collection_type_id')
                             ->label(FilamentUi::field('collection_type_id'))
                             ->relationship('collectionType', 'name', modifyQueryUsing: function (Builder $query): void {
@@ -126,7 +126,7 @@ class BookForm
                             })
                             ->searchable()
                             ->preload()
-                            ->helperText('Isi jika judul ini berjenis serial/jurnal.'),
+                            ->helperText(FilamentUi::text('Fill if this title is a serial or journal.')),
                         TextInput::make('pages')
                             ->label(FilamentUi::field('pages'))
                             ->numeric(),
@@ -147,11 +147,11 @@ class BookForm
                             ->searchable()
                             ->multiple()
                             ->preload()
-                            ->helperText('Opsional. Pilih topik/subject untuk klasifikasi laporan.')
+                            ->helperText(FilamentUi::text('Optional. Select topics for report classification.'))
                             ->columnSpanFull(),
                         Textarea::make('keywords')
                             ->label(FilamentUi::field('keywords'))
-                            ->helperText('Pisahkan kata kunci dengan koma.')
+                            ->helperText(FilamentUi::text('Separate keywords with commas.'))
                             ->columnSpanFull(),
                         Textarea::make('synopsis')
                             ->label(FilamentUi::field('synopsis'))

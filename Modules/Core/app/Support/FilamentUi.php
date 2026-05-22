@@ -445,6 +445,27 @@ class FilamentUi
         'Supplier details' => 'Detail pemasok',
         'Delivery details' => 'Detail pengiriman',
         'Approval information' => 'Informasi persetujuan',
+
+        // ── Sprint 4 — Helper text & placeholder phrases ──────────────────────────
+        'Optional. Leave blank for tenant-wide data.' => 'Opsional. Kosongkan untuk data tenant-wide.',
+        'Optional. Leave blank for tenant-wide stock takes.' => 'Opsional. Kosongkan untuk stock take tenant-wide.',
+        'Optional. Leave blank for tenant-wide fines.' => 'Opsional. Kosongkan untuk denda tenant-wide.',
+        'Optional. Leave blank for tenant-wide members.' => 'Opsional. Kosongkan untuk member tenant-wide (lintas organisasi).',
+        'Optional. Leave blank for tenant-wide transactions.' => 'Opsional. Kosongkan untuk transaksi tenant-wide.',
+        'Optional. Leave blank for tenant-wide copies.' => 'Opsional. Kosongkan untuk copy tenant-wide.',
+        'Leave blank for tenant-wide policy.' => 'Kosongkan agar policy berlaku tenant-wide.',
+        'Leave blank for the tenant-wide library policy.' => 'Kosongkan untuk kebijakan perpustakaan tenant-wide (terpusat).',
+        'Leave blank for tenant-wide categories.' => 'Kosongkan untuk kategori tenant-wide (terpusat).',
+        'Optional. If filled, publisher name follows master data.' => 'Opsional. Jika diisi, nama penerbit akan mengikuti master data.',
+        'Optional. Select authors from master data for report consistency.' => 'Opsional. Pilih penulis dari master data untuk konsistensi laporan.',
+        'Optional. Select topics for report classification.' => 'Opsional. Pilih topik/subject untuk klasifikasi laporan.',
+        'Optional. If filled, loan policy follows member type.' => 'Opsional. Jika diisi, kebijakan peminjaman mengikuti tipe member.',
+        'Optional. Fill if location is not registered in master data.' => 'Opsional. Isi jika lokasi belum terdaftar di master data.',
+        'Separate authors with commas.' => 'Pisahkan penulis dengan koma.',
+        'Separate keywords with commas.' => 'Pisahkan kata kunci dengan koma.',
+        'Fill if this title is a serial or journal.' => 'Isi jika judul ini berjenis serial/jurnal.',
+        'General Material Designation (GMD).' => 'General Material Designation (GMD).',
+        'Note for this action (optional).' => 'Catatan aksi ini (opsional).',
     ];
 
     /**
