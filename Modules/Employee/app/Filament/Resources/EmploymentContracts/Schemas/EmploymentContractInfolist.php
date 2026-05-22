@@ -6,6 +6,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class EmploymentContractInfolist
 {
@@ -13,75 +14,75 @@ class EmploymentContractInfolist
     {
         return $schema
             ->components([
-                Section::make('Contract Details')
+                Section::make(FilamentUi::text('Contract Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('employee.id')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Employee')),
+                            ->label(FilamentUi::text('Employee')),
                         TextEntry::make('previousContract.id')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Previous contract'))
+                            ->label(FilamentUi::text('Previous contract'))
                             ->placeholder('-'),
                         TextEntry::make('contract_number')
-                            ->label(\Modules\Core\Support\FilamentUi::field('contract_number')),
+                            ->label(FilamentUi::field('contract_number')),
                         TextEntry::make('contract_type')
-                            ->label(\Modules\Core\Support\FilamentUi::field('contract_type'))
+                            ->label(FilamentUi::field('contract_type'))
                             ->placeholder('-'),
                         TextEntry::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                            ->label(FilamentUi::field('status')),
                         TextEntry::make('document_file')
-                            ->label(\Modules\Core\Support\FilamentUi::field('document_file'))
+                            ->label(FilamentUi::field('document_file'))
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Period')
+                Section::make(FilamentUi::text('Period'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('start_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('start_date'))
+                            ->label(FilamentUi::field('start_date'))
                             ->date(),
                         TextEntry::make('end_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('end_date'))
+                            ->label(FilamentUi::field('end_date'))
                             ->date()
                             ->placeholder('-'),
                         TextEntry::make('probation_period_months')
-                            ->label(\Modules\Core\Support\FilamentUi::field('probation_period_months'))
+                            ->label(FilamentUi::field('probation_period_months'))
                             ->numeric(),
                     ]),
 
-                Section::make('Compensation')
+                Section::make(FilamentUi::text('Compensation'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('basic_salary')
-                            ->label(\Modules\Core\Support\FilamentUi::field('basic_salary'))
+                            ->label(FilamentUi::field('basic_salary'))
                             ->numeric(),
                         TextEntry::make('allowance_details')
-                            ->label(\Modules\Core\Support\FilamentUi::field('allowance_details'))
+                            ->label(FilamentUi::field('allowance_details'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('benefits')
-                            ->label(\Modules\Core\Support\FilamentUi::field('benefits'))
+                            ->label(FilamentUi::field('benefits'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Work Conditions')
+                Section::make(FilamentUi::text('Work Conditions'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('work_location')
-                            ->label(\Modules\Core\Support\FilamentUi::field('work_location'))
+                            ->label(FilamentUi::field('work_location'))
                             ->placeholder('-'),
                         TextEntry::make('work_hours_per_week')
-                            ->label(\Modules\Core\Support\FilamentUi::field('work_hours_per_week'))
+                            ->label(FilamentUi::field('work_hours_per_week'))
                             ->numeric(),
                         TextEntry::make('termination_clause')
-                            ->label(\Modules\Core\Support\FilamentUi::field('termination_clause'))
+                            ->label(FilamentUi::field('termination_clause'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Signatures')
+                Section::make(FilamentUi::text('Signatures'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('signed_by_employee')
@@ -89,11 +90,11 @@ class EmploymentContractInfolist
                         IconEntry::make('signed_by_employer')
                             ->boolean(),
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

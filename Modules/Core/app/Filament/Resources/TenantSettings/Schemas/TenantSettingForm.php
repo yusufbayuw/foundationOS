@@ -15,7 +15,7 @@ class TenantSettingForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -30,7 +30,7 @@ class TenantSettingForm
                             ->default('string'),
                     ]),
 
-                Section::make('Value')
+                Section::make(FilamentUi::text('Value'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('value')

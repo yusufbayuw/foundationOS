@@ -17,7 +17,7 @@ class CourseForm
     {
         return $schema
             ->components([
-                Section::make('Course Details')
+                Section::make(FilamentUi::text('Course Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -42,7 +42,7 @@ class CourseForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Credit Hours')
+                Section::make(FilamentUi::text('Credit Hours'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('credits')
@@ -62,7 +62,7 @@ class CourseForm
                             ->default(0),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_mandatory')

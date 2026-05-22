@@ -5,6 +5,7 @@ namespace Modules\Global\Filament\Resources\Countries\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class CountryForm
 {
@@ -12,14 +13,14 @@ class CountryForm
     {
         return $schema
             ->components([
-                Section::make('Country Details')
+                Section::make(FilamentUi::text('Country Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                            ->label(FilamentUi::field('code'))
                             ->required(),
                         TextInput::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                            ->label(FilamentUi::field('name'))
                             ->required(),
                     ]),
             ]);

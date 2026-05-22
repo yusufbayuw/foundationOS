@@ -17,7 +17,7 @@ class KpiIndicatorForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -40,7 +40,7 @@ class KpiIndicatorForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Target & Scoring')
+                Section::make(FilamentUi::text('Target & Scoring'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('target_type')
@@ -66,7 +66,7 @@ class KpiIndicatorForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Data & Status')
+                Section::make(FilamentUi::text('Data & Status'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('data_source')

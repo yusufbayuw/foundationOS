@@ -14,7 +14,7 @@ class AchievementTypeInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class AchievementTypeInfolist
                             ->label(FilamentUi::field('name')),
                     ]),
 
-                Section::make('Classification')
+                Section::make(FilamentUi::text('Classification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('category')
@@ -45,7 +45,7 @@ class AchievementTypeInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_active')

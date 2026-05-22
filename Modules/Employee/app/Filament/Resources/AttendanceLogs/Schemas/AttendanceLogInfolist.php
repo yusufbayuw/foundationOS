@@ -13,7 +13,7 @@ class AttendanceLogInfolist
     {
         return $schema
             ->components([
-                Section::make('Employee & Shift')
+                Section::make(FilamentUi::text('Employee & Shift'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -29,7 +29,7 @@ class AttendanceLogInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Attendance Details')
+                Section::make(FilamentUi::text('Attendance Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('date')
@@ -54,7 +54,7 @@ class AttendanceLogInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Location & Device')
+                Section::make(FilamentUi::text('Location & Device'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('location_check_in')
@@ -79,7 +79,7 @@ class AttendanceLogInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Notes & Timestamps')
+                Section::make(FilamentUi::text('Notes & Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('notes')

@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class VillageForm
 {
@@ -13,18 +14,18 @@ class VillageForm
     {
         return $schema
             ->components([
-                Section::make('Village Details')
+                Section::make(FilamentUi::text('Village Details'))
                     ->columns(2)
                     ->schema([
                         Select::make('district_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('district_id'))
+                            ->label(FilamentUi::field('district_id'))
                             ->relationship('district', 'name')
                             ->required(),
                         TextInput::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                            ->label(FilamentUi::field('code'))
                             ->required(),
                         TextInput::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                            ->label(FilamentUi::field('name'))
                             ->required(),
                     ]),
             ]);

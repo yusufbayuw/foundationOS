@@ -6,6 +6,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class ExamScheduleInfolist
 {
@@ -13,63 +14,63 @@ class ExamScheduleInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('admissionPeriod.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Admission period')),
+                            ->label(FilamentUi::text('Admission period')),
                         TextEntry::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name')),
+                            ->label(FilamentUi::field('name')),
                         TextEntry::make('type')
-                            ->label(\Modules\Core\Support\FilamentUi::field('type'))
+                            ->label(FilamentUi::field('type'))
                             ->placeholder('-'),
                         IconEntry::make('is_active')
                             ->boolean(),
                     ]),
 
-                Section::make('Schedule')
+                Section::make(FilamentUi::text('Schedule'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('date'))
+                            ->label(FilamentUi::field('date'))
                             ->date(),
                         TextEntry::make('location')
-                            ->label(\Modules\Core\Support\FilamentUi::field('location'))
+                            ->label(FilamentUi::field('location'))
                             ->placeholder('-'),
                         TextEntry::make('start_time')
-                            ->label(\Modules\Core\Support\FilamentUi::field('start_time'))
+                            ->label(FilamentUi::field('start_time'))
                             ->time(),
                         TextEntry::make('end_time')
-                            ->label(\Modules\Core\Support\FilamentUi::field('end_time'))
+                            ->label(FilamentUi::field('end_time'))
                             ->time(),
                     ]),
 
-                Section::make('Capacity')
+                Section::make(FilamentUi::text('Capacity'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('room_capacity')
-                            ->label(\Modules\Core\Support\FilamentUi::field('room_capacity'))
+                            ->label(FilamentUi::field('room_capacity'))
                             ->numeric(),
                         TextEntry::make('registered_count')
-                            ->label(\Modules\Core\Support\FilamentUi::field('registered_count'))
+                            ->label(FilamentUi::field('registered_count'))
                             ->numeric(),
                     ]),
 
-                Section::make('Instructions & Timestamps')
+                Section::make(FilamentUi::text('Instructions & Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('instructions')
-                            ->label(\Modules\Core\Support\FilamentUi::field('instructions'))
+                            ->label(FilamentUi::field('instructions'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

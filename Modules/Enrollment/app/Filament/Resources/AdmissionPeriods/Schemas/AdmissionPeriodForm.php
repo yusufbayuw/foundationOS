@@ -18,7 +18,7 @@ class AdmissionPeriodForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -39,7 +39,7 @@ class AdmissionPeriodForm
                             ->required(),
                     ]),
 
-                Section::make('Schedule')
+                Section::make(FilamentUi::text('Schedule'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('start_date')
@@ -52,7 +52,7 @@ class AdmissionPeriodForm
                             ->label(FilamentUi::field('announcement_date')),
                     ]),
 
-                Section::make('Capacity & Fees')
+                Section::make(FilamentUi::text('Capacity & Fees'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('registration_fee')
@@ -77,7 +77,7 @@ class AdmissionPeriodForm
                             ->default(0),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('description')

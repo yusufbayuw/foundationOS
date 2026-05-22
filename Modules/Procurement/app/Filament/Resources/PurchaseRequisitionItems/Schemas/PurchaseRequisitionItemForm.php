@@ -17,7 +17,7 @@ class PurchaseRequisitionItemForm
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -45,7 +45,7 @@ class PurchaseRequisitionItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Quantity & Pricing')
+                Section::make(FilamentUi::text('Quantity & Pricing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('quantity_requested')
@@ -77,7 +77,7 @@ class PurchaseRequisitionItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Fulfillment & Status')
+                Section::make(FilamentUi::text('Fulfillment & Status'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('status')

@@ -18,7 +18,7 @@ class AcademicPeriodForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -37,7 +37,7 @@ class AcademicPeriodForm
                             ->label(FilamentUi::field('type')),
                     ]),
 
-                Section::make('Period')
+                Section::make(FilamentUi::text('Period'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('start_date')
@@ -48,7 +48,7 @@ class AcademicPeriodForm
                             ->required(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')

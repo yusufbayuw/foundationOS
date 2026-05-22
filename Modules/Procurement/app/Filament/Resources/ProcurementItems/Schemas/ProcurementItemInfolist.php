@@ -14,7 +14,7 @@ class ProcurementItemInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -39,7 +39,7 @@ class ProcurementItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pricing & Ordering')
+                Section::make(FilamentUi::text('Pricing & Ordering'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('unit_of_measure')
@@ -65,7 +65,7 @@ class ProcurementItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status & Timestamps')
+                Section::make(FilamentUi::text('Status & Timestamps'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_active')

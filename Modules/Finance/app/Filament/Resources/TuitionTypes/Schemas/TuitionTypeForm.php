@@ -17,7 +17,7 @@ class TuitionTypeForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -37,7 +37,7 @@ class TuitionTypeForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Billing')
+                Section::make(FilamentUi::text('Billing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('amount')
@@ -57,7 +57,7 @@ class TuitionTypeForm
                             ->default(7),
                     ]),
 
-                Section::make('Late Fees & Discounts')
+                Section::make(FilamentUi::text('Late Fees & Discounts'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('late_fee_percentage')

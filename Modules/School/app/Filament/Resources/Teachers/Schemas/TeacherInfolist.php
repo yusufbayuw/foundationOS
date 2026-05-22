@@ -14,7 +14,7 @@ class TeacherInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -27,7 +27,7 @@ class TeacherInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Employment Details')
+                Section::make(FilamentUi::text('Employment Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('nip')
@@ -55,7 +55,7 @@ class TeacherInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Certification & Education')
+                Section::make(FilamentUi::text('Certification & Education'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_certified')
@@ -77,7 +77,7 @@ class TeacherInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Position & Teaching')
+                Section::make(FilamentUi::text('Position & Teaching'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('functional_position')
@@ -100,7 +100,7 @@ class TeacherInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Compensation & Benefits')
+                Section::make(FilamentUi::text('Compensation & Benefits'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('base_salary')
@@ -119,7 +119,7 @@ class TeacherInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

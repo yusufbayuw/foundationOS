@@ -8,6 +8,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Filament\Resources\Payments\PaymentResource;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Services\FinanceControlService;
@@ -24,12 +25,12 @@ class ViewPayment extends ViewRecord
 
         return [
             Action::make('verifyPayment')
-                ->label('Verify Payment')
+                ->label(FilamentUi::text('Verify Payment'))
                 ->icon('heroicon-o-check-badge')
                 ->color('success')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->form([
-                    Textarea::make('notes')->label('Verification Notes')->rows(3),
+                    Textarea::make('notes')->label(FilamentUi::text('Verification Notes'))->rows(3),
                 ])
                 ->action(function (array $data): void {
                     try {
@@ -44,12 +45,12 @@ class ViewPayment extends ViewRecord
                     }
                 }),
             Action::make('rejectPayment')
-                ->label('Reject Payment')
+                ->label(FilamentUi::text('Reject Payment'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->form([
-                    Textarea::make('notes')->label('Rejection Notes')->rows(3)->required(),
+                    Textarea::make('notes')->label(FilamentUi::text('Rejection Notes'))->rows(3)->required(),
                 ])
                 ->action(function (array $data): void {
                     try {

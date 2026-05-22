@@ -16,7 +16,7 @@ class TenantRoleForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -33,7 +33,7 @@ class TenantRoleForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Permissions')
+                Section::make(FilamentUi::text('Permissions'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('permissions')
@@ -41,7 +41,7 @@ class TenantRoleForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_default')

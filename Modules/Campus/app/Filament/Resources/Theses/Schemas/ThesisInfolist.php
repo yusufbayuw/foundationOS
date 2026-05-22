@@ -13,7 +13,7 @@ class ThesisInfolist
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class ThesisInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Thesis Details')
+                Section::make(FilamentUi::text('Thesis Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('title')
@@ -43,7 +43,7 @@ class ThesisInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timeline')
+                Section::make(FilamentUi::text('Timeline'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('proposal_submitted_at')
@@ -56,7 +56,7 @@ class ThesisInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Grade & Notes')
+                Section::make(FilamentUi::text('Grade & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('grade_letter')
@@ -72,7 +72,7 @@ class ThesisInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

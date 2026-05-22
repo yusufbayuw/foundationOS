@@ -8,6 +8,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Modules\Core\Models\AcademicPeriod;
+use Modules\Core\Support\FilamentUi;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Services\AttendanceRecapService;
 
@@ -53,17 +54,17 @@ class AttendanceRecapPage extends Page implements HasForms
         return $schema
             ->components([
                 Select::make('academic_period_id')
-                    ->label('Periode Akademik')
+                    ->label(FilamentUi::text('Periode Akademik'))
                     ->options(AcademicPeriod::pluck('name', 'id'))
                     ->required()
                     ->live(),
                 Select::make('class_id')
-                    ->label('Kelas')
+                    ->label(FilamentUi::text('Kelas'))
                     ->options(SchoolClass::pluck('name', 'id'))
                     ->required()
                     ->live(),
                 Select::make('month')
-                    ->label('Bulan')
+                    ->label(FilamentUi::text('Bulan'))
                     ->options([
                         1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
                         5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -72,7 +73,7 @@ class AttendanceRecapPage extends Page implements HasForms
                     ->required()
                     ->live(),
                 Select::make('year')
-                    ->label('Tahun')
+                    ->label(FilamentUi::text('Tahun'))
                     ->options(array_combine(range(date('Y') - 5, date('Y') + 1), range(date('Y') - 5, date('Y') + 1)))
                     ->required()
                     ->live(),

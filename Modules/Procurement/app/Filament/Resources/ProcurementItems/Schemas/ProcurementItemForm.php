@@ -3,8 +3,8 @@
 namespace Modules\Procurement\Filament\Resources\ProcurementItems\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -17,7 +17,7 @@ class ProcurementItemForm
     {
         return $schema
             ->components([
-                Section::make('Item Information')
+                Section::make(FilamentUi::text('Item Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -40,7 +40,7 @@ class ProcurementItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pricing & Quantity')
+                Section::make(FilamentUi::text('Pricing & Quantity'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('unit_of_measure')
@@ -65,7 +65,7 @@ class ProcurementItemForm
                             ->default(0),
                     ]),
 
-                Section::make('Specifications')
+                Section::make(FilamentUi::text('Specifications'))
                     ->columns(1)
                     ->schema([
                         Textarea::make('specifications')
@@ -73,7 +73,7 @@ class ProcurementItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')

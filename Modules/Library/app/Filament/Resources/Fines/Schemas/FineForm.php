@@ -20,7 +20,7 @@ class FineForm
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -43,7 +43,7 @@ class FineForm
                             ->required(),
                     ]),
 
-                Section::make('Fine Details')
+                Section::make(FilamentUi::text('Fine Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('fine_type')
@@ -65,7 +65,7 @@ class FineForm
                             ->default('unpaid'),
                     ]),
 
-                Section::make('Timeline & Notes')
+                Section::make(FilamentUi::text('Timeline & Notes'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('issued_at')

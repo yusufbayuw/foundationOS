@@ -5,6 +5,7 @@ namespace Modules\Procurement\Filament\Resources\RequestForQuotations\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class RequestForQuotationInfolist
 {
@@ -12,61 +13,61 @@ class RequestForQuotationInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('purchaseRequisition.id')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Purchase requisition')),
+                            ->label(FilamentUi::text('Purchase requisition')),
                         TextEntry::make('created_by')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_by'))
+                            ->label(FilamentUi::field('created_by'))
                             ->numeric()
                             ->placeholder('-'),
                         TextEntry::make('rfq_number')
-                            ->label(\Modules\Core\Support\FilamentUi::field('rfq_number')),
+                            ->label(FilamentUi::field('rfq_number')),
                         TextEntry::make('rfq_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('rfq_date'))
+                            ->label(FilamentUi::field('rfq_date'))
                             ->date(),
                         TextEntry::make('closing_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('closing_date'))
+                            ->label(FilamentUi::field('closing_date'))
                             ->date()
                             ->placeholder('-'),
                         TextEntry::make('description')
-                            ->label(\Modules\Core\Support\FilamentUi::field('description'))
+                            ->label(FilamentUi::field('description'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Budget & Status')
+                Section::make(FilamentUi::text('Budget & Status'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('total_estimated_budget')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_estimated_budget'))
+                            ->label(FilamentUi::field('total_estimated_budget'))
                             ->numeric(),
                         TextEntry::make('currency')
-                            ->label(\Modules\Core\Support\FilamentUi::field('currency')),
+                            ->label(FilamentUi::field('currency')),
                         TextEntry::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                            ->label(FilamentUi::field('status')),
                         TextEntry::make('award_criteria')
-                            ->label(\Modules\Core\Support\FilamentUi::field('award_criteria'))
+                            ->label(FilamentUi::field('award_criteria'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('notes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->label(FilamentUi::field('notes'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

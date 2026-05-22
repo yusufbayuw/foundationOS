@@ -14,7 +14,7 @@ class CurriculumInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -34,7 +34,7 @@ class CurriculumInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('grade_levels')

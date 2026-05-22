@@ -13,7 +13,7 @@ class AssessmentItemInfolist
     {
         return $schema
             ->components([
-                Section::make('Item Information')
+                Section::make(FilamentUi::text('Item Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -27,7 +27,7 @@ class AssessmentItemInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Question')
+                Section::make(FilamentUi::text('Question'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('question_text')
@@ -46,7 +46,7 @@ class AssessmentItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Scoring')
+                Section::make(FilamentUi::text('Scoring'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('max_score')
@@ -67,7 +67,7 @@ class AssessmentItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

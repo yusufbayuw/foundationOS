@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 use Modules\Library\Support\LibraryScopeResolver;
 
 class BookReservationForm
@@ -18,7 +19,7 @@ class BookReservationForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Scope')
+            Section::make(FilamentUi::text('Scope'))
                 ->columns(2)
                 ->schema([
                     TenantField::make(),
@@ -31,7 +32,7 @@ class BookReservationForm
                         ->nullable(),
                 ]),
 
-            Section::make('Reservation')
+            Section::make(FilamentUi::text('Reservation'))
                 ->columns(2)
                 ->schema([
                     Select::make('book_id')
@@ -52,7 +53,7 @@ class BookReservationForm
                     TextInput::make('status')->required()->default('pending'),
                 ]),
 
-            Section::make('Timeline')
+            Section::make(FilamentUi::text('Timeline'))
                 ->columns(2)
                 ->schema([
                     DateTimePicker::make('requested_at'),

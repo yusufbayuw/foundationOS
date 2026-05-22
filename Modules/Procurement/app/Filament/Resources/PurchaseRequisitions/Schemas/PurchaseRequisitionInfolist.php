@@ -2,10 +2,11 @@
 
 namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Schemas;
 
-use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class PurchaseRequisitionInfolist
 {
@@ -13,86 +14,86 @@ class PurchaseRequisitionInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('user.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('User'))
+                            ->label(FilamentUi::text('User'))
                             ->placeholder('-'),
                         TextEntry::make('requested_by')
-                            ->label(\Modules\Core\Support\FilamentUi::field('requested_by'))
+                            ->label(FilamentUi::field('requested_by'))
                             ->numeric()
                             ->placeholder('-'),
                         TextEntry::make('approved_by')
-                            ->label(\Modules\Core\Support\FilamentUi::field('approved_by'))
+                            ->label(FilamentUi::field('approved_by'))
                             ->numeric()
                             ->placeholder('-'),
                         TextEntry::make('request_number')
-                            ->label(\Modules\Core\Support\FilamentUi::field('request_number')),
+                            ->label(FilamentUi::field('request_number')),
                         TextEntry::make('priority')
-                            ->label(\Modules\Core\Support\FilamentUi::field('priority')),
+                            ->label(FilamentUi::field('priority')),
                     ]),
 
-                Section::make('Dates')
+                Section::make(FilamentUi::text('Dates'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('request_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('request_date'))
+                            ->label(FilamentUi::field('request_date'))
                             ->date(),
                         TextEntry::make('required_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('required_date'))
+                            ->label(FilamentUi::field('required_date'))
                             ->date()
                             ->placeholder('-'),
                         TextEntry::make('approved_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('approved_at'))
+                            ->label(FilamentUi::field('approved_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Financial Summary')
+                Section::make(FilamentUi::text('Financial Summary'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('total_items')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_items'))
+                            ->label(FilamentUi::field('total_items'))
                             ->numeric(),
                         TextEntry::make('total_estimated_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_estimated_amount'))
+                            ->label(FilamentUi::field('total_estimated_amount'))
                             ->numeric(),
                     ]),
 
-                Section::make('Status & Notes')
+                Section::make(FilamentUi::text('Status & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                            ->label(FilamentUi::field('status')),
                         IconEntry::make('ready_for_sourcing')
-                            ->label('Ready For Sourcing')
+                            ->label(FilamentUi::text('Ready For Sourcing'))
                             ->boolean(),
                         TextEntry::make('justification')
-                            ->label(\Modules\Core\Support\FilamentUi::field('justification'))
+                            ->label(FilamentUi::field('justification'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('rejection_reason')
-                            ->label(\Modules\Core\Support\FilamentUi::field('rejection_reason'))
+                            ->label(FilamentUi::field('rejection_reason'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('notes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->label(FilamentUi::field('notes'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

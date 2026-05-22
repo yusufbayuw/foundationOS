@@ -8,6 +8,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Resources\SalarySlips\SalarySlipResource;
 use Modules\Employee\Models\SalarySlip;
 
@@ -22,7 +23,7 @@ class ViewSalarySlip extends ViewRecord
 
         return [
             Action::make('approveSalarySlip')
-                ->label('Approve Slip')
+                ->label(FilamentUi::text('Approve Slip'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->visible(fn (): bool => $record->status === 'draft')
@@ -34,17 +35,17 @@ class ViewSalarySlip extends ViewRecord
                 }),
 
             Action::make('markAsPaid')
-                ->label('Mark as Paid')
+                ->label(FilamentUi::text('Mark as Paid'))
                 ->icon('heroicon-o-banknotes')
                 ->color('primary')
                 ->visible(fn (): bool => $record->status === 'approved')
                 ->form([
                     DateTimePicker::make('paid_at')
-                        ->label('Paid At')
+                        ->label(FilamentUi::text('Paid At'))
                         ->required()
                         ->default(now()),
                     TextInput::make('paid_via')
-                        ->label('Paid Via')
+                        ->label(FilamentUi::text('Paid Via'))
                         ->required(),
                 ])
                 ->action(function (array $data): void {
@@ -58,7 +59,7 @@ class ViewSalarySlip extends ViewRecord
                 }),
 
             Action::make('sendToEmployee')
-                ->label('Send to Employee')
+                ->label(FilamentUi::text('Send to Employee'))
                 ->icon('heroicon-o-envelope')
                 ->color('info')
                 ->visible(fn (): bool => $record->status === 'approved')

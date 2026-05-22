@@ -14,7 +14,7 @@ class StudentGradeInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -29,7 +29,7 @@ class StudentGradeInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Scoring')
+                Section::make(FilamentUi::text('Scoring'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('score')
@@ -51,7 +51,7 @@ class StudentGradeInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_passed')

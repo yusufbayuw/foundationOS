@@ -13,7 +13,7 @@ class LoanInfolist
     {
         return $schema
             ->components([
-                Section::make('Loan Parties')
+                Section::make(FilamentUi::text('Loan Parties'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -32,7 +32,7 @@ class LoanInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Loan Period')
+                Section::make(FilamentUi::text('Loan Period'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('loan_date')
@@ -55,7 +55,7 @@ class LoanInfolist
                             ->label(FilamentUi::field('status')),
                     ]),
 
-                Section::make('Fines')
+                Section::make(FilamentUi::text('Fines'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('fine_amount')
@@ -68,7 +68,7 @@ class LoanInfolist
                             ->label(FilamentUi::field('fine_status')),
                     ]),
 
-                Section::make('Condition & Notes')
+                Section::make(FilamentUi::text('Condition & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('condition_on_loan')
@@ -83,7 +83,7 @@ class LoanInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

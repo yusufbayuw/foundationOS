@@ -5,6 +5,7 @@ namespace Modules\Global\Filament\Resources\Timezones\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class TimezoneInfolist
 {
@@ -12,27 +13,27 @@ class TimezoneInfolist
     {
         return $schema
             ->components([
-                Section::make('Timezone Details')
+                Section::make(FilamentUi::text('Timezone Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code')),
+                            ->label(FilamentUi::field('code')),
                         TextEntry::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name')),
+                            ->label(FilamentUi::field('name')),
                         TextEntry::make('utc_offset')
-                            ->label(\Modules\Core\Support\FilamentUi::field('utc_offset'))
+                            ->label(FilamentUi::field('utc_offset'))
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

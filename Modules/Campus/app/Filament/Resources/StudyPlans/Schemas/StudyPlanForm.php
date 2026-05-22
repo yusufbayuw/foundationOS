@@ -17,7 +17,7 @@ class StudyPlanForm
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -30,7 +30,7 @@ class StudyPlanForm
                             ->relationship('academicPeriod', 'name'),
                     ]),
 
-                Section::make('Plan Details')
+                Section::make(FilamentUi::text('Plan Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('plan_number')
@@ -49,7 +49,7 @@ class StudyPlanForm
                             ->numeric(),
                     ]),
 
-                Section::make('Approval')
+                Section::make(FilamentUi::text('Approval'))
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('submitted_at'),

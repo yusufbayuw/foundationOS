@@ -14,7 +14,7 @@ class ViolationInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -43,7 +43,7 @@ class ViolationInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Reporting & Handling')
+                Section::make(FilamentUi::text('Reporting & Handling'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('reported_by')
@@ -60,7 +60,7 @@ class ViolationInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Sanctions & Resolution')
+                Section::make(FilamentUi::text('Sanctions & Resolution'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('sanctions')
@@ -83,7 +83,7 @@ class ViolationInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

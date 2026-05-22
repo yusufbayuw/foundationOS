@@ -13,7 +13,7 @@ class PurchaseRequisitionItemInfolist
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -43,7 +43,7 @@ class PurchaseRequisitionItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Quantity & Pricing')
+                Section::make(FilamentUi::text('Quantity & Pricing'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('quantity_requested')
@@ -71,7 +71,7 @@ class PurchaseRequisitionItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Fulfillment & Status')
+                Section::make(FilamentUi::text('Fulfillment & Status'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -92,7 +92,7 @@ class PurchaseRequisitionItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

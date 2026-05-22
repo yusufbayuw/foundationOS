@@ -14,7 +14,7 @@ class AcademicYearInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class AcademicYearInfolist
                             ->label(FilamentUi::field('code')),
                     ]),
 
-                Section::make('Period')
+                Section::make(FilamentUi::text('Period'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('start_date')
@@ -39,7 +39,7 @@ class AcademicYearInfolist
                             ->date(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_active')
@@ -52,7 +52,7 @@ class AcademicYearInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

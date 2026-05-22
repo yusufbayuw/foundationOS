@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Support\FilamentUi;
 use Modules\Procurement\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use Throwable;
 
@@ -18,7 +19,7 @@ class ViewPurchaseOrder extends ViewRecord
     {
         return [
             Action::make('approvePurchaseOrder')
-                ->label('Approve PO')
+                ->label(FilamentUi::text('Approve PO'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->visible(fn (): bool => $this->record->status === 'draft')
@@ -38,13 +39,13 @@ class ViewPurchaseOrder extends ViewRecord
                     }
                 }),
             Action::make('rejectPurchaseOrder')
-                ->label('Reject PO')
+                ->label(FilamentUi::text('Reject PO'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->visible(fn (): bool => $this->record->status === 'draft')
                 ->form([
                     Textarea::make('rejection_reason')
-                        ->label('Rejection Reason')
+                        ->label(FilamentUi::text('Rejection Reason'))
                         ->rows(3)
                         ->required(),
                 ])

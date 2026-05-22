@@ -19,7 +19,7 @@ class ExamScheduleForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -37,7 +37,7 @@ class ExamScheduleForm
                             ->required(),
                     ]),
 
-                Section::make('Schedule')
+                Section::make(FilamentUi::text('Schedule'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('date')
@@ -53,7 +53,7 @@ class ExamScheduleForm
                             ->required(),
                     ]),
 
-                Section::make('Capacity')
+                Section::make(FilamentUi::text('Capacity'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('room_capacity')
@@ -68,7 +68,7 @@ class ExamScheduleForm
                             ->default(0),
                     ]),
 
-                Section::make('Instructions')
+                Section::make(FilamentUi::text('Instructions'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('instructions')

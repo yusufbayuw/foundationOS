@@ -19,7 +19,7 @@ class RfqVendorForm
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -33,7 +33,7 @@ class RfqVendorForm
                             ->required(),
                     ]),
 
-                Section::make('Invitation & Response')
+                Section::make(FilamentUi::text('Invitation & Response'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('invitation_date')
@@ -52,7 +52,7 @@ class RfqVendorForm
                             ->label(FilamentUi::field('quotation_document')),
                     ]),
 
-                Section::make('Evaluation')
+                Section::make(FilamentUi::text('Evaluation'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('technical_score')

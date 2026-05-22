@@ -14,7 +14,7 @@ class StudyProgramInfolist
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -30,7 +30,7 @@ class StudyProgramInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Program Details')
+                Section::make(FilamentUi::text('Program Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('code')
@@ -55,7 +55,7 @@ class StudyProgramInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

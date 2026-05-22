@@ -14,7 +14,7 @@ class StudentAchievementInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -36,7 +36,7 @@ class StudentAchievementInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Achievement Details')
+                Section::make(FilamentUi::text('Achievement Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('title')
@@ -63,7 +63,7 @@ class StudentAchievementInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Certificate & Media')
+                Section::make(FilamentUi::text('Certificate & Media'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('certificate_number')
@@ -81,7 +81,7 @@ class StudentAchievementInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Points & Verification')
+                Section::make(FilamentUi::text('Points & Verification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('points_earned')

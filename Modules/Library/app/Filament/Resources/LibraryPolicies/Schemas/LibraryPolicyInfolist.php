@@ -5,13 +5,14 @@ namespace Modules\Library\Filament\Resources\LibraryPolicies\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class LibraryPolicyInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Scope')
+            Section::make(FilamentUi::text('Scope'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('tenant.name'),
@@ -19,7 +20,7 @@ class LibraryPolicyInfolist
                     TextEntry::make('name'),
                 ]),
 
-            Section::make('Loan Limits')
+            Section::make(FilamentUi::text('Loan Limits'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('max_books'),
@@ -30,7 +31,7 @@ class LibraryPolicyInfolist
                     TextEntry::make('reservation_pickup_days'),
                 ]),
 
-            Section::make('Notes')
+            Section::make(FilamentUi::text('Notes'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('notes'),

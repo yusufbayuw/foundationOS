@@ -64,7 +64,7 @@ class PurchaseRequisitionsTable
                     ->badge()
                     ->searchable(),
                 IconColumn::make('ready_for_sourcing')
-                    ->label('Ready For Sourcing')
+                    ->label(FilamentUi::text('Ready For Sourcing'))
                     ->boolean(),
                 TextColumn::make('approved_at')
                     ->label(FilamentUi::field('approved_at'))

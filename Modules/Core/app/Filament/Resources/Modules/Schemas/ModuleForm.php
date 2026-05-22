@@ -15,7 +15,7 @@ class ModuleForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('code')
@@ -32,7 +32,7 @@ class ModuleForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Appearance')
+                Section::make(FilamentUi::text('Appearance'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('icon')
@@ -43,7 +43,7 @@ class ModuleForm
                             ->label(FilamentUi::field('version')),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_core')
@@ -57,7 +57,7 @@ class ModuleForm
                             ->required(),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('price_monthly')
@@ -72,7 +72,7 @@ class ModuleForm
                             ->default(0),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('settings_schema')

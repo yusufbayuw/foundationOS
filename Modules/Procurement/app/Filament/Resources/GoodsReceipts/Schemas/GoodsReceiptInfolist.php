@@ -13,7 +13,7 @@ class GoodsReceiptInfolist
     {
         return $schema
             ->components([
-                Section::make('Receipt Information')
+                Section::make(FilamentUi::text('Receipt Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -34,7 +34,7 @@ class GoodsReceiptInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Personnel & Status')
+                Section::make(FilamentUi::text('Personnel & Status'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('received_by')
@@ -53,7 +53,7 @@ class GoodsReceiptInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Notes')
+                Section::make(FilamentUi::text('Notes'))
                     ->columns(1)
                     ->schema([
                         TextEntry::make('notes')
@@ -66,7 +66,7 @@ class GoodsReceiptInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

@@ -13,7 +13,7 @@ class PurchaseOrderInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -44,7 +44,7 @@ class PurchaseOrderInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Financial Summary')
+                Section::make(FilamentUi::text('Financial Summary'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('subtotal')
@@ -75,7 +75,7 @@ class PurchaseOrderInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Status & Approval')
+                Section::make(FilamentUi::text('Status & Approval'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -98,7 +98,7 @@ class PurchaseOrderInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

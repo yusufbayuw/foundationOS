@@ -14,7 +14,7 @@ class TenantModuleInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -23,7 +23,7 @@ class TenantModuleInfolist
                             ->label(FilamentUi::text('Module')),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_enabled')
@@ -38,7 +38,7 @@ class TenantModuleInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('settings')
@@ -47,7 +47,7 @@ class TenantModuleInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

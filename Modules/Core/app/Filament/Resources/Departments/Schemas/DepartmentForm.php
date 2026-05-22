@@ -17,7 +17,7 @@ class DepartmentForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -34,7 +34,7 @@ class DepartmentForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')

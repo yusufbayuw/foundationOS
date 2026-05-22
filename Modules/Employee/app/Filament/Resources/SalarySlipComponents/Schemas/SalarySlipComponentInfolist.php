@@ -14,7 +14,7 @@ class SalarySlipComponentInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -34,7 +34,7 @@ class SalarySlipComponentInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Calculation')
+                Section::make(FilamentUi::text('Calculation'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('amount')
@@ -54,7 +54,7 @@ class SalarySlipComponentInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_taxable')
@@ -70,7 +70,7 @@ class SalarySlipComponentInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

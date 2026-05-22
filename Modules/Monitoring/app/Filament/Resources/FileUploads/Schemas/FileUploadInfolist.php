@@ -14,7 +14,7 @@ class FileUploadInfolist
     {
         return $schema
             ->components([
-                Section::make('Context')
+                Section::make(FilamentUi::text('Context'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -39,7 +39,7 @@ class FileUploadInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('File Details')
+                Section::make(FilamentUi::text('File Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('original_name')
@@ -60,7 +60,7 @@ class FileUploadInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Storage')
+                Section::make(FilamentUi::text('Storage'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('disk')
@@ -80,7 +80,7 @@ class FileUploadInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

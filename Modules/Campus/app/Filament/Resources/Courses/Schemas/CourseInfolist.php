@@ -14,7 +14,7 @@ class CourseInfolist
     {
         return $schema
             ->components([
-                Section::make('Course Details')
+                Section::make(FilamentUi::text('Course Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -38,7 +38,7 @@ class CourseInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Credit Hours')
+                Section::make(FilamentUi::text('Credit Hours'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('credits')
@@ -52,7 +52,7 @@ class CourseInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_mandatory')
@@ -61,7 +61,7 @@ class CourseInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

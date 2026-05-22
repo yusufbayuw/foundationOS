@@ -13,7 +13,7 @@ class AttendanceInfolist
     {
         return $schema
             ->components([
-                Section::make('Attendance Information')
+                Section::make(FilamentUi::text('Attendance Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -36,7 +36,7 @@ class AttendanceInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Date & Time')
+                Section::make(FilamentUi::text('Date & Time'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('attendance_date')
@@ -52,7 +52,7 @@ class AttendanceInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Verification Details')
+                Section::make(FilamentUi::text('Verification Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('location_data')
@@ -72,7 +72,7 @@ class AttendanceInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

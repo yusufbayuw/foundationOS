@@ -17,7 +17,7 @@ class ShiftForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -35,7 +35,7 @@ class ShiftForm
                             ->label(FilamentUi::field('color')),
                     ]),
 
-                Section::make('Shift Schedule')
+                Section::make(FilamentUi::text('Shift Schedule'))
                     ->columns(2)
                     ->schema([
                         TimePicker::make('start_time')
@@ -51,7 +51,7 @@ class ShiftForm
                             ->default(60),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_night_shift')

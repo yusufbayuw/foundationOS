@@ -14,7 +14,7 @@ class TenantInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('uuid')
@@ -31,7 +31,7 @@ class TenantInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Branding')
+                Section::make(FilamentUi::text('Branding'))
                     ->columns(2)
                     ->schema([
                         ImageEntry::make('logo')
@@ -50,7 +50,7 @@ class TenantInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Localization')
+                Section::make(FilamentUi::text('Localization'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('timezone')
@@ -61,7 +61,7 @@ class TenantInfolist
                             ->label(FilamentUi::field('locale')),
                     ]),
 
-                Section::make('Subscription')
+                Section::make(FilamentUi::text('Subscription'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('billing_cycle')
@@ -86,7 +86,7 @@ class TenantInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Limits')
+                Section::make(FilamentUi::text('Limits'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('max_users')
@@ -103,7 +103,7 @@ class TenantInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('SEO & Metadata')
+                Section::make(FilamentUi::text('SEO & Metadata'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('meta_title')
@@ -123,7 +123,7 @@ class TenantInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

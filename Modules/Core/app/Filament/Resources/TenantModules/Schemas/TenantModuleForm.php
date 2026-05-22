@@ -17,7 +17,7 @@ class TenantModuleForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -27,7 +27,7 @@ class TenantModuleForm
                             ->required(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_enabled')
@@ -37,7 +37,7 @@ class TenantModuleForm
                         DateTimePicker::make('disabled_at'),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('settings')

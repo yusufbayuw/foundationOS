@@ -15,7 +15,7 @@ class BookInfolist
     {
         return $schema
             ->components([
-                Section::make('Scope & Category')
+                Section::make(FilamentUi::text('Scope & Category'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class BookInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Identification')
+                Section::make(FilamentUi::text('Identification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('isbn')
@@ -47,7 +47,7 @@ class BookInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Publication')
+                Section::make(FilamentUi::text('Publication'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('publisher')
@@ -72,7 +72,7 @@ class BookInfolist
                             ->label(FilamentUi::field('language')),
                     ]),
 
-                Section::make('Physical & Classification')
+                Section::make(FilamentUi::text('Physical & Classification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('pages')
@@ -102,7 +102,7 @@ class BookInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Media & Acquisition')
+                Section::make(FilamentUi::text('Media & Acquisition'))
                     ->columns(2)
                     ->schema([
                         ImageEntry::make('cover_image')
@@ -119,7 +119,7 @@ class BookInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Inventory & Status')
+                Section::make(FilamentUi::text('Inventory & Status'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('total_copies')
@@ -137,7 +137,7 @@ class BookInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

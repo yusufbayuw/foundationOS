@@ -16,7 +16,7 @@ class GoodsReceiptItemForm
     {
         return $schema
             ->components([
-                Section::make('Reference')
+                Section::make(FilamentUi::text('Reference'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -29,7 +29,7 @@ class GoodsReceiptItemForm
                             ->relationship('purchaseOrderItem', 'id'),
                     ]),
 
-                Section::make('Quantities')
+                Section::make(FilamentUi::text('Quantities'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('quantity_received')
@@ -53,7 +53,7 @@ class GoodsReceiptItemForm
                             ->default('good'),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('unit_price')
@@ -69,7 +69,7 @@ class GoodsReceiptItemForm
                             ->default(0),
                     ]),
 
-                Section::make('Notes')
+                Section::make(FilamentUi::text('Notes'))
                     ->columns(1)
                     ->schema([
                         Textarea::make('notes')

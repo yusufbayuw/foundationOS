@@ -6,6 +6,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class SubjectInfolist
 {
@@ -13,68 +14,68 @@ class SubjectInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('organization.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Organization'))
+                            ->label(FilamentUi::text('Organization'))
                             ->placeholder('-'),
                         TextEntry::make('curriculum.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Curriculum'))
+                            ->label(FilamentUi::text('Curriculum'))
                             ->placeholder('-'),
                         TextEntry::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name')),
+                            ->label(FilamentUi::field('name')),
                         TextEntry::make('short_name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('short_name'))
+                            ->label(FilamentUi::field('short_name'))
                             ->placeholder('-'),
                         TextEntry::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code')),
+                            ->label(FilamentUi::field('code')),
                         TextEntry::make('description')
-                            ->label(\Modules\Core\Support\FilamentUi::field('description'))
+                            ->label(FilamentUi::field('description'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Academic Details')
+                Section::make(FilamentUi::text('Academic Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('grade_level')
-                            ->label(\Modules\Core\Support\FilamentUi::field('grade_level'))
+                            ->label(FilamentUi::field('grade_level'))
                             ->placeholder('-'),
                         TextEntry::make('credits')
-                            ->label(\Modules\Core\Support\FilamentUi::field('credits'))
+                            ->label(FilamentUi::field('credits'))
                             ->numeric()
                             ->placeholder('-'),
                         IconEntry::make('is_mandatory')
                             ->boolean(),
                         TextEntry::make('subject_group')
-                            ->label(\Modules\Core\Support\FilamentUi::field('subject_group'))
+                            ->label(FilamentUi::field('subject_group'))
                             ->placeholder('-'),
                         IconEntry::make('has_practicum')
                             ->boolean(),
                     ]),
 
-                Section::make('Display & Outcomes')
+                Section::make(FilamentUi::text('Display & Outcomes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('color_code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('color_code'))
+                            ->label(FilamentUi::field('color_code'))
                             ->placeholder('-'),
                         TextEntry::make('icon')
-                            ->label(\Modules\Core\Support\FilamentUi::field('icon'))
+                            ->label(FilamentUi::field('icon'))
                             ->placeholder('-'),
                         TextEntry::make('learning_outcomes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('learning_outcomes'))
+                            ->label(FilamentUi::field('learning_outcomes'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

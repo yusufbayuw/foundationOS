@@ -17,7 +17,7 @@ class StudentForm
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -36,7 +36,7 @@ class StudentForm
                             ->label(FilamentUi::field('nisn')),
                     ]),
 
-                Section::make('Enrollment')
+                Section::make(FilamentUi::text('Enrollment'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('entry_date')
@@ -61,7 +61,7 @@ class StudentForm
                             ->label(FilamentUi::field('track')),
                     ]),
 
-                Section::make('Academic & Health')
+                Section::make(FilamentUi::text('Academic & Health'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('extracurricular_activities')
@@ -82,7 +82,7 @@ class StudentForm
                             ->label(FilamentUi::field('family_card_number')),
                     ]),
 
-                Section::make('Father Information')
+                Section::make(FilamentUi::text('Father Information'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('father_name')
@@ -98,7 +98,7 @@ class StudentForm
                             ->tel(),
                     ]),
 
-                Section::make('Mother Information')
+                Section::make(FilamentUi::text('Mother Information'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('mother_name')
@@ -114,7 +114,7 @@ class StudentForm
                             ->tel(),
                     ]),
 
-                Section::make('Guardian Information')
+                Section::make(FilamentUi::text('Guardian Information'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('guardian_name')
@@ -129,7 +129,7 @@ class StudentForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Residence & Transport')
+                Section::make(FilamentUi::text('Residence & Transport'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('residence_type')

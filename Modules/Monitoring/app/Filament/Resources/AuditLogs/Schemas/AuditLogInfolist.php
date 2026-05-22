@@ -13,7 +13,7 @@ class AuditLogInfolist
     {
         return $schema
             ->components([
-                Section::make('Context')
+                Section::make(FilamentUi::text('Context'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -27,7 +27,7 @@ class AuditLogInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Audit Target')
+                Section::make(FilamentUi::text('Audit Target'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('auditable_type')
@@ -47,7 +47,7 @@ class AuditLogInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Changed Values')
+                Section::make(FilamentUi::text('Changed Values'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('old_values')
@@ -60,7 +60,7 @@ class AuditLogInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Request Details')
+                Section::make(FilamentUi::text('Request Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('ip_address')
@@ -79,7 +79,7 @@ class AuditLogInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

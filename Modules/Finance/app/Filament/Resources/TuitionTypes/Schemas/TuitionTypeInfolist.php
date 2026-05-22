@@ -14,7 +14,7 @@ class TuitionTypeInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -35,7 +35,7 @@ class TuitionTypeInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Billing')
+                Section::make(FilamentUi::text('Billing'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('amount')
@@ -53,7 +53,7 @@ class TuitionTypeInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Late Fees & Discounts')
+                Section::make(FilamentUi::text('Late Fees & Discounts'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('late_fee_percentage')
@@ -68,7 +68,7 @@ class TuitionTypeInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

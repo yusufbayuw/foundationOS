@@ -18,7 +18,7 @@ class StudentAssessmentAnswerForm
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -42,7 +42,7 @@ class StudentAssessmentAnswerForm
                             ->numeric(),
                     ]),
 
-                Section::make('Answer')
+                Section::make(FilamentUi::text('Answer'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('answer_text')
@@ -54,7 +54,7 @@ class StudentAssessmentAnswerForm
                             ->label(FilamentUi::field('answer_attachment')),
                     ]),
 
-                Section::make('Scoring')
+                Section::make(FilamentUi::text('Scoring'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('score')
@@ -71,7 +71,7 @@ class StudentAssessmentAnswerForm
                         DateTimePicker::make('graded_at'),
                     ]),
 
-                Section::make('Attempt Information')
+                Section::make(FilamentUi::text('Attempt Information'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('attempt_number')

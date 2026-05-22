@@ -21,7 +21,7 @@ class MemberForm
     {
         return $schema
             ->components([
-                Section::make('Scope & Identity')
+                Section::make(FilamentUi::text('Scope & Identity'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -50,7 +50,7 @@ class MemberForm
                             ->required(),
                     ]),
 
-                Section::make('Membership')
+                Section::make(FilamentUi::text('Membership'))
                     ->columns(2)
                     ->schema([
                         Select::make('member_type_id')
@@ -69,7 +69,7 @@ class MemberForm
                             ->label(FilamentUi::field('expires_at')),
                     ]),
 
-                Section::make('Loan Limits')
+                Section::make(FilamentUi::text('Loan Limits'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('max_books')
@@ -89,7 +89,7 @@ class MemberForm
                             ->default(1000),
                     ]),
 
-                Section::make('Activity & Fines')
+                Section::make(FilamentUi::text('Activity & Fines'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('total_loans_count')
@@ -114,7 +114,7 @@ class MemberForm
                             ->default(0),
                     ]),
 
-                Section::make('Status & Notes')
+                Section::make(FilamentUi::text('Status & Notes'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('status')

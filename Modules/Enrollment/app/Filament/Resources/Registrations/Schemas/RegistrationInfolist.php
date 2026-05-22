@@ -5,6 +5,7 @@ namespace Modules\Enrollment\Filament\Resources\Registrations\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class RegistrationInfolist
 {
@@ -12,66 +13,66 @@ class RegistrationInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('applicant.id')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Applicant')),
+                            ->label(FilamentUi::text('Applicant')),
                         TextEntry::make('registration_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('registration_date'))
+                            ->label(FilamentUi::field('registration_date'))
                             ->date(),
                         TextEntry::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                            ->label(FilamentUi::field('status')),
                         TextEntry::make('completed_by')
-                            ->label(\Modules\Core\Support\FilamentUi::field('completed_by'))
+                            ->label(FilamentUi::field('completed_by'))
                             ->numeric()
                             ->placeholder('-'),
                         TextEntry::make('completed_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('completed_at'))
+                            ->label(FilamentUi::field('completed_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Payment')
+                Section::make(FilamentUi::text('Payment'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('payment_status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('payment_status')),
+                            ->label(FilamentUi::field('payment_status')),
                         TextEntry::make('total_fee')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_fee'))
+                            ->label(FilamentUi::field('total_fee'))
                             ->numeric(),
                         TextEntry::make('paid_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('paid_amount'))
+                            ->label(FilamentUi::field('paid_amount'))
                             ->numeric(),
                         TextEntry::make('uniform_size')
-                            ->label(\Modules\Core\Support\FilamentUi::field('uniform_size'))
+                            ->label(FilamentUi::field('uniform_size'))
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Documents & Notes')
+                Section::make(FilamentUi::text('Documents & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('documents_received')
-                            ->label(\Modules\Core\Support\FilamentUi::field('documents_received'))
+                            ->label(FilamentUi::field('documents_received'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('notes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->label(FilamentUi::field('notes'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

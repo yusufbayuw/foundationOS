@@ -19,7 +19,7 @@ class PurchaseRequisitionForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -42,7 +42,7 @@ class PurchaseRequisitionForm
                             ->default('normal'),
                     ]),
 
-                Section::make('Dates')
+                Section::make(FilamentUi::text('Dates'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('request_date')
@@ -54,7 +54,7 @@ class PurchaseRequisitionForm
                             ->disabled(),
                     ]),
 
-                Section::make('Financial Summary')
+                Section::make(FilamentUi::text('Financial Summary'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('total_items')
@@ -69,7 +69,7 @@ class PurchaseRequisitionForm
                             ->default(0),
                     ]),
 
-                Section::make('Status & Notes')
+                Section::make(FilamentUi::text('Status & Notes'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('status')
@@ -79,7 +79,7 @@ class PurchaseRequisitionForm
                             ->disabled()
                             ->dehydrated(),
                         Toggle::make('ready_for_sourcing')
-                            ->label('Ready For Sourcing')
+                            ->label(FilamentUi::text('Ready For Sourcing'))
                             ->inline(false)
                             ->disabled(),
                         Textarea::make('justification')

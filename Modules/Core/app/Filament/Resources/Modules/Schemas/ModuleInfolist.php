@@ -14,7 +14,7 @@ class ModuleInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('code')
@@ -29,7 +29,7 @@ class ModuleInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Appearance')
+                Section::make(FilamentUi::text('Appearance'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('icon')
@@ -43,7 +43,7 @@ class ModuleInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_core')
@@ -54,7 +54,7 @@ class ModuleInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('price_monthly')
@@ -65,7 +65,7 @@ class ModuleInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('settings_schema')
@@ -81,7 +81,7 @@ class ModuleInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

@@ -17,7 +17,7 @@ class ThesisForm
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -33,7 +33,7 @@ class ThesisForm
                             ->relationship('examinerLecturer', 'id'),
                     ]),
 
-                Section::make('Thesis Details')
+                Section::make(FilamentUi::text('Thesis Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('title')
@@ -49,14 +49,14 @@ class ThesisForm
                             ->label(FilamentUi::field('document_path')),
                     ]),
 
-                Section::make('Timeline')
+                Section::make(FilamentUi::text('Timeline'))
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('proposal_submitted_at'),
                         DateTimePicker::make('defense_date'),
                     ]),
 
-                Section::make('Grade & Notes')
+                Section::make(FilamentUi::text('Grade & Notes'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('grade_letter')

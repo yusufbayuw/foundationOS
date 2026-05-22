@@ -20,7 +20,7 @@ class PaymentForm
     {
         return $schema
             ->components([
-                Section::make('Payment Details')
+                Section::make(FilamentUi::text('Payment Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -52,7 +52,7 @@ class PaymentForm
                             ->numeric(),
                     ]),
 
-                Section::make('Payment Method')
+                Section::make(FilamentUi::text('Payment Method'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('payment_method')
@@ -71,7 +71,7 @@ class PaymentForm
                             ->label(FilamentUi::field('proof_file')),
                     ]),
 
-                Section::make('Verification')
+                Section::make(FilamentUi::text('Verification'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('verified_by')
@@ -83,7 +83,7 @@ class PaymentForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Reconciliation')
+                Section::make(FilamentUi::text('Reconciliation'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('status')

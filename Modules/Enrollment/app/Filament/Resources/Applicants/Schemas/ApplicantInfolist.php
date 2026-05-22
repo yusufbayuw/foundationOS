@@ -14,7 +14,7 @@ class ApplicantInfolist
     {
         return $schema
             ->components([
-                Section::make('Admission Information')
+                Section::make(FilamentUi::text('Admission Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -27,7 +27,7 @@ class ApplicantInfolist
                             ->label(FilamentUi::field('status')),
                     ]),
 
-                Section::make('Personal Data')
+                Section::make(FilamentUi::text('Personal Data'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('full_name')
@@ -57,7 +57,7 @@ class ApplicantInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Parent & Previous School')
+                Section::make(FilamentUi::text('Parent & Previous School'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('parent_name')
@@ -85,7 +85,7 @@ class ApplicantInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Achievements & Program Choices')
+                Section::make(FilamentUi::text('Achievements & Program Choices'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('achievement_count')
@@ -105,7 +105,7 @@ class ApplicantInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Selection & Enrollment')
+                Section::make(FilamentUi::text('Selection & Enrollment'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('test_score')
@@ -140,7 +140,7 @@ class ApplicantInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Documents & Notes')
+                Section::make(FilamentUi::text('Documents & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('photo')
@@ -156,7 +156,7 @@ class ApplicantInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

@@ -15,7 +15,7 @@ class OrganizationInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -36,7 +36,7 @@ class OrganizationInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Legal Documents')
+                Section::make(FilamentUi::text('Legal Documents'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('npsn')
@@ -53,7 +53,7 @@ class OrganizationInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Contact')
+                Section::make(FilamentUi::text('Contact'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('phone')
@@ -67,7 +67,7 @@ class OrganizationInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Address')
+                Section::make(FilamentUi::text('Address'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('address')
@@ -99,7 +99,7 @@ class OrganizationInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Management')
+                Section::make(FilamentUi::text('Management'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('established_date')
@@ -111,7 +111,7 @@ class OrganizationInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Media')
+                Section::make(FilamentUi::text('Media'))
                     ->columns(2)
                     ->schema([
                         ImageEntry::make('logo')
@@ -132,7 +132,7 @@ class OrganizationInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Status & Settings')
+                Section::make(FilamentUi::text('Status & Settings'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_main')
@@ -145,7 +145,7 @@ class OrganizationInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

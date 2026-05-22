@@ -14,7 +14,7 @@ class VendorInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -42,7 +42,7 @@ class VendorInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Legal Documents')
+                Section::make(FilamentUi::text('Legal Documents'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('npwp')
@@ -63,7 +63,7 @@ class VendorInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Address & Contact')
+                Section::make(FilamentUi::text('Address & Contact'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('province.name')
@@ -90,7 +90,7 @@ class VendorInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Contact Person')
+                Section::make(FilamentUi::text('Contact Person'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('contact_person')
@@ -107,7 +107,7 @@ class VendorInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Banking')
+                Section::make(FilamentUi::text('Banking'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('bank_name')
@@ -121,7 +121,7 @@ class VendorInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Performance')
+                Section::make(FilamentUi::text('Performance'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('performance_rating')
@@ -136,7 +136,7 @@ class VendorInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

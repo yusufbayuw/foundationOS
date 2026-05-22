@@ -17,7 +17,7 @@ class ExamResultForm
     {
         return $schema
             ->components([
-                Section::make('Context')
+                Section::make(FilamentUi::text('Context'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -33,7 +33,7 @@ class ExamResultForm
                             ->relationship('examiner', 'name'),
                     ]),
 
-                Section::make('Exam Details')
+                Section::make(FilamentUi::text('Exam Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('seat_number')
@@ -50,7 +50,7 @@ class ExamResultForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Notes')
+                Section::make(FilamentUi::text('Notes'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('notes')

@@ -18,7 +18,7 @@ class ApplicantForm
     {
         return $schema
             ->components([
-                Section::make('Admission Information')
+                Section::make(FilamentUi::text('Admission Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -35,7 +35,7 @@ class ApplicantForm
                             ->default('registered'),
                     ]),
 
-                Section::make('Personal Data')
+                Section::make(FilamentUi::text('Personal Data'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('full_name')
@@ -60,7 +60,7 @@ class ApplicantForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Parent & Previous School')
+                Section::make(FilamentUi::text('Parent & Previous School'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('parent_name')
@@ -82,7 +82,7 @@ class ApplicantForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Achievements & Program Choices')
+                Section::make(FilamentUi::text('Achievements & Program Choices'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('achievement_count')
@@ -101,7 +101,7 @@ class ApplicantForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Selection & Enrollment')
+                Section::make(FilamentUi::text('Selection & Enrollment'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('test_score')
@@ -128,7 +128,7 @@ class ApplicantForm
                             ->numeric(),
                     ]),
 
-                Section::make('Documents & Notes')
+                Section::make(FilamentUi::text('Documents & Notes'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('photo')

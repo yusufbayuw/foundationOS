@@ -16,7 +16,7 @@ class StudentInvoiceItemForm
     {
         return $schema
             ->components([
-                Section::make('Item Details')
+                Section::make(FilamentUi::text('Item Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -33,7 +33,7 @@ class StudentInvoiceItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('quantity')

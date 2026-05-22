@@ -14,7 +14,7 @@ class ProcurementCategoryInfolist
     {
         return $schema
             ->components([
-                Section::make('Category Information')
+                Section::make(FilamentUi::text('Category Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -34,7 +34,7 @@ class ProcurementCategoryInfolist
                             ->label(FilamentUi::field('type')),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(1)
                     ->schema([
                         TextEntry::make('description')
@@ -43,14 +43,14 @@ class ProcurementCategoryInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_active')
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

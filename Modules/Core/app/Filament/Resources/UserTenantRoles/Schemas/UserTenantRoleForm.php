@@ -17,7 +17,7 @@ class UserTenantRoleForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         Select::make('user_id')
@@ -34,7 +34,7 @@ class UserTenantRoleForm
                             ->required(),
                     ]),
 
-                Section::make('Assignment')
+                Section::make(FilamentUi::text('Assignment'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('assigned_by')
@@ -44,7 +44,7 @@ class UserTenantRoleForm
                         DateTimePicker::make('expires_at'),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_primary')

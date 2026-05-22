@@ -3,11 +3,12 @@
 namespace Modules\Finance\Filament\Resources\JournalEntryLines\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class JournalEntryLineForm
 {
@@ -15,33 +16,33 @@ class JournalEntryLineForm
     {
         return $schema
             ->components([
-                Section::make('Line Details')
+                Section::make(FilamentUi::text('Line Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
                         Select::make('journal_entry_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('journal_entry_id'))
+                            ->label(FilamentUi::field('journal_entry_id'))
                             ->relationship('journalEntry', 'id')
                             ->required(),
                         Select::make('chart_of_account_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('chart_of_account_id'))
+                            ->label(FilamentUi::field('chart_of_account_id'))
                             ->relationship('chartOfAccount', 'name')
                             ->required(),
                         Textarea::make('description')
-                            ->label(\Modules\Core\Support\FilamentUi::field('description'))
+                            ->label(FilamentUi::field('description'))
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Amounts')
+                Section::make(FilamentUi::text('Amounts'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('debit')
-                            ->label(\Modules\Core\Support\FilamentUi::field('debit'))
+                            ->label(FilamentUi::field('debit'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         TextInput::make('credit')
-                            ->label(\Modules\Core\Support\FilamentUi::field('credit'))
+                            ->label(FilamentUi::field('credit'))
                             ->required()
                             ->numeric()
                             ->default(0),

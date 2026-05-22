@@ -17,7 +17,7 @@ class PayrollComponentForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -37,7 +37,7 @@ class PayrollComponentForm
                             ->label(FilamentUi::field('category')),
                     ]),
 
-                Section::make('Calculation')
+                Section::make(FilamentUi::text('Calculation'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('calculation_type')
@@ -53,7 +53,7 @@ class PayrollComponentForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_taxable')

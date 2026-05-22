@@ -5,12 +5,13 @@ namespace Modules\Employee\Filament\Resources\SalarySlips\Schemas;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class SalarySlipForm
 {
@@ -18,98 +19,98 @@ class SalarySlipForm
     {
         return $schema
             ->components([
-                Section::make('Payroll Info')
+                Section::make(FilamentUi::text('Payroll Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
                         Select::make('employee_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('employee_id'))
+                            ->label(FilamentUi::field('employee_id'))
                             ->relationship('employee', 'id')
                             ->required(),
                         TextInput::make('period_month')
-                            ->label(\Modules\Core\Support\FilamentUi::field('period_month'))
+                            ->label(FilamentUi::field('period_month'))
                             ->required(),
                         TextInput::make('period_year')
-                            ->label(\Modules\Core\Support\FilamentUi::field('period_year'))
+                            ->label(FilamentUi::field('period_year'))
                             ->required(),
                         TextInput::make('period_label')
-                            ->label(\Modules\Core\Support\FilamentUi::field('period_label'))
+                            ->label(FilamentUi::field('period_label'))
                             ->required(),
                         TextInput::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                            ->label(FilamentUi::field('status'))
                             ->required()
                             ->default('draft'),
                     ]),
 
-                Section::make('Salary')
+                Section::make(FilamentUi::text('Salary'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('basic_salary')
-                            ->label(\Modules\Core\Support\FilamentUi::field('basic_salary'))
+                            ->label(FilamentUi::field('basic_salary'))
                             ->required()
                             ->numeric(),
                         TextInput::make('total_earnings')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_earnings'))
+                            ->label(FilamentUi::field('total_earnings'))
                             ->required()
                             ->numeric(),
                         TextInput::make('total_deductions')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_deductions'))
+                            ->label(FilamentUi::field('total_deductions'))
                             ->required()
                             ->numeric(),
                         TextInput::make('net_salary')
-                            ->label(\Modules\Core\Support\FilamentUi::field('net_salary'))
+                            ->label(FilamentUi::field('net_salary'))
                             ->required()
                             ->numeric(),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(2)
                     ->schema([
                         Repeater::make('earnings_details')
-                            ->label(\Modules\Core\Support\FilamentUi::field('earnings_details'))
+                            ->label(FilamentUi::field('earnings_details'))
                             ->required()
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Component'),
+                                    ->label(FilamentUi::text('Component')),
                                 TextInput::make('amount')
-                                    ->label('Amount')
+                                    ->label(FilamentUi::text('Amount'))
                                     ->numeric(),
                             ])
                             ->columnSpanFull()
                             ->addActionLabel('Add Item')
                             ->reorderable(),
                         Repeater::make('deductions_details')
-                            ->label(\Modules\Core\Support\FilamentUi::field('deductions_details'))
+                            ->label(FilamentUi::field('deductions_details'))
                             ->required()
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Component'),
+                                    ->label(FilamentUi::text('Component')),
                                 TextInput::make('amount')
-                                    ->label('Amount')
+                                    ->label(FilamentUi::text('Amount'))
                                     ->numeric(),
                             ])
                             ->columnSpanFull()
                             ->addActionLabel('Add Item')
                             ->reorderable(),
                         Repeater::make('tax_details')
-                            ->label(\Modules\Core\Support\FilamentUi::field('tax_details'))
+                            ->label(FilamentUi::field('tax_details'))
                             ->schema([
                                 TextInput::make('bracket')
-                                    ->label('Bracket'),
+                                    ->label(FilamentUi::text('Bracket')),
                                 TextInput::make('amount')
-                                    ->label('Amount')
+                                    ->label(FilamentUi::text('Amount'))
                                     ->numeric(),
                             ])
                             ->columnSpanFull()
                             ->addActionLabel('Add Item')
                             ->reorderable(),
                         Repeater::make('bpjs_details')
-                            ->label(\Modules\Core\Support\FilamentUi::field('bpjs_details'))
+                            ->label(FilamentUi::field('bpjs_details'))
                             ->schema([
                                 TextInput::make('type')
-                                    ->label('Type'),
+                                    ->label(FilamentUi::text('Type')),
                                 TextInput::make('amount')
-                                    ->label('Amount')
+                                    ->label(FilamentUi::text('Amount'))
                                     ->numeric(),
                             ])
                             ->columnSpanFull()
@@ -117,48 +118,48 @@ class SalarySlipForm
                             ->reorderable(),
                     ]),
 
-                Section::make('Attendance')
+                Section::make(FilamentUi::text('Attendance'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('working_days')
-                            ->label(\Modules\Core\Support\FilamentUi::field('working_days'))
+                            ->label(FilamentUi::field('working_days'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         TextInput::make('working_hours')
-                            ->label(\Modules\Core\Support\FilamentUi::field('working_hours'))
+                            ->label(FilamentUi::field('working_hours'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         TextInput::make('overtime_hours')
-                            ->label(\Modules\Core\Support\FilamentUi::field('overtime_hours'))
+                            ->label(FilamentUi::field('overtime_hours'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         TextInput::make('leave_days')
-                            ->label(\Modules\Core\Support\FilamentUi::field('leave_days'))
+                            ->label(FilamentUi::field('leave_days'))
                             ->required()
                             ->numeric()
                             ->default(0),
                         TextInput::make('absent_days')
-                            ->label(\Modules\Core\Support\FilamentUi::field('absent_days'))
+                            ->label(FilamentUi::field('absent_days'))
                             ->required()
                             ->numeric()
                             ->default(0),
                     ]),
 
-                Section::make('Payment')
+                Section::make(FilamentUi::text('Payment'))
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('paid_at'),
                         TextInput::make('paid_via')
-                            ->label(\Modules\Core\Support\FilamentUi::field('paid_via')),
+                            ->label(FilamentUi::field('paid_via')),
                         Toggle::make('is_sent')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_sent'))
+                            ->label(FilamentUi::field('is_sent'))
                             ->required(),
                         DateTimePicker::make('sent_at'),
                         Textarea::make('notes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->label(FilamentUi::field('notes'))
                             ->columnSpanFull(),
                     ]),
             ]);

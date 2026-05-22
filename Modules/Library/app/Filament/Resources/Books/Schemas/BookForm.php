@@ -21,7 +21,7 @@ class BookForm
     {
         return $schema
             ->components([
-                Section::make('Scope & Category')
+                Section::make(FilamentUi::text('Scope & Category'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -51,7 +51,7 @@ class BookForm
                             ->helperText('Opsional. Jika diisi, nama penerbit akan mengikuti master data.'),
                     ]),
 
-                Section::make('Identification')
+                Section::make(FilamentUi::text('Identification'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('isbn')
@@ -80,7 +80,7 @@ class BookForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Publication')
+                Section::make(FilamentUi::text('Publication'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('publisher')
@@ -101,7 +101,7 @@ class BookForm
                             ->default('Indonesian'),
                     ]),
 
-                Section::make('Classification & Physical Details')
+                Section::make(FilamentUi::text('Classification & Physical Details'))
                     ->columns(2)
                     ->schema([
                         Select::make('gmd_id')
@@ -158,7 +158,7 @@ class BookForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Media & Acquisition')
+                Section::make(FilamentUi::text('Media & Acquisition'))
                     ->columns(2)
                     ->schema([
                         FileUpload::make('cover_image')
@@ -175,7 +175,7 @@ class BookForm
                             ->label(FilamentUi::field('source')),
                     ]),
 
-                Section::make('Inventory & Status')
+                Section::make(FilamentUi::text('Inventory & Status'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('total_copies')

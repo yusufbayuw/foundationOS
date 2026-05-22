@@ -5,20 +5,21 @@ namespace Modules\Library\Filament\Resources\BookReservations\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class BookReservationInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Scope')
+            Section::make(FilamentUi::text('Scope'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('tenant.name'),
                     TextEntry::make('organization.name'),
                 ]),
 
-            Section::make('Reservation')
+            Section::make(FilamentUi::text('Reservation'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('book.title'),
@@ -27,7 +28,7 @@ class BookReservationInfolist
                     TextEntry::make('status'),
                 ]),
 
-            Section::make('Timeline')
+            Section::make(FilamentUi::text('Timeline'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('requested_at')->dateTime(),

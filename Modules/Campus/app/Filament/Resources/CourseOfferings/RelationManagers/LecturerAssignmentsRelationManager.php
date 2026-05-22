@@ -14,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Campus\Enums\CourseOfferingLecturerRole;
 use Modules\Campus\Models\Lecturer;
+use Modules\Core\Support\FilamentUi;
 
 class LecturerAssignmentsRelationManager extends RelationManager
 {
@@ -26,7 +27,7 @@ class LecturerAssignmentsRelationManager extends RelationManager
         return $schema
             ->components([
                 Select::make('lecturer_id')
-                    ->label('Lecturer')
+                    ->label(FilamentUi::text('Lecturer'))
                     ->options(fn () => Lecturer::query()
                         ->where('tenant_id', $this->getOwnerRecord()->tenant_id)
                         ->where('is_active', true)
@@ -49,7 +50,7 @@ class LecturerAssignmentsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('lecturer_id')
             ->columns([
-                TextColumn::make('lecturer.full_name')->label('Lecturer')->searchable(),
+                TextColumn::make('lecturer.full_name')->label(FilamentUi::text('Lecturer'))->searchable(),
                 TextColumn::make('role')->badge(),
                 IconColumn::make('is_active')->boolean(),
                 TextColumn::make('assigned_at')->dateTime()->toggleable(),

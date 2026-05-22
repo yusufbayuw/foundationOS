@@ -16,7 +16,7 @@ class StudyPlanItemForm
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -32,7 +32,7 @@ class StudyPlanItemForm
                             ->relationship('course', 'name'),
                     ]),
 
-                Section::make('Enrollment Details')
+                Section::make(FilamentUi::text('Enrollment Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('credits')
@@ -46,7 +46,7 @@ class StudyPlanItemForm
                             ->default('enrolled'),
                     ]),
 
-                Section::make('Grade')
+                Section::make(FilamentUi::text('Grade'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('grade_letter')

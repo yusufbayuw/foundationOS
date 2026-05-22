@@ -4,13 +4,17 @@ namespace Modules\School\Filament\Resources\Schedules\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
+use Modules\School\Services\ScheduleConflictChecker;
 
 class ScheduleForm
 {
@@ -18,80 +22,80 @@ class ScheduleForm
     {
         return $schema
             ->components([
-                Section::make('Schedule Details')
+                Section::make(FilamentUi::text('Schedule Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
                         Select::make('organization_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+                            ->label(FilamentUi::field('organization_id'))
                             ->relationship('organization', 'name'),
                         Select::make('academic_period_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('academic_period_id'))
+                            ->label(FilamentUi::field('academic_period_id'))
                             ->relationship('academicPeriod', 'name')
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TextInput::make('class_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('class_id'))
+                            ->label(FilamentUi::field('class_id'))
                             ->required()
                             ->numeric()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                         Select::make('subject_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('subject_id'))
+                            ->label(FilamentUi::field('subject_id'))
                             ->relationship('subject', 'name')
                             ->required(),
                         Select::make('teacher_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('teacher_id'))
+                            ->label(FilamentUi::field('teacher_id'))
                             ->relationship('teacher', 'id')
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TextInput::make('schedule_type')
-                            ->label(\Modules\Core\Support\FilamentUi::field('schedule_type')),
+                            ->label(FilamentUi::field('schedule_type')),
                         TextInput::make('semester')
-                            ->label(\Modules\Core\Support\FilamentUi::field('semester')),
+                            ->label(FilamentUi::field('semester')),
                     ]),
 
-                Section::make('Time & Location')
+                Section::make(FilamentUi::text('Time & Location'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('day_of_week')
-                            ->label(\Modules\Core\Support\FilamentUi::field('day_of_week'))
+                            ->label(FilamentUi::field('day_of_week'))
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TextInput::make('duration_minutes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('duration_minutes'))
+                            ->label(FilamentUi::field('duration_minutes'))
                             ->numeric(),
                         TimePicker::make('start_time')
-                            ->label(\Modules\Core\Support\FilamentUi::field('start_time'))
+                            ->label(FilamentUi::field('start_time'))
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TimePicker::make('end_time')
-                            ->label(\Modules\Core\Support\FilamentUi::field('end_time'))
+                            ->label(FilamentUi::field('end_time'))
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (\Filament\Forms\Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
                     ]),
 
-                Section::make('Recurrence & Notes')
+                Section::make(FilamentUi::text('Recurrence & Notes'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_recurring')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_recurring'))
+                            ->label(FilamentUi::field('is_recurring'))
                             ->required(),
                         DatePicker::make('effective_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('effective_date')),
+                            ->label(FilamentUi::field('effective_date')),
                         DatePicker::make('expiry_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('expiry_date')),
+                            ->label(FilamentUi::field('expiry_date')),
                         Textarea::make('notes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->label(FilamentUi::field('notes'))
                             ->columnSpanFull(),
                     ]),
             ]);
     }
 
-    protected static function checkConflicts(\Filament\Forms\Get $get, ?string $state, $livewire): void
+    protected static function checkConflicts(Get $get, ?string $state, $livewire): void
     {
         if (empty($state)) {
             return;
@@ -122,11 +126,11 @@ class ScheduleForm
             $excludeId = $record ? $record->id : null;
         }
 
-        $checker = new \Modules\School\Services\ScheduleConflictChecker();
+        $checker = new ScheduleConflictChecker;
         $conflicts = $checker->checkConflicts($data, $excludeId);
 
         if (! empty($conflicts)) {
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->warning()
                 ->title('Konflik Jadwal Terdeteksi')
                 ->body(implode('<br>', $conflicts))

@@ -14,7 +14,7 @@ class UserTenantRoleInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('user.name')
@@ -28,7 +28,7 @@ class UserTenantRoleInfolist
                             ->label(FilamentUi::text('Tenant role')),
                     ]),
 
-                Section::make('Assignment')
+                Section::make(FilamentUi::text('Assignment'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('assigned_by')
@@ -45,14 +45,14 @@ class UserTenantRoleInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_primary')
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

@@ -13,7 +13,7 @@ class OrganizationSettingInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('organization.name')
@@ -27,7 +27,7 @@ class OrganizationSettingInfolist
                             ->label(FilamentUi::field('type')),
                     ]),
 
-                Section::make('Value')
+                Section::make(FilamentUi::text('Value'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('value')
@@ -36,7 +36,7 @@ class OrganizationSettingInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

@@ -16,7 +16,7 @@ class AssessmentItemForm
     {
         return $schema
             ->components([
-                Section::make('Item Information')
+                Section::make(FilamentUi::text('Item Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -34,7 +34,7 @@ class AssessmentItemForm
                             ->numeric(),
                     ]),
 
-                Section::make('Question')
+                Section::make(FilamentUi::text('Question'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('question_text')
@@ -51,7 +51,7 @@ class AssessmentItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Scoring')
+                Section::make(FilamentUi::text('Scoring'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('max_score')

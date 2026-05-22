@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Support\FilamentUi;
 use Modules\Procurement\Filament\Resources\Vendors\VendorResource;
 use Throwable;
 
@@ -18,13 +19,13 @@ class ViewVendor extends ViewRecord
     {
         return [
             Action::make('blacklistVendor')
-                ->label('Blacklist Vendor')
+                ->label(FilamentUi::text('Blacklist Vendor'))
                 ->icon('heroicon-o-no-symbol')
                 ->color('danger')
                 ->visible(fn (): bool => ! $this->record->is_blacklisted)
                 ->form([
                     Textarea::make('blacklist_reason')
-                        ->label('Blacklist Reason')
+                        ->label(FilamentUi::text('Blacklist Reason'))
                         ->rows(3)
                         ->required(),
                 ])
@@ -42,7 +43,7 @@ class ViewVendor extends ViewRecord
                     }
                 }),
             Action::make('removeFromBlacklist')
-                ->label('Remove from Blacklist')
+                ->label(FilamentUi::text('Remove from Blacklist'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->visible(fn (): bool => $this->record->is_blacklisted)
@@ -61,7 +62,7 @@ class ViewVendor extends ViewRecord
                     }
                 }),
             Action::make('deactivateVendor')
-                ->label('Deactivate')
+                ->label(FilamentUi::text('Deactivate'))
                 ->icon('heroicon-o-pause-circle')
                 ->color('warning')
                 ->visible(fn (): bool => $this->record->is_active && ! $this->record->is_blacklisted)
@@ -77,7 +78,7 @@ class ViewVendor extends ViewRecord
                     }
                 }),
             Action::make('activateVendor')
-                ->label('Activate')
+                ->label(FilamentUi::text('Activate'))
                 ->icon('heroicon-o-play-circle')
                 ->color('success')
                 ->visible(fn (): bool => ! $this->record->is_active)

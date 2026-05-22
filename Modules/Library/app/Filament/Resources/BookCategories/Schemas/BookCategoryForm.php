@@ -19,7 +19,7 @@ class BookCategoryForm
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -34,7 +34,7 @@ class BookCategoryForm
                             ->helperText('Kosongkan untuk kategori tenant-wide (terpusat).'),
                     ]),
 
-                Section::make('Category Details')
+                Section::make(FilamentUi::text('Category Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('code')

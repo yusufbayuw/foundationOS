@@ -84,7 +84,7 @@ class CreatePurchaseRequisition extends CreateRecord
                             ->disabled()
                             ->dehydrated(),
                         Toggle::make('ready_for_sourcing')
-                            ->label('Ready For Sourcing')
+                            ->label(FilamentUi::text('Ready For Sourcing'))
                             ->inline(false)
                             ->disabled(),
                         Textarea::make('justification')

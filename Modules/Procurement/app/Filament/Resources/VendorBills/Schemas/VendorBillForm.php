@@ -18,7 +18,7 @@ class VendorBillForm
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -40,7 +40,7 @@ class VendorBillForm
                             ->numeric(),
                     ]),
 
-                Section::make('Bill Details')
+                Section::make(FilamentUi::text('Bill Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('bill_number')
@@ -55,7 +55,7 @@ class VendorBillForm
                             ->label(FilamentUi::field('due_date')),
                     ]),
 
-                Section::make('Financial Summary')
+                Section::make(FilamentUi::text('Financial Summary'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('subtotal')
@@ -90,7 +90,7 @@ class VendorBillForm
                             ->default(0),
                     ]),
 
-                Section::make('Status & Notes')
+                Section::make(FilamentUi::text('Status & Notes'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('status')

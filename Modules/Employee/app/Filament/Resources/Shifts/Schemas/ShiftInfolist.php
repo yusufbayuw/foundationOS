@@ -14,7 +14,7 @@ class ShiftInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -30,7 +30,7 @@ class ShiftInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Shift Schedule')
+                Section::make(FilamentUi::text('Shift Schedule'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('start_time')
@@ -44,7 +44,7 @@ class ShiftInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_night_shift')
@@ -53,7 +53,7 @@ class ShiftInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

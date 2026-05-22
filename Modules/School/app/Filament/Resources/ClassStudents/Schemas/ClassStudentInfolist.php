@@ -13,7 +13,7 @@ class ClassStudentInfolist
     {
         return $schema
             ->components([
-                Section::make('Enrollment Information')
+                Section::make(FilamentUi::text('Enrollment Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class ClassStudentInfolist
                             ->label(FilamentUi::text('Student')),
                     ]),
 
-                Section::make('Status & Period')
+                Section::make(FilamentUi::text('Status & Period'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('entry_date')
@@ -51,7 +51,7 @@ class ClassStudentInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Achievement')
+                Section::make(FilamentUi::text('Achievement'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('ranking')

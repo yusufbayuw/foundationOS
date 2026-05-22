@@ -14,7 +14,7 @@ class RfqVendorInfolist
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -25,7 +25,7 @@ class RfqVendorInfolist
                             ->label(FilamentUi::text('Vendor')),
                     ]),
 
-                Section::make('Invitation & Response')
+                Section::make(FilamentUi::text('Invitation & Response'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('invitation_date')
@@ -51,7 +51,7 @@ class RfqVendorInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Evaluation')
+                Section::make(FilamentUi::text('Evaluation'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('technical_score')
@@ -84,7 +84,7 @@ class RfqVendorInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

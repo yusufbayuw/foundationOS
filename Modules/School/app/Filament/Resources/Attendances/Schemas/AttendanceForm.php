@@ -18,7 +18,7 @@ class AttendanceForm
     {
         return $schema
             ->components([
-                Section::make('Attendance Information')
+                Section::make(FilamentUi::text('Attendance Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -43,7 +43,7 @@ class AttendanceForm
                             ->label(FilamentUi::field('entry_method')),
                     ]),
 
-                Section::make('Date & Time')
+                Section::make(FilamentUi::text('Date & Time'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('attendance_date')
@@ -53,7 +53,7 @@ class AttendanceForm
                         DateTimePicker::make('check_out'),
                     ]),
 
-                Section::make('Verification Details')
+                Section::make(FilamentUi::text('Verification Details'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('location_data')

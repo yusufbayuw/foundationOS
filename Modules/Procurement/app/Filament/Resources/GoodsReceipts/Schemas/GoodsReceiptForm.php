@@ -18,7 +18,7 @@ class GoodsReceiptForm
     {
         return $schema
             ->components([
-                Section::make('Receipt Information')
+                Section::make(FilamentUi::text('Receipt Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -37,7 +37,7 @@ class GoodsReceiptForm
                             ->label(FilamentUi::field('supplier_delivery_number')),
                     ]),
 
-                Section::make('Personnel & Status')
+                Section::make(FilamentUi::text('Personnel & Status'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('received_by')
@@ -53,7 +53,7 @@ class GoodsReceiptForm
                         DateTimePicker::make('received_at'),
                     ]),
 
-                Section::make('Notes')
+                Section::make(FilamentUi::text('Notes'))
                     ->columns(1)
                     ->schema([
                         Textarea::make('notes')

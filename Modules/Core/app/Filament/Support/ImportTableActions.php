@@ -8,6 +8,7 @@ use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Support\FilamentUi;
 
 class ImportTableActions
 {
@@ -19,7 +20,7 @@ class ImportTableActions
     {
         return [
             ImportAction::make()
-                ->label('Import Data')
+                ->label(FilamentUi::text('Import Data'))
                 ->importer($importer)
                 ->options(function () use ($importer): array {
                     $modelClass = $importer::getModel();
@@ -41,7 +42,7 @@ class ImportTableActions
     public static function downloadTemplate(string $importer): Action
     {
         return Action::make('downloadImportTemplate')
-            ->label('Download Template')
+            ->label(FilamentUi::text('Download Template'))
             ->icon('heroicon-o-arrow-down-tray')
             ->action(function () use ($importer) {
                 $headers = array_map(

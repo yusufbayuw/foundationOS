@@ -17,7 +17,7 @@ class PositionForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -41,7 +41,7 @@ class PositionForm
                             ->default(1),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('job_description')
@@ -52,7 +52,7 @@ class PositionForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')

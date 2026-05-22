@@ -3,16 +3,18 @@
 namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages;
 
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Throwable;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\PurchaseRequisitionResource;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Contracts\WorkflowResolver;
+use Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource;
 use Modules\Workflow\Models\WorkflowInstance;
+use Throwable;
 
 class ViewPurchaseRequisition extends ViewRecord
 {
@@ -22,7 +24,7 @@ class ViewPurchaseRequisition extends ViewRecord
     {
         return [
             Action::make('openWorkflow')
-                ->label('Open Active Workflow')
+                ->label(FilamentUi::text('Open Active Workflow'))
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->visible(fn (): bool => WorkflowInstance::query()
@@ -38,10 +40,10 @@ class ViewPurchaseRequisition extends ViewRecord
                         ->latest('started_at')
                         ->firstOrFail();
 
-                    return \Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource::getUrl('view', ['record' => $instance]);
+                    return WorkflowInstanceResource::getUrl('view', ['record' => $instance]);
                 }),
             Action::make('startWorkflow')
-                ->label('Start Approval Workflow')
+                ->label(FilamentUi::text('Start Approval Workflow'))
                 ->icon('heroicon-o-play')
                 ->color('primary')
                 ->visible(fn (): bool => ! WorkflowInstance::query()
@@ -75,7 +77,7 @@ class ViewPurchaseRequisition extends ViewRecord
                             ->success()
                             ->send();
 
-                        $this->redirect(\Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource::getUrl('view', ['record' => $instance]));
+                        $this->redirect(WorkflowInstanceResource::getUrl('view', ['record' => $instance]));
                     } catch (Throwable $exception) {
                         report($exception);
 

@@ -6,6 +6,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class FacultyInfolist
 {
@@ -13,55 +14,55 @@ class FacultyInfolist
     {
         return $schema
             ->components([
-                Section::make('Faculty Details')
+                Section::make(FilamentUi::text('Faculty Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('organization.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Organization'))
+                            ->label(FilamentUi::text('Organization'))
                             ->placeholder('-'),
                         TextEntry::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                            ->label(FilamentUi::field('code'))
                             ->placeholder('-'),
                         TextEntry::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name')),
+                            ->label(FilamentUi::field('name')),
                         TextEntry::make('short_name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('short_name'))
+                            ->label(FilamentUi::field('short_name'))
                             ->placeholder('-'),
                         TextEntry::make('description')
-                            ->label(\Modules\Core\Support\FilamentUi::field('description'))
+                            ->label(FilamentUi::field('description'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Contact Information')
+                Section::make(FilamentUi::text('Contact Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('office_phone')
-                            ->label(\Modules\Core\Support\FilamentUi::field('office_phone'))
+                            ->label(FilamentUi::field('office_phone'))
                             ->placeholder('-'),
                         TextEntry::make('office_email')
-                            ->label(\Modules\Core\Support\FilamentUi::field('office_email'))
+                            ->label(FilamentUi::field('office_email'))
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_active')
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

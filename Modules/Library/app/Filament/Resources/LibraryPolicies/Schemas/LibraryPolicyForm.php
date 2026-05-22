@@ -11,13 +11,14 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class LibraryPolicyForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Scope')
+            Section::make(FilamentUi::text('Scope'))
                 ->columns(2)
                 ->schema([
                     TenantField::make(),
@@ -32,7 +33,7 @@ class LibraryPolicyForm
                     TextInput::make('name')->required(),
                 ]),
 
-            Section::make('Loan Limits')
+            Section::make(FilamentUi::text('Loan Limits'))
                 ->columns(2)
                 ->schema([
                     TextInput::make('max_books')->numeric()->required()->default(3),
@@ -43,7 +44,7 @@ class LibraryPolicyForm
                     TextInput::make('reservation_pickup_days')->numeric()->required()->default(2),
                 ]),
 
-            Section::make('Status & Notes')
+            Section::make(FilamentUi::text('Status & Notes'))
                 ->columns(2)
                 ->schema([
                     Toggle::make('is_active')->default(true)->required(),

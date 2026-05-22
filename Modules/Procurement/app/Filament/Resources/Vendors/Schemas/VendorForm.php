@@ -21,7 +21,7 @@ class VendorForm
     {
         return $schema
             ->components([
-                Section::make('Company Information')
+                Section::make(FilamentUi::text('Company Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -52,7 +52,7 @@ class VendorForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Legal Documents')
+                Section::make(FilamentUi::text('Legal Documents'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('npwp')
@@ -67,7 +67,7 @@ class VendorForm
                             ->label(FilamentUi::field('tax_status')),
                     ]),
 
-                Section::make('Contact')
+                Section::make(FilamentUi::text('Contact'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('phone')
@@ -81,7 +81,7 @@ class VendorForm
                             ->url(),
                     ]),
 
-                Section::make('Contact Person')
+                Section::make(FilamentUi::text('Contact Person'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('contact_person')
@@ -96,7 +96,7 @@ class VendorForm
                             ->email(),
                     ]),
 
-                Section::make('Banking')
+                Section::make(FilamentUi::text('Banking'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('bank_name')
@@ -107,7 +107,7 @@ class VendorForm
                             ->label(FilamentUi::field('bank_account_holder')),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')
@@ -136,9 +136,9 @@ class VendorForm
                             ->label(FilamentUi::field('documents'))
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Document Name'),
+                                    ->label(FilamentUi::text('Document Name')),
                                 TextInput::make('url')
-                                    ->label('URL or File Path'),
+                                    ->label(FilamentUi::text('URL or File Path')),
                             ])
                             ->columnSpanFull()
                             ->addActionLabel('Add Item')

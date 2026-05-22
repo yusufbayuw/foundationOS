@@ -13,7 +13,7 @@ class StudentInvoiceItemInfolist
     {
         return $schema
             ->components([
-                Section::make('Item Details')
+                Section::make(FilamentUi::text('Item Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class StudentInvoiceItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('quantity')
@@ -48,7 +48,7 @@ class StudentInvoiceItemInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

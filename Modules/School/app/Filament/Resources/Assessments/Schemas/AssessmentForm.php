@@ -19,7 +19,7 @@ class AssessmentForm
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -44,7 +44,7 @@ class AssessmentForm
                             ->label(FilamentUi::field('code')),
                     ]),
 
-                Section::make('Classification & Scoring')
+                Section::make(FilamentUi::text('Classification & Scoring'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('type')
@@ -62,7 +62,7 @@ class AssessmentForm
                             ->numeric(),
                     ]),
 
-                Section::make('Schedule')
+                Section::make(FilamentUi::text('Schedule'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('schedule_date')
@@ -74,7 +74,7 @@ class AssessmentForm
                             ->numeric(),
                     ]),
 
-                Section::make('Instructions & Attachments')
+                Section::make(FilamentUi::text('Instructions & Attachments'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('instructions')
@@ -85,7 +85,7 @@ class AssessmentForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Publication & Attempts')
+                Section::make(FilamentUi::text('Publication & Attempts'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_published')

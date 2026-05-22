@@ -13,7 +13,7 @@ class FineInfolist
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -22,7 +22,7 @@ class FineInfolist
                             ->label(FilamentUi::text('Loan')),
                     ]),
 
-                Section::make('Fine Details')
+                Section::make(FilamentUi::text('Fine Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('fine_type')
@@ -37,7 +37,7 @@ class FineInfolist
                             ->label(FilamentUi::field('status')),
                     ]),
 
-                Section::make('Timeline & Notes')
+                Section::make(FilamentUi::text('Timeline & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('issued_at')
@@ -54,7 +54,7 @@ class FineInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

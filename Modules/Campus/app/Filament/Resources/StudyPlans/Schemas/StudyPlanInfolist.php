@@ -13,7 +13,7 @@ class StudyPlanInfolist
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -25,7 +25,7 @@ class StudyPlanInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Plan Details')
+                Section::make(FilamentUi::text('Plan Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('plan_number')
@@ -42,7 +42,7 @@ class StudyPlanInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Approval')
+                Section::make(FilamentUi::text('Approval'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('submitted_at')
@@ -59,7 +59,7 @@ class StudyPlanInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

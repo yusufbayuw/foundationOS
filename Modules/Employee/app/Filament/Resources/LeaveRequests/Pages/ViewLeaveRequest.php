@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Resources\LeaveRequests\LeaveRequestResource;
 use Modules\Employee\Models\LeaveRequest;
 
@@ -21,7 +22,7 @@ class ViewLeaveRequest extends ViewRecord
 
         return [
             Action::make('submitForApproval')
-                ->label('Submit for Approval')
+                ->label(FilamentUi::text('Submit for Approval'))
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
                 ->visible(fn (): bool => $record->status === 'draft')
@@ -33,7 +34,7 @@ class ViewLeaveRequest extends ViewRecord
                 }),
 
             Action::make('supervisorApprove')
-                ->label('Supervisor Approve')
+                ->label(FilamentUi::text('Supervisor Approve'))
                 ->icon('heroicon-o-shield-check')
                 ->color('warning')
                 ->visible(fn (): bool => $record->status === 'pending' && $record->supervisor_approved_at === null)
@@ -47,7 +48,7 @@ class ViewLeaveRequest extends ViewRecord
                 }),
 
             Action::make('approve')
-                ->label('Approve')
+                ->label(FilamentUi::text('Approve'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->visible(fn (): bool => $record->status === 'pending')
@@ -63,13 +64,13 @@ class ViewLeaveRequest extends ViewRecord
                 }),
 
             Action::make('reject')
-                ->label('Reject')
+                ->label(FilamentUi::text('Reject'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->form([
                     Textarea::make('rejection_reason')
-                        ->label('Rejection Reason')
+                        ->label(FilamentUi::text('Rejection Reason'))
                         ->rows(3)
                         ->required(),
                 ])

@@ -14,7 +14,7 @@ class ExamResultInfolist
     {
         return $schema
             ->components([
-                Section::make('Context')
+                Section::make(FilamentUi::text('Context'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -29,7 +29,7 @@ class ExamResultInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Exam Details')
+                Section::make(FilamentUi::text('Exam Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('seat_number')
@@ -51,7 +51,7 @@ class ExamResultInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Notes & Timestamps')
+                Section::make(FilamentUi::text('Notes & Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('notes')

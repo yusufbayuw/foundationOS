@@ -18,7 +18,7 @@ class CurriculumForm
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -38,7 +38,7 @@ class CurriculumForm
                             ->label(FilamentUi::field('type')),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('grade_levels')

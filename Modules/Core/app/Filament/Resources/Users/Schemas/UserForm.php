@@ -14,7 +14,7 @@ class UserForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
@@ -33,7 +33,7 @@ class UserForm
                             ->label(FilamentUi::field('avatar')),
                     ]),
 
-                Section::make('Authentication')
+                Section::make(FilamentUi::text('Authentication'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('password')
@@ -52,7 +52,7 @@ class UserForm
                         DateTimePicker::make('locked_until'),
                     ]),
 
-                Section::make('Preferences')
+                Section::make(FilamentUi::text('Preferences'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('timezone')

@@ -13,7 +13,7 @@ class SubscriptionLogInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class SubscriptionLogInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Payment')
+                Section::make(FilamentUi::text('Payment'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('amount')
@@ -55,7 +55,7 @@ class SubscriptionLogInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Period')
+                Section::make(FilamentUi::text('Period'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('period_start')
@@ -68,7 +68,7 @@ class SubscriptionLogInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Additional')
+                Section::make(FilamentUi::text('Additional'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('notes')
@@ -85,7 +85,7 @@ class SubscriptionLogInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

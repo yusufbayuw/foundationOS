@@ -9,6 +9,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Modules\Core\Models\AcademicPeriod;
+use Modules\Core\Support\FilamentUi;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Models\Student;
 
@@ -40,17 +41,17 @@ class ReportCardPage extends Page implements HasForms
         return $schema
             ->components([
                 Select::make('academic_period_id')
-                    ->label('Periode Akademik')
+                    ->label(FilamentUi::text('Periode Akademik'))
                     ->options(AcademicPeriod::pluck('name', 'id'))
                     ->required()
                     ->live(),
                 Select::make('class_id')
-                    ->label('Kelas')
+                    ->label(FilamentUi::text('Kelas'))
                     ->options(SchoolClass::pluck('name', 'id'))
                     ->live()
                     ->afterStateUpdated(fn (callable $set) => $set('student_id', null)),
                 Select::make('student_id')
-                    ->label('Siswa')
+                    ->label(FilamentUi::text('Siswa'))
                     ->options(function (callable $get) {
                         $classId = $get('class_id');
                         if (! $classId) {
@@ -71,7 +72,7 @@ class ReportCardPage extends Page implements HasForms
     {
         return [
             Action::make('download')
-                ->label('Download PDF')
+                ->label(FilamentUi::text('Download PDF'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->disabled(fn () => ! $this->academic_period_id || ! $this->student_id)
                 ->url(fn () => route('school.report-card.download', [

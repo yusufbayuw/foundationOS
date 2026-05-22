@@ -14,7 +14,7 @@ class SubscriptionPlanInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('code')
@@ -27,7 +27,7 @@ class SubscriptionPlanInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('price_monthly')
@@ -38,7 +38,7 @@ class SubscriptionPlanInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Limits')
+                Section::make(FilamentUi::text('Limits'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('max_users')
@@ -52,7 +52,7 @@ class SubscriptionPlanInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Features')
+                Section::make(FilamentUi::text('Features'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('included_modules')
@@ -64,7 +64,7 @@ class SubscriptionPlanInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_active')
@@ -76,7 +76,7 @@ class SubscriptionPlanInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

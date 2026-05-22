@@ -5,6 +5,7 @@ namespace Modules\Global\Filament\Resources\Cities\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class CityInfolist
 {
@@ -12,26 +13,26 @@ class CityInfolist
     {
         return $schema
             ->components([
-                Section::make('City Details')
+                Section::make(FilamentUi::text('City Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('province.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Province')),
+                            ->label(FilamentUi::text('Province')),
                         TextEntry::make('code')
-                            ->label(\Modules\Core\Support\FilamentUi::field('code')),
+                            ->label(FilamentUi::field('code')),
                         TextEntry::make('name')
-                            ->label(\Modules\Core\Support\FilamentUi::field('name')),
+                            ->label(FilamentUi::field('name')),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

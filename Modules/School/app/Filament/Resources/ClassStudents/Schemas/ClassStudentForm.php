@@ -17,7 +17,7 @@ class ClassStudentForm
     {
         return $schema
             ->components([
-                Section::make('Enrollment Information')
+                Section::make(FilamentUi::text('Enrollment Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -34,7 +34,7 @@ class ClassStudentForm
                             ->required(),
                     ]),
 
-                Section::make('Status & Period')
+                Section::make(FilamentUi::text('Status & Period'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('entry_date')
@@ -50,7 +50,7 @@ class ClassStudentForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Achievement')
+                Section::make(FilamentUi::text('Achievement'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('ranking')

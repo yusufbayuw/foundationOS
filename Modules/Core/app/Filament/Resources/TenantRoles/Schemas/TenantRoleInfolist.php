@@ -14,7 +14,7 @@ class TenantRoleInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -32,7 +32,7 @@ class TenantRoleInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Permissions')
+                Section::make(FilamentUi::text('Permissions'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('permissions')
@@ -41,7 +41,7 @@ class TenantRoleInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_default')
@@ -53,7 +53,7 @@ class TenantRoleInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

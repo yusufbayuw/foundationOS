@@ -14,7 +14,7 @@ class SalarySlipInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -32,7 +32,7 @@ class SalarySlipInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Earnings & Deductions')
+                Section::make(FilamentUi::text('Earnings & Deductions'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('earnings_details')
@@ -52,7 +52,7 @@ class SalarySlipInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Tax & Benefits')
+                Section::make(FilamentUi::text('Tax & Benefits'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tax_details')
@@ -65,7 +65,7 @@ class SalarySlipInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Attendance')
+                Section::make(FilamentUi::text('Attendance'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('working_days')
@@ -85,7 +85,7 @@ class SalarySlipInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Payment')
+                Section::make(FilamentUi::text('Payment'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -109,7 +109,7 @@ class SalarySlipInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

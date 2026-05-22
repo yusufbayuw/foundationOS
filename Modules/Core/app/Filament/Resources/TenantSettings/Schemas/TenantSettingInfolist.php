@@ -13,7 +13,7 @@ class TenantSettingInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -27,7 +27,7 @@ class TenantSettingInfolist
                             ->label(FilamentUi::field('type')),
                     ]),
 
-                Section::make('Value')
+                Section::make(FilamentUi::text('Value'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('value')
@@ -36,7 +36,7 @@ class TenantSettingInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

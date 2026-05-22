@@ -20,7 +20,7 @@ class BookCopyForm
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -43,7 +43,7 @@ class BookCopyForm
                             ->required(),
                     ]),
 
-                Section::make('Identification')
+                Section::make(FilamentUi::text('Identification'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('copy_number')
@@ -53,7 +53,7 @@ class BookCopyForm
                             ->label(FilamentUi::field('barcode')),
                     ]),
 
-                Section::make('Acquisition')
+                Section::make(FilamentUi::text('Acquisition'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('acquisition_date')
@@ -68,7 +68,7 @@ class BookCopyForm
                             ->label(FilamentUi::field('condition')),
                     ]),
 
-                Section::make('Classification & Status')
+                Section::make(FilamentUi::text('Classification & Status'))
                     ->columns(2)
                     ->schema([
                         Select::make('item_status_id')
@@ -91,7 +91,7 @@ class BookCopyForm
                             ->default('available'),
                     ]),
 
-                Section::make('Location & Notes')
+                Section::make(FilamentUi::text('Location & Notes'))
                     ->columns(2)
                     ->schema([
                         Select::make('location_id')

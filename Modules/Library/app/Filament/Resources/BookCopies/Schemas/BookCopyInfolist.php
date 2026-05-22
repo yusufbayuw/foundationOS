@@ -13,7 +13,7 @@ class BookCopyInfolist
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -22,7 +22,7 @@ class BookCopyInfolist
                             ->label(FilamentUi::text('Book')),
                     ]),
 
-                Section::make('Identification')
+                Section::make(FilamentUi::text('Identification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('copy_number')
@@ -32,7 +32,7 @@ class BookCopyInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Acquisition')
+                Section::make(FilamentUi::text('Acquisition'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('acquisition_date')
@@ -51,7 +51,7 @@ class BookCopyInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Status & Location')
+                Section::make(FilamentUi::text('Status & Location'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -65,7 +65,7 @@ class BookCopyInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

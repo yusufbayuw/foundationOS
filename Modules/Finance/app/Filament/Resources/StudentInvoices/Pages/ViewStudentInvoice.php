@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Filament\Resources\StudentInvoices\StudentInvoiceResource;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Finance\Services\FinanceControlService;
@@ -23,7 +24,7 @@ class ViewStudentInvoice extends ViewRecord
 
         return [
             Action::make('markIssued')
-                ->label('Mark Issued')
+                ->label(FilamentUi::text('Mark Issued'))
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
                 ->visible(fn (): bool => $record->status === 'draft')

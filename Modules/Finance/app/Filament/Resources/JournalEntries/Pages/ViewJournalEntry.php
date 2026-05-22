@@ -8,6 +8,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Filament\Resources\JournalEntries\JournalEntryResource;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Services\FinanceControlService;
@@ -24,12 +25,12 @@ class ViewJournalEntry extends ViewRecord
 
         return [
             Action::make('postJournal')
-                ->label('Post Journal')
+                ->label(FilamentUi::text('Post Journal'))
                 ->icon('heroicon-o-check')
                 ->color('success')
                 ->visible(fn (): bool => ! $record->is_posted && ! $record->is_reversed)
                 ->form([
-                    Textarea::make('notes')->label('Posting Notes')->rows(3),
+                    Textarea::make('notes')->label(FilamentUi::text('Posting Notes'))->rows(3),
                 ])
                 ->action(function (array $data): void {
                     try {
@@ -44,12 +45,12 @@ class ViewJournalEntry extends ViewRecord
                     }
                 }),
             Action::make('reverseJournal')
-                ->label('Reverse Journal')
+                ->label(FilamentUi::text('Reverse Journal'))
                 ->icon('heroicon-o-arrow-uturn-left')
                 ->color('danger')
                 ->visible(fn (): bool => $record->is_posted && ! $record->is_reversed)
                 ->form([
-                    Textarea::make('reason')->label('Reversal Reason')->rows(3)->required(),
+                    Textarea::make('reason')->label(FilamentUi::text('Reversal Reason'))->rows(3)->required(),
                 ])
                 ->action(function (array $data): void {
                     try {

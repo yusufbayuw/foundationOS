@@ -6,6 +6,7 @@ use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class StudentInvoiceInfolist
 {
@@ -13,92 +14,92 @@ class StudentInvoiceInfolist
     {
         return $schema
             ->components([
-                Section::make('Invoice Details')
+                Section::make(FilamentUi::text('Invoice Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tenant')),
+                            ->label(FilamentUi::text('Tenant')),
                         TextEntry::make('tuitionType.name')
-                            ->label(\Modules\Core\Support\FilamentUi::text('Tuition type'))
+                            ->label(FilamentUi::text('Tuition type'))
                             ->placeholder('-'),
                         TextEntry::make('invoice_number')
-                            ->label(\Modules\Core\Support\FilamentUi::field('invoice_number')),
+                            ->label(FilamentUi::field('invoice_number')),
                         TextEntry::make('invoice_type')
-                            ->label(\Modules\Core\Support\FilamentUi::field('invoice_type'))
+                            ->label(FilamentUi::field('invoice_type'))
                             ->placeholder('-'),
                         TextEntry::make('issue_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('issue_date'))
+                            ->label(FilamentUi::field('issue_date'))
                             ->date(),
                         TextEntry::make('due_date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('due_date'))
+                            ->label(FilamentUi::field('due_date'))
                             ->date(),
                         TextEntry::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status')),
+                            ->label(FilamentUi::field('status')),
                     ]),
 
-                Section::make('Amount')
+                Section::make(FilamentUi::text('Amount'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('amount'))
+                            ->label(FilamentUi::field('amount'))
                             ->numeric(),
                         TextEntry::make('discount_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('discount_amount'))
+                            ->label(FilamentUi::field('discount_amount'))
                             ->numeric(),
                         TextEntry::make('discount_reason')
-                            ->label(\Modules\Core\Support\FilamentUi::field('discount_reason'))
+                            ->label(FilamentUi::field('discount_reason'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('penalty_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('penalty_amount'))
+                            ->label(FilamentUi::field('penalty_amount'))
                             ->numeric(),
                         TextEntry::make('total_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_amount'))
+                            ->label(FilamentUi::field('total_amount'))
                             ->numeric(),
                         TextEntry::make('paid_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('paid_amount'))
+                            ->label(FilamentUi::field('paid_amount'))
                             ->numeric(),
                         TextEntry::make('remaining_amount')
-                            ->label(\Modules\Core\Support\FilamentUi::field('remaining_amount'))
+                            ->label(FilamentUi::field('remaining_amount'))
                             ->numeric(),
                     ]),
 
-                Section::make('Notes')
+                Section::make(FilamentUi::text('Notes'))
                     ->columns(1)
                     ->schema([
                         TextEntry::make('description')
-                            ->label(\Modules\Core\Support\FilamentUi::field('description'))
+                            ->label(FilamentUi::field('description'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                         TextEntry::make('notes')
-                            ->label(\Modules\Core\Support\FilamentUi::field('notes'))
+                            ->label(FilamentUi::field('notes'))
                             ->placeholder('-')
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Delivery')
+                Section::make(FilamentUi::text('Delivery'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_sent')
                             ->boolean(),
                         TextEntry::make('sent_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('sent_at'))
+                            ->label(FilamentUi::field('sent_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('sent_via')
-                            ->label(\Modules\Core\Support\FilamentUi::field('sent_via'))
+                            ->label(FilamentUi::field('sent_via'))
                             ->placeholder('-'),
                         TextEntry::make('invoiceable_type')
-                            ->label(\Modules\Core\Support\FilamentUi::field('invoiceable_type')),
+                            ->label(FilamentUi::field('invoiceable_type')),
                         TextEntry::make('invoiceable_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('invoiceable_id'))
+                            ->label(FilamentUi::field('invoiceable_id'))
                             ->numeric(),
                         TextEntry::make('created_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                            ->label(FilamentUi::field('created_at'))
                             ->dateTime()
                             ->placeholder('-'),
                         TextEntry::make('updated_at')
-                            ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                            ->label(FilamentUi::field('updated_at'))
                             ->dateTime()
                             ->placeholder('-'),
                     ]),

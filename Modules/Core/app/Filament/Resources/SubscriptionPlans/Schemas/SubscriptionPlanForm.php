@@ -16,7 +16,7 @@ class SubscriptionPlanForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('code')
@@ -30,7 +30,7 @@ class SubscriptionPlanForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Pricing')
+                Section::make(FilamentUi::text('Pricing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('price_monthly')
@@ -45,7 +45,7 @@ class SubscriptionPlanForm
                             ->default(0),
                     ]),
 
-                Section::make('Limits')
+                Section::make(FilamentUi::text('Limits'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('max_users')
@@ -65,7 +65,7 @@ class SubscriptionPlanForm
                             ->default(1),
                     ]),
 
-                Section::make('Features')
+                Section::make(FilamentUi::text('Features'))
                     ->columns(2)
                     ->schema([
                         Repeater::make('included_modules')
@@ -73,9 +73,9 @@ class SubscriptionPlanForm
                             ->required()
                             ->schema([
                                 TextInput::make('code')
-                                    ->label('Module Code'),
+                                    ->label(FilamentUi::text('Module Code')),
                                 TextInput::make('name')
-                                    ->label('Module Name'),
+                                    ->label(FilamentUi::text('Module Name')),
                             ])
                             ->columnSpanFull()
                             ->addActionLabel('Add Item')
@@ -84,16 +84,16 @@ class SubscriptionPlanForm
                             ->label(FilamentUi::field('features'))
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Feature'),
+                                    ->label(FilamentUi::text('Feature')),
                                 Textarea::make('description')
-                                    ->label('Description'),
+                                    ->label(FilamentUi::text('Description')),
                             ])
                             ->columnSpanFull()
                             ->addActionLabel('Add Item')
                             ->reorderable(),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')

@@ -14,7 +14,7 @@ class PaymentInfolist
     {
         return $schema
             ->components([
-                Section::make('Payment Details')
+                Section::make(FilamentUi::text('Payment Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -33,7 +33,7 @@ class PaymentInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Payment Method')
+                Section::make(FilamentUi::text('Payment Method'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('payment_method')
@@ -59,7 +59,7 @@ class PaymentInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Verification')
+                Section::make(FilamentUi::text('Verification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('verified_by')
@@ -76,7 +76,7 @@ class PaymentInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Reconciliation')
+                Section::make(FilamentUi::text('Reconciliation'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -89,7 +89,7 @@ class PaymentInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

@@ -14,7 +14,7 @@ class ViolationTypeInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -28,7 +28,7 @@ class ViolationTypeInfolist
                             ->label(FilamentUi::field('name')),
                     ]),
 
-                Section::make('Classification')
+                Section::make(FilamentUi::text('Classification'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('category')
@@ -44,7 +44,7 @@ class ViolationTypeInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Details & Actions')
+                Section::make(FilamentUi::text('Details & Actions'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('default_sanctions')
@@ -61,7 +61,7 @@ class ViolationTypeInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

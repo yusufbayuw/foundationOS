@@ -16,7 +16,7 @@ class VendorBillItemForm
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -35,7 +35,7 @@ class VendorBillItemForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Quantity & Pricing')
+                Section::make(FilamentUi::text('Quantity & Pricing'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('quantity')

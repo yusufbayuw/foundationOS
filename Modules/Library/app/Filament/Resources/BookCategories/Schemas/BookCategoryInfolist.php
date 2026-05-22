@@ -14,7 +14,7 @@ class BookCategoryInfolist
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -23,7 +23,7 @@ class BookCategoryInfolist
                             ->label(FilamentUi::text('Organization')),
                     ]),
 
-                Section::make('Category Details')
+                Section::make(FilamentUi::text('Category Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('code')
@@ -38,7 +38,7 @@ class BookCategoryInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

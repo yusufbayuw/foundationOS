@@ -13,7 +13,7 @@ class VendorBillItemInfolist
     {
         return $schema
             ->components([
-                Section::make('References')
+                Section::make(FilamentUi::text('References'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -32,7 +32,7 @@ class VendorBillItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Quantity & Pricing')
+                Section::make(FilamentUi::text('Quantity & Pricing'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('quantity')
@@ -56,7 +56,7 @@ class VendorBillItemInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

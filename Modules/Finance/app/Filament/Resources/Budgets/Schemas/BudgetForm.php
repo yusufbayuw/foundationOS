@@ -18,7 +18,7 @@ class BudgetForm
     {
         return $schema
             ->components([
-                Section::make('Budget Details')
+                Section::make(FilamentUi::text('Budget Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -56,7 +56,7 @@ class BudgetForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Amounts')
+                Section::make(FilamentUi::text('Amounts'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('allocated_amount')
@@ -74,7 +74,7 @@ class BudgetForm
                             ->numeric(),
                     ]),
 
-                Section::make('Approval')
+                Section::make(FilamentUi::text('Approval'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('approved_by')

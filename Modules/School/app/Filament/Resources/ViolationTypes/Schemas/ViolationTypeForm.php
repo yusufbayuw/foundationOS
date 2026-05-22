@@ -17,7 +17,7 @@ class ViolationTypeForm
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -32,7 +32,7 @@ class ViolationTypeForm
                             ->required(),
                     ]),
 
-                Section::make('Classification')
+                Section::make(FilamentUi::text('Classification'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('category')
@@ -49,7 +49,7 @@ class ViolationTypeForm
                             ->required(),
                     ]),
 
-                Section::make('Details & Actions')
+                Section::make(FilamentUi::text('Details & Actions'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('default_sanctions')

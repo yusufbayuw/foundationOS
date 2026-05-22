@@ -20,7 +20,7 @@ class LoanForm
     {
         return $schema
             ->components([
-                Section::make('Scope')
+                Section::make(FilamentUi::text('Scope'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -35,7 +35,7 @@ class LoanForm
                             ->helperText('Opsional. Kosongkan untuk transaksi tenant-wide.'),
                     ]),
 
-                Section::make('Loan Parties')
+                Section::make(FilamentUi::text('Loan Parties'))
                     ->columns(2)
                     ->schema([
                         Select::make('book_copy_id')
@@ -62,7 +62,7 @@ class LoanForm
                             ->numeric(),
                     ]),
 
-                Section::make('Loan Period')
+                Section::make(FilamentUi::text('Loan Period'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('loan_date')
@@ -89,7 +89,7 @@ class LoanForm
                             ->default('borrowed'),
                     ]),
 
-                Section::make('Fines')
+                Section::make(FilamentUi::text('Fines'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('fine_amount')
@@ -108,7 +108,7 @@ class LoanForm
                             ->default('none'),
                     ]),
 
-                Section::make('Condition & Notes')
+                Section::make(FilamentUi::text('Condition & Notes'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('condition_on_loan')

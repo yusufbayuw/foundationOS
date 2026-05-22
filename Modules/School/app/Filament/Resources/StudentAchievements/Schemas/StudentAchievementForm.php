@@ -19,7 +19,7 @@ class StudentAchievementForm
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -41,7 +41,7 @@ class StudentAchievementForm
                             ->numeric(),
                     ]),
 
-                Section::make('Achievement Details')
+                Section::make(FilamentUi::text('Achievement Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('title')
@@ -62,7 +62,7 @@ class StudentAchievementForm
                             ->label(FilamentUi::field('rank_position')),
                     ]),
 
-                Section::make('Certificate & Media')
+                Section::make(FilamentUi::text('Certificate & Media'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('certificate_number')
@@ -76,7 +76,7 @@ class StudentAchievementForm
                             ->label(FilamentUi::field('news_link')),
                     ]),
 
-                Section::make('Points & Verification')
+                Section::make(FilamentUi::text('Points & Verification'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('points_earned')

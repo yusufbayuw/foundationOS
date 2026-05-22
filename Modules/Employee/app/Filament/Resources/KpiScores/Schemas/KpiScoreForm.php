@@ -4,11 +4,12 @@ namespace Modules\Employee\Filament\Resources\KpiScores\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class KpiScoreForm
 {
@@ -16,57 +17,57 @@ class KpiScoreForm
     {
         return $schema
             ->components([
-                Section::make('Employee & Evaluation')
+                Section::make(FilamentUi::text('Employee & Evaluation'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
                         Select::make('employee_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('employee_id'))
+                            ->label(FilamentUi::field('employee_id'))
                             ->relationship('employee', 'id')
                             ->required(),
                         TextInput::make('kpi_template_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('kpi_template_id'))
+                            ->label(FilamentUi::field('kpi_template_id'))
                             ->numeric(),
                         Select::make('evaluator_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('evaluator_id'))
+                            ->label(FilamentUi::field('evaluator_id'))
                             ->relationship('evaluator', 'name'),
                         TextInput::make('period_month')
-                            ->label(\Modules\Core\Support\FilamentUi::field('period_month'))
+                            ->label(FilamentUi::field('period_month'))
                             ->required(),
                         TextInput::make('period_year')
-                            ->label(\Modules\Core\Support\FilamentUi::field('period_year'))
+                            ->label(FilamentUi::field('period_year'))
                             ->required(),
                     ]),
 
-                Section::make('Scores & Assessment')
+                Section::make(FilamentUi::text('Scores & Assessment'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('scores')
-                            ->label(\Modules\Core\Support\FilamentUi::field('scores'))
+                            ->label(FilamentUi::field('scores'))
                             ->required()
                             ->columnSpanFull(),
                         TextInput::make('total_score')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_score'))
+                            ->label(FilamentUi::field('total_score'))
                             ->required()
                             ->numeric(),
                         TextInput::make('grade')
-                            ->label(\Modules\Core\Support\FilamentUi::field('grade')),
+                            ->label(FilamentUi::field('grade')),
                         Textarea::make('qualitative_assessment')
-                            ->label(\Modules\Core\Support\FilamentUi::field('qualitative_assessment'))
+                            ->label(FilamentUi::field('qualitative_assessment'))
                             ->columnSpanFull(),
                         Textarea::make('employee_self_assessment')
-                            ->label(\Modules\Core\Support\FilamentUi::field('employee_self_assessment'))
+                            ->label(FilamentUi::field('employee_self_assessment'))
                             ->columnSpanFull(),
                         Textarea::make('development_plan')
-                            ->label(\Modules\Core\Support\FilamentUi::field('development_plan'))
+                            ->label(FilamentUi::field('development_plan'))
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Status & Approval')
+                Section::make(FilamentUi::text('Status & Approval'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('status')
-                            ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                            ->label(FilamentUi::field('status'))
                             ->required()
                             ->default('draft'),
                         DateTimePicker::make('submitted_at'),

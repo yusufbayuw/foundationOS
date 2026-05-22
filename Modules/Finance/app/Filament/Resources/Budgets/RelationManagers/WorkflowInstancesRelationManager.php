@@ -5,6 +5,8 @@ namespace Modules\Finance\Filament\Resources\Budgets\RelationManagers;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Modules\Core\Support\FilamentUi;
+use Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource;
 
 class WorkflowInstancesRelationManager extends RelationManager
 {
@@ -17,28 +19,28 @@ class WorkflowInstancesRelationManager extends RelationManager
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('workflow.name')
-                    ->label('Workflow')
+                    ->label(FilamentUi::text('Workflow'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('workflow_version')
-                    ->label('Workflow Version')
+                    ->label(FilamentUi::text('Workflow Version'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('currentStep.name')
-                    ->label('Current Step')
+                    ->label(FilamentUi::text('Current Step'))
                     ->placeholder('-'),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
+                    ->label(FilamentUi::text('Status'))
                     ->badge(),
                 Tables\Columns\TextColumn::make('requester.name')
-                    ->label('Requester')
+                    ->label(FilamentUi::text('Requester'))
                     ->placeholder('-'),
                 Tables\Columns\TextColumn::make('started_at')
-                    ->label('Started At')
+                    ->label(FilamentUi::text('Started At'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->recordActions([
                 Tables\Actions\ViewAction::make()
-                    ->url(fn ($record): string => \Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource::getUrl('view', ['record' => $record])),
+                    ->url(fn ($record): string => WorkflowInstanceResource::getUrl('view', ['record' => $record])),
             ])
             ->defaultSort('started_at', 'desc');
     }

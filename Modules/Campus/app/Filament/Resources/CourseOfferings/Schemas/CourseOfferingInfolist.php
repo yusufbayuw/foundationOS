@@ -13,7 +13,7 @@ class CourseOfferingInfolist
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -31,7 +31,7 @@ class CourseOfferingInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Offering Details')
+                Section::make(FilamentUi::text('Offering Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('class_code')
@@ -48,7 +48,7 @@ class CourseOfferingInfolist
                             ->label(FilamentUi::field('status')),
                     ]),
 
-                Section::make('Schedule')
+                Section::make(FilamentUi::text('Schedule'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('day_of_week')
@@ -65,7 +65,7 @@ class CourseOfferingInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

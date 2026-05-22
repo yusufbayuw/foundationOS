@@ -14,7 +14,7 @@ class AdmissionPeriodInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -32,7 +32,7 @@ class AdmissionPeriodInfolist
                             ->boolean(),
                     ]),
 
-                Section::make('Schedule')
+                Section::make(FilamentUi::text('Schedule'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('start_date')
@@ -47,7 +47,7 @@ class AdmissionPeriodInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Capacity & Fees')
+                Section::make(FilamentUi::text('Capacity & Fees'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('registration_fee')
@@ -64,7 +64,7 @@ class AdmissionPeriodInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Details')
+                Section::make(FilamentUi::text('Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('description')
@@ -77,7 +77,7 @@ class AdmissionPeriodInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

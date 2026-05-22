@@ -16,7 +16,7 @@ class AchievementTypeForm
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -31,7 +31,7 @@ class AchievementTypeForm
                             ->required(),
                     ]),
 
-                Section::make('Classification')
+                Section::make(FilamentUi::text('Classification'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('category')
@@ -47,7 +47,7 @@ class AchievementTypeForm
                             ->label(FilamentUi::field('certificate_template')),
                     ]),
 
-                Section::make('Status')
+                Section::make(FilamentUi::text('Status'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_active')

@@ -14,7 +14,7 @@ class PayrollComponentInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -33,7 +33,7 @@ class PayrollComponentInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Calculation')
+                Section::make(FilamentUi::text('Calculation'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('calculation_type')
@@ -53,7 +53,7 @@ class PayrollComponentInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Settings')
+                Section::make(FilamentUi::text('Settings'))
                     ->columns(2)
                     ->schema([
                         IconEntry::make('is_taxable')
@@ -67,7 +67,7 @@ class PayrollComponentInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

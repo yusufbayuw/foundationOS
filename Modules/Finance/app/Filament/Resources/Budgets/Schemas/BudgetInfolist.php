@@ -13,7 +13,7 @@ class BudgetInfolist
     {
         return $schema
             ->components([
-                Section::make('Budget Details')
+                Section::make(FilamentUi::text('Budget Details'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -31,7 +31,7 @@ class BudgetInfolist
                         TextEntry::make('status')
                             ->label(FilamentUi::field('status')),
                         TextEntry::make('workflowInstances_count')
-                            ->label('Workflow Instances')
+                            ->label(FilamentUi::text('Workflow Instances'))
                             ->state(fn ($record): int => $record->workflowInstances()->count()),
                         TextEntry::make('description')
                             ->label(FilamentUi::field('description'))
@@ -39,7 +39,7 @@ class BudgetInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Amounts')
+                Section::make(FilamentUi::text('Amounts'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('allocated_amount')
@@ -53,7 +53,7 @@ class BudgetInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Approval')
+                Section::make(FilamentUi::text('Approval'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('approved_by')
@@ -66,7 +66,7 @@ class BudgetInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

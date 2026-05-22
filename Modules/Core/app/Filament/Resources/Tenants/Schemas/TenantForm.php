@@ -17,7 +17,7 @@ class TenantForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('uuid')
@@ -35,7 +35,7 @@ class TenantForm
                             ->label(FilamentUi::field('subdomain')),
                     ]),
 
-                Section::make('Branding')
+                Section::make(FilamentUi::text('Branding'))
                     ->columns(2)
                     ->schema([
                         FileUpload::make('logo')
@@ -54,7 +54,7 @@ class TenantForm
                             ->label(FilamentUi::field('secondary_color')),
                     ]),
 
-                Section::make('Localization')
+                Section::make(FilamentUi::text('Localization'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('timezone')
@@ -71,7 +71,7 @@ class TenantForm
                             ->default('en'),
                     ]),
 
-                Section::make('Subscription')
+                Section::make(FilamentUi::text('Subscription'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('billing_cycle')
@@ -88,7 +88,7 @@ class TenantForm
                             ->relationship('subscriptionPlan', 'name'),
                     ]),
 
-                Section::make('Limits')
+                Section::make(FilamentUi::text('Limits'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('max_users')
@@ -102,7 +102,7 @@ class TenantForm
                             ->numeric(),
                     ]),
 
-                Section::make('SEO & Metadata')
+                Section::make(FilamentUi::text('SEO & Metadata'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('meta_title')

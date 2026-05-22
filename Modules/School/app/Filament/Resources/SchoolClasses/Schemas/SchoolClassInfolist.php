@@ -14,7 +14,7 @@ class SchoolClassInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -33,7 +33,7 @@ class SchoolClassInfolist
                             ->label(FilamentUi::field('code')),
                     ]),
 
-                Section::make('Teachers')
+                Section::make(FilamentUi::text('Teachers'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('homeroomTeacher.id')
@@ -44,7 +44,7 @@ class SchoolClassInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Capacity & Status')
+                Section::make(FilamentUi::text('Capacity & Status'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('grade_level')

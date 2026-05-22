@@ -13,7 +13,7 @@ class MemberInfolist
     {
         return $schema
             ->components([
-                Section::make('Scope & Identity')
+                Section::make(FilamentUi::text('Scope & Identity'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -24,7 +24,7 @@ class MemberInfolist
                             ->label(FilamentUi::field('member_number')),
                     ]),
 
-                Section::make('Membership')
+                Section::make(FilamentUi::text('Membership'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('member_type')
@@ -40,7 +40,7 @@ class MemberInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Loan Limits')
+                Section::make(FilamentUi::text('Loan Limits'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('max_books')
@@ -54,7 +54,7 @@ class MemberInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Activity & Fines')
+                Section::make(FilamentUi::text('Activity & Fines'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('total_loans_count')
@@ -71,7 +71,7 @@ class MemberInfolist
                             ->numeric(),
                     ]),
 
-                Section::make('Status & Notes')
+                Section::make(FilamentUi::text('Status & Notes'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -90,7 +90,7 @@ class MemberInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

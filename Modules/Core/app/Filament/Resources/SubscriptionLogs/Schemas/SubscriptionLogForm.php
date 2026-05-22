@@ -17,7 +17,7 @@ class SubscriptionLogForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -32,7 +32,7 @@ class SubscriptionLogForm
                             ->relationship('newPlan', 'name'),
                     ]),
 
-                Section::make('Payment')
+                Section::make(FilamentUi::text('Payment'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('amount')
@@ -53,14 +53,14 @@ class SubscriptionLogForm
                             ->url(),
                     ]),
 
-                Section::make('Period')
+                Section::make(FilamentUi::text('Period'))
                     ->columns(2)
                     ->schema([
                         DateTimePicker::make('period_start'),
                         DateTimePicker::make('period_end'),
                     ]),
 
-                Section::make('Additional')
+                Section::make(FilamentUi::text('Additional'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('notes')

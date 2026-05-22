@@ -14,7 +14,7 @@ class StudentAssessmentAnswerInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -34,7 +34,7 @@ class StudentAssessmentAnswerInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Answer')
+                Section::make(FilamentUi::text('Answer'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('answer_text')
@@ -49,7 +49,7 @@ class StudentAssessmentAnswerInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Scoring')
+                Section::make(FilamentUi::text('Scoring'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('score')
@@ -73,7 +73,7 @@ class StudentAssessmentAnswerInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Attempt Information')
+                Section::make(FilamentUi::text('Attempt Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('attempt_number')

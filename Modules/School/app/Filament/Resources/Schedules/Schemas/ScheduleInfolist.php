@@ -14,7 +14,7 @@ class ScheduleInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(FilamentUi::text('Basic Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -35,7 +35,7 @@ class ScheduleInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Schedule Time')
+                Section::make(FilamentUi::text('Schedule Time'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('day_of_week')
@@ -52,7 +52,7 @@ class ScheduleInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Configuration')
+                Section::make(FilamentUi::text('Configuration'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('schedule_type')

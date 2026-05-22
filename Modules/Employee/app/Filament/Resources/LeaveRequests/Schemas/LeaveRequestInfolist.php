@@ -13,7 +13,7 @@ class LeaveRequestInfolist
     {
         return $schema
             ->components([
-                Section::make('General Information')
+                Section::make(FilamentUi::text('General Information'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('tenant.name')
@@ -34,7 +34,7 @@ class LeaveRequestInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Leave Period')
+                Section::make(FilamentUi::text('Leave Period'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('start_date')
@@ -54,7 +54,7 @@ class LeaveRequestInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Approval')
+                Section::make(FilamentUi::text('Approval'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('status')
@@ -73,7 +73,7 @@ class LeaveRequestInfolist
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

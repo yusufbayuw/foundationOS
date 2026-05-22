@@ -17,7 +17,7 @@ class ChartOfAccountForm
     {
         return $schema
             ->components([
-                Section::make('Account Details')
+                Section::make(FilamentUi::text('Account Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -50,7 +50,7 @@ class ChartOfAccountForm
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Bank Account')
+                Section::make(FilamentUi::text('Bank Account'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_bank_account')
@@ -64,7 +64,7 @@ class ChartOfAccountForm
                             ->label(FilamentUi::field('bank_account_holder')),
                     ]),
 
-                Section::make('Balances & Status')
+                Section::make(FilamentUi::text('Balances & Status'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('opening_balance')

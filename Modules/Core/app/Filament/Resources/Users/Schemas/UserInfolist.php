@@ -13,7 +13,7 @@ class UserInfolist
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('name')
@@ -31,7 +31,7 @@ class UserInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Authentication')
+                Section::make(FilamentUi::text('Authentication'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('email_verified_at')
@@ -54,7 +54,7 @@ class UserInfolist
                             ->placeholder('-'),
                     ]),
 
-                Section::make('Preferences')
+                Section::make(FilamentUi::text('Preferences'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('timezone')
@@ -65,7 +65,7 @@ class UserInfolist
                             ->label(FilamentUi::field('status')),
                     ]),
 
-                Section::make('Timestamps')
+                Section::make(FilamentUi::text('Timestamps'))
                     ->columns(2)
                     ->schema([
                         TextEntry::make('created_at')

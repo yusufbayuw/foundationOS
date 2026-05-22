@@ -18,7 +18,7 @@ class FileUploadForm
     {
         return $schema
             ->components([
-                Section::make('Context')
+                Section::make(FilamentUi::text('Context'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -37,7 +37,7 @@ class FileUploadForm
                             ->label(FilamentUi::field('collection_name')),
                     ]),
 
-                Section::make('File Details')
+                Section::make(FilamentUi::text('File Details'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('original_name')
@@ -59,7 +59,7 @@ class FileUploadForm
                             ->label(FilamentUi::field('checksum')),
                     ]),
 
-                Section::make('Storage')
+                Section::make(FilamentUi::text('Storage'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('disk')

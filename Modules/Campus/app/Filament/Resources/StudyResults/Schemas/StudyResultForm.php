@@ -18,7 +18,7 @@ class StudyResultForm
     {
         return $schema
             ->components([
-                Section::make('Relationships')
+                Section::make(FilamentUi::text('Relationships'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -27,7 +27,7 @@ class StudyResultForm
                             ->relationship('studyPlanItem', 'id'),
                     ]),
 
-                Section::make('Grade')
+                Section::make(FilamentUi::text('Grade'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('grade_letter')

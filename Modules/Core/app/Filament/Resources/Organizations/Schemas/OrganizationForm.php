@@ -22,7 +22,7 @@ class OrganizationForm
     {
         return $schema
             ->components([
-                Section::make('Basic Info')
+                Section::make(FilamentUi::text('Basic Info'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -39,7 +39,7 @@ class OrganizationForm
                             ->label(FilamentUi::field('level')),
                     ]),
 
-                Section::make('Legal Documents')
+                Section::make(FilamentUi::text('Legal Documents'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('npsn')
@@ -52,7 +52,7 @@ class OrganizationForm
                             ->label(FilamentUi::field('npwp')),
                     ]),
 
-                Section::make('Contact')
+                Section::make(FilamentUi::text('Contact'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('phone')
@@ -66,7 +66,7 @@ class OrganizationForm
                             ->url(),
                     ]),
 
-                Section::make('Address')
+                Section::make(FilamentUi::text('Address'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('address')
@@ -97,7 +97,7 @@ class OrganizationForm
                             ->numeric(),
                     ]),
 
-                Section::make('Management')
+                Section::make(FilamentUi::text('Management'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('established_date')
@@ -107,7 +107,7 @@ class OrganizationForm
                             ->relationship('principalUser', 'name'),
                     ]),
 
-                Section::make('Media')
+                Section::make(FilamentUi::text('Media'))
                     ->columns(2)
                     ->schema([
                         FileUpload::make('logo')
@@ -132,7 +132,7 @@ class OrganizationForm
                             ->directory('organizations/letterheads'),
                     ]),
 
-                Section::make('Status & Settings')
+                Section::make(FilamentUi::text('Status & Settings'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_main')

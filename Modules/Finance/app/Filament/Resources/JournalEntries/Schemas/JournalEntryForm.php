@@ -6,12 +6,13 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class JournalEntryForm
 {
@@ -19,12 +20,12 @@ class JournalEntryForm
     {
         return $schema
             ->components([
-                Section::make('Entry Details')
+                Section::make(FilamentUi::text('Entry Details'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
                         Select::make('organization_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+                            ->label(FilamentUi::field('organization_id'))
                             ->relationship('organization', 'name', modifyQueryUsing: function ($query): void {
                                 if (Filament::getTenant()) {
                                     $query->where('tenant_id', Filament::getTenant()->getKey());
@@ -32,56 +33,56 @@ class JournalEntryForm
                             })
                             ->required(),
                         Select::make('reversed_entry_id')
-                            ->label(\Modules\Core\Support\FilamentUi::field('reversed_entry_id'))
+                            ->label(FilamentUi::field('reversed_entry_id'))
                             ->relationship('reversedEntry', 'id'),
                         TextInput::make('entry_number')
-                            ->label(\Modules\Core\Support\FilamentUi::field('entry_number'))
+                            ->label(FilamentUi::field('entry_number'))
                             ->required(),
                         DatePicker::make('date')
-                            ->label(\Modules\Core\Support\FilamentUi::field('date'))
+                            ->label(FilamentUi::field('date'))
                             ->required(),
                         Textarea::make('description')
-                            ->label(\Modules\Core\Support\FilamentUi::field('description'))
+                            ->label(FilamentUi::field('description'))
                             ->required()
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Totals')
+                Section::make(FilamentUi::text('Totals'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('total_debit')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_debit'))
+                            ->label(FilamentUi::field('total_debit'))
                             ->required()
                             ->numeric(),
                         TextInput::make('total_credit')
-                            ->label(\Modules\Core\Support\FilamentUi::field('total_credit'))
+                            ->label(FilamentUi::field('total_credit'))
                             ->required()
                             ->numeric(),
                         Toggle::make('is_balanced')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_balanced'))
+                            ->label(FilamentUi::field('is_balanced'))
                             ->required(),
                     ]),
 
-                Section::make('Posting')
+                Section::make(FilamentUi::text('Posting'))
                     ->columns(2)
                     ->schema([
                         TextInput::make('posted_by')
-                            ->label(\Modules\Core\Support\FilamentUi::field('posted_by'))
+                            ->label(FilamentUi::field('posted_by'))
                             ->numeric(),
                         DateTimePicker::make('posted_at'),
                         Toggle::make('is_posted')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_posted'))
+                            ->label(FilamentUi::field('is_posted'))
                             ->required(),
                     ]),
 
-                Section::make('Reversal')
+                Section::make(FilamentUi::text('Reversal'))
                     ->columns(2)
                     ->schema([
                         Toggle::make('is_reversed')
-                            ->label(\Modules\Core\Support\FilamentUi::field('is_reversed'))
+                            ->label(FilamentUi::field('is_reversed'))
                             ->required(),
                         Textarea::make('reversal_reason')
-                            ->label(\Modules\Core\Support\FilamentUi::field('reversal_reason'))
+                            ->label(FilamentUi::field('reversal_reason'))
                             ->columnSpanFull(),
                     ]),
             ]);

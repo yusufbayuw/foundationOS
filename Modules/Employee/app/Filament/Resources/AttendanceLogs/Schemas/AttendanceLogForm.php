@@ -18,7 +18,7 @@ class AttendanceLogForm
     {
         return $schema
             ->components([
-                Section::make('Employee & Shift')
+                Section::make(FilamentUi::text('Employee & Shift'))
                     ->columns(2)
                     ->schema([
                         TenantField::make(),
@@ -34,7 +34,7 @@ class AttendanceLogForm
                             ->numeric(),
                     ]),
 
-                Section::make('Attendance Details')
+                Section::make(FilamentUi::text('Attendance Details'))
                     ->columns(2)
                     ->schema([
                         DatePicker::make('date')
@@ -56,7 +56,7 @@ class AttendanceLogForm
                             ->default(0),
                     ]),
 
-                Section::make('Location & Device')
+                Section::make(FilamentUi::text('Location & Device'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('location_check_in')
@@ -75,7 +75,7 @@ class AttendanceLogForm
                             ->label(FilamentUi::field('photo_check_out')),
                     ]),
 
-                Section::make('Notes')
+                Section::make(FilamentUi::text('Notes'))
                     ->columns(2)
                     ->schema([
                         Textarea::make('notes')
