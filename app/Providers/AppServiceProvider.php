@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\TenantSwitched;
+use App\Listeners\LogTenantSwitchAudit;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Observers\ClassStudentObserver;
@@ -14,6 +16,7 @@ use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
 use App\Support\CurrentTenant;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -87,6 +90,8 @@ class AppServiceProvider extends ServiceProvider
             'goods_receipt' => GoodsReceipt::class,
             'vendor_bill' => VendorBill::class,
         ]);
+
+        Event::listen(TenantSwitched::class, LogTenantSwitchAudit::class);
 
         if (config('app.env') === 'production') {
             URL::forceScheme('https');

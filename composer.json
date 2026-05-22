@@ -30,6 +30,17 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "Modules\\Campus\\": "Modules/Campus/app/",
+            "Modules\\Core\\": "Modules/Core/app/",
+            "Modules\\Employee\\": "Modules/Employee/app/",
+            "Modules\\Enrollment\\": "Modules/Enrollment/app/",
+            "Modules\\Finance\\": "Modules/Finance/app/",
+            "Modules\\Global\\": "Modules/Global/app/",
+            "Modules\\Library\\": "Modules/Library/app/",
+            "Modules\\Monitoring\\": "Modules/Monitoring/app/",
+            "Modules\\Procurement\\": "Modules/Procurement/app/",
+            "Modules\\School\\": "Modules/School/app/",
+            "Modules\\Workflow\\": "Modules/Workflow/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }

@@ -68,7 +68,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 1.3 — Dynamic Form Data Source
+### Fase 1.3 — Dynamic Form Data Source `[x]`
 
 **Konteks.** `form_schema` V2 hanya mendukung static options (`["draft", "approved"]`). Untuk dropdown approver, vendor, atau cost center, options harus dihardcode atau di-seed.
 
@@ -88,6 +88,13 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 **Dependensi.** Tenancy hardening (Epic 4) — agar tenant scoping otomatis bisa dipakai resolver tanpa kebocoran data.
 
 **Risiko.** Performance — dropdown dengan 10k+ options. Tambah opsi `searchable` + lazy pagination via Filament `Select::getSearchResultsUsing()`.
+
+**Selesai.** 2026-05-22. Implementasi:
+- `config/workflow-dynamic-sources.php` — whitelist 9 model (Organization, Department, User, Vendor, ProcurementCategory, Position, ChartOfAccount, Faculty, StudyProgram) + TTL 300s + max_results 500.
+- `DynamicOptionsResolver` — kind `eloquent` (whitelist check + BelongsToTenant scope respect + Cache::remember per tenant+signature) dan kind `enum` (semua PHP backed/unit enum). Endpoint kind belum diimplementasi.
+- `LaravelWorkflowFormSchemaValidator::validateOptionsSourceShape()` — validasi shape `options_source` (kind supported, model whitelisted, enum exists) saat validate() dipanggil. `select`/`multiselect` type tidak enforce string rule (nilai bisa integer ID).
+- Composer.json tambah per-module PSR-4 autoload entries (diperlukan untuk test + artisan di environment ini).
+- Test `DynamicOptionsResolverTest` (9 tests) cover tenant isolation, whitelist rejection, enum resolution, cache, validator acceptance/rejection.
 
 ---
 
@@ -255,7 +262,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 4.3 — Tenant Switching UX & Audit
+### Fase 4.3 — Tenant Switching UX & Audit `[x]`
 
 **Deliverable.**
 - Audit log entry: setiap tenant switch dicatat di `audit_logs`.
@@ -270,6 +277,13 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 **Dependensi.** Fase 4.1.
 
 **Risiko.** False positive di tabel cross-tenant by design (Country, Province, dst.). Whitelist global tables.
+
+**Selesai.** 2026-05-22. Implementasi:
+- Event `App\Events\TenantSwitched` + Listener `App\Listeners\LogTenantSwitchAudit` → `AuditLog::withoutTenantScope()->create()`.
+- `BindTenantToContainer` dispatch event saat `newTenantId !== previousTenantId`.
+- Render hook `panels::topbar.start` → `resources/views/filament/tenant-badge.blade.php` (warning badge untuk super-admin, primary untuk tenant user biasa).
+- Command `fos:tenancy:audit-leaks`: SHOW TABLES → filter by `tenant_id` column → cross-join organizations untuk detect FK cross-tenant mismatch. MySQL-specific (`SHOW TABLES`).
+- Test `TenancySwitchAuditTest` (6 tests) cover event properties, listener audit log creation, old_values capture, event::fake dispatch, listener wiring.
 
 ---
 

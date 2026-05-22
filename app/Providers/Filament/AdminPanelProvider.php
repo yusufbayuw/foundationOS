@@ -87,7 +87,11 @@ class AdminPanelProvider extends PanelProvider
             ->tenantMiddleware([
                 SyncShieldTenant::class,
                 BindTenantToContainer::class,
-            ], isPersistent: true);
+            ], isPersistent: true)
+            ->renderHook(
+                'panels::topbar.start',
+                fn () => view('filament.tenant-badge'),
+            );
 
         foreach (Module::allEnabled() as $module) {
             $panel
