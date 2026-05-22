@@ -34,50 +34,47 @@
         @endif
 
         {{-- Search & Group Filter --}}
-        <div class="flex flex-col sm:flex-row gap-3 mb-5">
-
-            {{-- Search --}}
-            <div class="relative flex-1">
-                <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <input
-                    type="text"
-                    wire:model.live.debounce.200ms="search"
-                    placeholder="{{ \Modules\Core\Support\FilamentUi::text('Search menu') }}..."
-                    class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-                @if ($search)
-                    <button wire:click="$set('search', '')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                        <x-heroicon-o-x-circle class="w-4 h-4" />
-                    </button>
-                @endif
-            </div>
-
-            {{-- Group Filter Chips --}}
-            @if (! $search)
-                <div class="flex flex-wrap gap-2">
-                    <button
-                        wire:click="setGroup('')"
-                        @class([
-                            'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
-                            'bg-primary-600 border-primary-600 text-white' => $activeGroup === '',
-                            'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600' => $activeGroup !== '',
-                        ])>
-                        {{ \Modules\Core\Support\FilamentUi::text('All') }}
-                    </button>
-                    @foreach ($this->getGroupNames() as $group)
-                        <button
-                            wire:click="setGroup('{{ $group }}')"
-                            @class([
-                                'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
-                                'bg-primary-600 border-primary-600 text-white' => $activeGroup === $group,
-                                'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600' => $activeGroup !== $group,
-                            ])>
-                            {{ $group }}
-                        </button>
-                    @endforeach
-                </div>
+        {{-- Search --}}
+        <div class="relative mb-3">
+            <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <input
+                type="text"
+                wire:model.live.debounce.200ms="search"
+                placeholder="{{ \Modules\Core\Support\FilamentUi::text('Search menu') }}..."
+                class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+            @if ($search)
+                <button wire:click="$set('search', '')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <x-heroicon-o-x-circle class="w-4 h-4" />
+                </button>
             @endif
         </div>
+
+        {{-- Group Filter Chips --}}
+        @if (! $search)
+            <div class="flex flex-wrap gap-2 mb-5">
+                <button
+                    wire:click="setGroup('')"
+                    @class([
+                        'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
+                        'bg-primary-600 border-primary-600 text-white' => $activeGroup === '',
+                        'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600' => $activeGroup !== '',
+                    ])>
+                    {{ \Modules\Core\Support\FilamentUi::text('All') }}
+                </button>
+                @foreach ($this->getGroupNames() as $group)
+                    <button
+                        wire:click="setGroup('{{ $group }}')"
+                        @class([
+                            'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
+                            'bg-primary-600 border-primary-600 text-white' => $activeGroup === $group,
+                            'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600' => $activeGroup !== $group,
+                        ])>
+                        {{ $group }}
+                    </button>
+                @endforeach
+            </div>
+        @endif
 
         {{-- Grid Items --}}
         @php $items = $this->getVisibleItems(); @endphp
