@@ -233,7 +233,10 @@ function workflowCytoscape(wire, initialSteps, initialTransitions) {
         cy: null,
 
         initCy() {
-            if (typeof window.cytoscape === 'undefined') return;
+            if (typeof window.cytoscape === 'undefined') {
+                setTimeout(() => this.initCy(), 80);
+                return;
+            }
 
             const container = this.$refs.cytoscapeContainer;
             if (!container) return;
