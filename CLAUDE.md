@@ -231,6 +231,56 @@ php artisan make:super-admin
 
 ---
 
+## Translasi & Label
+
+Aplikasi ini bilingual (`id` / `en`). Semua teks UI **wajib** melewati `FilamentUi` — jangan pernah hardcode label berbahasa Inggris atau Indonesia langsung di kode.
+
+### Aturan wajib
+
+1. **Field label** (form field, table column, infolist entry) → `->label(FilamentUi::field('field_name'))`.
+   - `field_name` adalah nama kolom dalam format `snake_case`.
+   - ✅ `TextInput::make('phone_number')->label(FilamentUi::field('phone_number'))`
+   - ❌ `TextInput::make('phone_number')->label('Phone Number')`
+
+2. **Section / Tab / Fieldset / Wizard step title** → `Section::make(FilamentUi::text('Title'))`.
+   - ✅ `Section::make(FilamentUi::text('General information'))`
+   - ❌ `Section::make('General Information')`
+
+3. **Placeholder, helperText, prefix, suffix** → `FilamentUi::text(...)` jika ada teks naratif.
+   - ✅ `->placeholder(FilamentUi::text('Enter phone number'))`
+   - ❌ `->placeholder('Enter phone number')`
+
+4. **Action label** custom → `Action::make('name')->label(FilamentUi::text('Action Name'))`.
+   - Action bawaan Filament (Create/Edit/Delete) sudah ditranslasi Filament — tidak perlu diubah.
+
+5. **Modal heading / description** → wajib lewat `FilamentUi::text(...)`.
+
+6. **Resource navigation** sudah otomatis via `ModuleResource::getNavigationLabel()` dan `getModelLabel()` — tidak perlu override.
+
+### Frasa & kata baru
+
+Tambahkan ke `PHRASES` atau `WORDS` di `Modules/Core/app/Support/FilamentUi.php` sebelum menggunakan `FilamentUi::text('...')` dengan frasa baru. Pastikan ada entry untuk singular dan plural.
+
+### Linter
+
+```bash
+# Deteksi anti-pattern secara lokal
+php scripts/lint-translations.php
+
+# Lewat Composer
+composer run lint:translations
+```
+
+Suppress per baris: tambahkan `// fos:lint-ignore-translation` di akhir baris yang sengaja hardcode (mis. nilai teknis seperti FQCN model).
+
+CI memblokir PR yang memperkenalkan hardcoded label. Setelah deploy, wajib clear cache agar navigation group locale baru efektif:
+
+```bash
+php artisan optimize:clear
+```
+
+---
+
 ## Adding a New Module Resource
 
 1. Use `php artisan make:filament-resource --help` to find options; always pass `--no-interaction`.
@@ -241,6 +291,7 @@ php artisan make:super-admin
 6. Add an importer to `app/Filament/Imports/` extending `BaseModelImporter`.
 7. Run `php artisan optimize:clear` and `php artisan shield:generate --all --panel=admin --option=permissions --no-interaction`.
 8. Write a feature test using `RefreshDatabase` and the module model factories.
+9. **Semua label, section title, placeholder, dan helperText wajib melalui `FilamentUi`** (lihat section "Translasi & Label" di atas).
 
 ---
 

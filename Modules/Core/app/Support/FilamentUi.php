@@ -228,6 +228,63 @@ class FilamentUi
         'Is locked' => 'Dikunci',
         'Start date' => 'Tanggal mulai',
         'End date' => 'Tanggal selesai',
+
+        // ── Fase 1.2 — tambahan frasa audit 2026-05-22 ──────────────────────────
+        'Phone number' => 'Nomor telepon',
+        'Started at' => 'Dimulai pada',
+        'Finished at' => 'Selesai pada',
+        'Due at' => 'Jatuh tempo',
+        'Published at' => 'Dipublikasikan pada',
+        'Birth date' => 'Tanggal lahir',
+        'Birth place' => 'Tempat lahir',
+        'Father name' => 'Nama ayah',
+        'Mother name' => 'Nama ibu',
+        'Quantity' => 'Jumlah',
+        'Unit price' => 'Harga satuan',
+        'Total amount' => 'Total',
+        'Sub total' => 'Subtotal',
+        'Tax' => 'Pajak',
+        'Discount' => 'Diskon',
+        'Reference number' => 'Nomor referensi',
+        'Reference' => 'Referensi',
+        'Remarks' => 'Catatan',
+        'Notes' => 'Catatan',
+        'Description' => 'Deskripsi',
+        'Status' => 'Status',
+        'General information' => 'Informasi umum',
+        'Settings' => 'Pengaturan',
+        'Scope' => 'Cakupan',
+        'Configuration' => 'Konfigurasi',
+        'Approval' => 'Persetujuan',
+        'Trigger event' => 'Event pemicu',
+        'Trigger mode' => 'Mode pemicu',
+        'Subject type' => 'Tipe subjek',
+        'Subject label' => 'Label subjek',
+        'Step' => 'Langkah',
+        'Steps' => 'Langkah',
+        'Action type' => 'Jenis aksi',
+        'Sort order' => 'Urutan',
+        'Version' => 'Versi',
+        'Current step' => 'Langkah saat ini',
+        'Requester' => 'Pemohon',
+        'Status before' => 'Status sebelum',
+        'Status after' => 'Status sesudah',
+        'Workflow version' => 'Versi workflow',
+        'Step type' => 'Tipe langkah',
+        'To step' => 'Ke langkah',
+        'Sla hours' => 'Batas waktu (jam)',
+        'Calculation' => 'Kalkulasi',
+        'Payment details' => 'Detail pembayaran',
+        'Payment method' => 'Metode pembayaran',
+        'Loan limits' => 'Batas peminjaman',
+        'Quantity and pricing' => 'Jumlah & harga',
+        'Is taxable' => 'Kena pajak',
+        'Is mandatory' => 'Wajib',
+        'Created by' => 'Dibuat oleh',
+        'Updated by' => 'Diperbarui oleh',
+        'Preferred locale' => 'Bahasa',
+        'Language' => 'Bahasa',
+        // Collage student typo dipertahankan — alias UI; jangan rename tanpa rename file Resource
     ];
 
     /**
@@ -379,6 +436,35 @@ class FilamentUi
         'violation' => 'pelanggaran',
         'week' => 'minggu',
         'year' => 'tahun',
+
+        // Fase 1.2 — tambahan kata audit 2026-05-22
+        'started' => 'dimulai',
+        'finished' => 'selesai',
+        'published' => 'dipublikasikan',
+        'remarks' => 'catatan',
+        'phase' => 'fase',
+        'cycle' => 'siklus',
+        'mode' => 'mode',
+        'gateway' => 'gerbang',
+        'quorum' => 'kuorum',
+        'assignee' => 'penanggung jawab',
+        'approver' => 'penyetuju',
+        'reviewer' => 'peninjau',
+        'outcome' => 'hasil',
+        'branch' => 'cabang',
+        'instance' => 'instans',
+        'preferred' => 'disukai',
+        'locale' => 'bahasa',
+        'sla' => 'SLA',
+        'rfq' => 'RFQ',
+        'kpi' => 'KPI',
+        'tax' => 'pajak',
+        'discount' => 'diskon',
+        'quantity' => 'jumlah',
+        'calculation' => 'kalkulasi',
+        'approval' => 'persetujuan',
+        'requester' => 'pemohon',
+        'version' => 'versi',
     ];
 
     public static function text(string $value): string
@@ -521,7 +607,13 @@ class FilamentUi
         }
 
         if (array_key_exists($key, static::WORDS)) {
-            return static::WORDS[$key];
+            $translated = static::WORDS[$key];
+            // Preserve initial capitalization from the original word
+            if (strlen($word) > 0 && ctype_upper($word[0])) {
+                return ucfirst($translated);
+            }
+
+            return $translated;
         }
 
         if (preg_match('/^[A-Z0-9]{2,}$/', $word) === 1) {

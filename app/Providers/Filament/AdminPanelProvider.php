@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\EditProfile;
 use App\Http\Middleware\BindTenantToContainer;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
@@ -23,6 +24,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Modules\Core\Http\Middleware\SetUserLocale;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Support\FilamentUi;
 use Nwidart\Modules\Facades\Module;
@@ -37,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->topNavigation(false)
             ->login()
+            ->profile(EditProfile::class)
             ->colors([
                 'primary' => Color::Indigo,
             ])
@@ -79,6 +82,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                SetUserLocale::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),

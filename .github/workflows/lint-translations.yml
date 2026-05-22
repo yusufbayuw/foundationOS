@@ -1,0 +1,34 @@
+name: Translation Lint
+
+on:
+  push:
+    paths:
+      - 'Modules/**/Filament/**/*.php'
+      - 'app/Filament/**/*.php'
+      - 'scripts/lint-translations.php'
+  pull_request:
+    paths:
+      - 'Modules/**/Filament/**/*.php'
+      - 'app/Filament/**/*.php'
+      - 'scripts/lint-translations.php'
+
+jobs:
+  lint-translations:
+    name: Check hardcoded UI labels
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run translation linter
+        run: php scripts/lint-translations.php

@@ -63,6 +63,7 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants
         'locked_until',
         'timezone',
         'locale',
+        'preferred_locale',
         'status',
         'is_super_admin',
     ];
