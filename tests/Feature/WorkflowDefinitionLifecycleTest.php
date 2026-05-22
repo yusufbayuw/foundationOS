@@ -27,6 +27,7 @@ class WorkflowDefinitionLifecycleTest extends TestCase
 
         $v1 = $this->makeWorkflowDefinition($tenant, $organization, $user, version: 1, status: 'active', isActive: true);
         $v2 = $this->makeWorkflowDefinition($tenant, $organization, $user, version: 2, status: 'draft', isActive: false);
+        $this->attachStepsAndTransition($v2, $user);
 
         $published = app(WorkflowDefinitionLifecycleService::class)->publish($v2, $user->id);
 

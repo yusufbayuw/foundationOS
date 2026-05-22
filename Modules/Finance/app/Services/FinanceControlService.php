@@ -5,13 +5,13 @@ namespace Modules\Finance\Services;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
+use Modules\Core\Support\NotificationService;
 use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Models\StudentInvoice;
-use Modules\Core\Support\NotificationService;
 use Modules\Monitoring\Models\AuditLog;
 use RuntimeException;
 
@@ -135,7 +135,7 @@ class FinanceControlService
 
             $totals = $this->calculateJournalTotals($entry);
 
-            if (bccomp((string) $totals['debit'], (string) $totals['credit'], 2) !== 0) {
+            if (round((float) $totals['debit'], 2) !== round((float) $totals['credit'], 2)) {
                 throw new RuntimeException('Journal entry is not balanced.');
             }
 
@@ -146,7 +146,7 @@ class FinanceControlService
                 'is_posted' => true,
                 'posted_by' => $actor->getKey(),
                 'posted_at' => now(),
-                'description' => $notes ? trim($entry->description . "\n\n" . $notes) : $entry->description,
+                'description' => $notes ? trim($entry->description."\n\n".$notes) : $entry->description,
             ])->save();
 
             $this->audit($entry, $actor, 'finance_journal_posted', [
@@ -214,7 +214,7 @@ class FinanceControlService
 
         $existing = JournalEntry::query()
             ->where('tenant_id', $payment->tenant_id)
-            ->where('entry_number', 'PAY-' . $payment->payment_number)
+            ->where('entry_number', 'PAY-'.$payment->payment_number)
             ->first();
 
         if ($existing) {
@@ -225,9 +225,9 @@ class FinanceControlService
             'tenant_id' => $payment->tenant_id,
             'organization_id' => $invoice->invoiceable?->organization_id ?? $cashAccount->organization_id,
             'posted_by' => $actor->getKey(),
-            'entry_number' => 'PAY-' . $payment->payment_number,
+            'entry_number' => 'PAY-'.$payment->payment_number,
             'date' => $payment->payment_date,
-            'description' => 'Auto journal for verified payment ' . $payment->payment_number,
+            'description' => 'Auto journal for verified payment '.$payment->payment_number,
             'total_debit' => $payment->amount,
             'total_credit' => $payment->amount,
             'is_balanced' => true,
@@ -240,7 +240,7 @@ class FinanceControlService
             'tenant_id' => $payment->tenant_id,
             'journal_entry_id' => $entry->id,
             'chart_of_account_id' => $cashAccount->id,
-            'description' => 'Cash / bank receipt for payment ' . $payment->payment_number,
+            'description' => 'Cash / bank receipt for payment '.$payment->payment_number,
             'debit' => $payment->amount,
             'credit' => 0,
         ]);
@@ -249,7 +249,7 @@ class FinanceControlService
             'tenant_id' => $payment->tenant_id,
             'journal_entry_id' => $entry->id,
             'chart_of_account_id' => $receivableAccount->id,
-            'description' => 'Accounts receivable settlement for invoice ' . $invoice->invoice_number,
+            'description' => 'Accounts receivable settlement for invoice '.$invoice->invoice_number,
             'debit' => 0,
             'credit' => $payment->amount,
         ]);

@@ -287,7 +287,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 4.4 — (Opsional) Adopsi Package Tenancy
+### Fase 4.4 — (Opsional) Adopsi Package Tenancy ✅ 2026-05-22
 
 **Konteks.** Kalau Fase 4.1–4.3 sudah stabil dan tetap dirasa kurang, evaluasi `stancl/tenancy` (single-database multi-tenant mode) atau `spatie/laravel-multitenancy`. Decision deferred — keputusan pakai package hanya jika ada use case nyata yang tidak bisa kita penuhi (mis. tenant-specific database connection).
 
