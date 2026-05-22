@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Filament\Resources\Workflows\WorkflowResource;
 use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
@@ -20,7 +21,7 @@ class ViewWorkflow extends ViewRecord
             EditAction::make()
                 ->visible(fn (): bool => $this->record->status?->value !== WorkflowDefinitionStatus::Active->value),
             Action::make('publish')
-                ->label('Publish')
+                ->label(FilamentUi::text('Publish'))
                 ->icon('heroicon-o-bolt')
                 ->color('success')
                 ->requiresConfirmation()
@@ -35,7 +36,7 @@ class ViewWorkflow extends ViewRecord
                         ->send();
                 }),
             Action::make('archive')
-                ->label('Archive')
+                ->label(FilamentUi::text('Archive'))
                 ->icon('heroicon-o-archive-box')
                 ->color('gray')
                 ->requiresConfirmation()
@@ -50,7 +51,7 @@ class ViewWorkflow extends ViewRecord
                         ->send();
                 }),
             Action::make('duplicateVersion')
-                ->label('Duplicate as New Version')
+                ->label(FilamentUi::text('Duplicate as New Version'))
                 ->icon('heroicon-o-document-duplicate')
                 ->color('warning')
                 ->requiresConfirmation()

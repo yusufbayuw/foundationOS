@@ -10,6 +10,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Models\WorkflowAssignment;
 
@@ -23,34 +24,34 @@ class AssignmentsRelationManager extends RelationManager
             ->recordTitleAttribute('assigned_to_id')
             ->columns([
                 TextColumn::make('step.name')
-                    ->label('Step')
+                    ->label(FilamentUi::field('step_id'))
                     ->searchable()
                     ->placeholder('-'),
                 TextColumn::make('assigned_to_type')
-                    ->label('Assigned To Type')
+                    ->label(FilamentUi::text('Assigned to type'))
                     ->badge(),
                 TextColumn::make('assigned_to_id')
-                    ->label('Assigned User')
+                    ->label(FilamentUi::text('Assigned user'))
                     ->formatStateUsing(fn (WorkflowAssignment $record): string => (string) data_get($record->meta, 'user_name', $record->assigned_to_id))
                     ->searchable(),
                 TextColumn::make('assignment_role')
-                    ->label('Assignment Role')
+                    ->label(FilamentUi::text('Assignment role'))
                     ->badge()
                     ->placeholder('-'),
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label(FilamentUi::field('status'))
                     ->badge(),
                 TextColumn::make('assigned_at')
-                    ->label('Assigned At')
+                    ->label(FilamentUi::text('Assigned at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('due_at')
-                    ->label('Due At')
+                    ->label(FilamentUi::field('due_at'))
                     ->dateTime()
                     ->sortable()
                     ->placeholder('-'),
                 TextColumn::make('completed_at')
-                    ->label('Completed At')
+                    ->label(FilamentUi::text('Completed at'))
                     ->dateTime()
                     ->sortable()
                     ->placeholder('-'),
@@ -58,13 +59,13 @@ class AssignmentsRelationManager extends RelationManager
             ->headerActions([])
             ->recordActions([
                 Action::make('reassign')
-                    ->label('Reassign')
+                    ->label(FilamentUi::text('Reassign'))
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->visible(fn (WorkflowAssignment $record): bool => $record->status->value === 'pending')
                     ->form([
                         Select::make('target_user_id')
-                            ->label('Target User')
+                            ->label(FilamentUi::text('Target user'))
                             ->options(function (): array {
                                 $instance = $this->getOwnerRecord();
 
@@ -86,9 +87,9 @@ class AssignmentsRelationManager extends RelationManager
                             ->searchable()
                             ->required(),
                         Textarea::make('reason')
-                            ->label('Reason')
+                            ->label(FilamentUi::field('reason'))
                             ->rows(3)
-                            ->placeholder('Reason for reassignment.'),
+                            ->placeholder('-'),
                     ])
                     ->action(function (WorkflowAssignment $record, array $data): void {
                         /** @var User $actor */
@@ -103,7 +104,7 @@ class AssignmentsRelationManager extends RelationManager
                         );
 
                         Notification::make()
-                            ->title('Assignment berhasil dipindahkan.')
+                            ->title(FilamentUi::text('Reassign'))
                             ->success()
                             ->send();
                     }),

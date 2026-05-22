@@ -6,8 +6,10 @@ use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Core\Support\FilamentUi;
 
 class LogsRelationManager extends RelationManager
 {
@@ -18,50 +20,50 @@ class LogsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('logged_at')
-                    ->label('Logged At')
+                    ->label(FilamentUi::text('Logged at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('log_type')
-                    ->label('Log Type')
+                    ->label(FilamentUi::text('Log type'))
                     ->badge(),
                 TextColumn::make('action_taken')
-                    ->label('Action Taken')
+                    ->label(FilamentUi::text('Action taken'))
                     ->badge()
                     ->placeholder('-'),
                 TextColumn::make('step.name')
-                    ->label('Step')
+                    ->label(FilamentUi::field('step_id'))
                     ->placeholder('-'),
                 TextColumn::make('actor.name')
-                    ->label('Actor')
-                    ->placeholder('System')
+                    ->label(FilamentUi::text('Actor'))
+                    ->placeholder('-')
                     ->searchable(),
                 TextColumn::make('status_before')
-                    ->label('Status Before')
+                    ->label(FilamentUi::text('Status before'))
                     ->badge()
                     ->placeholder('-'),
                 TextColumn::make('status_after')
-                    ->label('Status After')
+                    ->label(FilamentUi::text('Status after'))
                     ->badge()
                     ->placeholder('-'),
                 TextColumn::make('notes')
-                    ->label('Notes')
+                    ->label(FilamentUi::field('notes'))
                     ->limit(60)
                     ->placeholder('-'),
             ])
             ->recordActions([
-                \Filament\Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->infolist([
-                        TextEntry::make('logged_at')->label('Logged At')->dateTime(),
-                        TextEntry::make('log_type')->label('Log Type')->badge(),
-                        TextEntry::make('action_taken')->label('Action Taken')->badge()->placeholder('-'),
-                        TextEntry::make('step.name')->label('Step')->placeholder('-'),
-                        TextEntry::make('actor.name')->label('Actor')->placeholder('System'),
-                        TextEntry::make('status_before')->label('Status Before')->badge()->placeholder('-'),
-                        TextEntry::make('status_after')->label('Status After')->badge()->placeholder('-'),
-                        TextEntry::make('notes')->label('Notes')->placeholder('-')->columnSpanFull(),
-                        KeyValueEntry::make('form_data_snapshot')->label('Form Data Snapshot')->columnSpanFull(),
-                        KeyValueEntry::make('payload_before')->label('Payload Before')->columnSpanFull(),
-                        KeyValueEntry::make('payload_after')->label('Payload After')->columnSpanFull(),
+                        TextEntry::make('logged_at')->label(FilamentUi::text('Logged at'))->dateTime(),
+                        TextEntry::make('log_type')->label(FilamentUi::text('Log type'))->badge(),
+                        TextEntry::make('action_taken')->label(FilamentUi::text('Action taken'))->badge()->placeholder('-'),
+                        TextEntry::make('step.name')->label(FilamentUi::field('step_id'))->placeholder('-'),
+                        TextEntry::make('actor.name')->label(FilamentUi::text('Actor'))->placeholder('-'),
+                        TextEntry::make('status_before')->label(FilamentUi::text('Status before'))->badge()->placeholder('-'),
+                        TextEntry::make('status_after')->label(FilamentUi::text('Status after'))->badge()->placeholder('-'),
+                        TextEntry::make('notes')->label(FilamentUi::field('notes'))->placeholder('-')->columnSpanFull(),
+                        KeyValueEntry::make('form_data_snapshot')->label(FilamentUi::text('Form data snapshot'))->columnSpanFull(),
+                        KeyValueEntry::make('payload_before')->label(FilamentUi::text('Payload before'))->columnSpanFull(),
+                        KeyValueEntry::make('payload_after')->label(FilamentUi::text('Payload after'))->columnSpanFull(),
                     ]),
             ])
             ->defaultSort('logged_at', 'desc');

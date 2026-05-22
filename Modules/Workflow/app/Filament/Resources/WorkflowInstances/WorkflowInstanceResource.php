@@ -2,16 +2,15 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances;
 
-use Filament\Infolists\Components\KeyValueEntry;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\Pages\ListWorkflowInstances;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\Pages\ViewWorkflowInstance;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers\AssignmentsRelationManager;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers\LogsRelationManager;
+use Modules\Workflow\Filament\Resources\WorkflowInstances\Schemas\WorkflowInstanceInfolist;
+use Modules\Workflow\Filament\Resources\WorkflowInstances\Tables\WorkflowInstancesTable;
 use Modules\Workflow\Models\WorkflowInstance;
 
 class WorkflowInstanceResource extends LocalizedResource
@@ -34,38 +33,12 @@ class WorkflowInstanceResource extends LocalizedResource
 
     public static function infolist(Schema $schema): Schema
     {
-        return $schema->components([
-            TextEntry::make('workflow.name')->label('Workflow'),
-            TextEntry::make('subject_label')->label('Subject Label')->placeholder('-'),
-            TextEntry::make('subject_type')->label('Subject Type')->formatStateUsing(fn (?string $state): string => (string) str(class_basename((string) $state))->headline()),
-            TextEntry::make('status')->label('Status')->badge(),
-            TextEntry::make('requester.name')->label('Requester'),
-            TextEntry::make('currentStep.name')->label('Current Step')->placeholder('-'),
-            TextEntry::make('started_at')->label('Started At')->dateTime(),
-            TextEntry::make('due_at')->label('Due At')->dateTime()->placeholder('-'),
-            TextEntry::make('completed_at')->label('Completed At')->dateTime()->placeholder('-'),
-            TextEntry::make('context_data.request_number')->label('Request Number')->placeholder('-'),
-            TextEntry::make('context_data.budget_code')->label('Budget Code')->placeholder('-'),
-            TextEntry::make('context_data.total_estimated_amount')->label('Requested Amount')->numeric(decimalPlaces: 2)->placeholder('-'),
-            TextEntry::make('context_data.allocated_amount')->label('Allocated Amount')->numeric(decimalPlaces: 2)->placeholder('-'),
-            KeyValueEntry::make('context_data')->label('Context Data')->columnSpanFull(),
-            KeyValueEntry::make('form_data')->label('Form Data')->columnSpanFull(),
-            KeyValueEntry::make('computed_data')->label('Computed Data')->columnSpanFull(),
-            KeyValueEntry::make('current_assignees')->label('Current Assignees')->columnSpanFull(),
-        ]);
+        return WorkflowInstanceInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            TextColumn::make('workflow.name')->label('Workflow')->searchable(),
-            TextColumn::make('subject_label')->label('Subject Label')->searchable()->placeholder('-'),
-            TextColumn::make('requester.name')->label('Requester')->searchable(),
-            TextColumn::make('currentStep.name')->label('Current Step')->placeholder('-'),
-            TextColumn::make('status')->label('Status')->badge(),
-            TextColumn::make('started_at')->label('Started At')->dateTime()->sortable(),
-            TextColumn::make('due_at')->label('Due At')->dateTime()->sortable()->placeholder('-'),
-        ]);
+        return WorkflowInstancesTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -82,20 +55,5 @@ class WorkflowInstanceResource extends LocalizedResource
             'index' => ListWorkflowInstances::route('/'),
             'view' => ViewWorkflowInstance::route('/{record}'),
         ];
-    }
-
-    public static function getModelLabel(): string
-    {
-        return 'Workflow Instance';
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return 'Workflow Instances';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return 'Workflow Instances';
     }
 }

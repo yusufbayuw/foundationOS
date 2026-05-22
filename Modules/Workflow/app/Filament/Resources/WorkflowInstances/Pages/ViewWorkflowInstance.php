@@ -12,6 +12,11 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Arr;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
+use Modules\Finance\Filament\Resources\Budgets\BudgetResource;
+use Modules\Finance\Models\Budget;
+use Modules\Procurement\Filament\Resources\PurchaseRequisitions\PurchaseRequisitionResource;
+use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Contracts\RuleEngine;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource;
@@ -32,7 +37,7 @@ class ViewWorkflowInstance extends ViewRecord
 
         if ($subjectUrl) {
             $headerActions[] = Action::make('openSubject')
-                ->label('Open Subject')
+                ->label(FilamentUi::text('Open Subject'))
                 ->icon('heroicon-o-arrow-top-right-on-square')
                 ->color('gray')
                 ->url($subjectUrl)
@@ -47,12 +52,12 @@ class ViewWorkflowInstance extends ViewRecord
 
         if ($this->getReturnTargetOptions($record) !== []) {
             $actions[] = Action::make('returnToStep')
-                ->label('Return To Step')
+                ->label(FilamentUi::text('Return To Step'))
                 ->icon('heroicon-o-arrow-uturn-left')
                 ->color('warning')
                 ->form([
                     Select::make('target_step_id')
-                        ->label('Target Step')
+                        ->label(FilamentUi::text('Target Step'))
                         ->options($this->getReturnTargetOptions($record))
                         ->required(),
                     ...$this->buildDynamicFormSchema($record),
@@ -136,7 +141,7 @@ class ViewWorkflowInstance extends ViewRecord
 
             if (($field['type'] ?? null) === 'file' && ! empty($field['accepted_types']) && is_array($field['accepted_types'])) {
                 $component->acceptedFileTypes(array_map(
-                    fn (string $type): string => str_contains($type, '/') ? $type : '.' . ltrim($type, '.'),
+                    fn (string $type): string => str_contains($type, '/') ? $type : '.'.ltrim($type, '.'),
                     $field['accepted_types'],
                 ));
             }
@@ -156,7 +161,7 @@ class ViewWorkflowInstance extends ViewRecord
         }
 
         $schema[] = Textarea::make('workflow_note')
-            ->label('Workflow Note')
+            ->label(FilamentUi::text('Workflow Note'))
             ->placeholder('Catatan aksi ini (opsional).');
 
         return $schema;
@@ -241,8 +246,8 @@ class ViewWorkflowInstance extends ViewRecord
         }
 
         return match ($record->subject_type) {
-            \Modules\Procurement\Models\PurchaseRequisition::class => \Modules\Procurement\Filament\Resources\PurchaseRequisitions\PurchaseRequisitionResource::getUrl('view', ['record' => $record->subject]),
-            \Modules\Finance\Models\Budget::class => \Modules\Finance\Filament\Resources\Budgets\BudgetResource::getUrl('view', ['record' => $record->subject]),
+            PurchaseRequisition::class => PurchaseRequisitionResource::getUrl('view', ['record' => $record->subject]),
+            Budget::class => BudgetResource::getUrl('view', ['record' => $record->subject]),
             default => null,
         };
     }
