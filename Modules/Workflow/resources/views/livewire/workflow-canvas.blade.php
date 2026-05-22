@@ -65,7 +65,7 @@
         <div class="lg:col-span-3">
             {{-- Cytoscape canvas container --}}
             <div
-                x-data="workflowCytoscape($wire)"
+                x-data="workflowCytoscape($wire, @js($steps), @js($transitions))"
                 x-init="initCy()"
                 x-on:workflow-canvas:state-updated.window="refreshGraph($event.detail.steps, $event.detail.transitions)"
                 class="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900"
@@ -228,36 +228,64 @@ function workflowDesigner(initialSteps, initialTransitions) {
     };
 }
 
-function workflowCytoscape(wire) {
+function workflowCytoscape(wire, initialSteps, initialTransitions) {
     return {
         cy: null,
 
         initCy() {
-            if (typeof cytoscape === 'undefined') return;
+            if (typeof window.cytoscape === 'undefined') return;
 
             const container = this.$refs.cytoscapeContainer;
             if (!container) return;
 
-            const steps = wire.get('steps') || [];
-            const transitions = wire.get('transitions') || [];
+            const COLORS = {
+                start: { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
+                end: { bg: '#fee2e2', border: '#ef4444', text: '#7f1d1d' },
+                approval: { bg: '#dbeafe', border: '#3b82f6', text: '#1e3a8a' },
+                task: { bg: '#f3f4f6', border: '#6b7280', text: '#111827' },
+                gateway: { bg: '#ede9fe', border: '#8b5cf6', text: '#4c1d95' },
+            };
 
-            this.cy = window.workflowCanvas
-                ? undefined
-                : null;
+            const buildElements = (steps, transitions) => {
+                const nodes = (steps || []).map(s => {
+                    const c = COLORS[s.step_type] || COLORS.task;
+                    return {
+                        data: { id: s.uuid, label: s.name + '\n[' + s.step_type + ']', bg: c.bg, border: c.border, textColor: c.text, stepData: s },
+                        position: s.canvas_position ? { x: s.canvas_position.x, y: s.canvas_position.y } : { x: 0, y: 0 },
+                    };
+                });
+                const edges = (transitions || [])
+                    .filter(t => t.from_uuid && t.to_uuid)
+                    .map((t, i) => ({ data: { id: 'e' + i, source: t.from_uuid, target: t.to_uuid, label: t.action_name || '' } }));
+                return [...nodes, ...edges];
+            };
 
-            // Build elements
-            const elements = this._buildElements(steps, transitions);
+            const applyLayout = (steps) => {
+                if (!this.cy) return;
+                const anyUnpositioned = (steps || []).some(s => !s.canvas_position);
+                if (anyUnpositioned) {
+                    this.cy.layout({ name: 'dagre', rankDir: 'LR', nodeSep: 60, rankSep: 120, padding: 40, animate: false }).run();
+                    this.cy.nodes().forEach(n => {
+                        const p = n.position();
+                        wire.updateStepPosition(n.id(), p.x, p.y);
+                    });
+                }
+            };
 
-            this.cy = cytoscape({
+            this.cy = window.cytoscape({
                 container,
-                elements,
-                style: this._buildStyle(),
+                elements: buildElements(initialSteps, initialTransitions),
+                style: [
+                    { selector: 'node', style: { 'background-color': 'data(bg)', 'border-color': 'data(border)', 'border-width': 2, 'color': 'data(textColor)', label: 'data(label)', 'text-valign': 'center', 'text-halign': 'center', 'text-wrap': 'wrap', 'text-max-width': '120px', 'font-size': '11px', width: 140, height: 60, shape: 'roundrectangle' } },
+                    { selector: 'node:selected', style: { 'border-width': 3, 'border-color': '#6366f1', 'overlay-color': '#6366f1', 'overlay-opacity': 0.1 } },
+                    { selector: 'edge', style: { width: 2, 'line-color': '#94a3b8', 'target-arrow-color': '#94a3b8', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', label: 'data(label)', 'font-size': '10px', color: '#64748b', 'text-background-color': '#ffffff', 'text-background-opacity': 0.8, 'text-background-padding': '2px' } },
+                ],
                 layout: { name: 'preset' },
                 userZoomingEnabled: true,
                 userPanningEnabled: true,
             });
 
-            this._applyAutoLayout(steps);
+            applyLayout(initialSteps);
 
             this.cy.on('dragfree', 'node', e => {
                 const pos = e.target.position();
@@ -267,57 +295,16 @@ function workflowCytoscape(wire) {
             this.cy.on('tap', 'node', e => {
                 wire.selectStep(e.target.id());
             });
+
+            this._buildElements = buildElements;
+            this._applyLayout = applyLayout;
         },
 
         refreshGraph(steps, transitions) {
-            if (!this.cy) return;
+            if (!this.cy || !this._buildElements) return;
             this.cy.elements().remove();
             this.cy.add(this._buildElements(steps, transitions));
-            this._applyAutoLayout(steps);
-        },
-
-        _buildElements(steps, transitions) {
-            const COLORS = {
-                start: { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
-                end: { bg: '#fee2e2', border: '#ef4444', text: '#7f1d1d' },
-                approval: { bg: '#dbeafe', border: '#3b82f6', text: '#1e3a8a' },
-                task: { bg: '#f3f4f6', border: '#6b7280', text: '#111827' },
-                gateway: { bg: '#ede9fe', border: '#8b5cf6', text: '#4c1d95' },
-            };
-
-            const nodes = steps.map(s => {
-                const c = COLORS[s.step_type] || COLORS.task;
-                return {
-                    data: { id: s.uuid, label: s.name + '\n[' + s.step_type + ']', bg: c.bg, border: c.border, textColor: c.text, hasPosition: !!s.canvas_position },
-                    position: s.canvas_position ? { x: s.canvas_position.x, y: s.canvas_position.y } : { x: 0, y: 0 },
-                };
-            });
-
-            const edges = (transitions || [])
-                .filter(t => t.from_uuid && t.to_uuid)
-                .map((t, i) => ({ data: { id: 'e' + i, source: t.from_uuid, target: t.to_uuid, label: t.action_name || '' } }));
-
-            return [...nodes, ...edges];
-        },
-
-        _applyAutoLayout(steps) {
-            if (!this.cy) return;
-            const anyUnpositioned = (steps || []).some(s => !s.canvas_position);
-            if (anyUnpositioned) {
-                this.cy.layout({ name: 'dagre', rankDir: 'LR', nodeSep: 60, rankSep: 120, padding: 40, animate: false }).run();
-                this.cy.nodes().forEach(n => {
-                    const p = n.position();
-                    wire.updateStepPosition(n.id(), p.x, p.y);
-                });
-            }
-        },
-
-        _buildStyle() {
-            return [
-                { selector: 'node', style: { 'background-color': 'data(bg)', 'border-color': 'data(border)', 'border-width': 2, 'color': 'data(textColor)', label: 'data(label)', 'text-valign': 'center', 'text-halign': 'center', 'text-wrap': 'wrap', 'text-max-width': '120px', 'font-size': '11px', width: 140, height: 60, shape: 'roundrectangle' } },
-                { selector: 'node:selected', style: { 'border-width': 3, 'border-color': '#6366f1', 'overlay-color': '#6366f1', 'overlay-opacity': 0.1 } },
-                { selector: 'edge', style: { width: 2, 'line-color': '#94a3b8', 'target-arrow-color': '#94a3b8', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', label: 'data(label)', 'font-size': '10px', color: '#64748b', 'text-background-color': '#fff', 'text-background-opacity': 0.8, 'text-background-padding': '2px' } },
-            ];
+            this._applyLayout(steps);
         },
     };
 }

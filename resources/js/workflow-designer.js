@@ -2,6 +2,7 @@ import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 
 cytoscape.use(dagre);
+window.cytoscape = cytoscape;
 
 const STEP_TYPE_COLORS = {
     start: { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
