@@ -365,7 +365,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 5.4 — Mobile-First Endpoints
+### Fase 5.4 — Mobile-First Endpoints ✅ 2026-05-22
 
 **Deliverable.**
 - Endpoint khusus mobile: bundle data untuk dashboard parent/student (1 call, multiple resources).

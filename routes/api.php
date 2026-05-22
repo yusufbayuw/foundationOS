@@ -4,12 +4,14 @@ use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
+use App\Http\Controllers\Api\v1\DeviceController;
 use App\Http\Controllers\Api\v1\EmployeeController;
 use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\StudentController;
+use App\Http\Controllers\Api\v1\StudentDashboardController;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -52,5 +54,10 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
+
+        // Mobile-first endpoints
+        Route::post('devices', [DeviceController::class, 'store']);
+        Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
+        Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
     });
 });
