@@ -301,7 +301,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** `routes/api.php` setiap modul saat ini hampir kosong (hanya Campus punya 1 resource). Bangun API publik berversi, ter-otentikasi, dengan rate limiting, untuk integrasi pihak ketiga (mobile app, parent portal, BI tools).
 
-### Fase 5.1 — Foundation API (v1)
+### Fase 5.1 — Foundation API (v1) ✅ 2026-05-22
 
 **Deliverable.**
 - Standar API: REST, JSON:API-ish, versioned via path (`/api/v1/...`).
@@ -325,7 +325,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 5.2 — Core Resources Read API
+### Fase 5.2 — Core Resources Read API ✅ 2026-05-22
 
 **Deliverable.**
 - Endpoint readonly: students, classes, courses, employees, tenants, organizations.
@@ -510,7 +510,7 @@ Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal 
 
 ---
 
-### Fase 6.6 — Academic Calendar Sync
+### Fase 6.6 — Academic Calendar Sync ✅ 2026-05-22
 
 **Deliverable.**
 - Sync `AcademicPeriod` → Moodle course start/end dates per offering.
