@@ -490,7 +490,7 @@ Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal 
 
 ---
 
-### Fase 6.5 — Thesis / Tugas Akhir Workflow
+### Fase 6.5 — Thesis / Tugas Akhir Workflow ✅ 2026-05-22
 
 **Konteks.** Modul `Thesis` di Campus belum punya alur lengkap. Universitas butuh: proposal → seminar → bimbingan → sidang → revisi → final.
 
