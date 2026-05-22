@@ -7,6 +7,7 @@ use App\Http\Middleware\BindTenantToContainer;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use Coolsam\Modules\ModulesPlugin;
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -83,6 +84,18 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 SetUserLocale::class,
+            ])
+            ->userMenuItems([
+                Action::make('switch_to_english')
+                    ->label('🇬🇧 English')
+                    ->icon('heroicon-o-language')
+                    ->url(fn () => route('locale.switch', 'en'))
+                    ->visible(fn () => FilamentUi::isIndonesian()),
+                Action::make('switch_to_indonesian')
+                    ->label('🇮🇩 Indonesia')
+                    ->icon('heroicon-o-language')
+                    ->url(fn () => route('locale.switch', 'id'))
+                    ->visible(fn () => ! FilamentUi::isIndonesian()),
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),

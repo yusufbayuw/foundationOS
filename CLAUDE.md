@@ -259,7 +259,32 @@ Aplikasi ini bilingual (`id` / `en`). Semua teks UI **wajib** melewati `Filament
 
 ### Frasa & kata baru
 
-Tambahkan ke `PHRASES` atau `WORDS` di `Modules/Core/app/Support/FilamentUi.php` sebelum menggunakan `FilamentUi::text('...')` dengan frasa baru. Pastikan ada entry untuk singular dan plural.
+Sebelum menggunakan `FilamentUi::text('...')` dengan frasa baru:
+
+1. Cari apakah frasa sudah ada di `PHRASES` (exact match) atau bisa dibangun dari `WORDS` (word-by-word fallback).
+2. Jika belum ada, tambahkan ke `PHRASES` dengan format:
+   ```php
+   // Modules/Core/app/Support/FilamentUi.php
+   'English phrase' => 'Terjemahan Indonesia',
+   'English phrases' => 'Terjemahan Indonesia (jamak)',  // jika plural beda
+   ```
+3. Kata tunggal yang sering dipakai → tambahkan ke `WORDS`:
+   ```php
+   'keyword' => 'kata kunci',
+   ```
+4. Jika ada terjemahan untuk `helperText` yang panjang, gunakan pattern yang sama:
+   ```php
+   'Optional. Leave blank for tenant-wide data.' => 'Opsional. Kosongkan untuk data tenant-wide.',
+   ```
+5. Tambahkan test ke `tests/Feature/FilamentUiTranslationsTest.php` untuk memverifikasi terjemahan baru.
+
+> **Tip:** Jalankan `php artisan tinker --execute "app()->setLocale('id'); echo \Modules\Core\Support\FilamentUi::text('Frasa baru');"` untuk cek cepat sebelum commit.
+
+### Ganti bahasa UI
+
+User dapat mengganti bahasa dari **user menu (avatar kanan atas)** → pilih 🇮🇩 Indonesia atau 🇬🇧 English. Preference tersimpan di `users.preferred_locale` dan aktif di semua sesi.
+
+Admin tenant dapat mengatur default bahasa untuk tenant via **Core → Tenant Settings** → tambahkan setting `group=core`, `key=default_locale`, `value=id` atau `en`.
 
 ### Linter
 
@@ -269,7 +294,16 @@ php scripts/lint-translations.php
 
 # Lewat Composer
 composer run lint:translations
+
+# Audit semua placeholder dan helperText
+php scripts/audit-placeholders.php Modules/
 ```
+
+Linter mendeteksi:
+- `->label('Hardcoded English')` — wajib pakai `FilamentUi::field()` atau `FilamentUi::text()`
+- `Section::make('Hardcoded Title')`, `Tab::make(...)`, `Fieldset::make(...)`, `Wizard\Step::make(...)`
+- `->placeholder('Narrative text')` — wajib pakai `FilamentUi::text()`
+- `->helperText('Narrative text')` — wajib pakai `FilamentUi::text()`
 
 Suppress per baris: tambahkan `// fos:lint-ignore-translation` di akhir baris yang sengaja hardcode (mis. nilai teknis seperti FQCN model).
 

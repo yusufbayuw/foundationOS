@@ -5,12 +5,18 @@ on:
     paths:
       - 'Modules/**/Filament/**/*.php'
       - 'app/Filament/**/*.php'
+      - 'Modules/**/Support/FilamentUi.php'
       - 'scripts/lint-translations.php'
+      - 'routes/web.php'
+      - 'app/Providers/Filament/AdminPanelProvider.php'
   pull_request:
     paths:
       - 'Modules/**/Filament/**/*.php'
       - 'app/Filament/**/*.php'
+      - 'Modules/**/Support/FilamentUi.php'
       - 'scripts/lint-translations.php'
+      - 'routes/web.php'
+      - 'app/Providers/Filament/AdminPanelProvider.php'
 
 jobs:
   lint-translations:

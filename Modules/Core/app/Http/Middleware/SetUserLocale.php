@@ -15,7 +15,21 @@ class SetUserLocale
     {
         if (Auth::check()) {
             $user = Auth::user();
-            $locale = $user->preferred_locale ?? config('app.locale', 'id');
+            $locale = $user->preferred_locale;
+
+            if (! $locale) {
+                // Fall back to tenant's default locale setting
+                $tenant = $request->route('tenant');
+                if ($tenant instanceof Tenant) {
+                    $setting = $tenant->settings()
+                        ->where('group', 'core')
+                        ->where('key', 'default_locale')
+                        ->first();
+                    $locale = $setting?->value;
+                }
+                $locale ??= config('app.locale', 'id');
+            }
+
             App::setLocale($locale);
         } elseif ($tenant = $request->route('tenant')) {
             // Guest on tenant panel: use tenant's default locale setting
