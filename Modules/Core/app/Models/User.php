@@ -66,6 +66,7 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants
         'preferred_locale',
         'status',
         'is_super_admin',
+        'pinned_menus',
     ];
 
     protected $hidden = [
@@ -82,6 +83,7 @@ class User extends Authenticatable implements HasDefaultTenant, HasTenants
             'login_attempts' => 'integer',
             'is_super_admin' => 'boolean',
             'password' => 'hashed',
+            'pinned_menus' => 'array',
         ];
     }
 
