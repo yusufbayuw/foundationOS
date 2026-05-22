@@ -345,7 +345,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 5.3 — Write API & Webhooks
+### Fase 5.3 — Write API & Webhooks ✅ 2026-05-22
 
 **Deliverable.**
 - Endpoint write untuk: applicant registration, payment recording, leave request submission.

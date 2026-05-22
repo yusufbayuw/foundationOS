@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
 use App\Http\Controllers\Api\v1\EmployeeController;
+use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
+use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\StudentController;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -42,5 +45,12 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
 
         Route::get('employees', [EmployeeController::class, 'index']);
         Route::get('employees/{id}', [EmployeeController::class, 'show']);
+
+        // Write endpoints (idempotency key supported)
+        Route::middleware(['idempotency'])->group(function () {
+            Route::post('applicants', [ApplicantController::class, 'store']);
+            Route::post('payments', [PaymentController::class, 'store']);
+            Route::post('leave-requests', [LeaveRequestController::class, 'store']);
+        });
     });
 });

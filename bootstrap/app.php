@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\IdempotencyKey;
 use App\Http\Middleware\ResolveApiTenant;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies('*');
         $middleware->alias([
             'resolve.api.tenant' => ResolveApiTenant::class,
+            'idempotency' => IdempotencyKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
