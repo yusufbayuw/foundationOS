@@ -37,11 +37,13 @@ class WorkflowStep extends Model
         'is_initial',
         'is_terminal',
         'sort_order',
+        'canvas_position',
     ];
 
     protected function casts(): array
     {
         return [
+            'canvas_position' => 'array',
             'step_type' => WorkflowStepType::class,
             'gateway_type' => WorkflowGatewayType::class,
             'quorum_strategy' => WorkflowQuorumStrategy::class,

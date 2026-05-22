@@ -5,16 +5,23 @@ namespace Modules\Workflow\Services;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
+use Modules\Workflow\Exceptions\WorkflowConfigurationException;
 use Modules\Workflow\Models\Workflow;
+use Modules\Workflow\Models\WorkflowAutomatedAction;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
 
 class WorkflowDefinitionLifecycleService
 {
+    /**
+     * @throws WorkflowConfigurationException
+     */
     public function publish(Workflow $workflow, ?int $actorId = null): Workflow
     {
         return DB::transaction(function () use ($workflow, $actorId): Workflow {
-            $workflow = $workflow->fresh();
+            $workflow = $workflow->fresh(['steps', 'transitions']);
+
+            $this->assertPublishable($workflow);
 
             Workflow::query()
                 ->where('tenant_id', $workflow->tenant_id)
@@ -110,6 +117,7 @@ class WorkflowDefinitionLifecycleService
                     'is_initial' => $step->is_initial,
                     'is_terminal' => $step->is_terminal,
                     'sort_order' => $step->sort_order,
+                    'canvas_position' => $step->canvas_position,
                 ]);
 
                 $stepIdMap[$step->id] = $newStep->id;
@@ -130,7 +138,7 @@ class WorkflowDefinitionLifecycleService
             }
 
             foreach ($workflow->automatedActions as $action) {
-                \Modules\Workflow\Models\WorkflowAutomatedAction::query()->create([
+                WorkflowAutomatedAction::query()->create([
                     'workflow_id' => $clone->id,
                     'step_id' => $action->step_id ? ($stepIdMap[$action->step_id] ?? $action->step_id) : null,
                     'trigger_event' => $action->trigger_event,
@@ -144,5 +152,50 @@ class WorkflowDefinitionLifecycleService
 
             return $clone->fresh(['steps', 'transitions', 'automatedActions']);
         });
+    }
+
+    /**
+     * Assert a workflow is structurally valid before publishing.
+     *
+     * @throws WorkflowConfigurationException
+     */
+    public function assertPublishable(Workflow $workflow): void
+    {
+        $steps = $workflow->steps()->get();
+
+        $initialCount = $steps->where('is_initial', true)->count();
+        if ($initialCount !== 1) {
+            throw new WorkflowConfigurationException(
+                "Workflow [{$workflow->code}] must have exactly 1 initial step, found {$initialCount}."
+            );
+        }
+
+        $terminalCount = $steps->where('is_terminal', true)->count();
+        if ($terminalCount < 1) {
+            throw new WorkflowConfigurationException(
+                "Workflow [{$workflow->code}] must have at least 1 terminal step."
+            );
+        }
+
+        // Check for orphan steps: steps that are not initial and have no incoming transitions
+        $stepIds = $steps->pluck('id')->all();
+        $reachableIds = $workflow->transitions()
+            ->whereIn('to_step_id', $stepIds)
+            ->pluck('to_step_id')
+            ->unique()
+            ->all();
+
+        $initialId = $steps->firstWhere('is_initial', true)?->id;
+
+        $orphans = $steps->filter(function ($step) use ($reachableIds, $initialId) {
+            return $step->id !== $initialId && ! in_array($step->id, $reachableIds, false);
+        });
+
+        if ($orphans->isNotEmpty()) {
+            $names = $orphans->pluck('name')->implode(', ');
+            throw new WorkflowConfigurationException(
+                "Workflow [{$workflow->code}] has unreachable steps: {$names}."
+            );
+        }
     }
 }
