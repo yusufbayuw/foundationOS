@@ -8,12 +8,13 @@ use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Laravel\Sanctum\HasApiTokens;
 use Modules\Campus\Models\FeederLog;
 use Modules\Campus\Models\Lecturer;
 use Modules\Campus\Models\StudyPlan;
@@ -44,9 +45,9 @@ use Modules\School\Models\Teacher;
 use Modules\School\Models\Violation;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements HasTenants, HasDefaultTenant
+class User extends Authenticatable implements HasDefaultTenant, HasTenants
 {
-    use HasFactory, SoftDeletes, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -133,7 +134,7 @@ class User extends Authenticatable implements HasTenants, HasDefaultTenant
                 ->exists();
     }
 
-    public function getTenants(Panel $panel): array | Collection
+    public function getTenants(Panel $panel): array|Collection
     {
         if ($this->isGlobalSuperAdmin()) {
             return Tenant::query()->get();
