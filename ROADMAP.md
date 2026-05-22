@@ -68,7 +68,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 1.3 — Dynamic Form Data Source
+### Fase 1.3 — Dynamic Form Data Source `[x]`
 
 **Konteks.** `form_schema` V2 hanya mendukung static options (`["draft", "approved"]`). Untuk dropdown approver, vendor, atau cost center, options harus dihardcode atau di-seed.
 
@@ -88,6 +88,13 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 **Dependensi.** Tenancy hardening (Epic 4) — agar tenant scoping otomatis bisa dipakai resolver tanpa kebocoran data.
 
 **Risiko.** Performance — dropdown dengan 10k+ options. Tambah opsi `searchable` + lazy pagination via Filament `Select::getSearchResultsUsing()`.
+
+**Selesai.** 2026-05-22. Implementasi:
+- `config/workflow-dynamic-sources.php` — whitelist 9 model (Organization, Department, User, Vendor, ProcurementCategory, Position, ChartOfAccount, Faculty, StudyProgram) + TTL 300s + max_results 500.
+- `DynamicOptionsResolver` — kind `eloquent` (whitelist check + BelongsToTenant scope respect + Cache::remember per tenant+signature) dan kind `enum` (semua PHP backed/unit enum). Endpoint kind belum diimplementasi.
+- `LaravelWorkflowFormSchemaValidator::validateOptionsSourceShape()` — validasi shape `options_source` (kind supported, model whitelisted, enum exists) saat validate() dipanggil. `select`/`multiselect` type tidak enforce string rule (nilai bisa integer ID).
+- Composer.json tambah per-module PSR-4 autoload entries (diperlukan untuk test + artisan di environment ini).
+- Test `DynamicOptionsResolverTest` (9 tests) cover tenant isolation, whitelist rejection, enum resolution, cache, validator acceptance/rejection.
 
 ---
 
@@ -255,7 +262,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 4.3 — Tenant Switching UX & Audit
+### Fase 4.3 — Tenant Switching UX & Audit `[x]`
 
 **Deliverable.**
 - Audit log entry: setiap tenant switch dicatat di `audit_logs`.
@@ -270,6 +277,13 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 **Dependensi.** Fase 4.1.
 
 **Risiko.** False positive di tabel cross-tenant by design (Country, Province, dst.). Whitelist global tables.
+
+**Selesai.** 2026-05-22. Implementasi:
+- Event `App\Events\TenantSwitched` + Listener `App\Listeners\LogTenantSwitchAudit` → `AuditLog::withoutTenantScope()->create()`.
+- `BindTenantToContainer` dispatch event saat `newTenantId !== previousTenantId`.
+- Render hook `panels::topbar.start` → `resources/views/filament/tenant-badge.blade.php` (warning badge untuk super-admin, primary untuk tenant user biasa).
+- Command `fos:tenancy:audit-leaks`: SHOW TABLES → filter by `tenant_id` column → cross-join organizations untuk detect FK cross-tenant mismatch. MySQL-specific (`SHOW TABLES`).
+- Test `TenancySwitchAuditTest` (6 tests) cover event properties, listener audit log creation, old_values capture, event::fake dispatch, listener wiring.
 
 ---
 
@@ -287,7 +301,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 **Tujuan.** `routes/api.php` setiap modul saat ini hampir kosong (hanya Campus punya 1 resource). Bangun API publik berversi, ter-otentikasi, dengan rate limiting, untuk integrasi pihak ketiga (mobile app, parent portal, BI tools).
 
-### Fase 5.1 — Foundation API (v1)
+### Fase 5.1 — Foundation API (v1) ✅ 2026-05-22
 
 **Deliverable.**
 - Standar API: REST, JSON:API-ish, versioned via path (`/api/v1/...`).
@@ -311,7 +325,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 5.2 — Core Resources Read API
+### Fase 5.2 — Core Resources Read API ✅ 2026-05-22
 
 **Deliverable.**
 - Endpoint readonly: students, classes, courses, employees, tenants, organizations.
@@ -331,7 +345,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 5.3 — Write API & Webhooks
+### Fase 5.3 — Write API & Webhooks ✅ 2026-05-22
 
 **Deliverable.**
 - Endpoint write untuk: applicant registration, payment recording, leave request submission.
@@ -351,7 +365,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 5.4 — Mobile-First Endpoints
+### Fase 5.4 — Mobile-First Endpoints ✅ 2026-05-22
 
 **Deliverable.**
 - Endpoint khusus mobile: bundle data untuk dashboard parent/student (1 call, multiple resources).
@@ -476,7 +490,7 @@ Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal 
 
 ---
 
-### Fase 6.5 — Thesis / Tugas Akhir Workflow
+### Fase 6.5 — Thesis / Tugas Akhir Workflow ✅ 2026-05-22
 
 **Konteks.** Modul `Thesis` di Campus belum punya alur lengkap. Universitas butuh: proposal → seminar → bimbingan → sidang → revisi → final.
 
@@ -496,7 +510,7 @@ Catatan: grace period configurable belum diimplementasi sebagai timer terjadwal 
 
 ---
 
-### Fase 6.6 — Academic Calendar Sync
+### Fase 6.6 — Academic Calendar Sync ✅ 2026-05-22
 
 **Deliverable.**
 - Sync `AcademicPeriod` → Moodle course start/end dates per offering.

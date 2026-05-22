@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\TenantSwitched;
+use App\Listeners\LogTenantSwitchAudit;
 use App\Models\Permission;
+use App\Models\PersonalAccessToken;
 use App\Models\Role;
+use App\Observers\AcademicPeriodObserver;
 use App\Observers\ClassStudentObserver;
 use App\Observers\CourseObserver;
 use App\Observers\CourseOfferingLecturerObserver;
@@ -14,9 +18,11 @@ use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
 use App\Support\CurrentTenant;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\Sanctum;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -24,6 +30,7 @@ use Modules\Campus\Models\CourseOfferingLecturer;
 use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyPlanItem;
 use Modules\Campus\Models\StudyProgram;
+use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
@@ -39,12 +46,10 @@ use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         $this->app->singleton(CurrentTenant::class);
+        Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
 
     /**
@@ -53,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         User::observe(UserObserver::class);
+        AcademicPeriod::observe(AcademicPeriodObserver::class);
         Course::observe(CourseObserver::class);
         Student::observe(StudentObserver::class);
         ClassStudent::observe(ClassStudentObserver::class);
@@ -87,6 +93,8 @@ class AppServiceProvider extends ServiceProvider
             'goods_receipt' => GoodsReceipt::class,
             'vendor_bill' => VendorBill::class,
         ]);
+
+        Event::listen(TenantSwitched::class, LogTenantSwitchAudit::class);
 
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
