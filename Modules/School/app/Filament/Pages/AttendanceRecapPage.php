@@ -19,7 +19,7 @@ class AttendanceRecapPage extends Page implements HasForms
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-chart-bar';
 
     // Customize navigation label based on translation or static text
-    protected static ?string $navigationLabel = 'Rekapitulasi Absensi';
+    protected static ?string $navigationLabel = null;
 
     protected static ?string $title = 'Rekapitulasi Absensi Siswa';
 
@@ -43,10 +43,14 @@ class AttendanceRecapPage extends Page implements HasForms
         ]);
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return FilamentUi::text('Attendance recap');
+    }
+
     public static function getNavigationGroup(): ?string
     {
-        // Use standard group or logic here
-        return __('school::filament.navigation.groups.academic') ?? 'Akademik';
+        return FilamentUi::module('School');
     }
 
     public function form(Schema $schema): Schema

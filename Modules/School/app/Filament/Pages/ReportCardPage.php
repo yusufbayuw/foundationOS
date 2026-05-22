@@ -19,7 +19,7 @@ class ReportCardPage extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationLabel = 'Rapor Siswa';
+    protected static ?string $navigationLabel = null;
 
     protected static ?string $title = 'Rapor Akademik Siswa';
 
@@ -31,9 +31,14 @@ class ReportCardPage extends Page implements HasForms
 
     public ?int $student_id = null;
 
+    public static function getNavigationLabel(): string
+    {
+        return FilamentUi::text('Student report card');
+    }
+
     public static function getNavigationGroup(): ?string
     {
-        return __('school::filament.navigation.groups.academic') ?? 'Akademik';
+        return FilamentUi::module('School');
     }
 
     public function form(Schema $schema): Schema
