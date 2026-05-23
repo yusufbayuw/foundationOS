@@ -57,7 +57,6 @@ class PlatformPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 SetUserLocale::class,
-                'role:platform_owner',
             ]);
     }
 }

@@ -6,9 +6,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
-use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
-use Modules\Core\Models\UserTenantRole;
+use Modules\Core\Services\TenantAdminProvisioner;
 
 class MvpDemoSeeder extends Seeder
 {
@@ -25,6 +24,7 @@ class MvpDemoSeeder extends Seeder
                 'email_verified_at' => now(),
                 'timezone' => 'Asia/Jakarta',
                 'locale' => 'id',
+                'is_super_admin' => true,
             ],
         );
 
@@ -39,7 +39,7 @@ class MvpDemoSeeder extends Seeder
                 'locale' => 'id',
                 'status' => 'active',
                 'billing_cycle' => 'monthly',
-                'trial_ends_at' => now()->addDays(30),
+                'trial_ends_at' => now()->addYear(),
                 'max_users' => 100,
                 'max_organizations' => 5,
                 'max_storage_mb' => 10240,
@@ -67,34 +67,10 @@ class MvpDemoSeeder extends Seeder
             ],
         );
 
-        $tenantRole = TenantRole::query()->updateOrCreate(
-            [
-                'tenant_id' => $tenant->getKey(),
-                'slug' => 'owner',
-            ],
-            [
-                'name' => 'Owner',
-                'description' => 'Pemilik tenant dan administrator utama MVP.',
-                'level' => 100,
-                'permissions' => ['*'],
-                'is_default' => true,
-                'is_super_admin' => true,
-                'dashboard_route' => 'filament.admin.pages.dashboard',
-            ],
-        );
-
-        UserTenantRole::query()->updateOrCreate(
-            [
-                'user_id' => $admin->getKey(),
-                'tenant_id' => $tenant->getKey(),
-                'tenant_role_id' => $tenantRole->getKey(),
-            ],
-            [
-                'organization_id' => $organization->getKey(),
-                'assigned_by' => $admin->getKey(),
-                'assigned_at' => now(),
-                'is_primary' => true,
-            ],
+        app(TenantAdminProvisioner::class)->provisionDemoAdmin(
+            $admin,
+            $tenant,
+            $organization->getKey(),
         );
     }
 }

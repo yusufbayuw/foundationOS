@@ -1,17 +1,22 @@
 {
     "agents": [
         "claude_code",
-        "codex"
+        "codex",
+        "gemini",
+        "cursor",
+        "copilot"
     ],
     "cloud": false,
     "guidelines": true,
     "mcp": true,
     "nightwatch": false,
     "packages": [
-        "filament/filament"
+        "filament/filament",
+        "spatie/laravel-activitylog"
     ],
     "sail": false,
     "skills": [
-        "laravel-best-practices"
+        "laravel-best-practices",
+        "tailwindcss-development"
     ]
 }

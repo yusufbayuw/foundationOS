@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // platform_owner is a global role (no team/tenant scope) for cross-tenant SaaS admins
+        // platform_owner is a global SaaS role; assignments use tenant_id 0 (see User::canAccessPanel).
         Role::firstOrCreate(
             ['name' => 'platform_owner', 'guard_name' => 'web'],
         );

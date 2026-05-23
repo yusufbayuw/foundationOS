@@ -7,6 +7,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Modules\Core\Models\User;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 #[Signature('fos:make-platform-owner {--user= : User ID or email}')]
 #[Description('Assign the platform_owner role to a user, granting access to the /platform panel')]
@@ -34,9 +35,17 @@ class MakePlatformOwner extends Command
             ['name' => 'platform_owner', 'guard_name' => 'web'],
         );
 
-        // Assign without team scope (platform role is global)
-        setPermissionsTeamId(null);
-        $user->assignRole($role);
+        // Platform roles use tenant_id 0 as global SaaS scope (see User::canAccessPanel).
+        setPermissionsTeamId(0);
+
+        $user->roles()->syncWithoutDetaching([
+            $role->id => [
+                'model_type' => $user->getMorphClass(),
+                'tenant_id' => 0,
+            ],
+        ]);
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $this->info("✓ User [{$user->name} <{$user->email}>] assigned platform_owner role.");
         $this->line('  They can now access the platform panel at: '.url('/platform'));

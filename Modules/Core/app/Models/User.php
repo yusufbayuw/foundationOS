@@ -9,6 +9,7 @@ use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
 use Filament\Auth\MultiFactor\Email\Concerns\InteractsWithEmailAuthentication;
 use Filament\Auth\MultiFactor\Email\Contracts\HasEmailAuthentication;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
@@ -53,7 +54,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants
 {
     use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, Notifiable, SoftDeletes;
 
@@ -146,34 +147,26 @@ class User extends Authenticatable implements HasAppAuthentication, HasAppAuthen
 
     public function canAccessTenant(Model $tenant): bool
     {
-        if ($this->isGlobalSuperAdmin()) {
-            return $tenant instanceof Tenant;
+        if (! $tenant instanceof Tenant) {
+            return false;
         }
 
-        return $tenant instanceof Tenant
-            && $this->userTenantRoles()
-                ->where('tenant_id', $tenant->getKey())
-                ->exists();
+        return $this->userTenantRoles()
+            ->where('tenant_id', $tenant->getKey())
+            ->exists();
     }
 
     public function getTenants(Panel $panel): array|Collection
     {
-        if ($this->isGlobalSuperAdmin()) {
-            return Tenant::query()->get();
-        }
-
         return $this->tenants()
             ->select('tenants.*')
             ->distinct()
+            ->orderBy('tenants.name')
             ->get();
     }
 
     public function getDefaultTenant(Panel $panel): ?Model
     {
-        if ($this->isGlobalSuperAdmin()) {
-            return Tenant::query()->first();
-        }
-
         $primaryAssignment = $this->userTenantRoles()
             ->where('is_primary', true)
             ->with('tenant')
@@ -379,5 +372,24 @@ class User extends Authenticatable implements HasAppAuthentication, HasAppAuthen
     public function isGlobalSuperAdmin(): bool
     {
         return (bool) $this->is_super_admin;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'platform') {
+            setPermissionsTeamId(0);
+
+            return $this->hasRole('platform_owner');
+        }
+
+        if ($panel->getId() === 'admin') {
+            if ($this->isGlobalSuperAdmin()) {
+                return true;
+            }
+
+            return $this->userTenantRoles()->exists();
+        }
+
+        return false;
     }
 }

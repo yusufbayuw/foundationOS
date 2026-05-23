@@ -92,6 +92,11 @@ class Tenant extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

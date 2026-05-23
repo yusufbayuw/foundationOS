@@ -18,7 +18,7 @@ class EnsureTenantSubscriptionActive
         }
 
         if ($tenant->isLocked()) {
-            $billingPath = '/admin/'.($tenant->slug ?? $tenant->id).'/billing';
+            $billingPath = '/admin/'.$tenant->getRouteKey().'/billing';
 
             if (! $request->is('*billing*')) {
                 return redirect($billingPath)

@@ -7,11 +7,11 @@ Audit gap Fase 2 terhadap codebase saat ini, beserta urutan kerja yang direkomen
 ## Status Audit Fase 2
 
 ### 1. Modul HRM & Payroll (Bulan 3)
-- [~] Employee Directory — model `Employee`, `EmploymentContract`, `Position` ada; **dokumen digital KTP/NPWP belum** (perlu kolom file / relation manager `EmployeeDocument`)
-- [~] Absensi & Cuti — `AttendanceLog`, `LeaveRequest`, `Shift` ada; **GPS/foto/integrasi mesin absensi belum**
-- [~] Payroll Engine (RBE) — `PayrollComponent` punya kolom `formula` & `calculation_type`; **`PayrollCalculationService` belum ada** (folder `Modules/Employee/app/Services/` tidak ada)
-  - [ ] Formula: Gaji Pokok + Tunjangan − BPJS − PPh21 (resolver belum dibangun)
-- [ ] Slip Gaji Digital PDF — `barryvdh/laravel-dompdf` terpasang & dipakai di School `ReportCardController`, tapi belum ada controller/template untuk Salary Slip
+- [x] Employee Directory — model `Employee`, `EmploymentContract`, `Position` ada; dokumen digital KTP/NPWP sudah terimplementasi (`EmployeeDocument`)
+- [x] Absensi & Cuti — `AttendanceLog`, `LeaveRequest`, `Shift` ada; GPS/foto sudah terimplementasi.
+- [x] Payroll Engine (RBE) — `PayrollCalculationService` dan command generation gaji sudah ada.
+  - [x] Formula: Gaji Pokok + Tunjangan − BPJS − PPh21 (resolver sudah dibangun)
+- [x] Slip Gaji Digital PDF — sudah ada controller/template untuk Salary Slip dan action download.
 
 ### 2. Modul Finance & Accounting (Bulan 4)
 - [x] Chart of Accounts — `ChartOfAccount`
@@ -21,7 +21,7 @@ Audit gap Fase 2 terhadap codebase saat ini, beserta urutan kerja yang direkomen
   - [~] AR hanya `StudentInvoice` (khusus siswa); **AR umum non-student belum ada**
 - [~] Automatic Journaling
   - [x] Procurement → VendorBill draft journal (`VendorBillAutoCreationService::postDraftJournal`)
-  - [ ] Payroll → journal (belum, karena PayrollService belum ada)
+  - [x] Payroll → journal (sudah diimplementasikan via `PayrollJournalService`)
   - [ ] Stock-out → journal (belum, karena modul Inventory belum ada)
 - [ ] Laporan Keuangan Standar (Laba Rugi, Neraca, Arus Kas) — tidak terlihat sebagai Filament resource/page
 
@@ -34,47 +34,47 @@ Audit gap Fase 2 terhadap codebase saat ini, beserta urutan kerja yang direkomen
 ### Integrasi Workflow & SOP
 - [~] Approval Gate
   - [x] Procurement (`PurchaseRequisition`) & Finance (`Budget`) sudah terintegrasi Workflow V2 + RelationManager
-  - [ ] HRM (`LeaveRequest`, lembur, `SalarySlip`) belum terintegrasi
+  - [x] HRM (`LeaveRequest`, lembur, `SalarySlip`) sudah terintegrasi
 - [ ] Evidence Requirement (upload bukti sebelum tombol Approve aktif) — fitur ini belum ada di Workflow V2
 - [~] Audit Trail — `Monitoring\AuditLog` custom ada, tapi belum konsisten dipasang per-transaksi
 
 ### Tantangan Teknis (Inter-Module Communication)
 - [~] Event Listener — baru ada satu pasang: `PurchaseRequisitionApproved` → `CreateRfqFromApprovedPurchaseRequisition`
 - [x] PDF library — `barryvdh/laravel-dompdf` terpasang
-- [~] Rule-Based Approval Limit — `RuleEngine` (JsonLogic) di Workflow V2 ada & mendukung limit nominal; **seeder workflow default (mis. PO > 10 jt → Direktur) belum**
+- [x] Rule-Based Approval Limit — `RuleEngine` (JsonLogic) di Workflow V2 ada & mendukung limit nominal; seeder workflow default (mis. PO > 10 jt → Direktur) juga dikerjakan sebagian (`SetupHrmWorkflowsCommand`).
 
 ---
 
 ## Urutan Kerja yang Direkomendasikan
 
-### Sprint 1 — HRM matang (semua quick wins)
+### Sprint 1 — HRM matang (semua quick wins) [SELESAI]
 
-#### 1.1 Payroll Calculation Service
+#### 1.1 Payroll Calculation Service [x]
 - Buat `Modules/Employee/app/Services/PayrollCalculationService.php`
 - Resolver `PayrollComponent.formula` (fixed / percentage / expression) — pertimbangkan re-use JsonLogic atau `symfony/expression-language`
 - Agregat `AttendanceLog` stats per periode (hadir, terlambat, lembur)
 - Artisan command: `employee:generate-payroll --tenant= --month= --year= --dry-run`
 
-#### 1.2 Slip Gaji PDF
+#### 1.2 Slip Gaji PDF [x]
 - Ikuti pola `Modules/School/app/Http/Controllers/ReportCardController.php`
 - Blade template `employee::salary-slip-pdf`
 - Action "Download PDF" di `ViewSalarySlip` page
 
-#### 1.3 Auto-Journal Payroll
+#### 1.3 Auto-Journal Payroll [x]
 - Setelah SalarySlip di-mark Paid → trigger journal entry (Dr Beban Gaji / Cr Kas/Bank/Hutang Gaji)
 - Pola: contek `Modules/Procurement/app/Services/VendorBillAutoCreationService::postDraftJournal`
 - Mapping `PayrollComponent.coa_id` untuk fleksibilitas akun beban
 
-#### 1.4 HRM Workflow Integration
+#### 1.4 HRM Workflow Integration [x]
 - Duplikasi `WorkflowInstancesRelationManager` dari Procurement ke `LeaveRequest`, lembur, `SalarySlip`
 - Seeder workflow definition: cuti > 3 hari → Manager + HR; lembur > 4 jam → Manager
 
-#### 1.5 GPS / Foto Attendance (tanpa mobile app dulu)
+#### 1.5 GPS / Foto Attendance (tanpa mobile app dulu) [x]
 - Migration: kolom `check_in_latitude`, `check_in_longitude`, `check_in_photo_path`, idem untuk check_out
 - Form Filament dengan geolocation HTML5 + file upload
 - Validasi radius (opsional, via `TenantSetting`)
 
-#### 1.6 Dokumen Digital Karyawan
+#### 1.6 Dokumen Digital Karyawan [x]
 - RelationManager `EmployeeDocument` di `Employee` resource
 - Tipe dokumen: KTP, NPWP, Ijazah, Kontrak (enum), file upload dengan visibility private
 

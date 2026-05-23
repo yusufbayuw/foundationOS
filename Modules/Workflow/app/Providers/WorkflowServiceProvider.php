@@ -3,6 +3,7 @@
 namespace Modules\Workflow\Providers;
 
 use Livewire\Livewire;
+use Modules\Workflow\Console\Commands\SetupApprovalLimitsCommand;
 use Modules\Workflow\Contracts\RuleEngine;
 use Modules\Workflow\Contracts\WorkflowAssigneeResolver;
 use Modules\Workflow\Contracts\WorkflowAuditLogger;
@@ -29,6 +30,10 @@ class WorkflowServiceProvider extends ModuleServiceProvider
     protected string $name = 'Workflow';
 
     protected string $nameLower = 'workflow';
+
+    protected array $commands = [
+        SetupApprovalLimitsCommand::class,
+    ];
 
     protected array $providers = [
         EventServiceProvider::class,
