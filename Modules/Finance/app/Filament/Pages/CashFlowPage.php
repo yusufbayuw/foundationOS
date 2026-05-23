@@ -24,7 +24,9 @@ class CashFlowPage extends Page
     protected static ?int $navigationSort = 13;
 
     public string $dateFrom = '';
+
     public string $dateTo = '';
+
     public ?int $organizationId = null;
 
     public array $reportData = [];
@@ -93,6 +95,17 @@ class CashFlowPage extends Page
                     $this->organizationId = $data['organization_id'] ? (int) $data['organization_id'] : null;
                     $this->generateReport();
                 }),
+
+            Action::make('exportPdf')
+                ->label(FilamentUi::text('Export PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->url(fn () => route('finance.reports.cash-flow.pdf', [
+                    'from' => $this->dateFrom,
+                    'to' => $this->dateTo,
+                    'organization_id' => $this->organizationId,
+                ]))
+                ->openUrlInNewTab(),
         ];
     }
 }

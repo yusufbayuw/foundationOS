@@ -12,5 +12,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('profit-loss.pdf');
         Route::get('/balance-sheet/pdf', [FinancialReportController::class, 'balanceSheetPdf'])
             ->name('balance-sheet.pdf');
+        Route::get('/cash-flow/pdf', [FinancialReportController::class, 'cashFlowPdf'])
+            ->name('cash-flow.pdf');
     });
 });

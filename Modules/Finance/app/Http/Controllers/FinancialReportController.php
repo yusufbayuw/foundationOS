@@ -43,4 +43,20 @@ class FinancialReportController extends Controller
 
         return $pdf->download("Neraca_{$data['as_of']}.pdf");
     }
+
+    public function cashFlowPdf(Request $request)
+    {
+        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->id ?? 0);
+        $tenant = Tenant::findOrFail($tenantId);
+        $from = Carbon::parse($request->query('from', now()->startOfYear()->toDateString()));
+        $to = Carbon::parse($request->query('to', now()->toDateString()));
+        $organizationId = $request->query('organization_id') ? (int) $request->query('organization_id') : null;
+
+        $data = $this->service->cashFlow($tenantId, $from, $to, $organizationId);
+
+        $pdf = Pdf::loadView('finance::pdf.cash-flow', ['data' => $data, 'tenant' => $tenant])
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download("Arus_Kas_{$data['period_from']}_{$data['period_to']}.pdf");
+    }
 }
