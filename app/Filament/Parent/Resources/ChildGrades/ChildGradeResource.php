@@ -18,7 +18,7 @@ class ChildGradeResource extends Resource
 
     protected static ?string $model = StudentGrade::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::AcademicCap;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::ChartBar;
 
     protected static ?string $slug = 'child-grades';
 

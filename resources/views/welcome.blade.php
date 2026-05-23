@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'FoundationOS') }} | Sistem Operasional Yayasan Pendidikan untuk Sekolah, Kampus, dan Manajemen Yayasan</title>
-    <meta name="description" content="FoundationOS membantu yayasan pendidikan mengelola sekolah, kampus, dan manajemen yayasan dalam satu sistem yang rapi. Satukan layanan akademik, keuangan, SDM, approval, procurement, dan library dalam pengalaman kerja yang lebih jelas dan terkendali.">
+    <title>{{ config('app.name', 'FoundationOS') }} | Integrated Education Foundation OS</title>
+    <meta name="description" content="FoundationOS adalah Integrated Education Foundation OS untuk yayasan pendidikan multi-unit: tenant SaaS, admin panel, platform console, parent portal, workflow designer, akademik, finance, procurement, Moodle, audit, dan education QA.">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800&family=fraunces:600,700&display=swap" rel="stylesheet" />
 
@@ -13,6 +13,8 @@
         $adminUrl = url('/admin');
         $loginUrl = url('/admin/login');
         $registerUrl = url('/admin/register');
+        $platformUrl = url('/platform');
+        $parentUrl = url('/parent');
     @endphp
 
     <style>
@@ -807,8 +809,8 @@
                     @if (auth()->check())
                         <a href="{{ $adminUrl }}" class="btn-ghost">Buka Dashboard</a>
                     @else
-                        <a href="{{ $loginUrl }}" class="btn-ghost">Masuk</a>
-                        <a href="{{ $registerUrl }}" class="btn" style="padding: 0.45rem 1rem; font-size: 0.875rem;">Daftar</a>
+                        <a href="{{ $loginUrl }}" class="btn-ghost">Masuk Admin</a>
+                        <a href="{{ $registerUrl }}" class="btn" style="padding: 0.45rem 1rem; font-size: 0.875rem;">Buat Tenant</a>
                     @endif
                 </div>
             </div>
@@ -820,67 +822,67 @@
                     <div>
                         <span class="eyebrow">
                             <span class="eyebrow-dot"></span>
-                            Sistem kerja yayasan pendidikan yang lebih elegan dan terkendali
+                            Integrated Education Foundation OS
                         </span>
                         <h1>
-                            Satu sistem untuk <span class="accent">yayasan, sekolah, dan kampus</span>,
-                            dengan kerja yang lebih rapi
-                            dan keputusan yang lebih terkendali.
+                            Satu operating system untuk <span class="accent">yayasan, sekolah, kampus, dan orang tua</span>.
                         </h1>
                         <p class="hero-lead">
-                            {{ $appName }} dirancang untuk yayasan pendidikan yang mengelola banyak unit sekaligus. Dari manajemen yayasan, operasional sekolah, sampai layanan kampus, semua proses penting hadir dalam satu sistem yang membantu tim bekerja lebih sinkron, pimpinan melihat lebih jelas, dan keputusan bergerak lebih cepat.
+                            {{ $appName }} sekarang memusatkan tenant SaaS, Admin Panel, Platform Console, Parent Portal, Workflow Designer, akademik sekolah dan kampus, finance, procurement, HR, library, Moodle reconciliation, audit, risk, ISO, dan education QA dalam satu ruang kerja yang lebih mudah dikendalikan.
                         </p>
 
                         <div class="hero-actions">
                             @if (auth()->check())
                                 <a href="{{ $adminUrl }}" class="btn">Masuk ke Dashboard</a>
                             @else
-                                <a href="{{ $registerUrl }}" class="btn">Coba Gratis Sekarang</a>
-                                <a href="{{ $loginUrl }}" class="btn-ghost">Masuk</a>
+                                <a href="{{ $registerUrl }}" class="btn">Buat Tenant</a>
+                                <a href="{{ $loginUrl }}" class="btn-ghost">Masuk Admin</a>
                             @endif
+                            <a href="{{ $platformUrl }}" class="btn-ghost">Platform Console</a>
+                            <a href="{{ $parentUrl }}" class="btn-ghost">Parent Portal</a>
                         </div>
 
                         <div class="hero-proof">
                             <div class="proof">
-                                <strong>Satu ritme untuk semua unit</strong>
-                                <span>Yayasan, sekolah, dan kampus bergerak dalam alur kerja yang lebih selaras.</span>
+                                <strong>3 panel kerja</strong>
+                                <span>Admin Panel untuk tenant, Platform Console untuk operator SaaS, dan Parent Portal untuk wali murid.</span>
                             </div>
                             <div class="proof">
-                                <strong>Kontrol manajemen lebih kuat</strong>
-                                <span>Pimpinan yayasan dapat memantau approval, anggaran, dan operasional lintas unit lebih mudah.</span>
+                                <strong>800+ route aktif</strong>
+                                <span>Permukaan produk mencakup web, API v1, OPAC, webhook, mobile shell, dan panel Filament.</span>
                             </div>
                             <div class="proof">
-                                <strong>Data lebih dapat dipercaya</strong>
-                                <span>Satu sumber informasi untuk kepala sekolah, pimpinan kampus, dan manajemen yayasan.</span>
+                                <strong>40+ modul</strong>
+                                <span>Core, School, Campus, Finance, Procurement, Workflow, Library, GRC, dan unit usaha.</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="hero-panel" aria-label="Gambaran manfaat produk">
                         <div class="command-bridge">
-                            <span>Yayasan yang tertata bukan soal menambah banyak aplikasi</span>
-                            <span>Soal menyatukan sekolah, kampus, dan manajemen yayasan</span>
+                            <span>Current product surface</span>
+                            <span>Tenant-aware, modular, auditable</span>
                         </div>
 
                         <div class="panel-grid">
                             <div class="panel-stack">
                                 <div class="card">
                                     <span class="signal signal-emerald">Operasional harian</span>
-                                    <h3 style="margin-top: 0.8rem;">Setiap unit bekerja dengan alur yang lebih jelas</h3>
-                                    <p>Manajemen yayasan, sekolah, dan kampus dapat melihat siapa mengerjakan apa, apa yang menunggu persetujuan, dan apa yang sudah selesai tanpa mengejar informasi ke banyak tempat.</p>
+                                    <h3 style="margin-top: 0.8rem;">Admin Panel yang mengikuti konteks tenant</h3>
+                                    <p>Setiap tenant bekerja dalam boundary yang jelas, dengan role, subscription guard, branding, notification, module activation, dan resource discovery dari modul aktif.</p>
 
                                     <div class="mini-list">
                                         <div class="mini-item">
-                                            <strong>Layanan sekolah dan kampus lebih terhubung</strong>
-                                            <span>Data siswa, mahasiswa, kelas, studi, dan layanan akademik tidak lagi berjalan sendiri-sendiri.</span>
+                                            <strong>Workflow Designer</strong>
+                                            <span>Tenant dapat merancang approval, form runtime, parallel gateway, SLA, delegasi, dan histori tugas.</span>
                                         </div>
                                         <div class="mini-item">
-                                            <strong>Keuangan yayasan lebih mudah diawasi</strong>
-                                            <span>Tagihan, pembayaran, anggaran, dan pengeluaran lintas unit dapat dipantau dengan konteks yang lebih utuh.</span>
+                                            <strong>Moodle reconciliation</strong>
+                                            <span>Outbox, drift detection, auto-fix mode, bulk enroll, dan laporan operasi menjaga FOS sebagai source of truth.</span>
                                         </div>
                                         <div class="mini-item">
-                                            <strong>Approval manajemen tidak lagi kabur</strong>
-                                            <span>Setiap keputusan punya jejak, alasan, dan status yang mudah dibaca oleh level operasional maupun pimpinan.</span>
+                                            <strong>Risk, audit, ISO, and education QA</strong>
+                                            <span>Enterprise risk, internal audit, ISO controls, quality standards, gap analysis, dan improvement plan tersedia sebagai modul kerja.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -889,14 +891,14 @@
                             <div class="panel-stack">
                                 <div class="card">
                                     <span class="signal signal-indigo">Untuk pimpinan</span>
-                                    <h3 style="margin-top: 0.8rem;">Yayasan melihat lebih cepat, bukan lebih terlambat</h3>
-                                    <p>Masalah di sekolah, kampus, atau unit pendukung tidak baru terlihat saat sudah terlambat. Pimpinan bisa melihat bottleneck, backlog, dan progres dalam tampilan yang lebih ringkas.</p>
+                                    <h3 style="margin-top: 0.8rem;">Executive view lintas akademik dan operasional</h3>
+                                    <p>Dashboard, chart, weekly summary, finance overview, attendance recap, academic analytics, helpdesk, dan sustainability memberi sinyal yang bisa ditindaklanjuti.</p>
                                 </div>
 
                                 <div class="card">
                                     <span class="signal signal-amber">Untuk pertumbuhan</span>
-                                    <h3 style="margin-top: 0.8rem;">Siap berkembang tanpa kehilangan kendali yayasan</h3>
-                                    <p>Saat jumlah sekolah, kampus, atau unit bertambah, proses tetap dapat ditata dengan jelas tanpa membuat koordinasi yayasan menjadi lebih rumit.</p>
+                                    <h3 style="margin-top: 0.8rem;">Platform Console dan module marketplace</h3>
+                                    <p>Operator platform dapat memantau tenants, users, module×tenant activation, billing, dan konfigurasi produk tanpa masuk ke data operasional tenant.</p>
                                 </div>
                             </div>
                         </div>
@@ -908,25 +910,25 @@
                 <div class="container">
                     <div class="section-head">
                         <span class="section-kicker">Nilai Produk</span>
-                        <h2>Bukan sekadar software yang lengkap. Ini fondasi kerja yayasan pendidikan yang terasa lebih tertata.</h2>
-                        <p>{{ $appName }} dirancang untuk pengguna yang setiap hari menghubungkan banyak kepentingan: manajemen yayasan, sekolah, kampus, keuangan, SDM, dan layanan akademik. Fokusnya bukan memamerkan teknologi, tetapi membuat koordinasi lintas unit terasa lebih jelas dan lebih mudah dijalankan.</p>
+                        <h2>Bukan sekadar daftar menu. Ini fondasi kerja multi-tenant untuk yayasan pendidikan yang sudah punya banyak permukaan produk.</h2>
+                        <p>{{ $appName }} dirancang untuk pengguna yang setiap hari menghubungkan banyak kepentingan: admin tenant, operator platform, orang tua, manajemen yayasan, sekolah, kampus, keuangan, SDM, audit, dan layanan akademik. Fokusnya bukan memamerkan teknologi, tetapi membuat koordinasi lintas unit terasa lebih jelas dan lebih mudah dijalankan.</p>
                     </div>
 
                     <div class="benefits-grid">
                         <article class="benefit">
                             <div class="benefit-icon">01</div>
-                            <h3>Yayasan, sekolah, dan kampus terasa nyambung</h3>
-                            <p>Tim tidak perlu lagi memindahkan konteks dari satu alat ke alat lain. Data dan tindakan berada di tempat yang sama, sehingga koordinasi antarlembaga bergerak lebih mulus.</p>
+                            <h3>Panel kerja dipisah sesuai tanggung jawab</h3>
+                            <p>Tenant mengelola operasi di Admin Panel, operator SaaS menjaga platform di Platform Console, dan wali murid masuk melalui Parent Portal yang lebih fokus.</p>
                         </article>
                         <article class="benefit">
                             <div class="benefit-icon">02</div>
                             <h3>Setiap status lebih mudah dibaca lintas level</h3>
-                            <p>Apa yang masih draft, sedang direview, perlu revisi, atau sudah disetujui tampil lebih jelas untuk operator, kepala unit, dan pimpinan yayasan.</p>
+                            <p>Apa yang masih draft, sedang direview, perlu revisi, sudah disetujui, menunggu sinkron Moodle, atau perlu tindak lanjut audit tampil lebih jelas.</p>
                         </article>
                         <article class="benefit">
                             <div class="benefit-icon">03</div>
                             <h3>Standar kerja yayasan lebih konsisten</h3>
-                            <p>Workflow, approval, dan guardrail membantu seluruh unit menjalankan SOP yang rapi tanpa membuat tim merasa dibebani langkah administratif yang berlebihan.</p>
+                            <p>Workflow, approval, module activation, tenant-aware permissions, billing guard, audit trail, dan localization membantu SOP tetap rapi saat unit bertambah.</p>
                         </article>
                     </div>
                 </div>
@@ -936,14 +938,14 @@
                 <div class="container">
                     <div class="section-head">
                         <span class="section-kicker">Fitur yang Menonjol</span>
-                        <h2>Fitur diposisikan untuk mempermudah tata kelola yayasan, bukan menambah beban belajar sistem.</h2>
-                        <p>Setiap kemampuan utama dibangun untuk menjawab situasi kerja nyata di yayasan pendidikan: data tersebar antar unit, approval lambat, koordinasi sekolah dan kampus tidak sinkron, serta pimpinan membutuhkan visibilitas yang lebih cepat.</p>
+                        <h2>Fitur utama sekarang mengikuti peta produk yang benar-benar sudah hidup di aplikasi.</h2>
+                        <p>Setiap kemampuan utama dibangun untuk menjawab situasi kerja nyata di yayasan pendidikan: data tersebar antar unit, approval lambat, sinkronisasi Moodle drift, kontrol subscription, parent communication, audit, dan kebutuhan visibilitas pimpinan yang lebih cepat.</p>
                     </div>
 
                     <div class="journey">
                         <div class="journey-intro">
                             <span class="signal signal-indigo">Kenapa terasa berbeda</span>
-                            <p style="margin-top: 1rem;">Alih-alih menampilkan daftar menu panjang tanpa cerita, {{ $appName }} memusatkan pengalaman pada apa yang ingin dicapai yayasan pendidikan: menjaga sekolah dan kampus tetap selaras, memperjelas kontrol manajemen, dan membuat pelayanan berjalan lebih konsisten.</p>
+                            <p style="margin-top: 1rem;">Alih-alih menampilkan daftar menu panjang tanpa cerita, {{ $appName }} memusatkan pengalaman pada apa yang ingin dicapai yayasan pendidikan: menjaga tenant tetap aman, sekolah dan kampus selaras, approval terlihat, orang tua terhubung, dan integrasi operasional dapat diaudit.</p>
 
                             <div class="quote">
                                 <p>"Yang terasa premium bukan hanya tampilannya, tetapi rasa tenang saat yayasan tahu apa yang terjadi di setiap unit, apa yang menunggu keputusan, dan apa yang sudah selesai."</p>
@@ -955,29 +957,29 @@
                             <article class="step">
                                 <div class="step-index">1</div>
                                 <div>
-                                    <h3>Approval yang mudah dipahami</h3>
-                                    <p>Alur persetujuan tidak lagi tersembunyi di chat atau catatan informal. Setiap keputusan yayasan punya jalur, aktor, status, dan riwayat yang jelas.</p>
+                                    <h3>Admin Panel untuk operasi tenant</h3>
+                                    <p>Tenant mengelola sekolah, kampus, finance, procurement, HR, library, DMS, helpdesk, risk, audit, dan QA dengan resource Filament yang ditemukan otomatis dari modul aktif.</p>
                                 </div>
                             </article>
                             <article class="step">
                                 <div class="step-index">2</div>
                                 <div>
-                                    <h3>Operasional sekolah dan kampus yang lebih sinkron</h3>
-                                    <p>Akademik, keuangan, SDM, procurement, dan library tidak berdiri sendiri. Yayasan dapat melihat efek satu proses terhadap proses lain dengan lebih mudah.</p>
+                                    <h3>Workflow Designer dan approval engine</h3>
+                                    <p>Approval tidak lagi tersembunyi di chat. Setiap keputusan punya definisi, aktor, SLA, cabang paralel, form runtime, assignment, history, dan evidence.</p>
                                 </div>
                             </article>
                             <article class="step">
                                 <div class="step-index">3</div>
                                 <div>
-                                    <h3>Pelacakan yang tidak melelahkan untuk manajemen</h3>
-                                    <p>Status penting, histori tindakan, dan backlog pekerjaan hadir dalam tampilan yang mudah dipindai. Pimpinan tidak dipaksa membangun laporan manual hanya untuk tahu kondisi saat ini.</p>
+                                    <h3>Moodle, API, mobile, dan webhook</h3>
+                                    <p>FOS tetap menjadi source of truth melalui outbox Moodle, drift reconciliation, API v1, OpenAPI, mobile shell, WhatsApp webhook, payment webhook, dan developer platform.</p>
                                 </div>
                             </article>
                             <article class="step">
                                 <div class="step-index">4</div>
                                 <div>
-                                    <h3>Siap bertumbuh dengan struktur yayasan</h3>
-                                    <p>Saat jumlah sekolah, kampus, dan unit manajemen bertambah kompleks, pengalaman kerja tetap terjaga rapi tanpa terasa terpecah.</p>
+                                    <h3>Parent Portal dan public services</h3>
+                                    <p>Orang tua melihat anak, nilai, absensi, pengumuman, survey, dan kanal laporan; publik dapat mengakses OPAC, certificate verification, CMS page, dan inquiry.</p>
                                 </div>
                             </article>
                         </div>
@@ -1014,42 +1016,42 @@
                 <div class="container">
                     <div class="section-head">
                         <span class="section-kicker">Cakupan Produk</span>
-                        <h2>Satu platform untuk proses yayasan yang biasanya tersebar di banyak alat.</h2>
-                        <p>{{ $appName }} menonjol bukan karena banyaknya modul semata, tetapi karena modul-modul itu membantu yayasan membangun pengalaman kerja yang menyatu untuk sekolah, kampus, dan manajemen pusat.</p>
+                        <h2>Satu platform untuk proses yayasan yang biasanya tersebar di banyak alat, kini dipetakan sesuai modul yang ada.</h2>
+                        <p>{{ $appName }} menonjol bukan karena banyaknya modul semata, tetapi karena modul-modul itu membantu yayasan membangun pengalaman kerja yang menyatu untuk sekolah, kampus, orang tua, unit usaha, dan manajemen pusat.</p>
                     </div>
 
                     <div class="modules-grid">
                         <article class="module-card">
-                            <strong>Akademik & Enrollment</strong>
-                            <span>Kelola proses belajar, data siswa dan mahasiswa, kelas, studi, dan layanan akademik dalam alur yang lebih tertib.</span>
+                            <strong>Core Tenancy & Platform</strong>
+                            <span>Tenant, organization, user, role, module marketplace, subscription, billing, branding, locale, importer, dan platform console.</span>
                         </article>
                         <article class="module-card">
-                            <strong>Keuangan Yayasan</strong>
-                            <span>Tagihan, pembayaran, anggaran, jurnal, dan kontrol keuangan lintas unit yang lebih mudah dipantau.</span>
+                            <strong>School, Campus & Enrollment</strong>
+                            <span>Data siswa dan mahasiswa, kelas, kurikulum, assessment, attendance recap, report card, academic analytics, PPDB, dan study plan.</span>
                         </article>
                         <article class="module-card">
-                            <strong>Workflow & Approval</strong>
-                            <span>Bangun approval yang dapat diandalkan untuk procurement, anggaran, dan keputusan manajemen lintas sekolah maupun kampus.</span>
+                            <strong>Finance & Revenue</strong>
+                            <span>Chart of accounts, journal entry, budget, invoice, payment, Midtrans billing, donation, sales, marketplace, property, training, and reports.</span>
                         </article>
                         <article class="module-card">
-                            <strong>Procurement</strong>
-                            <span>Permintaan pembelian, review, sourcing readiness, dan tata kelola pengadaan yang lebih kuat untuk seluruh entitas yayasan.</span>
+                            <strong>Workflow & Procurement</strong>
+                            <span>Designer, inbox, dynamic form options, PR to RFQ to PO to GR to vendor bill, evidence, webhook subscription, and SLA escalation.</span>
                         </article>
                         <article class="module-card">
-                            <strong>Library</strong>
-                            <span>Layanan perpustakaan yang terasa modern, dari katalog publik hingga sirkulasi dan keanggotaan di lingkungan sekolah atau kampus.</span>
+                            <strong>Library, DMS & E-Office</strong>
+                            <span>OPAC publik, circulation, reservations, book stock, document archive, letters, certificate verification, and file upload audit.</span>
                         </article>
                         <article class="module-card">
-                            <strong>SDM & Operasional Tim</strong>
-                            <span>Kelola struktur kerja yayasan, absensi, KPI, dan proses administrasi internal dengan lebih rapi.</span>
+                            <strong>People & Campus Operations</strong>
+                            <span>Employee, payroll, leave, KPI, transport, boarding, cafeteria, clinic, counseling, event, alumni, facility, asset, and visitor kiosk.</span>
                         </article>
                         <article class="module-card">
-                            <strong>Monitoring & Audit</strong>
-                            <span>Jejak perubahan, histori aktivitas, dan visibilitas proses untuk yayasan yang menuntut akuntabilitas lintas unit.</span>
+                            <strong>GRC & Education QA</strong>
+                            <span>Risk, audit, ISO, and education QA; monitoring, compliance logs, school health index, accreditation cycle, and improvement plan.</span>
                         </article>
                         <article class="module-card">
-                            <strong>Siap Diperluas</strong>
-                            <span>Ketika yayasan berkembang, pengalaman kerja tetap bisa dijaga tertib tanpa menambah kerumitan yang tidak perlu.</span>
+                            <strong>Integrations & Extension</strong>
+                            <span>Moodle reconciliation, WhatsApp dispatch, OpenAPI, API v1, Sanctum, mobile shell, queue jobs, scheduled commands, and AI governance.</span>
                         </article>
                     </div>
                 </div>
@@ -1092,9 +1094,9 @@
                                 <p>{{ $appName }} dirancang untuk yayasan yang ingin bergerak lebih tertib, lebih cepat, dan lebih percaya diri dalam mengambil keputusan sehari-hari di seluruh unitnya.</p>
 
                                 <div class="cta-list">
-                                    <span><i>1</i> Satu tempat untuk yayasan, sekolah, dan kampus</span>
-                                    <span><i>2</i> Approval dan operasional yang lebih mudah dipantau pimpinan</span>
-                                    <span><i>3</i> Pengalaman kerja yang terasa premium bagi tim internal</span>
+                                    <span><i>1</i> Admin Panel, Platform Console, dan Parent Portal dalam satu produk</span>
+                                    <span><i>2</i> Workflow, Moodle, finance, procurement, dan GRC yang bisa diaudit</span>
+                                    <span><i>3</i> API, mobile shell, webhook, dan module marketplace untuk ekspansi platform</span>
                                 </div>
                             </div>
 
@@ -1102,9 +1104,10 @@
                                 @if (auth()->check())
                                     <a href="{{ $adminUrl }}" class="btn">Buka Dashboard</a>
                                 @else
-                                    <a href="{{ $registerUrl }}" class="btn">Mulai Gratis</a>
+                                    <a href="{{ $registerUrl }}" class="btn">Buat Tenant</a>
                                     <a href="{{ $loginUrl }}" class="btn-ghost">Sudah punya akun?</a>
                                 @endif
+                                <a href="{{ $platformUrl }}" class="btn-ghost">Platform Console</a>
                                 <a href="#hero" class="btn-ghost">Kembali ke Atas</a>
                             </div>
                         </div>
@@ -1123,6 +1126,8 @@
                     <a href="#fitur">Fitur</a>
                     <a href="#modul">Modul</a>
                     <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}">Admin</a>
+                    <a href="{{ $platformUrl }}">Platform</a>
+                    <a href="{{ $parentUrl }}">Parent</a>
                 </div>
             </div>
         </footer>

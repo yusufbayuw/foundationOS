@@ -14,7 +14,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static \BackedEnum|string|null $navigationIcon = Heroicon::Users;
+    protected static \BackedEnum|string|null $navigationIcon = Heroicon::UserCircle;
 
     protected static ?string $navigationLabel = 'Users';
 

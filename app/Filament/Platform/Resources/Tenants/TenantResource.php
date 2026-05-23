@@ -2,14 +2,22 @@
 
 namespace App\Filament\Platform\Resources\Tenants;
 
+use App\Filament\Platform\Resources\Tenants\Pages\CreateTenant;
+use App\Filament\Platform\Resources\Tenants\Pages\EditTenant;
 use App\Filament\Platform\Resources\Tenants\Pages\ListTenants;
 use App\Filament\Platform\Resources\Tenants\Pages\ViewTenant;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Resources\Tenants\Schemas\TenantForm;
+use Modules\Core\Filament\Resources\Tenants\Schemas\TenantInfolist;
 use Modules\Core\Models\Tenant;
 
 class TenantResource extends Resource
@@ -65,12 +73,22 @@ class TenantResource extends Resource
                     ->sortable()
                     ->label('Registered'),
             ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return TenantForm::configure($schema);
     }
 
     public static function infolist(Schema $schema): Schema
     {
-        return $schema->components([]);
+        return TenantInfolist::configure($schema);
     }
 
     public static function getRelations(): array
@@ -82,22 +100,58 @@ class TenantResource extends Resource
     {
         return [
             'index' => ListTenants::route('/'),
+            'create' => CreateTenant::route('/create'),
             'view' => ViewTenant::route('/{record}'),
+            'edit' => EditTenant::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return static::canManagePlatformTenants();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return static::canManagePlatformTenants();
+    }
+
+    public static function canView(Model $record): bool
+    {
+        return static::canManagePlatformTenants();
     }
 
     public static function canCreate(): bool
     {
-        return false;
+        return static::canManagePlatformTenants();
     }
 
     public static function canEdit(Model $record): bool
     {
-        return false;
+        return static::canManagePlatformTenants();
     }
 
     public static function canDelete(Model $record): bool
     {
-        return false;
+        return static::canManagePlatformTenants();
+    }
+
+    private static function canManagePlatformTenants(): bool
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            return false;
+        }
+
+        if (Filament::getCurrentPanel()?->getId() === 'platform') {
+            return true;
+        }
+
+        if (function_exists('setPermissionsTeamId')) {
+            setPermissionsTeamId(0);
+        }
+
+        return $user->hasRole('platform_owner');
     }
 }

@@ -3,17 +3,19 @@
 namespace App\Filament\Platform\Resources\Tenants\Pages;
 
 use App\Filament\Platform\Resources\Tenants\TenantResource;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ViewTenant extends ViewRecord
+class EditTenant extends EditRecord
 {
     protected static string $resource = TenantResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }
