@@ -3,6 +3,7 @@
 namespace Modules\Messaging\Services;
 
 use Illuminate\Support\Facades\Notification;
+use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Messaging\Contracts\WhatsAppProvider;
 use Modules\Messaging\Models\NotificationDelivery;
@@ -37,6 +38,10 @@ class NotificationDispatcher
 
         $tenantId = $user->tenants()->value('tenants.id')
             ?? $user->userTenantRoles()->value('tenant_id');
+        $channels = array_values(array_filter(
+            $channels,
+            fn (string $channel): bool => $this->channelEnabled($channel, $tenantId),
+        ));
 
         $delivery = NotificationDelivery::query()->create([
             'tenant_id' => $tenantId,
@@ -80,5 +85,26 @@ class NotificationDispatcher
         if ($user->phone) {
             $this->whatsApp->sendMessage($user->phone, $body);
         }
+    }
+
+    protected function channelEnabled(string $channel, int|string|null $tenantId): bool
+    {
+        if ($channel === 'database' || $channel === 'mail') {
+            return true;
+        }
+
+        $configured = (bool) config("messaging.channels.{$channel}", false);
+
+        if ($tenantId === null) {
+            return $configured;
+        }
+
+        $tenantOverride = TenantSetting::withoutTenantScope()
+            ->where('tenant_id', $tenantId)
+            ->where('group', 'integrations')
+            ->where('key', "{$channel}.enabled")
+            ->value('value');
+
+        return $tenantOverride === null ? $configured : filter_var($tenantOverride, FILTER_VALIDATE_BOOL);
     }
 }

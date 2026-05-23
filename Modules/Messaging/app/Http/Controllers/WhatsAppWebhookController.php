@@ -10,7 +10,19 @@ class WhatsAppWebhookController extends Controller
 {
     public function handle(Request $request, string $provider): JsonResponse
     {
-        // Provider-specific signature validation deferred to v09 integration sprint.
-        return response()->json(['received' => true, 'provider' => $provider]);
+        $secret = (string) config('messaging.webhooks.whatsapp_secret', '');
+
+        if ($secret !== '') {
+            $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $secret);
+            $provided = (string) $request->header('X-Hub-Signature-256', '');
+
+            abort_unless(hash_equals($expected, $provided), 403);
+        }
+
+        return response()->json([
+            'received' => true,
+            'provider' => $provider,
+            'verified' => $secret !== '',
+        ]);
     }
 }

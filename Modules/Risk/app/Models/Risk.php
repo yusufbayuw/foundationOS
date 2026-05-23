@@ -24,12 +24,27 @@ class Risk extends Model
         'status',
         'description',
         'meta',
+        'risk_category_id',
+        'riskable_type',
+        'riskable_id',
+        'likelihood',
+        'impact',
+        'score',
+        'residual_likelihood',
+        'residual_impact',
+        'residual_score',
     ];
 
     protected function casts(): array
     {
         return [
             'meta' => 'array',
+            'likelihood' => 'integer',
+            'impact' => 'integer',
+            'score' => 'integer',
+            'residual_likelihood' => 'integer',
+            'residual_impact' => 'integer',
+            'residual_score' => 'integer',
         ];
     }
 

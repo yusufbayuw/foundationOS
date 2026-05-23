@@ -53,6 +53,7 @@
             "Modules\\Boarding\\": "Modules/Boarding/app/",
             "Modules\\Cafeteria\\": "Modules/Cafeteria/app/",
             "Modules\\Capacity\\": "Modules/Capacity/app/",
+            "Modules\\Ai\\": "Modules/Ai/app/",
             "Modules\\Clinic\\": "Modules/Clinic/app/",
             "Modules\\Cms\\": "Modules/Cms/app/",
             "Modules\\Counseling\\": "Modules/Counseling/app/",

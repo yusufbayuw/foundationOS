@@ -111,3 +111,7 @@ Schedule::command('printing:calculate-royalty-monthly')
 Schedule::command('property:generate-monthly-lease-invoice')
     ->monthlyOn(1, '04:00')
     ->withoutOverlapping();
+
+Schedule::command('workflow:escalate-overdue')
+    ->hourly()
+    ->withoutOverlapping();

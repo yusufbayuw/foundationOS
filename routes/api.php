@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\OpenApiController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -28,6 +29,9 @@ RateLimiter::for('api', function (Request $request) {
 
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->name('webhooks.whatsapp');
+
+Route::get('/openapi.json', OpenApiController::class)
+    ->name('api.openapi');
 
 Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'show'])
     ->name('letters.verify');

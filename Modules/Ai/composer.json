@@ -1,0 +1,10 @@
+{
+    "name": "foundationos/ai",
+    "description": "AI advisor module for FoundationOS",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Ai\\": "app/"
+        }
+    }
+}

@@ -24,12 +24,18 @@ class KpiActual extends Model
         'status',
         'description',
         'meta',
+        'kpi_metric_id',
+        'period',
+        'actual_value',
+        'score',
     ];
 
     protected function casts(): array
     {
         return [
             'meta' => 'array',
+            'actual_value' => 'float',
+            'score' => 'float',
         ];
     }
 

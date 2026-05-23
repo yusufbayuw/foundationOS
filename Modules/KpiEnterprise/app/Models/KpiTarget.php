@@ -24,12 +24,18 @@ class KpiTarget extends Model
         'status',
         'description',
         'meta',
+        'kpi_metric_id',
+        'period',
+        'target_value',
+        'weight',
     ];
 
     protected function casts(): array
     {
         return [
             'meta' => 'array',
+            'target_value' => 'float',
+            'weight' => 'float',
         ];
     }
 

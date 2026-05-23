@@ -24,6 +24,8 @@ class KpiCascade extends Model
         'status',
         'description',
         'meta',
+        'parent_kpi_metric_id',
+        'child_kpi_metric_id',
     ];
 
     protected function casts(): array

@@ -1,0 +1,9 @@
+{
+    "appId": "app.fos.staff",
+    "appName": "FoundationOS",
+    "webDir": "../public",
+    "server": {
+        "url": "https://foundationos.test",
+        "cleartext": false
+    }
+}

@@ -49,7 +49,8 @@ class ApplicationModuleCatalog
         'educationqa' => ['is_core' => false, 'sort_order' => 122],
         'kpienterprise' => ['is_core' => false, 'sort_order' => 123],
         'capacity' => ['is_core' => false, 'sort_order' => 124],
-        'messaging' => ['is_core' => false, 'sort_order' => 125],
+        'ai' => ['is_core' => false, 'sort_order' => 125],
+        'messaging' => ['is_core' => false, 'sort_order' => 126],
     ];
 
     /**
