@@ -39,6 +39,10 @@ class SetupHrmWorkflowsCommand extends Command
         $finance = $this->resolveUserOption('finance', required: true);
         $actorId = $hr->id;
 
+        $this->assertUserBelongsToTenant($manager, $tenant);
+        $this->assertUserBelongsToTenant($hr, $tenant);
+        $this->assertUserBelongsToTenant($finance, $tenant);
+
         $this->info("Setting up HRM workflows for tenant [{$tenant->name}]...");
 
         $this->setupLeaveRequestWorkflow($tenant, $manager, $hr, $lifecycle, $actorId);
@@ -268,6 +272,17 @@ class SetupHrmWorkflowsCommand extends Command
         }
 
         return User::query()->findOrFail((int) $value);
+    }
+
+    private function assertUserBelongsToTenant(User $user, Tenant $tenant): void
+    {
+        $isValid = $user->userTenantRoles()
+            ->where('tenant_id', $tenant->id)
+            ->exists();
+
+        if (! $isValid) {
+            $this->fail("User [{$user->email}] is not a member of tenant [{$tenant->name}].");
+        }
     }
 
     private function makeStep(Workflow $workflow, array $attributes): WorkflowStep

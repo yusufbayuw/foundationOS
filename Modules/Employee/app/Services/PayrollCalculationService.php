@@ -31,7 +31,7 @@ class PayrollCalculationService
         $attendanceStats = $this->aggregateAttendance($employee, $month, $year);
 
         return DB::transaction(function () use ($employee, $month, $year, $attendanceStats, $dryRun): SalarySlip {
-            $slip = $this->resolveSlip($employee, $month, $year, $attendanceStats);
+            $slip = $this->resolveSlip($employee, $month, $year, $attendanceStats, $dryRun);
 
             $components = PayrollComponent::query()
                 ->where('tenant_id', $employee->tenant_id)
@@ -118,9 +118,35 @@ class PayrollCalculationService
         });
     }
 
-    private function resolveSlip(Employee $employee, int $month, int $year, array $stats): SalarySlip
+    /**
+     * @param  array{working_days:int, absent_days:int, overtime_hours:float, leave_days:int, work_hours:float}  $stats
+     */
+    private function resolveSlip(Employee $employee, int $month, int $year, array $stats, bool $dryRun): SalarySlip
     {
         $periodLabel = date('F Y', mktime(0, 0, 0, $month, 1, $year));
+        $basicSalary = (float) $employee->basic_salary;
+
+        if ($dryRun) {
+            return new SalarySlip([
+                'tenant_id' => $employee->tenant_id,
+                'employee_id' => $employee->id,
+                'period_month' => $month,
+                'period_year' => $year,
+                'period_label' => $periodLabel,
+                'basic_salary' => $basicSalary,
+                'earnings_details' => [],
+                'deductions_details' => [],
+                'total_earnings' => $basicSalary,
+                'total_deductions' => 0,
+                'net_salary' => $basicSalary,
+                'working_days' => $stats['working_days'],
+                'working_hours' => $stats['work_hours'],
+                'overtime_hours' => $stats['overtime_hours'],
+                'leave_days' => $stats['leave_days'],
+                'absent_days' => $stats['absent_days'],
+                'status' => 'draft',
+            ]);
+        }
 
         return SalarySlip::query()->firstOrCreate(
             [
@@ -131,7 +157,17 @@ class PayrollCalculationService
             ],
             [
                 'period_label' => $periodLabel,
-                'basic_salary' => $employee->basic_salary,
+                'basic_salary' => $basicSalary,
+                'earnings_details' => [],
+                'deductions_details' => [],
+                'total_earnings' => $basicSalary,
+                'total_deductions' => 0,
+                'net_salary' => $basicSalary,
+                'working_days' => $stats['working_days'],
+                'working_hours' => $stats['work_hours'],
+                'overtime_hours' => $stats['overtime_hours'],
+                'leave_days' => $stats['leave_days'],
+                'absent_days' => $stats['absent_days'],
                 'status' => 'draft',
             ],
         );
