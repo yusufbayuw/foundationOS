@@ -1,745 +1,701 @@
-# FoundationOS
+# FoundationOS — Platform ERP Modular untuk Lembaga Pendidikan
 
-FoundationOS adalah fondasi aplikasi SaaS modular berbasis Laravel, Filament, dan sistem module. Arsitekturnya dirancang untuk shared-database multi-tenancy, sehingga satu instance aplikasi dapat melayani banyak tenant dengan boundary domain yang tetap jelas.
+<div align="center">
 
-## Setup Cepat
+![Laravel](https://img.shields.io/badge/Laravel-13.0-FF2D20?style=flat-square&logo=laravel)
+![Filament](https://img.shields.io/badge/Filament-5-FDA41C?style=flat-square)
+![Livewire](https://img.shields.io/badge/Livewire-4-FB70A9?style=flat-square)
+![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square&logo=php)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-Urutan setup minimal untuk menjalankan aplikasi:
+**Sistem ERP terpadu, modular, dan scalable untuk mengelola operasional lembaga pendidikan tinggi dan menengah.**
+
+[Demo](#-fitur-utama) • [Dokumentasi](#-dokumentasi) • [Kontribusi](#-kontribusi)
+
+</div>
+
+---
+
+## 🎯 Tentang FoundationOS
+
+FoundationOS adalah fondasi aplikasi **ERP (Enterprise Resource Planning) yang dirancang khusus untuk lembaga pendidikan** (K-12, kampus, universitas). Platform ini menyediakan ekosistem modul terpadu untuk mengelola:
+
+- **Akademik**: kurikulum, mata pelajaran, kelas, penilaian, dan absensi
+- **Kepegawaian & HR**: posisi, kontrak kerja, gaji, KPI, dan cuti
+- **Keuangan**: bagan akun, anggaran, invoice, pembayaran, dan jurnal
+- **Procurement**: requisisi pembelian, RFQ, PO, dan vendor bills
+- **Perpustakaan**: manajemen buku, peminjaman, denda, dan integrasi SLIMS
+- **Alur Kerja**: approval engine berbasis metadata dengan automasi
+- **Monitoring**: audit log, tracking file upload, dan compliance
+- **Serta 40+ modul lainnya** untuk berbagai aspek operasional
+
+**Teknologi Stack**:
+- **Backend**: Laravel 13, PHP 8.4
+- **Frontend**: Livewire 4, Alpine.js, Tailwind CSS v4
+- **Admin Panel**: Filament v5 (berbasis Laravel)
+- **Arsitektur Modul**: coolsam/modules v5 (nwidart-compatible)
+- **Multi-Tenancy**: shared-database (tanpa paket external seperti stancl/tenancy)
+- **Authorization**: Spatie Permission + Filament Shield
+- **Database**: Laravel migrations, Eloquent ORM
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+
+- PHP 8.4+
+- Node.js 18+
+- Composer
+- SQLite atau database relasional lainnya
+
+### Installation
 
 ```bash
+# 1. Clone repository
+git clone <repo-url>
+cd foundationOS
+
+# 2. Install dependencies
 composer install
+npm install
+
+# 3. Setup environment
 cp .env.example .env
 php artisan key:generate
+
+# 4. Database migrations & seeds
 php artisan migrate
-npm install
-npm run dev
+php artisan db:seed
+
+# 5. Link storage (jika file uploads diperlukan)
+php artisan storage:link
+
+# 6. Start development servers
+composer run dev
 ```
 
-Jika ingin verifikasi fondasi aplikasi setelah setup:
+**Akses panel admin**: https://foundationOS.test/admin
+
+Jika belum memiliki akun, buat super admin terlebih dahulu:
 
 ```bash
-php artisan test
+php artisan make:super-admin
 ```
 
-Panduan setup Moodle terpisah tersedia di:
+---
 
-- [MOODLE.md](/Users/yusuf/Herd/foundationOS/MOODLE.md)
-- [MOODLE_HARDENING_CHECKLIST.md](/Users/yusuf/Herd/foundationOS/MOODLE_HARDENING_CHECKLIST.md)
-- [LIBRARY.md](/Users/yusuf/Herd/foundationOS/LIBRARY.md)
-- [WORKFLOW.md](/Users/yusuf/Herd/foundationOS/WORKFLOW.md)
-- [PROCUREMENT.md](/Users/yusuf/Herd/foundationOS/PROCUREMENT.md)
-- [FINANCE.md](/Users/yusuf/Herd/foundationOS/FINANCE.md)
+## 🏗️ Arsitektur Sistem
 
-## Konfigurasi Dasar Aplikasi
+### Multi-Tenancy Model
 
-Beberapa keputusan konfigurasi penting pada project ini:
+FoundationOS menggunakan **shared-database multi-tenancy** (satu instance aplikasi melayani banyak tenant):
 
-- auth model utama memakai `Modules\Core\Models\User`
-- panel admin Filament berada di path `admin`
-- multi-tenancy saat ini memakai `shared database`, bukan database-per-tenant
-- semua resource Filament modular didiscover dari folder `Modules/*/app/Filament`
-- `app/Models/User.php` hanya bridge untuk kompatibilitas Laravel ecosystem
-
-File yang paling penting untuk dicek saat onboarding:
-
-- [config/auth.php](/Users/yusuf/Herd/foundationOS/config/auth.php)
-- [app/Providers/Filament/AdminPanelProvider.php](/Users/yusuf/Herd/foundationOS/app/Providers/Filament/AdminPanelProvider.php)
-- [config/filament-modules.php](/Users/yusuf/Herd/foundationOS/config/filament-modules.php)
-- [config/filament-shield.php](/Users/yusuf/Herd/foundationOS/config/filament-shield.php)
-- [config/permission.php](/Users/yusuf/Herd/foundationOS/config/permission.php)
-
-## Konfigurasi Multi-Tenancy MVP
-
-Project ini belum memakai package tenancy terpisah seperti `stancl/tenancy` atau `spatie/laravel-multitenancy`. Untuk MVP, tenancy dijalankan secara manual dengan pola berikut:
-
-- `Tenant` adalah boundary utama akun SaaS
-- `User` bersifat global dan dapat bergabung ke banyak tenant
-- assignment akses user ke tenant diatur melalui `user_tenant_roles`
-- seluruh data operasional wajib membawa `tenant_id`
-- data unit/lembaga tertentu juga membawa `organization_id`
-- panel Filament memakai tenant model `Modules\Core\Models\Tenant`
-
-Konsekuensi praktisnya:
-
-- sebelum panel admin bisa dipakai penuh, harus ada minimal `1 tenant`
-- user harus punya assignment ke tenant tersebut
-- query dan policy aplikasi harus tenant-aware
-
-## Konfigurasi Filament
-
-Panel utama project ini:
-
-- panel id: `admin`
-- URL: `/admin`
-- tenant model: `Modules\Core\Models\Tenant`
-
-Panel ini sekarang mendiscover:
-
-- resource utama app dari `app/Filament/Resources`
-- resource modular dari `Modules/*/app/Filament/Resources`
-- pages dan widgets modular dari setiap module aktif
-
-Jika setelah menambah resource baru panel belum membaca perubahan, jalankan:
-
-```bash
-php artisan optimize:clear
+```
+┌─────────────────────────────────────────┐
+│      Single FoundationOS Instance       │
+├─────────────────────────────────────────┤
+│                                         │
+│  ┌──────────────┐  ┌──────────────┐   │
+│  │  Tenant A    │  │  Tenant B    │   │
+│  │ (tenant_id:1)│  │ (tenant_id:2)│   │
+│  └──────────────┘  └──────────────┘   │
+│                                         │
+│  Shared Database (dengan tenant_id)    │
+│  ├─ Users (global, dapat multi-tenant) │
+│  ├─ Operasional (students, courses)    │
+│  └─ Config (settings per-tenant)       │
+│                                         │
+└─────────────────────────────────────────┘
 ```
 
-### Import Data dan Template CSV
+**Komponen Utama**:
 
-Semua table resource sekarang memiliki dua tombol di header:
+- **Tenant**: Boundary akun SaaS (universitas, sekolah, institusi)
+- **User**: Global, dapat bergabung ke multiple tenants
+- **User-Tenant Roles**: Menghubungkan user ke tenant dengan role tertentu
+- **Tenant-Scoped Data**: Setiap tabel operasional membawa `tenant_id`
+- **Organization** (opsional): Unit/departemen dalam tenant (membawa `organization_id`)
 
-- `Import Data` (menggunakan Filament `ImportAction`)
-- `Download Template` (mengunduh template CSV sesuai kolom importer)
+**Akibatnya**:
 
-Implementasi utama:
+- Setiap query & policy harus tenant-aware
+- Panel Filament dilindungi dengan tenant middleware
+- Permission/Role dikelola per-tenant (Spatie Permission teams mode)
 
-- base importer dinamis: [app/Filament/Imports/BaseModelImporter.php](/Users/yusuf/Herd/foundationOS/app/Filament/Imports/BaseModelImporter.php)
-- helper action tombol import/template: [Modules/Core/app/Filament/Support/ImportTableActions.php](/Users/yusuf/Herd/foundationOS/Modules/Core/app/Filament/Support/ImportTableActions.php)
+### Filament Admin Panel
 
-Prasyarat migration import Filament yang sudah dipasang:
+- **Panel ID**: `admin`
+- **URL**: `/admin`
+- **Tenant Model**: `Modules\Core\Models\Tenant`
+- **Discovery**: Otomatis dari `app/Filament/Resources` & `Modules/*/app/Filament/Resources`
 
-- `create_notifications_table`
-- `create_imports_table`
-- `create_exports_table`
-- `create_failed_import_rows_table`
-
-### Bilingual Resource UI
-
-Semua label Filament resource sekarang mengikuti locale aplikasi aktif:
-
-- `id` untuk bahasa Indonesia
-- `en` untuk bahasa Inggris
-
-Source of truth untuk label dan ikon resource ada di:
-
-- [Modules/Core/app/Support/FilamentUi.php](/Users/yusuf/Herd/foundationOS/Modules/Core/app/Support/FilamentUi.php)
-- [Modules/Core/app/Filament/Support/ModuleResource.php](/Users/yusuf/Herd/foundationOS/Modules/Core/app/Filament/Support/ModuleResource.php)
-
-Aturan yang dipakai:
-
-- `modelLabel`, `pluralModelLabel`, `navigationLabel`, dan field label tidak lagi hardcoded di resource generator
-- ikon navigasi dibedakan per resource/domain agar panel lebih mudah dipindai
-- top navigation dimatikan untuk menghindari menu atas yang terlalu penuh
-
-Kalau nanti kita menambah resource baru, ikuti pola:
-
-- extend `Modules\Core\Filament\Support\ModuleResource`
-- gunakan label field dari `Modules\Core\Support\FilamentUi`
-- jangan tambahkan trash action kalau model tidak memakai `SoftDeletes`
-
-## Konfigurasi Filament Shield
-
-Shield sudah bisa berjalan pada project ini, dengan beberapa syarat konfigurasi berikut:
-
-- package `bezhansalleh/filament-shield` terpasang
-- `spatie/laravel-permission` ikut terpasang sebagai dependency
-- user model utama memakai trait `HasRoles`
-- config Shield diarahkan ke `Modules\Core\Models\User`
-- mode `teams` di Spatie Permission aktif
-- `team_foreign_key` menggunakan `tenant_id`
-- tenant model Shield diarahkan ke `Modules\Core\Models\Tenant`
-
-Konfigurasi yang dipakai saat ini:
-
-- [Modules/Core/app/Models/User.php](/Users/yusuf/Herd/foundationOS/Modules/Core/app/Models/User.php)
-- [config/filament-shield.php](/Users/yusuf/Herd/foundationOS/config/filament-shield.php)
-- [config/permission.php](/Users/yusuf/Herd/foundationOS/config/permission.php)
-
-Langkah setup Shield yang direkomendasikan:
+Setelah menambah resource baru:
 
 ```bash
-php artisan shield:setup --tenant=Modules\\Core\\Models\\Tenant
-php artisan shield:generate --all --panel=admin --relationships
-```
-
-Keterangan:
-
-- `shield:setup` menyiapkan fondasi Shield
-- `shield:generate` membuat policy, permission, dan relationship permission untuk entity Filament di panel `admin`
-- opsi `--relationships` penting karena panel ini memakai tenancy
-
-Status setup saat ini di project:
-
-- migration permission tables sudah ada
-- permission berhasil tergenerate untuk resource modular
-- policy Shield berhasil tergenerate untuk entity panel admin
-
-### Runbook Shield Per Tenant
-
-Untuk modul Workflow dan modul lain yang tenant-aware, pola operasional yang disarankan:
-
-1. pastikan user sudah menjadi member tenant melalui `user_tenant_roles`
-2. pilih tenant aktif di panel admin
-3. generate ulang permission jika ada resource/page baru
-4. assign role Shield pada tenant aktif
-5. verifikasi page/resource muncul di sidebar tenant tersebut
-
-Command yang paling sering dipakai:
-
-```bash
+php artisan optimize:clear  # Refresh auto-discovery
 php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
-php artisan optimize:clear
 ```
 
-Kalau ingin membuat tenant super admin berbasis Shield:
+### Module Architecture
 
-```bash
-php artisan shield:super-admin --user=1 --tenant=1 --panel=admin
+Sistem modul menggunakan **coolsam/modules v5** dengan struktur per-module:
+
+```
+Modules/<Name>/
+├─ app/
+│  ├─ Filament/
+│  │  ├─ Resources/          # Filament resources per domain
+│  │  ├─ Pages/              # Custom pages
+│  │  └─ Widgets/            # Dashboard widgets
+│  ├─ Models/                # Eloquent models
+│  ├─ Services/              # Business logic
+│  ├─ Policies/              # Authorization policies
+│  ├─ Events/                # Domain events
+│  ├─ Observers/             # Model observers
+│  └─ Exceptions/
+├─ database/
+│  ├─ migrations/
+│  ├─ seeders/
+│  └─ factories/
+├─ routes/
+│  ├─ web.php
+│  └─ api.php
+├─ tests/
+│  ├─ Feature/
+│  └─ Unit/
+└─ resources/views/
 ```
 
-Catatan:
+---
 
-- Shield adalah source of truth authorization panel
-- `user_tenant_roles` tetap source of truth membership tenant/organization
-- keduanya harus sama-sama benar agar menu tenant-aware tampil normal
+## 📚 Struktur Direktori Utama
 
-## Workflow V2
-
-FoundationOS sekarang memiliki modul `Workflow` V2 dengan pendekatan metadata-driven:
-
-- Rule Engine terpisah dari Workflow Engine
-- form runtime dibangun dari `form_schema`
-- inbox/worklist dipisahkan dari engine
-- snapshot workflow bersifat immutable per instance
-- automated actions tersedia sebagai hook database-driven
-
-Dokumentasi lengkap ada di:
-
-- [WORKFLOW.md](/Users/yusuf/Herd/foundationOS/WORKFLOW.md)
-
-### Ringkasan Operasional
-
-Halaman operasional yang tersedia:
-
-- `Workflow Worklist`
-- `Workflow My Tasks`
-- `Workflow Team Inbox`
-- `Workflow Task History`
-
-Pilot pertama saat ini adalah Procurement Purchase Requisition.
-
-Setup cepat workflow pilot Procurement:
-
-```bash
-php artisan fos:workflow:setup-procurement-pilot 1 --manager=10 --finance=11 --executive=12 --finance-threshold=10000000 --executive-threshold=50000000
+```
+foundationOS/
+├─ app/                           # Core application layer
+│  ├─ Filament/Imports/          # 100+ Filament CSV importers
+│  ├─ Integrations/Moodle/       # Moodle API client & sync
+│  ├─ Jobs/                      # Queue jobs
+│  ├─ Models/User.php            # Bridge untuk Laravel ecosystem
+│  ├─ Observers/                 # Model observers
+│  ├─ Policies/                  # Authorization policies
+│  └─ Providers/Filament/        # Panel configuration
+│
+├─ Modules/                      # Feature modules (45+)
+│  ├─ Core/                      # 🔴 Fondasi: tenancy, users, orgs
+│  ├─ Global/                    # 🔴 Referensi: negara, provinsi, kota
+│  ├─ School/                    # 🎓 K-12: kurikulum, kelas, siswa
+│  ├─ Campus/                    # 🎓 Higher-ed: fakultas, program studi
+│  ├─ Enrollment/                # 📝 Admisi & registrasi
+│  ├─ Finance/                   # 💰 Akuntansi & pembayaran
+│  ├─ Procurement/               # 🛒 Pembelian & vendor
+│  ├─ Employee/                  # 👥 HR & Payroll
+│  ├─ Library/                   # 📖 Manajemen perpustakaan
+│  ├─ Workflow/                  # ✅ Approval engine (V2)
+│  ├─ Monitoring/                # 📊 Audit & compliance
+│  └─ [40+ modul lainnya]/       # Asset, DMS, Helpdesk, Facility, dll
+│
+├─ config/                       # Laravel & package configuration
+├─ database/
+│  ├─ migrations/                # Database schema
+│  └─ seeders/
+├─ routes/
+│  ├─ web.php                    # Web routes
+│  └─ api.php                    # API routes
+├─ resources/
+│  ├─ views/                     # Blade templates (jika diperlukan)
+│  └─ css/js/                    # Frontend assets
+├─ storage/                      # File uploads, logs, cache
+├─ tests/                        # PHPUnit tests
+│  ├─ Feature/
+│  └─ Unit/
+├─ scripts/                      # One-off PHP utilities
+├─ bootstrap/                    # Bootstrap files
+├─ public/                       # Document root
+├─ composer.json                 # PHP dependencies
+├─ package.json                  # JavaScript dependencies
+└─ README.md                     # This file
 ```
 
-Setup cepat workflow Budget:
+---
 
-```bash
-php artisan fos:workflow:setup-budget-workflow 1 --organization=5 --finance=11 --executive=12 --executive-threshold=50000000
+## 🌟 Fitur Utama
+
+### 1. **Multi-Tenancy Terintegrasi**
+
+- Satu instance, banyak tenant (universitas, sekolah, institusi)
+- Isolasi data otomatis dengan `tenant_id` di setiap tabel
+- Role & permission per-tenant (Spatie Permission teams mode)
+- Tenant settings & konfigurasi terisolasi
+
+### 2. **Filament Admin Panel (v5)**
+
+- UI responsif & intuitif berbasis Livewire v4
+- Bilingual (Indonesia & English) dengan `FilamentUi` helper
+- Import/Export CSV built-in untuk setiap resource
+- Soft delete support & activity logging
+- Real-time Livewire components
+
+### 3. **45+ Modul Terintegrasi**
+
+Lihat [Module Index](#-modul-tersedia) di bawah untuk daftar lengkap.
+
+### 4. **Workflow Engine (V2) — Metadata-Driven**
+
+Approval engine berbasis JSONLogic rules:
+
+```php
+// Definisi workflow di database
+// Automatis advance instance based on condition rules
+Workflow -> WorkflowInstance -> WorkflowStep -> WorkflowAssignment
 ```
 
-Setelah workflow aktif:
-
-- buka Purchase Requisition
-- klik `Start Approval Workflow`
-- approver memproses dari worklist atau halaman workflow instance
-
-Untuk setup, tutorial penggunaan, dan troubleshooting lengkap, gunakan:
-
-- [WORKFLOW.md](/Users/yusuf/Herd/foundationOS/WORKFLOW.md)
-
-Command operasional workflow yang paling sering dipakai:
+**Artisan commands**:
 
 ```bash
+php artisan fos:workflow:setup-procurement-pilot 1 --manager=10
 php artisan fos:workflow:health-check --tenant=1
-php artisan fos:workflow:retry-sla --tenant=1
-php artisan fos:workflow:retry-automation 123 completed
 ```
 
-## Procurement Runbook
+Lihat [WORKFLOW.md](./WORKFLOW.md) untuk detail lengkap.
 
-Vertical slice Procurement yang saat ini paling matang adalah approval `Purchase Requisition`.
+### 5. **Moodle Integration**
 
-Dokumentasi operasional lengkap:
+One-way sync: FoundationOS → Moodle (master data)
 
-- [PROCUREMENT.md](/Users/yusuf/Herd/foundationOS/PROCUREMENT.md)
-
-## Finance Golden Path
-
-Golden path Finance yang sudah dihardening saat ini:
-
-- `Student Invoice -> Payment -> Journal`
-- `Budget approval`
-- overview tenant untuk outstanding, verified payment, posted journal, dan budget status
-
-Dokumentasi operasional lengkap:
-
-- [FINANCE.md](/Users/yusuf/Herd/foundationOS/FINANCE.md)
-
-## Role dan Permission Tenant
-
-Karena Spatie Permission dipakai dalam mode teams, role dan permission bersifat tenant-aware.
-
-Artinya:
-
-- role yang sama dapat eksis dalam konteks tenant berbeda
-- assignment role ke user perlu dilakukan dalam konteks tenant aktif
-- user tidak cukup hanya ada di tabel `users`, tetapi juga harus masuk ke boundary tenant aplikasi
-
-Langkah minimal setelah install:
-
-1. Buat tenant pertama.
-2. Pastikan user admin sudah ada.
-3. Assign user ke tenant tersebut.
-4. Buat atau assign role Shield pada tenant itu.
-
-Contoh assign super admin tenant:
+- Sync users, courses, cohorts, grades, attendance
+- Outbox pattern untuk reliable sync
+- Health check & reconcile commands
 
 ```bash
-php artisan shield:super-admin --user=1 --tenant=1 --panel=admin
+php artisan moodle:sync-cohorts
+php artisan moodle:pull-grades
+php artisan moodle:health-check
 ```
 
-Nilai `--user` dan `--tenant` harus disesuaikan dengan data yang ada di database.
+Lihat [MOODLE.md](./MOODLE.md) dan [MOODLE_HARDENING_CHECKLIST.md](./MOODLE_HARDENING_CHECKLIST.md).
 
-## Catatan Penting Shield di Project Ini
+### 6. **Activity Logging (spatie/laravel-activitylog)**
 
-- `TenantRole` dan `UserTenantRole` di domain `Core` bukan pengganti Spatie Permission; keduanya adalah layer domain membership aplikasi.
-- Shield + Spatie Permission dipakai untuk authorization panel dan action-level permission.
-- `user_tenant_roles` tetap dibutuhkan untuk menentukan user tergabung ke tenant/organization mana.
-- role Shield menentukan apa yang boleh dilakukan user di panel.
+Automatic audit trail untuk semua model changes:
 
-Singkatnya:
+```php
+$activity = Activity::forSubject($course)->get();
+// Tracks: who, what, when, old values, new values
+```
 
-- `user_tenant_roles` menjawab: user ini masuk tenant mana?
-- `roles/permissions` dari Shield menjawab: user ini boleh melakukan apa di tenant tersebut?
+### 7. **Authorization & Permissions**
 
-## Global Super Admin
+- **Filament Shield** untuk UI management
+- **Spatie Permission** untuk granular permissions
+- Role-based access control (RBAC) per-tenant
+- Policy classes untuk model authorization
 
-Project ini mendukung `global super-admin` yang dapat:
+### 8. **Import/Export CSV**
 
-- mengakses seluruh tenant tanpa assignment manual di `user_tenant_roles`
-- melewati authorization gate untuk kebutuhan administrasi platform
+Setiap resource memiliki:
 
-Implementasinya memakai flag `users.is_super_admin`.
+- ✅ Import Data button (bulk CSV upload)
+- 📥 Download Template button (struktur CSV)
+- 100+ custom importers di `app/Filament/Imports/`
 
-### Buat atau Promote Global Super Admin
+### 9. **Responsive Design**
 
-Gunakan command berikut:
+- Tailwind CSS v4
+- Mobile-first UI
+- Alpine.js interactivity
+- Filament components (Tables, Forms, Infolists)
+
+---
+
+## 📦 Modul Tersedia
+
+### Core & Foundation (Wajib)
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **Core** | Fondasi sistem | Tenancy, Users, Organizations, Subscriptions, Academic Years, Departments |
+| **Global** | Reference data | Countries, Provinces, Cities, Districts, Timezones |
+| **Monitoring** | Audit & Compliance | Activity logs, File uploads, System health |
+
+### Akademik & Pendidikan
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **School** | K-12 Education | Curricula, Subjects, Classes, Teachers, Students, Attendance, Assessments |
+| **Campus** | Higher Ed | Faculties, Study Programs, Courses, Lecturers, Theses, Study Plans |
+| **Enrollment** | Admissions & Registration | Admission Periods, Applicants, Registrations, Exams |
+| **EducationQa** | Quality Assurance | Academic quality monitoring & metrics |
+
+### Operasional
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **Finance** | Accounting & Payments | Chart of Accounts, Budgets, Invoices, Journal Entries, Payments |
+| **Procurement** | Purchasing & Vendor Mgmt | Purchase Requisitions, RFQs, POs, Goods Receipts, Vendor Bills |
+| **Employee** | HR & Payroll | Positions, Contracts, Salary Slips, KPIs, Leave Requests |
+| **Library** | Library Management | Books, Copies, Members, Loans, Fines, SLIMS Integration |
+| **Inventory** | Inventory Management | Stock tracking, warehouse operations |
+| **Asset** | Asset Management | Fixed asset tracking, depreciation, maintenance |
+| **Facility** | Facilities Management | Buildings, rooms, maintenance, utilization |
+| **Property** | Property Management | Real estate, leasing, tenant management |
+
+### Workflow & Approval
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **Workflow** | Approval Engine | Metadata-driven workflows, multi-step approvals, SLA automation |
+
+### Komunikasi & Layanan
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **Messaging** | Internal Messaging | Notifications, announcements, messaging system |
+| **EOffice** | Document Management | Electronic office, correspondence tracking |
+| **Helpdesk** | IT Support | Ticketing system, issue tracking |
+| **Clinic** | Medical Services | Student/staff health services |
+| **Counseling** | Student Services | Academic & personal counseling |
+| **Transport** | Transportation | Vehicle & route management |
+| **Cafeteria** | Dining Services | Menu, inventory, transactions |
+| **Boarding** | Student Housing | Dormitory management |
+| **Event** | Events Management | Event planning & management |
+
+### Keamanan & Compliance
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **PhysicalSecurity** | Security | CCTV, access control, incidents |
+| **IsoCompliance** | ISO Standards | ISO 9001, ISO 27001, audit trails |
+| **InternalAudit** | Internal Audit | Audit planning, findings, follow-up |
+| **Risk** | Risk Management | Risk register, mitigation, monitoring |
+| **Legal** | Legal Management | Contracts, agreements, compliance |
+
+### Bisnis & Commerce
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **Sales** | Sales Management | Customers, quotations, orders, invoicing |
+| **Marketplace** | E-Commerce | Product catalog, online ordering |
+| **MerchOrder** | Merchandise | Internal product ordering |
+| **Donation** | Fundraising | Donation tracking, campaigns |
+| **Alumni** | Alumni Relations | Alumni network, engagement |
+
+### Analytics & Intelligence
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **KpiEnterprise** | KPI Tracking | Enterprise metrics, dashboards |
+| **Capacity** | Capacity Planning | Resource planning, forecasting |
+| **InternalAudit** | Internal Audit | Audit operations & reporting |
+| **EducationQa** | Quality Metrics | Academic quality indicators |
+
+### Khusus
+
+| Modul | Domain | Deskripsi |
+|-------|--------|-----------|
+| **Cms** | Content Management | Website content, pages, posts |
+| **Training** | Training & Development | Training programs, certifications |
+| **Printing** | Print Management | Print jobs, quotas, billing |
+| **ItOps** | IT Operations | Infrastructure, systems, monitoring |
+| **Consulting** | Consulting Services | Project-based services |
+| **Dms** | Document Management | Digital records, OCR, archival |
+
+---
+
+## 🛠️ Development
+
+### Artisan Commands
 
 ```bash
-php artisan foundation:make-super-admin admin@example.com
+# Modules
+php artisan module:list                    # Lihat daftar modules
+php artisan module:make <Name>            # Buat module baru
+php artisan module:enable <Name>          # Aktifkan module
+php artisan module:disable <Name>         # Nonaktifkan module
+
+# Database
+php artisan migrate                       # Jalankan migrations
+php artisan migrate:rollback              # Rollback migrations
+php artisan db:seed                       # Run seeders
+php artisan db:seed --class=<Seeder>     # Run specific seeder
+
+# Filament
+php artisan make:filament-resource <Name> --no-interaction
+php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
+php artisan shield:super-admin --user=1 --tenant=1
+
+# Testing
+php artisan test --compact                # Run all tests
+php artisan test --compact --filter=testName  # Run specific test
+php artisan test --compact tests/Feature/ExampleTest.php
+
+# Code Quality
+vendor/bin/pint --dirty --format agent    # Format code
+php artisan tinker                        # Interactive shell
+
+# Workflow
+php artisan fos:workflow:health-check --tenant=1
+php artisan fos:workflow:setup-procurement-pilot 1 --manager=10 --finance=11
 ```
 
-Opsional dengan nama, username, dan password:
+### Development Server
 
 ```bash
-php artisan foundation:make-super-admin admin@example.com --name="Platform Admin" --username="platform_admin" --password="StrongPassword123!"
+# Start all dev services (Laravel, queue, Vite, Pail)
+composer run dev
+
+# Or individually:
+php artisan serve                   # Server on 127.0.0.1:8000
+php artisan queue:listen            # Queue worker
+npm run dev                         # Vite dev server
+php artisan pail                    # Live logs
 ```
 
-Perilaku command:
+### Testing
 
-- jika user belum ada, command akan membuat user baru dan menandai sebagai global super-admin
-- jika user sudah ada, command akan mempromosikan user tersebut menjadi global super-admin
-- jika membuat user baru tanpa `--password`, sistem akan generate password sementara
-
-## Integrasi Moodle (Observer + Outbox + Queue)
-
-Project ini mendukung sinkronisasi satu arah dari FOS ke Moodle dengan pola:
-
-- `Eloquent Observer -> Outbox -> Queue Job -> Moodle Web Service`
-- target near real-time (drain outbox tiap menit)
-- idempotent dengan `dedupe_key`
-- soft delete diterjemahkan menjadi nonaktif/suspend, bukan hard delete
-
-### Scope V1
-
-- `User` (`Modules\Core\Models\User`)
-- `Course` (`Modules\Campus\Models\Course`)
-- Enrollment dari `Student + ClassStudent` (`Modules\School\Models\Student`, `Modules\School\Models\ClassStudent`)
-
-### Tabel Integrasi
-
-- `moodle_sync_outbox`
-- `moodle_entity_mappings`
-- `moodle_class_course_mappings`
-
-### Konfigurasi Environment
-
-Tambahkan variabel berikut di `.env`:
+FoundationOS menggunakan **PHPUnit v12** untuk semua testing:
 
 ```bash
-MOODLE_SYNC_ENABLED=true
-MOODLE_SYNC_READONLY=false
-MOODLE_BASE_URL=https://moodle.test
-MOODLE_WS_TOKEN=your_token_here
-MOODLE_WS_FORMAT=json
-MOODLE_TIMEOUT=15
-MOODLE_VERIFY_SSL=true
-MOODLE_CATEGORY_PARENT_ID=
-MOODLE_ENROL_ROLE_ID=5
-MOODLE_COHORT_SYNC_ENABLED=true
-MOODLE_ROLE_STUDENT=5
-MOODLE_ROLE_TEACHER=3
-MOODLE_ROLE_ASSISTANT_TEACHER=4
-MOODLE_ROLE_MANAGER=1
-MOODLE_CALENDAR_SYNC_ENABLED=false
-MOODLE_LEARNING_PULL_ENABLED=false
-MOODLE_ATTENDANCE_PULL_ENABLED=false
-MOODLE_SYNC_QUEUE=moodle-sync
-MOODLE_SYNC_MAX_ATTEMPTS=7
-MOODLE_SYNC_BATCH_LIMIT=100
+# Run all tests
+php artisan test --compact
+
+# Run specific file
+php artisan test --compact tests/Feature/CoreTenancyFoundationTest.php
+
+# Run with filter
+php artisan test --compact --filter=testWorkflowDefinition
+
+# Generate code coverage
+php artisan test --coverage
 ```
 
-### Prasyarat Moodle
+**Testing conventions**:
+- Feature tests di `tests/Feature/`
+- Unit tests di `tests/Unit/`
+- Use factories untuk test data
+- Always use `RefreshDatabase` trait
 
-- Web services aktif
-- Buat external service + token
-- Pastikan token memiliki akses fungsi:
-  - `core_webservice_get_site_info`
-  - `core_user_create_users`
-  - `core_user_update_users`
-  - `core_course_create_categories`
-  - `core_course_update_categories`
-  - `core_course_create_courses`
-  - `core_course_update_courses`
-  - `enrol_manual_enrol_users`
-  - `enrol_manual_unenrol_users`
+### Code Formatting
 
-Fungsi tambahan (opsional) sesuai toggle:
-
-- `MOODLE_COHORT_SYNC_ENABLED=true`:
-  - `core_cohort_get_cohorts` atau `core_cohort_search_cohorts`
-  - `core_cohort_create_cohorts`
-  - `core_cohort_add_cohort_members`
-- `MOODLE_CALENDAR_SYNC_ENABLED=true`:
-  - `core_calendar_create_calendar_events`
-- `MOODLE_LEARNING_PULL_ENABLED=true`:
-  - `gradereport_overview_get_course_grades`
-  - `core_completion_get_course_completion_status`
-  - `core_completion_get_activities_completion_status`
-- `MOODLE_ATTENDANCE_PULL_ENABLED=true` (plugin attendance):
-  - `mod_attendance_get_courses_with_today_sessions` atau `mod_attendance_get_user_absences`
-
-Untuk bootstrap cepat function token service, jalankan:
+FoundationOS menggunakan **Laravel Pint** untuk style consistency:
 
 ```bash
-php scripts/setup_moodle_foundation_service.php
+# Auto-format modified PHP files
+vendor/bin/pint --dirty --format agent
+
+# Format specific file
+vendor/bin/pint resources/views/app.blade.php --format agent
 ```
 
-Script akan menautkan function integrasi yang tersedia di Moodle Anda ke external service token.
-Jika plugin attendance belum terpasang, function attendance akan dilewati otomatis.
+### Bilingual UI (Indonesia & English)
 
-### Command Operasional
+Semua label UI harus melalui `FilamentUi` helper:
+
+```php
+// ✅ Benar
+TextInput::make('email')->label(FilamentUi::field('email'))
+Section::make(FilamentUi::text('Personal Information'))
+
+// ❌ Salah — hardcoded label
+TextInput::make('email')->label('Email Address')
+Section::make('Personal Information')
+```
+
+Tambah frasa baru ke `Modules/Core/app/Support/FilamentUi.php`:
+
+```php
+private const PHRASES = [
+    'English phrase' => 'Terjemahan Indonesia',
+    'New workflow name' => 'Nama alur kerja baru',
+];
+```
+
+---
+
+## 📖 Dokumentasi Lengkap
+
+Dokumentasi spesifik untuk fitur & modul tersedia di:
+
+| Dokumen | Topik |
+|---------|-------|
+| [ROADMAP.md](./ROADMAP.md) | Development roadmap & versioning |
+| [WORKFLOW.md](./WORKFLOW.md) | Workflow V2 engine, setup, testing |
+| [MOODLE.md](./MOODLE.md) | Moodle integration, sync setup |
+| [MOODLE_HARDENING_CHECKLIST.md](./MOODLE_HARDENING_CHECKLIST.md) | Security hardening untuk Moodle |
+| [PROCUREMENT.md](./PROCUREMENT.md) | Procurement workflows & approval chains |
+| [FINANCE.md](./FINANCE.md) | Financial management & accounting flows |
+| [LIBRARY.md](./LIBRARY.md) | Library module & SLIMS integration |
+| [AGENTS.md](./AGENTS.md) | AI agents & automation |
+
+---
+
+## 🚀 Deployment
+
+### Production Deployment dengan Laravel Cloud
 
 ```bash
-php artisan fos:moodle:health-check
-php artisan fos:moodle:backfill all --tenant=1
-php artisan fos:moodle:drain-outbox --limit=100
-php artisan fos:moodle:retry-failed --limit=100
-php artisan fos:moodle:sync-cohorts --tenant=1
-php artisan fos:moodle:sync-calendar --tenant=1 --limit=100
-php artisan fos:moodle:pull-grades --tenant=1
-php artisan fos:moodle:pull-progress --tenant=1 --limit=200
-php artisan fos:moodle:pull-attendance --tenant=1 --limit=100
-php artisan fos:moodle:reconcile all --dry-run
-php artisan fos:moodle:reconcile all --fix --limit=500
-php artisan fos:moodle:ops-report
+# Laravel Cloud adalah cara tercepat untuk deploy & scale aplikasi Laravel
+# https://cloud.laravel.com/
+
+laravel-cloud deploy
 ```
 
-`drain-outbox` dijadwalkan setiap menit, dan `reconcile --dry-run` setiap jam melalui scheduler Laravel.
-Pastikan worker queue dan scheduler aktif:
+### Manual Deployment
 
 ```bash
-php artisan queue:work --queue=moodle-sync,default
-php artisan schedule:work
+# Build frontend assets
+npm run build
+
+# Install production dependencies
+composer install --optimize-autoloader --no-dev
+
+# Run migrations
+php artisan migrate --force
+
+# Clear & optimize caches
+php artisan optimize
+
+# Start queue worker (jika ada jobs)
+php artisan queue:work
 ```
 
-### Monitoring Operasional
+### Environment Configuration
 
-Gunakan report cepat untuk observability:
+Key `.env` variables:
 
-```bash
-php artisan fos:moodle:ops-report
-php artisan fos:moodle:ops-report --json
+```env
+# Multi-Tenancy
+TENANCY_ENABLED=true
+
+# Database
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_DATABASE=foundationos
+DB_USERNAME=root
+DB_PASSWORD=secret
+
+# Mail (untuk notifikasi)
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+
+# Moodle Integration (opsional)
+MOODLE_URL=https://moodle.example.com
+MOODLE_TOKEN=your-moodle-webservice-token
+
+# Queue
+QUEUE_CONNECTION=database
+# atau: redis, sync (development)
 ```
 
-Report mencakup:
+---
 
-- backlog outbox (`pending`, `processing`, `failed`)
-- umur item pending tertua
-- distribusi gagal per entity
-- jumlah snapshot learning pull 24 jam terakhir
+## 🤝 Kontribusi
 
-### Catatan Enrollment
+Kami menerima kontribusi dari community! Berikut guidelines:
 
-Enrollment membaca `moodle_class_course_mappings` untuk menentukan kelas FOS (`class_id`) diarahkan ke course Moodle yang mana.
-Isi mapping ini sebelum menjalankan backfill enrollment agar sinkronisasi berhasil.
+### Development Process
 
-### Catatan Attendance Pull
+1. **Fork repository** & buat branch fitur
+2. **Ikuti code conventions** (lihat [code-style.md](./docs/code-style.md))
+3. **Tulis tests** untuk fitur baru (PHPUnit)
+4. **Format code** dengan `vendor/bin/pint --dirty`
+5. **Buat pull request** dengan deskripsi jelas
 
-`pull-attendance` bersifat plugin-aware:
+### Branch Naming
 
-- command cek fungsi attendance yang tersedia dari Moodle site info
-- jika fungsi plugin tidak tersedia, proses akan skip dengan warning (bukan gagal total)
-- hasil pull disimpan sebagai snapshot di `moodle_learning_metrics`
-
-### Inbound Sync Policy (Moodle -> FOS)
-
-Kebijakan default integrasi bersifat **strict source-of-truth**:
-
-- FOS tetap master data untuk user dan course
-- perubahan destruktif dari Moodle tidak langsung menghapus data di FOS
-- drift dari Moodle ditangani lewat reconcile dan remediasi ke Moodle
-
-Contoh: user terhapus di Moodle
-
-- `fos:moodle:reconcile --dry-run` akan mendeteksi user FOS aktif yang hilang di Moodle
-- `fos:moodle:reconcile --fix` akan enqueue remediasi (`upsert`) ke outbox agar user dipulihkan di Moodle
-- jika user FOS sudah nonaktif/soft-delete, reconcile akan menjaga kondisi suspend di Moodle (bukan hard delete)
-
-## Arsitektur Inti
-
-Tiga entitas inti yang menjadi tulang punggung sistem:
-
-- `User`
-  User bersifat global. Satu user dapat bergabung ke banyak tenant dan banyak organization melalui pivot `user_tenant_roles`.
-- `Tenant`
-  Tenant adalah akun SaaS utama. Semua data operasional wajib di-scope minimal dengan `tenant_id`.
-- `Organization`
-  Organization adalah unit operasional di dalam tenant, misalnya sekolah, kampus, cabang, atau lembaga.
-
-Konsekuensinya:
-
-- `users` tidak memiliki `tenant_id` langsung.
-- akses lintas tenant ditentukan oleh `user_tenant_roles`.
-- data global seperti `subscription_plans`, `modules`, dan referensi wilayah tidak membawa `tenant_id`.
-- data operasional membawa `tenant_id`, dan bila relevan juga `organization_id`.
-
-## Struktur Modul
-
-- `Core`
-  Tenancy, organization, roles, academic year/period, module entitlement, dan settings.
-- `Global`
-  Referensi global seperti negara, provinsi, kota, kecamatan, desa, dan timezone.
-- `School`
-  Domain sekolah: siswa, guru, kelas, kurikulum, jadwal, penilaian, pelanggaran, prestasi.
-- `Campus`
-  Domain perguruan tinggi: fakultas, prodi, dosen, mahasiswa, penawaran mata kuliah, KRS, hasil studi, tesis, feeder log.
-- `Enrollment`
-  Domain penerimaan: admission period, applicant, exam schedule/result, registration.
-- `Finance`
-  COA, tuition, invoice, payment, journal entry, budget.
-- `Library`
-  Katalog buku, eksemplar, anggota, peminjaman, denda.
-- `Employee`
-  Karyawan, jabatan, shift, kontrak, absensi, cuti, payroll, KPI.
-- `Procurement`
-  Vendor, item pengadaan, requisition, RFQ, PO, goods receipt, vendor bill.
-- `Monitoring`
-  Audit trail dan file attachment yang bersifat lintas domain.
-
-## Migrasi Legacy SLiMS ke FOS Library
-
-Untuk antisipasi tenant yang sebelumnya sudah memakai SLiMS, tersedia importer khusus per-tenant:
-
-```bash
-php artisan fos:library:import-slims --tenant=1 --organization=1 --entity=all --dry-run
-php artisan fos:library:import-slims --tenant=1 --entity=all --dry-run
-php artisan fos:library:import-slims --tenant=1 --entity=all
-php artisan fos:library:import-slims --tenant=1 --entity=all --skip-existing
-php artisan fos:library:import-slims --tenant=1 --entity=all --since="2026-03-01 00:00:00"
+```
+feature/short-description        # Fitur baru
+bugfix/issue-description         # Bug fixes
+refactor/component-name          # Refactoring
+docs/what-was-documented         # Documentation
 ```
 
-Konfigurasi legacy SLiMS tidak lagi memakai `.env` global.
-Jika library berjalan tenant-wide, gunakan `tenant_settings`.
-Jika library berjalan per-organization, gunakan `organization_settings`.
+### Pull Request Checklist
 
-Contoh key yang perlu diisi:
+- [ ] Tests written & passing (`php artisan test --compact`)
+- [ ] Code formatted (`vendor/bin/pint --dirty`)
+- [ ] Migrations created (jika ada schema changes)
+- [ ] Documentation updated
+- [ ] No breaking changes (atau documented clearly)
+- [ ] Bilingual UI labels (via `FilamentUi`)
 
-```bash
-slims_import_enabled=true
-slims_db_host=127.0.0.1
-slims_db_port=3306
-slims_db_database=slims
-slims_db_username=root
-slims_db_password=
-slims_db_prefix=
-slims_import_email_domain=slims.local
-slims_import_member_status=active
+---
+
+## 📋 Requirements
+
+### System Requirements
+
+```
+- PHP 8.4+
+- Composer 2.4+
+- Node.js 18+ (untuk frontend bundling)
+- MySQL 8.0+ atau PostgreSQL 12+
+- Redis 6.0+ (untuk caching & queue, optional)
 ```
 
-Contoh insert cepat untuk mode tenant-wide:
+### PHP Extensions
 
-```sql
-INSERT INTO tenant_settings (tenant_id, `group`, `key`, `value`, `type`, created_at, updated_at)
-VALUES
-(1, 'integration', 'slims_import_enabled', 'true', 'boolean', NOW(), NOW()),
-(1, 'integration', 'slims_db_host', '127.0.0.1', 'string', NOW(), NOW()),
-(1, 'integration', 'slims_db_port', '3306', 'integer', NOW(), NOW()),
-(1, 'integration', 'slims_db_database', 'slims', 'string', NOW(), NOW()),
-(1, 'integration', 'slims_db_username', 'root', 'string', NOW(), NOW()),
-(1, 'integration', 'slims_db_password', '', 'string', NOW(), NOW());
+```
+- BCMath
+- Ctype
+- JSON
+- Mbstring
+- OpenSSL
+- PDO
+- Tokenizer
+- XML
 ```
 
-Karakteristik importer:
+---
 
-- wajib `--tenant`, sehingga import selalu terikat ke satu tenant
-- `--organization` opsional:
-  - isi `--organization=ID` untuk mode per-organization
-  - kosongkan untuk mode tenant-wide (terpusat)
-- bila `--organization` diisi, konfigurasi SLiMS diprioritaskan dari `organization_settings`
-- fallback ke `tenant_settings` hanya dipakai untuk mode tenant-wide
-- idempotent per tenant melalui tabel mapping `library_slims_mappings`
-- bisa dijalankan bertahap per entitas: `catalog`, `members`, `loans`, atau `all`
-- aman untuk re-run (update mapping yang sudah ada, tidak duplikasi membabi buta)
+## 📄 Lisensi
 
-Catatan:
+FoundationOS di-license di bawah [MIT License](./LICENSE).
 
-- importer ini khusus skenario migrasi tenant legacy; tenant baru tanpa SLiMS tidak perlu menjalankannya
-- importer sekarang mendukung mode incremental dengan `--skip-existing` dan `--since`
+---
 
-### Operasional Library
+## 💬 Support & Community
 
-Command operasional yang tersedia:
+Untuk bantuan & pertanyaan:
 
-```bash
-php artisan fos:library:recalc-fines
-php artisan fos:library:recalc-fines --tenant=1
-php artisan fos:library:stock-audit
-php artisan fos:library:stock-audit --tenant=1
-```
+- 📧 **Email**: support@foundationos.com
+- 🐛 **Issue Tracker**: [GitHub Issues](https://github.com/yusufbayuw/foundationOS/issues)
+- 📚 **Documentation**: [Lihat ROADMAP.md](./ROADMAP.md) untuk development updates
+- 💡 **Feature Requests**: [Diskusi komunitas](https://github.com/yusufbayuw/foundationOS/discussions)
 
-Catatan arsitektur:
+---
 
-- scope Library memakai `tenant-first`
-- `organization_id` boleh `null` untuk mode library terpusat lintas organization dalam satu tenant
-- policy sirkulasi mengikuti precedence `member -> organization -> tenant -> default`
-- OPAC publik tersedia di `/opac/{tenant_code}`
-- OPAC per-organization tersedia di `/opac/{tenant_code}/organizations/{organization_code}`
-- role assignment member ke tenant memakai `--tenant-role-id` jika ingin role spesifik; jika tidak diisi, sistem cari role default/member/student
+## 🎓 Learning Resources
 
-## Aturan Relasi
+### Getting Started
 
-Aturan relasi yang dipakai di seluruh project:
+1. Baca [Quick Start](#-quick-start) di atas
+2. Jalankan aplikasi lokal dengan `composer run dev`
+3. Login ke panel admin di `/admin`
+4. Explore modules & features di Filament UI
 
-- setiap `belongsTo()` harus memiliki inverse relation yang sesuai di model induk.
-- setiap foreign key konkret harus diikat dengan constraint database bila target tabelnya jelas.
-- kolom generic hanya dipertahankan untuk payload bebas yang memang tidak cocok menjadi FK keras.
-- relasi yang mewakili entitas lintas domain harus menggunakan Eloquent native, bukan pseudo relation manual.
+### Deep Dive
 
-Konvensi foreign key:
+- **Module Development**: Baca struktur di `Modules/Core/` sebagai contoh
+- **Filament Resources**: Check `Modules/School/app/Filament/Resources/`
+- **Workflow**: Lihat [WORKFLOW.md](./WORKFLOW.md) untuk automation
+- **Testing**: Review `tests/Feature/` untuk test examples
 
-- `tenant_id`
-  Wajib untuk semua tabel operasional.
-- `organization_id`
-  Dipakai bila data memang milik unit/lembaga tertentu di dalam tenant.
-- `user_id`
-  Dipakai hanya saat entitas benar-benar dimiliki atau dioperasikan oleh user.
-- kolom seperti `created_by`, `approved_by`, `verified_by`, `processed_by`, `reported_by`, `handled_by`, `uploaded_by`, `synced_by`
-  Harus mengarah ke `users.id` dan punya inverse relation di model `User`.
+---
 
-## Relasi Polymorphic Resmi
+## 🙏 Acknowledgments
 
-Project ini sekarang mengunci polymorphic relation berikut:
+FoundationOS dibangun dengan teknologi terbaik:
 
-### Billing
+- [Laravel](https://laravel.com/) - PHP Framework
+- [Filament](https://filamentphp.com/) - Admin Panel
+- [Livewire](https://livewire.laravel.com/) - Reactive Components
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Spatie](https://spatie.be/) - Permission & Activity Logging Packages
+- [coolsam/modules](https://github.com/coolsam/modules) - Module System
 
-`Finance\StudentInvoice` memakai:
+---
 
-- `invoiceable(): MorphTo`
+**Last Updated**: 2026-05-23 | **Version**: Comprehensive v1.0
 
-Inverse resmi:
-
-- `School\Student::studentInvoices(): MorphMany`
-- `Enrollment\Applicant::studentInvoices(): MorphMany`
-- `Campus\CollageStudent::studentInvoices(): MorphMany`
-
-Ini berarti invoice pendidikan dapat diarahkan ke:
-
-- siswa sekolah,
-- calon siswa atau pendaftar,
-- mahasiswa kampus.
-
-### Monitoring
-
-`Monitoring\AuditLog` memakai:
-
-- `auditable(): MorphTo`
-
-`Monitoring\FileUpload` memakai:
-
-- `fileable(): MorphTo`
-
-Model yang saat ini secara eksplisit disiapkan untuk audit trail atau attachment domain:
-
-- `Tenant`
-- `Organization`
-- `School\Student`
-- `Enrollment\Applicant`
-- `Campus\CollageStudent`
-- `Campus\StudyProgram`
-- `Library\Book`
-- `Procurement\Vendor`
-- `Procurement\PurchaseOrder`
-- `Procurement\GoodsReceipt`
-- `Procurement\VendorBill`
-
-Selain morph, `audit_logs` dan `file_uploads` tetap membawa `tenant_id` dan `organization_id` agar bisa di-query sebagai data tenant-scoped tanpa custom join tambahan.
-
-## Matriks Relasi Inti
-
-Ringkasan relasi inti yang paling sering dipakai service layer dan panel admin:
-
-- `Tenant`
-  Punya banyak organization, userTenantRoles, tenantRoles, tenantModules, academicYears, departments, dan seluruh entitas operasional lintas modul.
-- `Organization`
-  Punya banyak academicYears, departments, admissionPeriods, school entities, finance entities, employee entities, procurement categories, dan campus entities.
-- `User`
-  Punya banyak assignment tenant lewat `user_tenant_roles`, serta inverse relation ke semua kolom user-based seperti `createdTenants`, `principalOrganizations`, `verifiedPayments`, `approvedPurchaseOrders`, `processedVendorBills`, `uploadedFiles`, `auditLogs`, dan lainnya.
-- `TenantRole`
-  Punya banyak `userTenantRoles`.
-- `UserTenantRole`
-  Menghubungkan `user`, `tenant`, `organization`, dan `tenantRole`.
-- `Module`
-  Terhubung ke tenant melalui pivot `tenant_modules`.
-
-## Guidelines Pengembangan
-
-Gunakan panduan ini saat menambah tabel atau model baru:
-
-1. Mulai dari boundary:
-   apakah data ini global, tenant-scoped, atau organization-scoped.
-2. Jika data operasional:
-   tambahkan `tenant_id`.
-3. Jika data milik unit tertentu:
-   tambahkan `organization_id`.
-4. Jika relasi target jelas:
-   pakai `foreignId(...)->constrained()` atau constraint tambahan di migration alter.
-5. Jika entitas butuh attachment atau audit trail:
-   pakai `morphMany()` ke `FileUpload` atau `AuditLog`.
-6. Jika menambah `belongsTo()`:
-   selalu tambahkan inverse relation yang sesuai.
-
-## Catatan Implementasi
-
-- Model user utama aplikasi berada di `Modules/Core/Models/User.php`, sedangkan `app/Models/User.php` adalah bridge agar komponen Laravel tetap kompatibel.
-- `Monitoring` sudah memakai polymorphic native Laravel, bukan lagi pasangan kolom manual `entity_type/entity_id`.
-- Morph map dikunci di `AppServiceProvider` agar tipe polymorphic stabil dan tidak bergantung pada refactor namespace.
-- Beberapa FK yang semula berupa kolom lepas kini dipasang constraint tambahan lewat migration alter, supaya urutan migration lama tetap aman.
-
-## Verifikasi
-
-Perintah minimal untuk memverifikasi fondasi relasi:
-
-```bash
-php artisan migrate:fresh
-php artisan test
-```
-
-Test yang penting setelah perubahan relasi:
-
-- inverse relation tenant dan organization tetap terbaca,
-- `invoiceable` resolve ke model sumber yang benar,
-- `auditable` dan `fileable` resolve ke entitas domain yang benar,
-- fresh migration tidak gagal karena urutan FK.
-
-Perintah tambahan untuk memverifikasi setup panel dan Shield:
-
-```bash
-php artisan optimize:clear
-php artisan route:list | grep filament.admin.resources
-php artisan test
-```
