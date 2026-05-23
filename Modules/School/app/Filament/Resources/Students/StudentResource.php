@@ -2,10 +2,13 @@
 
 namespace Modules\School\Filament\Resources\Students;
 
-use Illuminate\Database\Eloquent\Model;
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
+use Modules\Core\Support\FilamentUi;
 use Modules\School\Filament\Resources\Students\Pages\CreateStudent;
 use Modules\School\Filament\Resources\Students\Pages\EditStudent;
 use Modules\School\Filament\Resources\Students\Pages\ListStudents;
@@ -25,19 +28,34 @@ use Modules\School\Models\Student;
 
 class StudentResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = Student::class;
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['nis', 'nisn', 'user.name'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return array_merge(
+            static::detailStatus($record->status),
+            [FilamentUi::field('nis') => $record->nis ?? '-'],
+        );
+    }
 
     protected static ?string $recordTitleAttribute = null;
 
-    public static function getRecordTitle(?Model $record): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
     {
         if ($record === null) {
             return null;
         }
 
         return $record->user?->name
-            ?? ($record->nis ? 'NIS: ' . $record->nis : null)
-            ?? 'Siswa #' . $record->getKey();
+            ?? ($record->nis ? 'NIS: '.$record->nis : null)
+            ?? 'Siswa #'.$record->getKey();
     }
 
     public static function form(Schema $schema): Schema

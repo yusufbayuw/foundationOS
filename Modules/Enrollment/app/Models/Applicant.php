@@ -4,21 +4,21 @@ namespace Modules\Enrollment\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Department;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
 use Modules\School\Models\Student;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Applicant extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected ?int $previousAdmissionPeriodId = null;
 
@@ -79,6 +79,7 @@ class Applicant extends Model
 
     protected $fillable = [
         'tenant_id',
+        'lead_id',
         'admission_period_id',
         'registration_number',
         'full_name',
@@ -130,6 +131,12 @@ class Applicant extends Model
             'documents' => 'array',
         ];
     }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class);
+    }
+
     public function admissionPeriod(): BelongsTo
     {
         return $this->belongsTo(AdmissionPeriod::class);

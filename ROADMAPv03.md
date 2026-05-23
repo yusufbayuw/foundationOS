@@ -7,33 +7,33 @@ Audit gap Fase 3 (Global Dashboard, Reporting Engine, Global Search, Audit Trail
 ## Status Audit Fase 3
 
 ### 1. Global Dashboard & BI
-- [~] Executive Summary — `TabbedDashboard` + per-modul `*StatsOverview` widget (Finance, Employee, Procurement, Library, School, Campus, Enrollment); **belum ada tab CEO cross-modul tunggal**
-- [ ] Real-time Analytics — widget masih count/sum sederhana; tidak ada chart tren / time-series
-- [ ] Custom Widget Builder — semua widget hardcode di kode; tidak ada UI user-side
+- [x] Executive Summary — tab **Executive** di `TabbedDashboard` + `ExecutiveStatsOverview` via `ExecutiveMetricsService`
+- [x] Real-time Analytics — 4 chart widget time-series (Revenue, Payroll, AR/AP, Workflow) dengan cache 5 menit
+- [ ] Custom Widget Builder — **tunda** (backlog ROADMAP)
 
 ### 2. Centralized Reporting Engine
-- [ ] Cross-Module Reporting (efisiensi biaya, profitabilitas per program studi)
-- [~] Export Center — `ExportAction` sudah dipakai di `StudentsTable` + table `exports` dari Filament; **belum ada halaman Export Center sentral** untuk monitor/retry semua ekspor
-- [ ] Scheduled Reports — `app/Console/Kernel.php` tidak punya schedule; tidak ada mailer report
+- [x] Cross-Module Reporting — `CrossModuleReportService` + halaman `CostEfficiencyReportPage`
+- [x] Export Center — `ExportCenterPage` (re-download, retry)
+- [x] Scheduled Reports — `reports:weekly-summary` + schedule Senin 07:00 di `routes/console.php`
 
 ### 3. Global Search & Command Center
-- [ ] Deep Search — tidak ada resource yang mendefinisikan `getGloballySearchableAttributes()` / `getGlobalSearchResultDetails()`. **Filament Global Search belum diaktifkan**
-- [~] Keyboard Shortcuts — shortcut bawaan Filament v5 jalan; kustomisasi spotlight cross-module belum
+- [x] Deep Search — 10 resource utama + trait `ConfiguresGlobalSearch`
+- [~] Keyboard Shortcuts — shortcut bawaan Filament v5; kustomisasi spotlight belum
 
 ### 4. Advanced Audit Trail & Security
-- [~] Audit Trail Explorer — `Monitoring\AuditLogs` resource ada (custom, bukan Spatie ActivityLog); **belum ada UI diff before/after**
-- [ ] Security Logs — tidak ada listener untuk `Illuminate\Auth\Events\Failed` / `Lockout`; akses data sensitif (gaji) tidak ditandai khusus
-- [ ] Database Archiving — tidak ada strategi atau command archiving
+- [x] Audit Trail Explorer — diff renderer `components/audit-diff` di view Audit Log
+- [x] Security Logs — listener `LogSecurityAuthEvents` + filter kategori `security`
+- [ ] Database Archiving — **tunda** (backlog)
 
 ### 5. Sinkronisasi Antar-Modul (Bridging)
-- [ ] Inventory → Finance — N/A (modul Inventory belum ada — lihat ROADMAPv02 Sprint 3)
+- [x] Inventory → Finance — modul Inventory + integrasi procurement (ROADMAPv02)
 - [ ] HR → Finance — auto-journal payroll belum ada (PayrollService belum dibangun — lihat ROADMAPv02 Sprint 1.3)
-- [ ] Sales/POS → Finance & Inventory — **modul Sales/POS belum ada sama sekali**
+- [~] Sales/POS → Finance & Inventory — modul **Sales** (migration + model skeleton); POS UI & auto-journal listener belum lengkap
 - [x] School (SPP) → Finance — `Student` morphMany `StudentInvoice`, `TuitionType` + `Payment` aktif
 
 ### Langkah Teknis Penting
-- [ ] Laravel Pulse / Telescope — tidak terpasang
-- [~] Database Indexing — perlu audit `journal_entry_lines`, `attendance_logs`, `moodle_sync_outbox`, `audit_logs`
+- [x] Laravel Pulse — terpasang; gate `viewPulse` untuk global super-admin
+- [x] Database Indexing — migration `2026_05_23_210000_phase3_audit_category_and_performance_indexes`
 
 ---
 
@@ -42,9 +42,9 @@ Audit gap Fase 3 (Global Dashboard, Reporting Engine, Global Search, Audit Trail
 - [x] SIAKAD K-12 — `Curriculum`, `Subject`, `SchoolClass`, `Teacher`, `Student`, `Schedule`, `Attendance`, `Assessment`, `StudentGrade`
 - [x] SIAKAD Higher-Ed — `Faculty`, `StudyProgram`, `Course`, `Lecturer`, `CollageStudent`, `StudyPlan`, `Thesis`, `StudyResult`
 - [x] Student Ledger bridge — `Student` ↔ `StudentInvoice` ↔ `Payment` ↔ `TuitionType`
-- [~] SPP otomatis — bridge data ada, **scheduler auto-generate SPP bulanan / cicilan uang pangkal / denda belum terlihat**
+- [x] SPP otomatis — `school:generate-monthly-tuition`, `school:apply-late-fees`, `RegistrationFeeInstallmentService`
 - [~] LMS Lite — **tidak ada LMS native**; integrasi **Moodle** matang (`MoodleClient`, `MoodleOutboxService`, `MoodleSyncService`, `MoodleEnrollmentReconciler`, `MoodleDetailedGradePullService`)
-- [~] Raport — `StudentGrade`, `Assessment`, `ReportCardController` (PDF dompdf) ada; **belum ada workflow approval Kepala Sekolah untuk revisi nilai**
+- [x] Raport — workflow revisi nilai (`student-grade-revision`) + `StudentGradeObserver` + RelationManager workflow
 
 ---
 

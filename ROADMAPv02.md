@@ -16,18 +16,18 @@ Audit gap Fase 2 terhadap codebase saat ini, beserta urutan kerja yang direkomen
 ### 2. Modul Finance & Accounting (Bulan 4)
 - [x] Chart of Accounts — `ChartOfAccount`
 - [x] General Ledger — `JournalEntry` + `JournalEntryLine`
-- [~] AP & AR
+- [x] AP & AR
   - [x] AP via `VendorBill` + `VendorBillAutoCreationService`
-  - [~] AR hanya `StudentInvoice` (khusus siswa); **AR umum non-student belum ada**
-- [~] Automatic Journaling
+  - [x] AR umum via `CustomerInvoice` (+ `StudentInvoice` untuk siswa)
+- [x] Automatic Journaling
   - [x] Procurement → VendorBill draft journal (`VendorBillAutoCreationService::postDraftJournal`)
-  - [x] Payroll → journal (sudah diimplementasikan via `PayrollJournalService`)
-  - [ ] Stock-out → journal (belum, karena modul Inventory belum ada)
-- [ ] Laporan Keuangan Standar (Laba Rugi, Neraca, Arus Kas) — tidak terlihat sebagai Filament resource/page
+  - [x] Payroll → journal (`PayrollJournalService`)
+  - [x] Stock-in/out → journal (`StockJournalService` + listener `StockMoveCommitted`)
+- [x] Laporan Keuangan Standar — `FinancialReportService` + halaman P&L, Neraca, Arus Kas
 
 ### 3. Modul Inventory & Procurement (Bulan 5)
-- [ ] **Warehouse Management — gap terbesar.** Modul Inventory/Warehouse belum ada sama sekali. Tidak ada `Warehouse`, `StockItem`, `StockMove`, valuation FIFO/LIFO/Average
-- [ ] Stock Move & Adjustment — N/A
+- [x] **Warehouse Management** — modul `Inventory`: `Warehouse`, `StockItem`, `StockLevel`, `StockMove`, `StockCostLayer`, valuation FIFO/LIFO/AVG
+- [x] Stock Move & Adjustment — `StockMoveService`, `StockAdjustment` + workflow
 - [x] Purchase Order — full chain: `PurchaseRequisition` → `RequestForQuotation` → `PurchaseOrder` → `GoodsReceipt` → `VendorBill`
 - [x] Supplier Management — `Vendor`
 
@@ -35,8 +35,8 @@ Audit gap Fase 2 terhadap codebase saat ini, beserta urutan kerja yang direkomen
 - [~] Approval Gate
   - [x] Procurement (`PurchaseRequisition`) & Finance (`Budget`) sudah terintegrasi Workflow V2 + RelationManager
   - [x] HRM (`LeaveRequest`, lembur, `SalarySlip`) sudah terintegrasi
-- [ ] Evidence Requirement (upload bukti sebelum tombol Approve aktif) — fitur ini belum ada di Workflow V2
-- [~] Audit Trail — `Monitoring\AuditLog` custom ada, tapi belum konsisten dipasang per-transaksi
+  - [x] Evidence Requirement — `required_evidence` pada `WorkflowStep`, gate di `DatabaseWorkflowEngine`, `WorkflowEvidence` + RelationManager
+- [x] Audit Trail — `HasAuditTrail` + `AuditableObserver` + `AuditTrailRecorder` (Inventory, Procurement transaksi, Finance Budget/CustomerInvoice)
 
 ### Tantangan Teknis (Inter-Module Communication)
 - [~] Event Listener — baru ada satu pasang: `PurchaseRequisitionApproved` → `CreateRfqFromApprovedPurchaseRequisition`
@@ -78,50 +78,50 @@ Audit gap Fase 2 terhadap codebase saat ini, beserta urutan kerja yang direkomen
 - RelationManager `EmployeeDocument` di `Employee` resource
 - Tipe dokumen: KTP, NPWP, Ijazah, Kontrak (enum), file upload dengan visibility private
 
-### Sprint 2 — Finance lengkap
+### Sprint 2 — Finance lengkap [SELESAI]
 
-#### 2.1 Laporan Keuangan Standar
+#### 2.1 Laporan Keuangan Standar [x]
 - Service `FinancialReportService`: P&L, Neraca, Arus Kas
 - Agregasi `JournalEntryLine` per `ChartOfAccount.type` (asset/liability/equity/revenue/expense)
 - Filament page per laporan + export PDF/Excel
 - Filter periode + organization
 
-#### 2.2 AR Umum (non-student)
+#### 2.2 AR Umum (non-student) [x]
 - Keputusan arsitektur: polymorphic `Invoice` vs `CustomerInvoice` paralel
 - Rekomendasi: model `Invoice` baru dengan `invoiceable` polymorphic; `StudentInvoice` jadi sub-type
 - Migration + backfill data lama
 
-#### 2.3 Evidence Requirement di Workflow
+#### 2.3 Evidence Requirement di Workflow [x]
 - Extend `WorkflowStep` dengan field `required_evidence` (array: file_count, types, label)
 - Gate `WorkflowEngine::advance()` cek attachment terlampir
 - UI: zone upload di `WorkflowInstancesRelationManager`
 
-#### 2.4 Seeder Workflow Approval Limit
+#### 2.4 Seeder Workflow Approval Limit [x]
 - Workflow default: PO > 10 jt → Direktur; PO > 50 jt → Direktur + Komisaris
 - Pakai `RuleEngine` JsonLogic condition pada transition
 - Artisan command: `fos:workflow:setup-approval-limits --tenant=`
 
-### Sprint 3 — Modul Inventory MVP (modul baru)
+### Sprint 3 — Modul Inventory MVP [SELESAI]
 
-#### 3.1 Skeleton Modul
+#### 3.1 Skeleton Modul [x]
 - `php artisan module:make Inventory`
 - Models: `Warehouse`, `StockItem`, `StockLevel` (per warehouse × item), `StockMove`, `StockAdjustment`
 - Migration `tenant_id` + `organization_id` di semua tabel
 
-#### 3.2 Valuation
+#### 3.2 Valuation [x]
 - Field `valuation_method` enum (FIFO/LIFO/AVG) per item atau per warehouse
 - Service `StockValuationService` — hitung COGS saat stock-out
 
-#### 3.3 Integrasi Procurement
+#### 3.3 Integrasi Procurement [x]
 - Listener: `GoodsReceiptConfirmed` → buat `StockMove` (stock-in) ke `Warehouse` tujuan
 - Update `StockLevel` atomik (lock for update)
 
-#### 3.4 Integrasi Finance
+#### 3.4 Integrasi Finance [x]
 - Stock-in → Dr Persediaan / Cr GR/IR
 - Stock-out → Dr COGS / Cr Persediaan
 - Auto-journal via listener `StockMoveCommitted`
 
-#### 3.5 Stock Adjustment + Workflow
+#### 3.5 Stock Adjustment + Workflow [x]
 - Form adjustment dengan reason enum
 - Wajib approval (Workflow V2) untuk adjustment > threshold
 

@@ -21,8 +21,6 @@ use Modules\Core\Models\User;
 use Modules\Enrollment\Models\AdmissionPeriod;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Finance\Models\StudentInvoice;
-use Modules\Monitoring\Models\AuditLog;
-use Modules\Monitoring\Models\FileUpload;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\GoodsReceiptItem;
 use Modules\Procurement\Models\ProcurementCategory;
@@ -378,8 +376,14 @@ class ProcurementCampusMonitoringFoundationTest extends TestCase
         $this->assertSame($tenant->id, $auditLog->tenant->id);
         $this->assertSame($user->id, $auditLog->user->id);
         $this->assertTrue($auditLog->auditable->is($purchaseOrder));
-        $this->assertCount(1, $purchaseOrder->auditLogs);
-        $this->assertCount(1, $tenant->auditLogs);
+        $this->assertCount(2, $purchaseOrder->auditLogs);
+        $this->assertTrue(
+            $purchaseOrder->auditLogs()->where('action', 'purchase_order.created')->exists(),
+        );
+        $this->assertTrue(
+            $purchaseOrder->auditLogs()->where('action', 'purchase_order.approved')->exists(),
+        );
+        $this->assertGreaterThanOrEqual(2, $tenant->auditLogs()->count());
         $this->assertCount(1, $organization->auditLogs);
         $this->assertSame($tenant->id, $upload->tenant->id);
         $this->assertSame($user->id, $upload->uploader->id);

@@ -1,0 +1,11 @@
+{
+    "name": "PhysicalSecurity",
+    "alias": "physicalsecurity",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\PhysicalSecurity\\Providers\\PhysicalSecurityServiceProvider"
+    ],
+    "files": []
+}

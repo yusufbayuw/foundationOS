@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/boarding",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Boarding\\": "app/",
+            "Modules\\Boarding\\Database\\Factories\\": "database/factories/",
+            "Modules\\Boarding\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Boarding\\Tests\\": "tests/"
+        }
+    }
+}

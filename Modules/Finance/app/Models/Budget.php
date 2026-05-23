@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 use Modules\Workflow\Contracts\ProvidesWorkflowContext;
 use Modules\Workflow\Contracts\StartsWorkflow;
 use Modules\Workflow\Models\WorkflowInstance;
@@ -18,7 +19,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Budget extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
-    use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
+    use BelongsToTenant, HasAuditTrail, HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {

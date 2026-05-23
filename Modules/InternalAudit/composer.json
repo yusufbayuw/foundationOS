@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/internalaudit",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\InternalAudit\\": "app/",
+            "Modules\\InternalAudit\\Database\\Factories\\": "database/factories/",
+            "Modules\\InternalAudit\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\InternalAudit\\Tests\\": "tests/"
+        }
+    }
+}

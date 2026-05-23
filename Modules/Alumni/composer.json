@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/alumni",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Alumni\\": "app/",
+            "Modules\\Alumni\\Database\\Factories\\": "database/factories/",
+            "Modules\\Alumni\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Alumni\\Tests\\": "tests/"
+        }
+    }
+}

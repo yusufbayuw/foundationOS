@@ -11,14 +11,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
-use Modules\Monitoring\Models\AuditLog;
+use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 use Modules\Monitoring\Models\FileUpload;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 class PurchaseOrder extends Model
 {
-    use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
+    use BelongsToTenant, HasAuditTrail, HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -110,11 +110,6 @@ class PurchaseOrder extends Model
     public function requisitionItems(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class);
-    }
-
-    public function auditLogs(): MorphMany
-    {
-        return $this->morphMany(AuditLog::class, 'auditable');
     }
 
     public function fileUploads(): MorphMany

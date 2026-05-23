@@ -1,0 +1,11 @@
+{
+    "name": "EOffice",
+    "alias": "eoffice",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\EOffice\\Providers\\EOfficeServiceProvider"
+    ],
+    "files": []
+}

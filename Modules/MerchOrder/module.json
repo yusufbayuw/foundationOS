@@ -1,0 +1,11 @@
+{
+    "name": "MerchOrder",
+    "alias": "merchorder",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\MerchOrder\\Providers\\MerchOrderServiceProvider"
+    ],
+    "files": []
+}

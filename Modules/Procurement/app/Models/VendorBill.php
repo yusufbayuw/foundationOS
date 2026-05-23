@@ -4,19 +4,19 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\User;
 use Modules\Finance\Models\JournalEntry;
-use Modules\Monitoring\Models\AuditLog;
+use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 use Modules\Monitoring\Models\FileUpload;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class VendorBill extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -55,6 +55,7 @@ class VendorBill extends Model
             'processed_at' => 'datetime',
         ];
     }
+
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
@@ -83,11 +84,6 @@ class VendorBill extends Model
     public function items(): HasMany
     {
         return $this->hasMany(VendorBillItem::class);
-    }
-
-    public function auditLogs(): MorphMany
-    {
-        return $this->morphMany(AuditLog::class, 'auditable');
     }
 
     public function fileUploads(): MorphMany

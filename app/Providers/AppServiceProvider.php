@@ -17,6 +17,9 @@ use App\Observers\StudyPlanItemObserver;
 use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
 use App\Support\CurrentTenant;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -36,16 +39,27 @@ use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Finance\Models\Budget;
+use Modules\Finance\Models\CustomerInvoice;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Models\StudentInvoice;
+use Modules\Inventory\Models\StockAdjustment;
+use Modules\Inventory\Models\StockAdjustmentLine;
+use Modules\Inventory\Models\StockItem;
+use Modules\Inventory\Models\StockMove;
+use Modules\Inventory\Models\Warehouse;
 use Modules\Library\Models\Book;
+use Modules\Monitoring\Listeners\LogSecurityAuthEvents;
 use Modules\Procurement\Models\GoodsReceipt;
+use Modules\Procurement\Models\GoodsReceiptItem;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Models\VendorBill;
 use Modules\School\Models\ClassStudent;
 use Modules\School\Models\Student;
+use Modules\School\Models\StudentGrade;
+use Modules\School\Observers\StudentGradeObserver;
+use Modules\Workflow\Models\WorkflowInstance;
 use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
@@ -70,6 +84,7 @@ class AppServiceProvider extends ServiceProvider
         CourseOfferingLecturer::observe(CourseOfferingLecturerObserver::class);
         StudyPlan::observe(StudyPlanObserver::class);
         StudyPlanItem::observe(StudyPlanItemObserver::class);
+        StudentGrade::observe(StudentGradeObserver::class);
 
         app(PermissionRegistrar::class)
             ->setPermissionClass(Permission::class)
@@ -83,6 +98,8 @@ class AppServiceProvider extends ServiceProvider
             return null;
         });
 
+        Gate::define('viewPulse', fn (?User $user = null): bool => $user instanceof User && $user->isGlobalSuperAdmin());
+
         Relation::enforceMorphMap([
             'user' => User::class,
             'tenant' => Tenant::class,
@@ -95,14 +112,25 @@ class AppServiceProvider extends ServiceProvider
             'procurement_vendor' => Vendor::class,
             'purchase_order' => PurchaseOrder::class,
             'goods_receipt' => GoodsReceipt::class,
+            'goods_receipt_item' => GoodsReceiptItem::class,
+            'stock_adjustment_line' => StockAdjustmentLine::class,
             'vendor_bill' => VendorBill::class,
             'student_invoice' => StudentInvoice::class,
             'payment' => Payment::class,
             'journal_entry' => JournalEntry::class,
             'budget' => Budget::class,
+            'customer_invoice' => CustomerInvoice::class,
+            'warehouse' => Warehouse::class,
+            'stock_item' => StockItem::class,
+            'stock_move' => StockMove::class,
+            'stock_adjustment' => StockAdjustment::class,
+            'workflow_instance' => WorkflowInstance::class,
         ]);
 
         Event::listen(TenantSwitched::class, LogTenantSwitchAudit::class);
+        Event::listen(Failed::class, [LogSecurityAuthEvents::class, 'handleFailed']);
+        Event::listen(Lockout::class, [LogSecurityAuthEvents::class, 'handleLockout']);
+        Event::listen(Login::class, [LogSecurityAuthEvents::class, 'handleLogin']);
 
         if (config('app.env') === 'production') {
             URL::forceScheme('https');

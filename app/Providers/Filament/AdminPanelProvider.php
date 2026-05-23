@@ -86,19 +86,10 @@ class AdminPanelProvider extends PanelProvider
 
                 return null;
             })
-            ->navigationGroups([
-                NavigationGroup::make()->label(FilamentUi::module('Core')),
-                NavigationGroup::make()->label(FilamentUi::module('Global')),
-                NavigationGroup::make()->label(FilamentUi::module('School')),
-                NavigationGroup::make()->label(FilamentUi::module('Campus')),
-                NavigationGroup::make()->label(FilamentUi::module('Workflow')),
-                NavigationGroup::make()->label(FilamentUi::module('Enrollment')),
-                NavigationGroup::make()->label(FilamentUi::module('Employee')),
-                NavigationGroup::make()->label(FilamentUi::module('Finance')),
-                NavigationGroup::make()->label(FilamentUi::module('Procurement')),
-                NavigationGroup::make()->label(FilamentUi::module('Library')),
-                NavigationGroup::make()->label(FilamentUi::module('Monitoring')),
-            ])
+            ->navigationGroups(collect(Module::allEnabled())
+                ->map(fn ($module) => NavigationGroup::make()->label(FilamentUi::module($module->getName())))
+                ->values()
+                ->all())
             ->tenant(Tenant::class)
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')

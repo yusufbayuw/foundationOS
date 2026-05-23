@@ -2,9 +2,12 @@
 
 namespace Modules\Finance\Filament\Resources\JournalEntries;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
+use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Filament\Resources\JournalEntries\Pages\CreateJournalEntry;
 use Modules\Finance\Filament\Resources\JournalEntries\Pages\EditJournalEntry;
 use Modules\Finance\Filament\Resources\JournalEntries\Pages\ListJournalEntries;
@@ -17,9 +20,23 @@ use Modules\Finance\Models\JournalEntry;
 
 class JournalEntryResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = JournalEntry::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'entry_number';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['entry_number', 'description'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return [
+            FilamentUi::field('is_posted') => $record->is_posted ? 'yes' : 'no',
+        ];
+    }
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
@@ -55,7 +72,7 @@ class JournalEntryResource extends LocalizedResource
         ];
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return $record instanceof JournalEntry
             && ! $record->isLockedForMutation()

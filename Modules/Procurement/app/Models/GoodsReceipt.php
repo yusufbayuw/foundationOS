@@ -4,18 +4,18 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Modules\Core\Models\User;
-use Modules\Monitoring\Models\AuditLog;
-use Modules\Monitoring\Models\FileUpload;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\User;
+use Modules\Monitoring\Models\Concerns\HasAuditTrail;
+use Modules\Monitoring\Models\FileUpload;
 
 class GoodsReceipt extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -39,6 +39,7 @@ class GoodsReceipt extends Model
             'received_at' => 'datetime',
         ];
     }
+
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
@@ -62,11 +63,6 @@ class GoodsReceipt extends Model
     public function vendorBills(): HasMany
     {
         return $this->hasMany(VendorBill::class);
-    }
-
-    public function auditLogs(): MorphMany
-    {
-        return $this->morphMany(AuditLog::class, 'auditable');
     }
 
     public function fileUploads(): MorphMany

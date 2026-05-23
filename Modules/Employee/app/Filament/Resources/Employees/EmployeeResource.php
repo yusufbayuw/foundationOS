@@ -4,6 +4,8 @@ namespace Modules\Employee\Filament\Resources\Employees;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\Employees\Pages\CreateEmployee;
 use Modules\Employee\Filament\Resources\Employees\Pages\EditEmployee;
@@ -16,9 +18,21 @@ use Modules\Employee\Models\Employee;
 
 class EmployeeResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = Employee::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'full_name';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['employee_number', 'full_name', 'email'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return static::detailStatus($record->employment_status);
+    }
 
     public static function form(Schema $schema): Schema
     {

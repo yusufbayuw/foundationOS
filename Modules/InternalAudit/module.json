@@ -1,0 +1,11 @@
+{
+    "name": "InternalAudit",
+    "alias": "internalaudit",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\InternalAudit\\Providers\\InternalAuditServiceProvider"
+    ],
+    "files": []
+}

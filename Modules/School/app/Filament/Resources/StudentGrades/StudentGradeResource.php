@@ -2,13 +2,14 @@
 
 namespace Modules\School\Filament\Resources\StudentGrades;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\StudentGrades\Pages\CreateStudentGrade;
 use Modules\School\Filament\Resources\StudentGrades\Pages\EditStudentGrade;
 use Modules\School\Filament\Resources\StudentGrades\Pages\ListStudentGrades;
 use Modules\School\Filament\Resources\StudentGrades\Pages\ViewStudentGrade;
+use Modules\School\Filament\Resources\StudentGrades\RelationManagers\WorkflowInstancesRelationManager;
 use Modules\School\Filament\Resources\StudentGrades\Schemas\StudentGradeForm;
 use Modules\School\Filament\Resources\StudentGrades\Schemas\StudentGradeInfolist;
 use Modules\School\Filament\Resources\StudentGrades\Tables\StudentGradesTable;
@@ -38,7 +39,7 @@ class StudentGradeResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            WorkflowInstancesRelationManager::class,
         ];
     }
 

@@ -1,0 +1,41 @@
+<?php
+
+namespace Modules\Inventory\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Concerns\BelongsToTenant;
+
+class StockLevel extends Model
+{
+    use BelongsToTenant, HasFactory;
+
+    protected $fillable = [
+        'tenant_id',
+        'warehouse_id',
+        'stock_item_id',
+        'quantity_on_hand',
+        'quantity_reserved',
+        'average_unit_cost',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'quantity_on_hand' => 'decimal:4',
+            'quantity_reserved' => 'decimal:4',
+            'average_unit_cost' => 'decimal:4',
+        ];
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    public function stockItem(): BelongsTo
+    {
+        return $this->belongsTo(StockItem::class);
+    }
+}

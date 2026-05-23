@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/training",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Training\\": "app/",
+            "Modules\\Training\\Database\\Factories\\": "database/factories/",
+            "Modules\\Training\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Training\\Tests\\": "tests/"
+        }
+    }
+}

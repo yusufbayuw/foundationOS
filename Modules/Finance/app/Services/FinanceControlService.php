@@ -294,7 +294,7 @@ class FinanceControlService
             'tenant_id' => $record->tenant_id,
             'organization_id' => $record->organization_id ?? null,
             'user_id' => $actor->getKey(),
-            'auditable_type' => $record::class,
+            'auditable_type' => $record->getMorphClass(),
             'auditable_id' => $record->getKey(),
             'action' => $action,
             'description' => str($action)->headline()->toString(),

@@ -1,0 +1,11 @@
+{
+    "name": "Counseling",
+    "alias": "counseling",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Counseling\\Providers\\CounselingServiceProvider"
+    ],
+    "files": []
+}

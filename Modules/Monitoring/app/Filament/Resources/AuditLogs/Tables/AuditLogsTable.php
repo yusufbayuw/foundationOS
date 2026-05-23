@@ -15,6 +15,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
+use Modules\Monitoring\Models\AuditLog;
 
 class AuditLogsTable
 {
@@ -38,6 +39,10 @@ class AuditLogsTable
                     ->label(FilamentUi::field('auditable_id'))
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('category')
+                    ->label(FilamentUi::field('category'))
+                    ->badge()
+                    ->toggleable(),
                 TextColumn::make('action')
                     ->label(FilamentUi::field('action'))
                     ->searchable(),
@@ -63,6 +68,13 @@ class AuditLogsTable
             ])
             ->filters([
                 TrashedFilter::make(),
+                SelectFilter::make('category')
+                    ->label(FilamentUi::field('category'))
+                    ->options([
+                        AuditLog::CATEGORY_GENERAL => FilamentUi::text('General'),
+                        AuditLog::CATEGORY_SECURITY => FilamentUi::text('Security Events'),
+                    ])
+                    ->default(null),
                 SelectFilter::make('action')
                     ->options([
                         'create' => 'Create',

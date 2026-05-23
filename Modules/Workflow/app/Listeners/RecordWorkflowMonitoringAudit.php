@@ -20,7 +20,7 @@ class RecordWorkflowMonitoringAudit
             'tenant_id' => $instance->tenant_id,
             'organization_id' => $instance->organization_id,
             'user_id' => $actor?->getKey(),
-            'auditable_type' => $instance::class,
+            'auditable_type' => $instance->getMorphClass(),
             'auditable_id' => $instance->getKey(),
             'action' => match (true) {
                 $event instanceof WorkflowStarted => 'workflow_started',

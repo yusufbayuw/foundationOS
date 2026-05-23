@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/merchorder",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\MerchOrder\\": "app/",
+            "Modules\\MerchOrder\\Database\\Factories\\": "database/factories/",
+            "Modules\\MerchOrder\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\MerchOrder\\Tests\\": "tests/"
+        }
+    }
+}

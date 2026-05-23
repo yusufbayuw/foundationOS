@@ -3,7 +3,7 @@
 namespace Modules\Workflow\Listeners;
 
 use Modules\Finance\Models\Budget;
-use Modules\Monitoring\Models\AuditLog;
+use Modules\Monitoring\Services\AuditTrailRecorder;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
 use Modules\Workflow\Events\WorkflowAdvanced;
 use Modules\Workflow\Events\WorkflowCancelled;
@@ -73,21 +73,12 @@ class SyncBudgetWorkflowState
     {
         $budget->forceFill($attributes)->save();
 
-        AuditLog::query()->create([
-            'tenant_id' => $budget->tenant_id,
-            'organization_id' => $budget->organization_id,
-            'user_id' => $actorId,
-            'auditable_type' => Budget::class,
-            'auditable_id' => $budget->getKey(),
-            'action' => $action,
-            'description' => $description,
-            'old_values' => null,
-            'new_values' => $attributes,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'request_id' => request()?->headers->get('X-Request-Id'),
-            'status' => 'success',
-            'error_message' => null,
-        ]);
+        AuditTrailRecorder::record(
+            $budget,
+            $action,
+            null,
+            $attributes,
+            $description,
+        );
     }
 }

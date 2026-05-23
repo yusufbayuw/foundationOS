@@ -16,6 +16,8 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Modules\EOffice\Http\Controllers\LetterVerificationController;
+use Modules\Messaging\Http\Controllers\WhatsAppWebhookController;
 
 RateLimiter::for('api', function (Request $request) {
     $token = $request->user()?->currentAccessToken();
@@ -23,6 +25,12 @@ RateLimiter::for('api', function (Request $request) {
 
     return Limit::perMinute(60)->by($key);
 });
+
+Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
+    ->name('webhooks.whatsapp');
+
+Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'show'])
+    ->name('letters.verify');
 
 Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {

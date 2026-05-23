@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies('*');
         $middleware->validateCsrfTokens(except: [
             'billing/webhook',
+            'donation/webhook',
         ]);
         $middleware->alias([
             'resolve.api.tenant' => ResolveApiTenant::class,

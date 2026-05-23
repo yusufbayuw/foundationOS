@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/consulting",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Consulting\\": "app/",
+            "Modules\\Consulting\\Database\\Factories\\": "database/factories/",
+            "Modules\\Consulting\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Consulting\\Tests\\": "tests/"
+        }
+    }
+}

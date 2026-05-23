@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/isocompliance",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\IsoCompliance\\": "app/",
+            "Modules\\IsoCompliance\\Database\\Factories\\": "database/factories/",
+            "Modules\\IsoCompliance\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\IsoCompliance\\Tests\\": "tests/"
+        }
+    }
+}

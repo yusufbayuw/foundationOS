@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Enrollment\Http\Controllers\EnrollmentController;
+use Modules\Enrollment\Http\Controllers\InquiryController;
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('enrollments', EnrollmentController::class)->names('enrollment');
+Route::middleware(['throttle:10,1'])->group(function (): void {
+    Route::post('/inquiry', [InquiryController::class, 'store'])->name('enrollment.inquiry');
 });

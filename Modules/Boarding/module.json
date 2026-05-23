@@ -1,0 +1,11 @@
+{
+    "name": "Boarding",
+    "alias": "boarding",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Boarding\\Providers\\BoardingServiceProvider"
+    ],
+    "files": []
+}

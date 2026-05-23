@@ -2,21 +2,22 @@
 
 namespace Modules\Core\Filament\Resources\Tenants;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
 use Modules\Core\Filament\Resources\Tenants\Pages\CreateTenant;
 use Modules\Core\Filament\Resources\Tenants\Pages\EditTenant;
 use Modules\Core\Filament\Resources\Tenants\Pages\ListTenants;
 use Modules\Core\Filament\Resources\Tenants\Pages\ViewTenant;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\AcademicYearsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\AchievementTypesRelationManager;
-use Modules\Core\Filament\Resources\Tenants\RelationManagers\AssessmentsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\AssessmentItemsRelationManager;
+use Modules\Core\Filament\Resources\Tenants\RelationManagers\AssessmentsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\AttachedFilesRelationManager;
-use Modules\Core\Filament\Resources\Tenants\RelationManagers\AuditLogsRelationManager;
-use Modules\Core\Filament\Resources\Tenants\RelationManagers\AuditableLogsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\AttendancesRelationManager;
+use Modules\Core\Filament\Resources\Tenants\RelationManagers\AuditableLogsRelationManager;
+use Modules\Core\Filament\Resources\Tenants\RelationManagers\AuditLogsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\ClassStudentsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\CollageStudentsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\CourseOfferingsRelationManager;
@@ -29,8 +30,8 @@ use Modules\Core\Filament\Resources\Tenants\RelationManagers\FileUploadsRelation
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\LecturersRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\ModulesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\OrganizationsRelationManager;
-use Modules\Core\Filament\Resources\Tenants\RelationManagers\SchoolClassesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\SchedulesRelationManager;
+use Modules\Core\Filament\Resources\Tenants\RelationManagers\SchoolClassesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\StudentAchievementsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\StudentAssessmentAnswersRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\StudentGradesRelationManager;
@@ -46,20 +47,33 @@ use Modules\Core\Filament\Resources\Tenants\RelationManagers\TenantModulesRelati
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\TenantRolesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\TenantSettingsRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\ThesesRelationManager;
-use Modules\Core\Filament\Resources\Tenants\RelationManagers\UserTenantRolesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\UsersRelationManager;
-use Modules\Core\Filament\Resources\Tenants\RelationManagers\ViolationTypesRelationManager;
+use Modules\Core\Filament\Resources\Tenants\RelationManagers\UserTenantRolesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\RelationManagers\ViolationsRelationManager;
+use Modules\Core\Filament\Resources\Tenants\RelationManagers\ViolationTypesRelationManager;
 use Modules\Core\Filament\Resources\Tenants\Schemas\TenantForm;
 use Modules\Core\Filament\Resources\Tenants\Schemas\TenantInfolist;
 use Modules\Core\Filament\Resources\Tenants\Tables\TenantsTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\Tenant;
 
 class TenantResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = Tenant::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['name', 'code'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return static::detailStatus($record->status);
+    }
 
     public static function form(Schema $schema): Schema
     {

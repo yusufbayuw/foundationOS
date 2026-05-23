@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/physicalsecurity",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\PhysicalSecurity\\": "app/",
+            "Modules\\PhysicalSecurity\\Database\\Factories\\": "database/factories/",
+            "Modules\\PhysicalSecurity\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\PhysicalSecurity\\Tests\\": "tests/"
+        }
+    }
+}

@@ -228,6 +228,7 @@ abstract class ModuleResource extends Resource
     {
         return [
             'Core' => [
+                'FoundationStructurePage' => 15,
                 'OrganizationResource' => 10,
                 'DepartmentResource' => 20,
                 'AcademicYearResource' => 30,
@@ -242,6 +243,8 @@ abstract class ModuleResource extends Resource
                 'TenantModuleResource' => 120,
                 'SubscriptionPlanResource' => 130,
                 'SubscriptionLogResource' => 140,
+                'AnnouncementResource' => 150,
+                'BroadcastResource' => 160,
             ],
             'Global' => [
                 'CountryResource' => 10,
@@ -268,6 +271,7 @@ abstract class ModuleResource extends Resource
                 'StudentAchievementResource' => 140,
                 'ViolationTypeResource' => 150,
                 'ViolationResource' => 160,
+                'ExtracurricularResource' => 170,
             ],
             'Campus' => [
                 'FacultyResource' => 10,
@@ -288,10 +292,26 @@ abstract class ModuleResource extends Resource
             ],
             'Enrollment' => [
                 'AdmissionPeriodResource' => 10,
+                'LeadResource' => 15,
                 'ApplicantResource' => 20,
                 'RegistrationResource' => 30,
                 'ExamScheduleResource' => 40,
                 'ExamResultResource' => 50,
+            ],
+            'Cms' => [
+                'SiteResource' => 10,
+            ],
+            'Donation' => [
+                'CampaignResource' => 10,
+            ],
+            'Training' => [
+                'TrainingProgramResource' => 10,
+            ],
+            'Sales' => [
+                'CustomerResource' => 10,
+            ],
+            'Marketplace' => [
+                'SellerResource' => 10,
             ],
             'Employee' => [
                 'PositionResource' => 10,
@@ -318,6 +338,12 @@ abstract class ModuleResource extends Resource
                 'JournalEntryLineResource' => 80,
                 'CustomerInvoiceResource' => 90,
                 'CustomerInvoiceItemResource' => 100,
+            ],
+            'Inventory' => [
+                'WarehouseResource' => 10,
+                'StockItemResource' => 20,
+                'StockMoveResource' => 30,
+                'StockAdjustmentResource' => 40,
             ],
             'Procurement' => [
                 'VendorResource' => 10,
@@ -359,6 +385,42 @@ abstract class ModuleResource extends Resource
             'Monitoring' => [
                 'FileUploadResource' => 10,
                 'AuditLogResource' => 20,
+            ],
+            'Legal' => [
+                'LegalDocumentResource' => 10,
+                'ContractResource' => 20,
+            ],
+            'Asset' => [
+                'AssetResource' => 10,
+            ],
+            'Dms' => [
+                'DocumentResource' => 10,
+            ],
+            'Helpdesk' => [
+                'HelpdeskDashboard' => 5,
+                'TicketResource' => 10,
+            ],
+            'Facility' => [
+                'RoomResource' => 10,
+                'SustainabilityDashboard' => 90,
+            ],
+            'EOffice' => [
+                'LetterResource' => 10,
+            ],
+            'ItOps' => [
+                'SoftwareLicenseResource' => 10,
+            ],
+            'Transport' => [
+                'VehicleResource' => 10,
+            ],
+            'Boarding' => [
+                'DormitoryResource' => 10,
+            ],
+            'Cafeteria' => [
+                'MenuResource' => 10,
+            ],
+            'PhysicalSecurity' => [
+                'VisitorResource' => 10,
             ],
         ];
     }

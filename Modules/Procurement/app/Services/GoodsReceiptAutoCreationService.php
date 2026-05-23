@@ -3,6 +3,7 @@
 namespace Modules\Procurement\Services;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Procurement\Events\GoodsReceiptConfirmed;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\GoodsReceiptItem;
 use Modules\Procurement\Models\PurchaseOrder;
@@ -66,7 +67,11 @@ class GoodsReceiptAutoCreationService
 
             $this->recomputePoStatus($purchaseOrder);
 
-            return $receipt->fresh(['items']);
+            $receipt = $receipt->fresh(['items']);
+
+            GoodsReceiptConfirmed::dispatch($receipt);
+
+            return $receipt;
         });
     }
 

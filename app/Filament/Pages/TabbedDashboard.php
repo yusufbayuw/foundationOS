@@ -2,7 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\Charts\OutstandingArApChart;
+use App\Filament\Widgets\Charts\PayrollTrendChart;
+use App\Filament\Widgets\Charts\RevenueTrendChart;
+use App\Filament\Widgets\Charts\WorkflowPendingChart;
+use App\Filament\Widgets\ExecutiveStatsOverview;
 use App\Filament\Widgets\NavigationGridWidget;
+use Filament\Facades\Filament;
 use Filament\Pages\Dashboard;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
@@ -11,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\WidgetConfiguration;
 use Modules\Campus\Filament\Widgets\CampusStatsOverview;
+use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Widgets\EmployeeStatsOverview;
 use Modules\Enrollment\Filament\Widgets\EnrollmentStatsOverview;
@@ -84,6 +91,19 @@ class TabbedDashboard extends Dashboard
                             $this->widgetsGrid([
                                 FinanceStatsWidget::class,
                                 FinanceStatsOverview::class,
+                                RevenueTrendChart::class,
+                                PayrollTrendChart::class,
+                                OutstandingArApChart::class,
+                                WorkflowPendingChart::class,
+                            ]),
+                        ]),
+
+                    Tab::make(FilamentUi::text('Executive'))
+                        ->icon('heroicon-o-presentation-chart-line')
+                        ->visible(fn (): bool => static::canViewExecutiveTab())
+                        ->schema([
+                            $this->widgetsGrid([
+                                ExecutiveStatsOverview::class,
                             ]),
                         ]),
 
@@ -113,5 +133,27 @@ class TabbedDashboard extends Dashboard
     {
         return Grid::make($columns ?? $this->getColumns())
             ->schema(fn (): array => $this->getWidgetsSchemaComponents($widgets));
+    }
+
+    public static function canViewExecutiveTab(): bool
+    {
+        $user = auth()->user();
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        if ($user->isGlobalSuperAdmin()) {
+            return true;
+        }
+
+        $tenant = Filament::getTenant();
+        if (! $tenant) {
+            return false;
+        }
+
+        return $user->userTenantRoles()
+            ->where('tenant_id', $tenant->getKey())
+            ->whereHas('tenantRole', fn ($q) => $q->where('is_super_admin', true))
+            ->exists();
     }
 }

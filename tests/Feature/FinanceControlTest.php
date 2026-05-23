@@ -74,7 +74,7 @@ class FinanceControlTest extends TestCase
 
         $journal = JournalEntry::query()
             ->where('tenant_id', $tenant->id)
-            ->where('entry_number', 'PAY-' . $payment->payment_number)
+            ->where('entry_number', 'PAY-'.$payment->payment_number)
             ->first();
 
         $this->assertNotNull($journal);
@@ -82,7 +82,7 @@ class FinanceControlTest extends TestCase
         $this->assertDatabaseCount('journal_entry_lines', 2);
         $this->assertDatabaseHas('audit_logs', [
             'tenant_id' => $tenant->id,
-            'auditable_type' => Payment::class,
+            'auditable_type' => 'payment',
             'auditable_id' => $payment->id,
             'action' => 'finance_payment_verified',
         ]);
@@ -150,13 +150,13 @@ class FinanceControlTest extends TestCase
         $this->assertTrue((bool) $reversedJournal->is_reversed);
         $this->assertDatabaseHas('audit_logs', [
             'tenant_id' => $tenant->id,
-            'auditable_type' => Budget::class,
+            'auditable_type' => 'budget',
             'auditable_id' => $budget->id,
             'action' => 'finance_budget_approved',
         ]);
         $this->assertDatabaseHas('audit_logs', [
             'tenant_id' => $tenant->id,
-            'auditable_type' => JournalEntry::class,
+            'auditable_type' => 'journal_entry',
             'auditable_id' => $journal->id,
             'action' => 'finance_journal_reversed',
         ]);

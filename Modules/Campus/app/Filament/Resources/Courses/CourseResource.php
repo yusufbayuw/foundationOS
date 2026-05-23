@@ -2,9 +2,9 @@
 
 namespace Modules\Campus\Filament\Resources\Courses;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Campus\Filament\Resources\Courses\Pages\CreateCourse;
 use Modules\Campus\Filament\Resources\Courses\Pages\EditCourse;
 use Modules\Campus\Filament\Resources\Courses\Pages\ListCourses;
@@ -15,12 +15,26 @@ use Modules\Campus\Filament\Resources\Courses\Schemas\CourseForm;
 use Modules\Campus\Filament\Resources\Courses\Schemas\CourseInfolist;
 use Modules\Campus\Filament\Resources\Courses\Tables\CoursesTable;
 use Modules\Campus\Models\Course;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class CourseResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = Course::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['code', 'name'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return static::detailStatus($record->status ?? null);
+    }
 
     public static function form(Schema $schema): Schema
     {

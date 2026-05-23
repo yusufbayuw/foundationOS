@@ -2,9 +2,11 @@
 
 namespace Modules\Finance\Filament\Resources\StudentInvoices;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\CreateStudentInvoice;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\EditStudentInvoice;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\ListStudentInvoices;
@@ -18,9 +20,21 @@ use Modules\Finance\Models\StudentInvoice;
 
 class StudentInvoiceResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = StudentInvoice::class;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $recordTitleAttribute = 'invoice_number';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['invoice_number'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return static::detailStatus($record->status);
+    }
 
     protected static ?string $tenantOwnershipRelationshipName = 'tenant';
 
@@ -57,7 +71,7 @@ class StudentInvoiceResource extends LocalizedResource
         ];
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return $record instanceof StudentInvoice
             && ! $record->isLockedForMutation()

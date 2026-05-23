@@ -390,6 +390,10 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             return $this->userTenantRoles()->exists();
         }
 
+        if ($panel->getId() === 'parent') {
+            return ParentStudent::query()->where('parent_user_id', $this->getKey())->exists();
+        }
+
         return false;
     }
 }

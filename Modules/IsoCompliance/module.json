@@ -1,0 +1,11 @@
+{
+    "name": "IsoCompliance",
+    "alias": "isocompliance",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\IsoCompliance\\Providers\\IsoComplianceServiceProvider"
+    ],
+    "files": []
+}

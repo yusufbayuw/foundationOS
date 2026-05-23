@@ -2,9 +2,11 @@
 
 namespace Modules\Procurement\Filament\Resources\Vendors;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\Vendors\Pages\CreateVendor;
 use Modules\Procurement\Filament\Resources\Vendors\Pages\EditVendor;
 use Modules\Procurement\Filament\Resources\Vendors\Pages\ListVendors;
@@ -16,9 +18,21 @@ use Modules\Procurement\Models\Vendor;
 
 class VendorResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = Vendor::class;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['name', 'code'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return static::detailStatus($record->status ?? null);
+    }
 
     public static function form(Schema $schema): Schema
     {

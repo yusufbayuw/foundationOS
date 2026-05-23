@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/capacity",
+    "description": "",
+    "authors": [
+        {
+            "name": "FoundationOS",
+            "email": "dev@foundationos.test"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Capacity\\": "app/",
+            "Modules\\Capacity\\Database\\Factories\\": "database/factories/",
+            "Modules\\Capacity\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Capacity\\Tests\\": "tests/"
+        }
+    }
+}

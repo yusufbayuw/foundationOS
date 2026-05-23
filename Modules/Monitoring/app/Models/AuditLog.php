@@ -4,16 +4,20 @@ namespace Modules\Monitoring\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class AuditLog extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
+
+    public const CATEGORY_GENERAL = 'general';
+
+    public const CATEGORY_SECURITY = 'security';
 
     protected $fillable = [
         'tenant_id',
@@ -22,6 +26,7 @@ class AuditLog extends Model
         'auditable_type',
         'auditable_id',
         'action',
+        'category',
         'description',
         'old_values',
         'new_values',
@@ -39,6 +44,7 @@ class AuditLog extends Model
             'new_values' => 'array',
         ];
     }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

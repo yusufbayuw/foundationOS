@@ -2,11 +2,46 @@
 
 namespace Modules\Monitoring\Providers;
 
-use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Finance\Models\Budget;
+use Modules\Finance\Models\CustomerInvoice;
+use Modules\Inventory\Models\StockAdjustment;
+use Modules\Inventory\Models\StockItem;
+use Modules\Inventory\Models\StockMove;
+use Modules\Inventory\Models\Warehouse;
+use Modules\Monitoring\Observers\AuditableObserver;
+use Modules\Procurement\Models\GoodsReceipt;
+use Modules\Procurement\Models\PurchaseOrder;
+use Modules\Procurement\Models\VendorBill;
+use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class MonitoringServiceProvider extends ModuleServiceProvider
 {
+    /**
+     * @var array<int, class-string<Model>>
+     */
+    protected array $auditableModels = [
+        Warehouse::class,
+        StockItem::class,
+        StockMove::class,
+        StockAdjustment::class,
+        GoodsReceipt::class,
+        PurchaseOrder::class,
+        VendorBill::class,
+        Budget::class,
+        CustomerInvoice::class,
+    ];
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        foreach ($this->auditableModels as $modelClass) {
+            $modelClass::observe(AuditableObserver::class);
+        }
+    }
+
     /**
      * The name of the module.
      */
@@ -36,8 +71,8 @@ class MonitoringServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     * 
-     * @param $schedule
+     *
+     * @param  $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
     // {

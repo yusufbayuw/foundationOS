@@ -48,15 +48,14 @@ class AuditLogInfolist
                     ]),
 
                 Section::make(FilamentUi::text('Changed Values'))
-                    ->columns(2)
                     ->schema([
-                        TextEntry::make('old_values')
-                            ->label(FilamentUi::field('old_values'))
-                            ->placeholder('-')
-                            ->columnSpanFull(),
-                        TextEntry::make('new_values')
-                            ->label(FilamentUi::field('new_values'))
-                            ->placeholder('-')
+                        TextEntry::make('diff')
+                            ->label(FilamentUi::text('Value diff'))
+                            ->state(fn ($record) => view('components.audit-diff', [
+                                'old' => $record->old_values ?? [],
+                                'new' => $record->new_values ?? [],
+                            ])->render())
+                            ->html()
                             ->columnSpanFull(),
                     ]),
 

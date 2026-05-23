@@ -4,7 +4,8 @@ namespace Modules\Library\Filament\Resources\Books;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
 use Modules\Library\Filament\Resources\Books\Pages\CreateBook;
 use Modules\Library\Filament\Resources\Books\Pages\EditBook;
 use Modules\Library\Filament\Resources\Books\Pages\ListBooks;
@@ -18,13 +19,26 @@ use Modules\Library\Filament\Resources\Books\RelationManagers\SubjectItemsRelati
 use Modules\Library\Filament\Resources\Books\Schemas\BookForm;
 use Modules\Library\Filament\Resources\Books\Schemas\BookInfolist;
 use Modules\Library\Filament\Resources\Books\Tables\BooksTable;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Models\Book;
 
 class BookResource extends LocalizedResource
 {
+    use ConfiguresGlobalSearch;
+
     protected static ?string $model = Book::class;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    protected static function globalSearchAttributes(): array
+    {
+        return ['title', 'isbn', 'isbn13'];
+    }
+
+    protected static function globalSearchResultDetails(Model $record): array
+    {
+        return static::detailStatus($record->status ?? null);
+    }
 
     public static function form(Schema $schema): Schema
     {
