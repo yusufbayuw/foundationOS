@@ -11,6 +11,8 @@ use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Resources\SalarySlips\SalarySlipResource;
 use Modules\Employee\Models\SalarySlip;
+use Modules\Employee\Services\PayrollCalculationService;
+use Modules\Employee\Services\PayrollJournalService;
 
 class ViewSalarySlip extends ViewRecord
 {
@@ -49,12 +51,14 @@ class ViewSalarySlip extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data): void {
-                    $this->getRecord()->update([
+                    $slip = $this->getRecord();
+                    $slip->update([
                         'status' => 'paid',
                         'paid_at' => $data['paid_at'],
                         'paid_via' => $data['paid_via'],
                     ]);
-                    Notification::make()->title('Salary slip marked as paid.')->success()->send();
+                    app(PayrollJournalService::class)->postForSlip($slip->fresh());
+                    Notification::make()->title(FilamentUi::text('Salary slip marked as paid.'))->success()->send();
                     $this->record = $this->getRecord()->fresh();
                 }),
 
@@ -73,6 +77,32 @@ class ViewSalarySlip extends ViewRecord
                     Notification::make()->title('Salary slip sent to employee.')->success()->send();
                     $this->record = $this->getRecord()->fresh();
                 }),
+
+            Action::make('calculatePayroll')
+                ->label(FilamentUi::text('Calculate Payroll'))
+                ->icon('heroicon-o-calculator')
+                ->color('warning')
+                ->visible(fn (): bool => $record->status === 'draft')
+                ->requiresConfirmation()
+                ->action(function (): void {
+                    /** @var SalarySlip $record */
+                    $record = $this->getRecord()->load('employee');
+                    $service = app(PayrollCalculationService::class);
+                    $service->calculate(
+                        $record->employee,
+                        (int) $record->period_month,
+                        (int) $record->period_year,
+                    );
+                    Notification::make()->title(FilamentUi::text('Payroll calculated.'))->success()->send();
+                    $this->record = $this->getRecord()->fresh();
+                }),
+
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->url(fn (): string => route('employee.salary-slips.download', $record))
+                ->openUrlInNewTab(),
 
             EditAction::make(),
         ];

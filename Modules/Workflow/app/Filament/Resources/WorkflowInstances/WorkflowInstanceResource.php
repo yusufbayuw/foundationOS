@@ -8,6 +8,7 @@ use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\Pages\ListWorkflowInstances;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\Pages\ViewWorkflowInstance;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers\AssignmentsRelationManager;
+use Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers\EvidencesRelationManager;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers\LogsRelationManager;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\Schemas\WorkflowInstanceInfolist;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\Tables\WorkflowInstancesTable;
@@ -45,6 +46,7 @@ class WorkflowInstanceResource extends LocalizedResource
     {
         return [
             AssignmentsRelationManager::class,
+            EvidencesRelationManager::class,
             LogsRelationManager::class,
         ];
     }

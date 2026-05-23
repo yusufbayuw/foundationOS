@@ -38,6 +38,7 @@ class WorkflowStep extends Model
         'is_terminal',
         'sort_order',
         'canvas_position',
+        'required_evidence',
     ];
 
     protected function casts(): array
@@ -58,7 +59,20 @@ class WorkflowStep extends Model
             'is_initial' => 'boolean',
             'is_terminal' => 'boolean',
             'sort_order' => 'integer',
+            'required_evidence' => 'array',
         ];
+    }
+
+    /** Returns true when this step mandates evidence upload before advancing. */
+    public function requiresEvidence(): bool
+    {
+        return isset($this->required_evidence['file_count'])
+            && (int) $this->required_evidence['file_count'] > 0;
+    }
+
+    public function requiredEvidenceCount(): int
+    {
+        return (int) ($this->required_evidence['file_count'] ?? 0);
     }
 
     public function workflow(): BelongsTo
@@ -84,5 +98,10 @@ class WorkflowStep extends Model
     public function automatedActions(): HasMany
     {
         return $this->hasMany(WorkflowAutomatedAction::class, 'step_id');
+    }
+
+    public function evidences(): HasMany
+    {
+        return $this->hasMany(WorkflowEvidence::class, 'workflow_step_id');
     }
 }

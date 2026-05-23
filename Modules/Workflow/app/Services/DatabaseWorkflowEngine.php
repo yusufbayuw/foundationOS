@@ -16,6 +16,7 @@ use Modules\Workflow\Events\WorkflowAdvanced;
 use Modules\Workflow\Events\WorkflowCancelled;
 use Modules\Workflow\Events\WorkflowReturned;
 use Modules\Workflow\Exceptions\WorkflowAuthorizationException;
+use Modules\Workflow\Exceptions\WorkflowEvidenceRequiredException;
 use Modules\Workflow\Models\WorkflowAssignment;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
@@ -34,6 +35,21 @@ class DatabaseWorkflowEngine implements WorkflowEngine
 
     public function advance(WorkflowInstance $instance, string $actionName, array $formData, User $actor, ?string $notes = null): WorkflowInstance
     {
+        // Evidence gate — checked before acquiring the row lock to fail fast.
+        $currentStep = $instance->currentStep;
+        if ($currentStep?->requiresEvidence()) {
+            $uploaded = $instance->evidences()
+                ->where('workflow_step_id', $currentStep->getKey())
+                ->count();
+            if ($uploaded < $currentStep->requiredEvidenceCount()) {
+                throw new WorkflowEvidenceRequiredException(
+                    $currentStep->name,
+                    $currentStep->requiredEvidenceCount(),
+                    $uploaded,
+                );
+            }
+        }
+
         $result = DB::transaction(function () use ($instance, $actionName, $formData, $actor, $notes): array {
             // Row-lock the instance to serialize concurrent advance() calls
             // from parallel approvers.

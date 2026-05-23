@@ -9,6 +9,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\CurrencyFormatter;
 use Modules\Core\Support\FilamentUi;
 
 class TenantForm
@@ -61,10 +62,12 @@ class TenantForm
                             ->label(FilamentUi::field('timezone'))
                             ->required()
                             ->default('UTC'),
-                        TextInput::make('currency')
+                        Select::make('currency')
                             ->label(FilamentUi::field('currency'))
+                            ->options(CurrencyFormatter::options())
                             ->required()
-                            ->default('USD'),
+                            ->searchable()
+                            ->default('IDR'),
                         TextInput::make('locale')
                             ->label(FilamentUi::field('locale'))
                             ->required()

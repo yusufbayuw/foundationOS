@@ -3,12 +3,14 @@
 namespace Modules\Core\Filament\Support;
 
 use BackedEnum;
+use Filament\Facades\Filament;
+use Filament\Resources\Resource;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Resources\Resource;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\TenantModule;
 use Modules\Core\Support\FilamentUi;
 use UnitEnum;
 
@@ -34,7 +36,7 @@ abstract class ModuleResource extends Resource
             return false;
         }
 
-        return $model instanceof \Illuminate\Database\Eloquent\Model
+        return $model instanceof Model
             && $model->isRelation($ownershipRelationship);
     }
 
@@ -55,7 +57,7 @@ abstract class ModuleResource extends Resource
         return parent::canCreate();
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         if (static::isGlobalMutationRestricted() && ! static::canCurrentUserMutateGlobalResource()) {
             return false;
@@ -64,7 +66,7 @@ abstract class ModuleResource extends Resource
         return parent::canEdit($record);
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         if (static::isGlobalMutationRestricted() && ! static::canCurrentUserMutateGlobalResource()) {
             return false;
@@ -82,7 +84,7 @@ abstract class ModuleResource extends Resource
         return parent::canDeleteAny();
     }
 
-    public static function canForceDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canForceDelete(Model $record): bool
     {
         if (static::isGlobalMutationRestricted() && ! static::canCurrentUserMutateGlobalResource()) {
             return false;
@@ -100,7 +102,7 @@ abstract class ModuleResource extends Resource
         return parent::canForceDeleteAny();
     }
 
-    public static function canRestore(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canRestore(Model $record): bool
     {
         if (static::isGlobalMutationRestricted() && ! static::canCurrentUserMutateGlobalResource()) {
             return false;
@@ -116,6 +118,34 @@ abstract class ModuleResource extends Resource
         }
 
         return parent::canRestoreAny();
+    }
+
+    /** Core and Global are always required; all other modules are gated by TenantModule. */
+    private const ALWAYS_VISIBLE_MODULES = ['Core', 'Global'];
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $module = static::getModuleName();
+
+        if (in_array($module, self::ALWAYS_VISIBLE_MODULES, true)) {
+            return true;
+        }
+
+        $tenant = Filament::getTenant();
+
+        if (! $tenant) {
+            return true;
+        }
+
+        return Cache::remember(
+            "tenant_module_active:{$tenant->getKey()}:{$module}",
+            now()->addMinutes(5),
+            fn () => TenantModule::query()
+                ->whereHas('module', fn (Builder $q) => $q->where('code', strtolower($module)))
+                ->where('tenant_id', $tenant->getKey())
+                ->where('is_enabled', true)
+                ->exists()
+        );
     }
 
     public static function getNavigationSort(): ?int
@@ -286,6 +316,8 @@ abstract class ModuleResource extends Resource
                 'PaymentResource' => 60,
                 'JournalEntryResource' => 70,
                 'JournalEntryLineResource' => 80,
+                'CustomerInvoiceResource' => 90,
+                'CustomerInvoiceItemResource' => 100,
             ],
             'Procurement' => [
                 'VendorResource' => 10,
@@ -351,6 +383,7 @@ abstract class ModuleResource extends Resource
                     }
 
                     $lower = strtolower($part);
+
                     return ucfirst($lower);
                 }, $parts);
 

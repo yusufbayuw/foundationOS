@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\LeaveRequests;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\LeaveRequests\Pages\CreateLeaveRequest;
 use Modules\Employee\Filament\Resources\LeaveRequests\Pages\EditLeaveRequest;
 use Modules\Employee\Filament\Resources\LeaveRequests\Pages\ListLeaveRequests;
@@ -38,7 +38,7 @@ class LeaveRequestResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\WorkflowInstancesRelationManager::class,
         ];
     }
 

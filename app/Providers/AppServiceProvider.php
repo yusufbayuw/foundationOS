@@ -35,6 +35,10 @@ use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Enrollment\Models\Applicant;
+use Modules\Finance\Models\Budget;
+use Modules\Finance\Models\JournalEntry;
+use Modules\Finance\Models\Payment;
+use Modules\Finance\Models\StudentInvoice;
 use Modules\Library\Models\Book;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\PurchaseOrder;
@@ -92,6 +96,10 @@ class AppServiceProvider extends ServiceProvider
             'purchase_order' => PurchaseOrder::class,
             'goods_receipt' => GoodsReceipt::class,
             'vendor_bill' => VendorBill::class,
+            'student_invoice' => StudentInvoice::class,
+            'payment' => Payment::class,
+            'journal_entry' => JournalEntry::class,
+            'budget' => Budget::class,
         ]);
 
         Event::listen(TenantSwitched::class, LogTenantSwitchAudit::class);

@@ -2,8 +2,10 @@
 
 namespace Modules\Employee\Providers;
 
-use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Employee\Console\Commands\GeneratePayrollCommand;
+use Modules\Employee\Console\Commands\SetupHrmWorkflowsCommand;
+use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class EmployeeServiceProvider extends ModuleServiceProvider
 {
@@ -22,7 +24,10 @@ class EmployeeServiceProvider extends ModuleServiceProvider
      *
      * @var string[]
      */
-    // protected array $commands = [];
+    protected array $commands = [
+        GeneratePayrollCommand::class,
+        SetupHrmWorkflowsCommand::class,
+    ];
 
     /**
      * Provider classes to register.
@@ -36,8 +41,8 @@ class EmployeeServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     * 
-     * @param $schedule
+     *
+     * @param  $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
     // {

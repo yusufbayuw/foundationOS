@@ -97,4 +97,9 @@ class WorkflowInstance extends Model
     {
         return $this->hasMany(WorkflowAssignment::class);
     }
+
+    public function evidences(): HasMany
+    {
+        return $this->hasMany(WorkflowEvidence::class);
+    }
 }

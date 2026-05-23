@@ -4,14 +4,18 @@ namespace Modules\Employee\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Models\User;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\User;
+use Modules\Workflow\Contracts\ProvidesWorkflowContext;
+use Modules\Workflow\Contracts\StartsWorkflow;
+use Modules\Workflow\Models\WorkflowInstance;
 
-class LeaveRequest extends Model
+class LeaveRequest extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -41,6 +45,7 @@ class LeaveRequest extends Model
             'approved_at' => 'datetime',
         ];
     }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -59,5 +64,38 @@ class LeaveRequest extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approver_id');
+    }
+
+    public function workflowInstances(): MorphMany
+    {
+        return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');
+    }
+
+    public function workflowCode(): string
+    {
+        return 'leave-request-approval';
+    }
+
+    public function workflowContext(): array
+    {
+        return [
+            'tenant_id' => $this->tenant_id,
+            'employee_id' => $this->employee_id,
+            'leave_type' => $this->leave_type,
+            'total_days' => $this->total_days,
+            'start_date' => $this->start_date?->toDateString(),
+            'end_date' => $this->end_date?->toDateString(),
+            'status' => $this->status,
+        ];
+    }
+
+    public function workflowSubjectLabel(): string
+    {
+        return 'Cuti #'.$this->getKey().' — '.($this->employee?->full_name ?? '');
+    }
+
+    public function workflowSubjectType(): string
+    {
+        return self::class;
     }
 }

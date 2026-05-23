@@ -19,3 +19,11 @@ Schedule::command('fos:moodle:reconcile all --dry-run --limit=500')
 Schedule::command('fos:library:recalc-fines')
     ->hourly()
     ->withoutOverlapping();
+
+Schedule::command('fos:billing:check-grace-period')
+    ->dailyAt('01:00')
+    ->withoutOverlapping();
+
+Schedule::command('fos:billing:generate-invoices')
+    ->monthlyOn(1, '02:00')
+    ->withoutOverlapping();

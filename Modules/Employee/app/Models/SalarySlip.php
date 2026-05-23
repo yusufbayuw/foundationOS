@@ -4,14 +4,19 @@ namespace Modules\Employee\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Finance\Models\JournalEntry;
+use Modules\Workflow\Contracts\ProvidesWorkflowContext;
+use Modules\Workflow\Contracts\StartsWorkflow;
+use Modules\Workflow\Models\WorkflowInstance;
 
-class SalarySlip extends Model
+class SalarySlip extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -38,6 +43,7 @@ class SalarySlip extends Model
         'notes',
         'is_sent',
         'sent_at',
+        'journal_entry_id',
     ];
 
     protected function casts(): array
@@ -61,6 +67,7 @@ class SalarySlip extends Model
             'sent_at' => 'datetime',
         ];
     }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -69,5 +76,43 @@ class SalarySlip extends Model
     public function components(): HasMany
     {
         return $this->hasMany(SalarySlipComponent::class);
+    }
+
+    public function journalEntry(): BelongsTo
+    {
+        return $this->belongsTo(JournalEntry::class);
+    }
+
+    public function workflowInstances(): MorphMany
+    {
+        return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');
+    }
+
+    public function workflowCode(): string
+    {
+        return 'salary-slip-approval';
+    }
+
+    public function workflowContext(): array
+    {
+        return [
+            'tenant_id' => $this->tenant_id,
+            'employee_id' => $this->employee_id,
+            'period_label' => $this->period_label,
+            'net_salary' => (float) $this->net_salary,
+            'total_earnings' => (float) $this->total_earnings,
+            'total_deductions' => (float) $this->total_deductions,
+            'status' => $this->status,
+        ];
+    }
+
+    public function workflowSubjectLabel(): string
+    {
+        return 'Slip Gaji #'.$this->getKey().' — '.($this->period_label ?? '');
+    }
+
+    public function workflowSubjectType(): string
+    {
+        return self::class;
     }
 }

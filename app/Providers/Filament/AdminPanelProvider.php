@@ -2,13 +2,18 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\BillingPage;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\TabbedDashboard;
+use App\Filament\Pages\Tenancy\RegisterTenant;
 use App\Http\Middleware\BindTenantToContainer;
+use App\Http\Middleware\EnsureTenantSubscriptionActive;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use Coolsam\Modules\ModulesPlugin;
 use Filament\Actions\Action;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Auth\MultiFactor\Email\EmailAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -25,6 +30,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Core\Http\Middleware\SetUserLocale;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Models\TenantSetting;
 use Modules\Core\Support\FilamentUi;
 use Nwidart\Modules\Facades\Module;
 
@@ -39,10 +45,47 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->topNavigation(false)
             ->login()
+            ->registration()
+            ->emailVerification()
+            ->passwordReset()
+            ->tenantRegistration(RegisterTenant::class)
             ->profile(EditProfile::class)
-            ->colors([
-                'primary' => Color::Indigo,
+            ->multiFactorAuthentication([
+                AppAuthentication::make()->recoverable(),
+                EmailAuthentication::make(),
             ])
+            ->colors(function (): array {
+                $tenant = filament()->getTenant();
+                if ($tenant) {
+                    $primaryColor = TenantSetting::query()
+                        ->where('tenant_id', $tenant->getKey())
+                        ->where('group', 'branding')
+                        ->where('key', 'primary_color')
+                        ->value('value');
+
+                    if ($primaryColor) {
+                        return ['primary' => Color::hex($primaryColor)];
+                    }
+                }
+
+                return ['primary' => Color::Indigo];
+            })
+            ->brandLogo(function (): ?string {
+                $tenant = filament()->getTenant();
+                if ($tenant) {
+                    $logo = TenantSetting::query()
+                        ->where('tenant_id', $tenant->getKey())
+                        ->where('group', 'branding')
+                        ->where('key', 'brand_logo')
+                        ->value('value');
+
+                    if ($logo) {
+                        return asset('storage/'.$logo);
+                    }
+                }
+
+                return null;
+            })
             ->navigationGroups([
                 NavigationGroup::make()->label(FilamentUi::module('Core')),
                 NavigationGroup::make()->label(FilamentUi::module('Global')),
@@ -63,6 +106,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 TabbedDashboard::class,
+                BillingPage::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([])
@@ -80,6 +124,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 SetUserLocale::class,
+                EnsureTenantSubscriptionActive::class,
             ])
             ->userMenuItems([
                 Action::make('switch_to_english')

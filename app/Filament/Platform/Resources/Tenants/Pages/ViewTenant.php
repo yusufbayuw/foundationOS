@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Filament\Platform\Resources\Tenants\Pages;
+
+use App\Filament\Platform\Resources\Tenants\TenantResource;
+use Filament\Resources\Pages\ViewRecord;
+
+class ViewTenant extends ViewRecord
+{
+    protected static string $resource = TenantResource::class;
+}

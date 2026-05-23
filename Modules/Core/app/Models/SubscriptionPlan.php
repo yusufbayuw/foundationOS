@@ -4,8 +4,8 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubscriptionPlan extends Model
 {
@@ -17,6 +17,11 @@ class SubscriptionPlan extends Model
         'description',
         'price_monthly',
         'price_yearly',
+        'price_per_seat',
+        'price_per_module',
+        'free_seats',
+        'free_modules',
+        'grace_period_days',
         'max_users',
         'max_organizations',
         'max_storage_gb',
@@ -32,6 +37,11 @@ class SubscriptionPlan extends Model
         return [
             'price_monthly' => 'decimal:2',
             'price_yearly' => 'decimal:2',
+            'price_per_seat' => 'decimal:2',
+            'price_per_module' => 'decimal:2',
+            'free_seats' => 'integer',
+            'free_modules' => 'integer',
+            'grace_period_days' => 'integer',
             'max_users' => 'integer',
             'max_organizations' => 'integer',
             'max_storage_gb' => 'integer',
@@ -41,6 +51,16 @@ class SubscriptionPlan extends Model
             'is_recommended' => 'boolean',
             'display_order' => 'integer',
         ];
+    }
+
+    public function calculateMonthlyAmount(int $activeSeats, int $activeModules): float
+    {
+        $billableSeats = max(0, $activeSeats - $this->free_seats);
+        $billableModules = max(0, $activeModules - $this->free_modules);
+
+        return (float) $this->price_monthly
+            + ($billableSeats * (float) $this->price_per_seat)
+            + ($billableModules * (float) $this->price_per_module);
     }
 
     public function tenants(): HasMany

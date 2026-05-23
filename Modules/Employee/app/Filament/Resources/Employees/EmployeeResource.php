@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\Employees;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\Employees\Pages\CreateEmployee;
 use Modules\Employee\Filament\Resources\Employees\Pages\EditEmployee;
 use Modules\Employee\Filament\Resources\Employees\Pages\ListEmployees;
@@ -38,7 +38,7 @@ class EmployeeResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DocumentsRelationManager::class,
         ];
     }
 

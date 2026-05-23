@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\SalarySlips;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\SalarySlips\Pages\CreateSalarySlip;
 use Modules\Employee\Filament\Resources\SalarySlips\Pages\EditSalarySlip;
 use Modules\Employee\Filament\Resources\SalarySlips\Pages\ListSalarySlips;
@@ -38,7 +38,7 @@ class SalarySlipResource extends LocalizedResource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\WorkflowInstancesRelationManager::class,
         ];
     }
 

@@ -4,19 +4,29 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
-use Modules\Core\Models\Concerns\BelongsToTenant;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['po_number', 'total_amount', 'status', 'approved_by', 'approved_at', 'vendor_id'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'tenant_id',
@@ -62,14 +72,45 @@ class PurchaseOrder extends Model
         ];
     }
 
-    public function tenant(): BelongsTo { return $this->belongsTo(Tenant::class); }
-    public function requestForQuotation(): BelongsTo { return $this->belongsTo(RequestForQuotation::class); }
-    public function vendor(): BelongsTo { return $this->belongsTo(Vendor::class); }
-    public function approver(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
-    public function items(): HasMany { return $this->hasMany(PurchaseOrderItem::class); }
-    public function goodsReceipts(): HasMany { return $this->hasMany(GoodsReceipt::class); }
-    public function vendorBills(): HasMany { return $this->hasMany(VendorBill::class); }
-    public function requisitionItems(): HasMany { return $this->hasMany(PurchaseRequisitionItem::class); }
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function requestForQuotation(): BelongsTo
+    {
+        return $this->belongsTo(RequestForQuotation::class);
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    public function goodsReceipts(): HasMany
+    {
+        return $this->hasMany(GoodsReceipt::class);
+    }
+
+    public function vendorBills(): HasMany
+    {
+        return $this->hasMany(VendorBill::class);
+    }
+
+    public function requisitionItems(): HasMany
+    {
+        return $this->hasMany(PurchaseRequisitionItem::class);
+    }
 
     public function auditLogs(): MorphMany
     {

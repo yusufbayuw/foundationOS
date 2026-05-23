@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureTenantSubscriptionActive;
 use App\Http\Middleware\IdempotencyKey;
 use App\Http\Middleware\ResolveApiTenant;
 use Illuminate\Auth\AuthenticationException;
@@ -22,9 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies('*');
+        $middleware->validateCsrfTokens(except: [
+            'billing/webhook',
+        ]);
         $middleware->alias([
             'resolve.api.tenant' => ResolveApiTenant::class,
             'idempotency' => IdempotencyKey::class,
+            'subscription.active' => EnsureTenantSubscriptionActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

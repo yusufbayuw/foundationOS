@@ -12,6 +12,7 @@
         $appName = config('app.name', 'FoundationOS');
         $adminUrl = url('/admin');
         $loginUrl = url('/admin/login');
+        $registerUrl = url('/admin/register');
     @endphp
 
     <style>
@@ -803,9 +804,12 @@
                 </nav>
 
                 <div class="nav-actions">
-                    <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}" class="btn-ghost">
-                        {{ auth()->check() ? 'Buka Dashboard' : 'Masuk Admin' }}
-                    </a>
+                    @if (auth()->check())
+                        <a href="{{ $adminUrl }}" class="btn-ghost">Buka Dashboard</a>
+                    @else
+                        <a href="{{ $loginUrl }}" class="btn-ghost">Masuk</a>
+                        <a href="{{ $registerUrl }}" class="btn" style="padding: 0.45rem 1rem; font-size: 0.875rem;">Daftar</a>
+                    @endif
                 </div>
             </div>
         </header>
@@ -828,10 +832,12 @@
                         </p>
 
                         <div class="hero-actions">
-                            <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}" class="btn">
-                                {{ auth()->check() ? 'Masuk ke Dashboard' : 'Mulai dari Panel Admin' }}
-                            </a>
-                            <a href="#fitur" class="btn-ghost">Lihat Nilai Produk</a>
+                            @if (auth()->check())
+                                <a href="{{ $adminUrl }}" class="btn">Masuk ke Dashboard</a>
+                            @else
+                                <a href="{{ $registerUrl }}" class="btn">Coba Gratis Sekarang</a>
+                                <a href="{{ $loginUrl }}" class="btn-ghost">Masuk</a>
+                            @endif
                         </div>
 
                         <div class="hero-proof">
@@ -1093,9 +1099,12 @@
                             </div>
 
                             <div class="hero-actions" style="justify-content: flex-start;">
-                                <a href="{{ auth()->check() ? $adminUrl : $loginUrl }}" class="btn">
-                                    {{ auth()->check() ? 'Buka Dashboard' : 'Masuk ke FoundationOS' }}
-                                </a>
+                                @if (auth()->check())
+                                    <a href="{{ $adminUrl }}" class="btn">Buka Dashboard</a>
+                                @else
+                                    <a href="{{ $registerUrl }}" class="btn">Mulai Gratis</a>
+                                    <a href="{{ $loginUrl }}" class="btn-ghost">Sudah punya akun?</a>
+                                @endif
                                 <a href="#hero" class="btn-ghost">Kembali ke Atas</a>
                             </div>
                         </div>
