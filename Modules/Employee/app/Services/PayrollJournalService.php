@@ -9,6 +9,7 @@ use Modules\Employee\Models\SalarySlipComponent;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
+use RuntimeException;
 
 /**
  * Posts a journal entry when a salary slip is marked as paid.
@@ -58,7 +59,12 @@ class PayrollJournalService
             ]);
 
             // Debit: Salary Expense = total_earnings
-            $salaryExpenseCoa = $this->findOrNullCoa($slip->tenant_id, 'expense', ['beban gaji', 'salary expense', 'beban upah']);
+            $salaryExpenseCoa = $this->findRequiredCoa(
+                $slip->tenant_id,
+                'expense',
+                ['beban gaji', 'salary expense', 'beban upah'],
+                'Payroll journal requires an active salary expense account.',
+            );
 
             JournalEntryLine::query()->create([
                 'tenant_id' => $slip->tenant_id,
@@ -88,7 +94,12 @@ class PayrollJournalService
             }
 
             // Credit: remaining net salary → Cash/Bank
-            $cashCoa = $this->findOrNullCoa($slip->tenant_id, 'asset', ['kas', 'bank', 'cash']);
+            $cashCoa = $this->findRequiredCoa(
+                $slip->tenant_id,
+                'asset',
+                ['kas', 'bank', 'cash'],
+                'Payroll journal requires an active cash or bank account.',
+            );
 
             JournalEntryLine::query()->create([
                 'tenant_id' => $slip->tenant_id,
@@ -105,22 +116,26 @@ class PayrollJournalService
         });
     }
 
-    private function findOrNullCoa(int $tenantId, string $type, array $keywords): ?ChartOfAccount
+    /**
+     * @param  array<int, string>  $keywords
+     */
+    private function findRequiredCoa(int $tenantId, string $type, array $keywords, string $message): ChartOfAccount
     {
-        $query = ChartOfAccount::withoutTenantScope()
+        $account = ChartOfAccount::withoutTenantScope()
             ->where('tenant_id', $tenantId)
             ->where('type', $type)
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->where(function ($query) use ($keywords): void {
+                foreach ($keywords as $keyword) {
+                    $query->orWhereRaw('LOWER(name) LIKE ?', ['%'.strtolower($keyword).'%']);
+                }
+            })
+            ->first();
 
-        foreach ($keywords as $kw) {
-            $query->orWhere(function ($q) use ($tenantId, $type, $kw): void {
-                $q->where('tenant_id', $tenantId)
-                    ->where('type', $type)
-                    ->where('is_active', true)
-                    ->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($kw).'%']);
-            });
+        if (! $account) {
+            throw new RuntimeException($message);
         }
 
-        return $query->first();
+        return $account;
     }
 }
