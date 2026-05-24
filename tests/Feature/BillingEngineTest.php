@@ -147,16 +147,26 @@ class BillingEngineTest extends TestCase
 
     public function test_webhook_marks_invoice_paid_and_activates_tenant(): void
     {
+        config(['midtrans.server_key' => 'billing-test-key']);
+
         $this->tenant->update(['status' => 'past_due']);
         $billing = app(BillingService::class);
         $invoice = $billing->generateInvoice($this->tenant);
+        $grossAmount = number_format((float) $invoice->amount, 2, '.', '');
 
         $billing->handleWebhookNotification([
             'order_id' => $invoice->invoice_number,
+            'status_code' => '200',
+            'gross_amount' => $grossAmount,
+            'currency' => $invoice->currency,
             'transaction_status' => 'settlement',
             'fraud_status' => 'accept',
             'payment_type' => 'bank_transfer',
             'transaction_id' => 'txn-123',
+            'signature_key' => hash(
+                'sha512',
+                $invoice->invoice_number.'200'.$grossAmount.config('midtrans.server_key'),
+            ),
         ]);
 
         $invoice->refresh();

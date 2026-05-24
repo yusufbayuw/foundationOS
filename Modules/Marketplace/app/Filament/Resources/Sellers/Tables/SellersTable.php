@@ -1,0 +1,62 @@
+<?php
+
+namespace Modules\Marketplace\Filament\Resources\Sellers\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class SellersTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('tenant.name')
+                    ->searchable(),
+                TextColumn::make('organization_id')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('code')
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->searchable(),
+                TextColumn::make('status')
+                    ->searchable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('deleted_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('seller_type')
+                    ->searchable(),
+                TextColumn::make('seller_id')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('verification_status')
+                    ->searchable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

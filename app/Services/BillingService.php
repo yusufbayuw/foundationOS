@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Services\Billing\MidtransWebhookVerifier;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Midtrans\Config as MidtransConfig;
 use Midtrans\Snap;
@@ -11,7 +13,7 @@ use Modules\Core\Models\TenantModule;
 
 class BillingService
 {
-    public function __construct()
+    public function __construct(private readonly MidtransWebhookVerifier $webhookVerifier)
     {
         MidtransConfig::$serverKey = config('midtrans.server_key');
         MidtransConfig::$isProduction = config('midtrans.is_production');
@@ -114,39 +116,82 @@ class BillingService
 
     public function handleWebhookNotification(array $notification): void
     {
+        $this->webhookVerifier->verifySignature($notification);
+
         $orderId = $notification['order_id'] ?? null;
         if (! $orderId) {
             return;
         }
 
-        $invoice = SubscriptionLog::where('invoice_number', $orderId)->first();
-        if (! $invoice) {
-            return;
-        }
+        DB::transaction(function () use ($notification, $orderId): void {
+            $invoice = SubscriptionLog::query()
+                ->where('invoice_number', $orderId)
+                ->lockForUpdate()
+                ->first();
 
-        $transactionStatus = $notification['transaction_status'] ?? '';
-        $fraudStatus = $notification['fraud_status'] ?? '';
+            if (! $invoice) {
+                return;
+            }
 
-        $paymentStatus = match (true) {
-            $transactionStatus === 'capture' && $fraudStatus === 'accept' => 'paid',
-            $transactionStatus === 'settlement' => 'paid',
-            $transactionStatus === 'pending' => 'pending',
-            in_array($transactionStatus, ['deny', 'cancel', 'expire']) => 'failed',
-            default => $invoice->payment_status,
-        };
+            $metadata = $this->appendRawWebhookPayload($invoice->metadata ?? [], $notification);
+            $webhookKey = $this->webhookKey($notification);
 
-        $invoice->update([
-            'payment_status' => $paymentStatus,
-            'payment_method' => $notification['payment_type'] ?? $invoice->payment_method,
-            'metadata' => array_merge($invoice->metadata ?? [], [
-                'midtrans_transaction_id' => $notification['transaction_id'] ?? null,
-                'midtrans_status' => $transactionStatus,
-            ]),
-        ]);
+            if (in_array($webhookKey, $metadata['processed_midtrans_webhook_keys'] ?? [], true)) {
+                return;
+            }
 
-        if ($paymentStatus === 'paid') {
-            $this->activateTenantSubscription($invoice->tenant, $invoice);
-        }
+            if (! $this->amountMatchesInvoice($invoice, $notification)) {
+                $invoice->update([
+                    'metadata' => array_merge($metadata, [
+                        'midtrans_validation_failure' => 'amount_mismatch',
+                    ]),
+                ]);
+
+                return;
+            }
+
+            if (! $this->currencyMatchesInvoice($invoice, $notification)) {
+                $invoice->update([
+                    'metadata' => array_merge($metadata, [
+                        'midtrans_validation_failure' => 'currency_mismatch',
+                    ]),
+                ]);
+
+                return;
+            }
+
+            $transactionStatus = (string) ($notification['transaction_status'] ?? '');
+            $fraudStatus = (string) ($notification['fraud_status'] ?? '');
+
+            $paymentStatus = match (true) {
+                $transactionStatus === 'capture' && $fraudStatus === 'accept' => 'paid',
+                $transactionStatus === 'settlement' => 'paid',
+                $transactionStatus === 'pending' => 'pending',
+                in_array($transactionStatus, ['deny', 'cancel', 'expire'], true) => 'failed',
+                default => $invoice->payment_status,
+            };
+
+            $wasPaid = $invoice->payment_status === 'paid';
+            $processedWebhookKeys = array_values(array_unique([
+                ...($metadata['processed_midtrans_webhook_keys'] ?? []),
+                $webhookKey,
+            ]));
+
+            $invoice->update([
+                'payment_status' => $paymentStatus,
+                'payment_method' => $notification['payment_type'] ?? $invoice->payment_method,
+                'metadata' => array_merge($metadata, [
+                    'midtrans_transaction_id' => $notification['transaction_id'] ?? null,
+                    'midtrans_status' => $transactionStatus,
+                    'midtrans_validation_failure' => null,
+                    'processed_midtrans_webhook_keys' => $processedWebhookKeys,
+                ]),
+            ]);
+
+            if ($paymentStatus === 'paid' && ! $wasPaid) {
+                $this->activateTenantSubscription($invoice->tenant, $invoice);
+            }
+        });
     }
 
     private function activateTenantSubscription(Tenant $tenant, SubscriptionLog $invoice): void
@@ -157,6 +202,57 @@ class BillingService
             'subscription_expires_at' => $invoice->period_end,
             'grace_period_ends_at' => null,
         ]);
+    }
+
+    private function amountMatchesInvoice(SubscriptionLog $invoice, array $notification): bool
+    {
+        if (! array_key_exists('gross_amount', $notification)) {
+            return false;
+        }
+
+        return abs(round((float) $invoice->amount, 2) - round((float) $notification['gross_amount'], 2)) < 0.01;
+    }
+
+    private function currencyMatchesInvoice(SubscriptionLog $invoice, array $notification): bool
+    {
+        if (blank($notification['currency'] ?? null)) {
+            return true;
+        }
+
+        return strtoupper((string) $invoice->currency) === strtoupper((string) $notification['currency']);
+    }
+
+    private function webhookKey(array $notification): string
+    {
+        return hash('sha256', implode('|', [
+            $notification['transaction_id'] ?? '',
+            $notification['order_id'] ?? '',
+            $notification['transaction_status'] ?? '',
+            $notification['status_code'] ?? '',
+            $notification['gross_amount'] ?? '',
+        ]));
+    }
+
+    private function appendRawWebhookPayload(array $metadata, array $notification): array
+    {
+        $webhooks = $metadata['midtrans_webhooks'] ?? [];
+        $webhookKey = $this->webhookKey($notification);
+
+        foreach ($webhooks as $webhook) {
+            if (($webhook['key'] ?? null) === $webhookKey) {
+                return $metadata;
+            }
+        }
+
+        $webhooks[] = [
+            'key' => $webhookKey,
+            'received_at' => now()->toIso8601String(),
+            'payload' => $notification,
+        ];
+
+        $metadata['midtrans_webhooks'] = $webhooks;
+
+        return $metadata;
     }
 
     private function buildItemDetails(Tenant $tenant, SubscriptionLog $invoice): array

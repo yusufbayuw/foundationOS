@@ -859,18 +859,25 @@ class FilamentUi
             return $value;
         }
 
+        $normalized = str($value)->replace(['_', '.'], ' ')->squish()->toString();
+        $lowercaseFirst = ucfirst(strtolower($normalized));
+
+        // 1. Try file-based translation first
+        $fileTranslation = static::resolveFromFile($value, $normalized, $lowercaseFirst);
+        if ($fileTranslation !== null) {
+            return $fileTranslation;
+        }
+
+        // 2. Fall back to hardcoded PHRASES
         if (array_key_exists($value, static::PHRASES)) {
             return static::PHRASES[$value];
         }
-
-        $normalized = str($value)->replace(['_', '.'], ' ')->squish()->toString();
 
         if (array_key_exists($normalized, static::PHRASES)) {
             return static::PHRASES[$normalized];
         }
 
         // Case-insensitive lookup: 'Study Program' should match 'Study program'
-        $lowercaseFirst = ucfirst(strtolower($normalized));
         if (array_key_exists($lowercaseFirst, static::PHRASES)) {
             return static::PHRASES[$lowercaseFirst];
         }
@@ -890,6 +897,46 @@ class FilamentUi
             ->implode('');
 
         return trim($translated);
+    }
+
+    protected static function resolveFromFile(string $value, string $normalized, string $lowercaseFirst): ?string
+    {
+        // Try caller module first
+        if ($module = static::getCallerModule()) {
+            $lowerModule = strtolower($module);
+
+            foreach ([$value, $normalized, $lowercaseFirst] as $key) {
+                $translationKey = "{$lowerModule}::{$lowerModule}.{$key}";
+                if (app('translator')->has($translationKey)) {
+                    return __($translationKey);
+                }
+            }
+        }
+
+        // Fall back to core module
+        foreach ([$value, $normalized, $lowercaseFirst] as $key) {
+            $translationKey = "core::core.{$key}";
+            if (app('translator')->has($translationKey)) {
+                return __($translationKey);
+            }
+        }
+
+        return null;
+    }
+
+    protected static function getCallerModule(): ?string
+    {
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+        foreach ($trace as $step) {
+            if (isset($step['class'])) {
+                $class = $step['class'];
+                if (str_starts_with($class, 'Modules\\')) {
+                    return str($class)->after('Modules\\')->before('\\')->toString();
+                }
+            }
+        }
+
+        return null;
     }
 
     public static function field(string $field): string

@@ -78,21 +78,29 @@ class CourseOfferingSyncsToMoodleTest extends TestCase
         $ctx = $this->seedContext();
         $offering = $this->makeOffering($ctx);
 
-        MoodleEntityMapping::create([
-            'entity_type' => 'course',
-            'fos_entity_id' => $ctx['course']->id,
-            'tenant_id' => $ctx['tenant']->id,
-            'moodle_id' => 1000,
-            'moodle_idnumber' => 'fos_course_'.$ctx['course']->id,
-        ]);
+        MoodleEntityMapping::updateOrCreate(
+            [
+                'entity_type' => 'course',
+                'moodle_idnumber' => 'fos_course_'.$ctx['course']->id,
+            ],
+            [
+                'fos_entity_id' => $ctx['course']->id,
+                'tenant_id' => $ctx['tenant']->id,
+                'moodle_id' => 1000,
+            ],
+        );
 
-        MoodleEntityMapping::create([
-            'entity_type' => MoodleOutboxService::ENTITY_COURSE_OFFERING,
-            'fos_entity_id' => $offering->id,
-            'tenant_id' => $ctx['tenant']->id,
-            'moodle_id' => 2000,
-            'moodle_idnumber' => 'fos_offering_'.$offering->id,
-        ]);
+        MoodleEntityMapping::updateOrCreate(
+            [
+                'entity_type' => MoodleOutboxService::ENTITY_COURSE_OFFERING,
+                'moodle_idnumber' => 'fos_offering_'.$offering->id,
+            ],
+            [
+                'fos_entity_id' => $offering->id,
+                'tenant_id' => $ctx['tenant']->id,
+                'moodle_id' => 2000,
+            ],
+        );
 
         $service = app(MoodleSyncService::class);
         $this->assertSame(2000, $service->resolveMoodleCourseIdForOffering($offering));
@@ -103,13 +111,22 @@ class CourseOfferingSyncsToMoodleTest extends TestCase
         $ctx = $this->seedContext();
         $offering = $this->makeOffering($ctx);
 
-        MoodleEntityMapping::create([
-            'entity_type' => 'course',
-            'fos_entity_id' => $ctx['course']->id,
-            'tenant_id' => $ctx['tenant']->id,
-            'moodle_id' => 1000,
-            'moodle_idnumber' => 'fos_course_'.$ctx['course']->id,
-        ]);
+        MoodleEntityMapping::query()
+            ->where('entity_type', MoodleOutboxService::ENTITY_COURSE_OFFERING)
+            ->where('fos_entity_id', $offering->id)
+            ->delete();
+
+        MoodleEntityMapping::updateOrCreate(
+            [
+                'entity_type' => 'course',
+                'moodle_idnumber' => 'fos_course_'.$ctx['course']->id,
+            ],
+            [
+                'fos_entity_id' => $ctx['course']->id,
+                'tenant_id' => $ctx['tenant']->id,
+                'moodle_id' => 1000,
+            ],
+        );
 
         $service = app(MoodleSyncService::class);
         $this->assertSame(1000, $service->resolveMoodleCourseIdForOffering($offering));

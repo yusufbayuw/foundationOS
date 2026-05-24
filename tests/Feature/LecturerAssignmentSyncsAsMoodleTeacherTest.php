@@ -105,13 +105,22 @@ class LecturerAssignmentSyncsAsMoodleTeacherTest extends TestCase
     {
         $ctx = $this->seedContext();
 
-        MoodleEntityMapping::create([
-            'entity_type' => 'course',
-            'fos_entity_id' => $ctx['course']->id,
-            'tenant_id' => $ctx['tenant']->id,
-            'moodle_id' => 9911,
-            'moodle_idnumber' => 'fos_course_'.$ctx['course']->id,
-        ]);
+        MoodleEntityMapping::query()
+            ->where('entity_type', MoodleOutboxService::ENTITY_COURSE_OFFERING)
+            ->where('fos_entity_id', $ctx['offering']->id)
+            ->delete();
+
+        MoodleEntityMapping::updateOrCreate(
+            [
+                'entity_type' => 'course',
+                'moodle_idnumber' => 'fos_course_'.$ctx['course']->id,
+            ],
+            [
+                'fos_entity_id' => $ctx['course']->id,
+                'tenant_id' => $ctx['tenant']->id,
+                'moodle_id' => 9911,
+            ],
+        );
 
         $service = app(MoodleSyncService::class);
         $this->assertSame(9911, $service->resolveMoodleCourseIdForOffering($ctx['offering']));

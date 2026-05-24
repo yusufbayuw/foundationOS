@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Billing\MidtransWebhookException;
 use App\Services\BillingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Midtrans\Config as MidtransConfig;
-use Midtrans\Notification;
+use Throwable;
 
 class BillingController extends Controller
 {
@@ -15,16 +15,22 @@ class BillingController extends Controller
 
     public function webhook(Request $request): JsonResponse
     {
-        MidtransConfig::$serverKey = config('midtrans.server_key');
-        MidtransConfig::$isProduction = config('midtrans.is_production');
-
         try {
-            $notification = new Notification;
-            $this->billingService->handleWebhookNotification((array) $notification);
-        } catch (\Exception $e) {
+            $this->billingService->handleWebhookNotification($request->all());
+        } catch (MidtransWebhookException $e) {
             report($e);
 
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid webhook notification.',
+            ], 400);
+        } catch (Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unable to process webhook notification.',
+            ], 500);
         }
 
         return response()->json(['status' => 'ok']);

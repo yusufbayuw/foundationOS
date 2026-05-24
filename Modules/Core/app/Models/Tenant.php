@@ -394,6 +394,9 @@ class Tenant extends Model
         return $this->hasMany(Book::class);
     }
 
+    /**
+     * @deprecated Query Modules\Library\Models\BookCopy by tenant_id from the Library module instead.
+     */
     public function bookCopies(): HasMany
     {
         return $this->hasMany(BookCopy::class);
@@ -499,6 +502,9 @@ class Tenant extends Model
         return $this->hasMany(ProcurementItem::class);
     }
 
+    /**
+     * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by tenant_id from the Procurement module instead.
+     */
     public function purchaseRequisitions(): HasMany
     {
         return $this->hasMany(PurchaseRequisition::class);
@@ -509,6 +515,9 @@ class Tenant extends Model
         return $this->hasMany(PurchaseRequisitionItem::class);
     }
 
+    /**
+     * @deprecated Query Modules\Procurement\Models\RequestForQuotation by tenant_id from the Procurement module instead.
+     */
     public function requestForQuotations(): HasMany
     {
         return $this->hasMany(RequestForQuotation::class);
