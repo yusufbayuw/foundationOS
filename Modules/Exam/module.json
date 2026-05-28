@@ -1,0 +1,11 @@
+{
+    "name": "Exam",
+    "alias": "exam",
+    "description": "eduOS Exam Lite admin — bank soal, paket ujian, peserta, publish ke Cloudflare runtime",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Exam\\Providers\\ExamServiceProvider"
+    ],
+    "files": []
+}

@@ -60,6 +60,7 @@
             "Modules\\Dms\\": "Modules/Dms/app/",
             "Modules\\Donation\\": "Modules/Donation/app/",
             "Modules\\EducationQa\\": "Modules/EducationQa/app/",
+            "Modules\\Exam\\": "Modules/Exam/app/",
             "Modules\\EOffice\\": "Modules/EOffice/app/",
             "Modules\\Event\\": "Modules/Event/app/",
             "Modules\\Facility\\": "Modules/Facility/app/",

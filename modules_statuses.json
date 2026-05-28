@@ -35,6 +35,7 @@
     "InternalAudit": true,
     "IsoCompliance": true,
     "EducationQa": true,
+    "Exam": true,
     "KpiEnterprise": true,
     "Capacity": true,
     "Ai": true,

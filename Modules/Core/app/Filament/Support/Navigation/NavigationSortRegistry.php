@@ -88,6 +88,13 @@ class NavigationSortRegistry
                 'ExamScheduleResource' => 40,
                 'ExamResultResource' => 50,
             ],
+            'Exam' => [
+                'ExamDefinitionResource' => 10,
+                'ExamQuestionBankResource' => 20,
+                'ExamQuestionResource' => 25,
+                'ExamParticipantResource' => 30,
+                'ExamTokenResource' => 40,
+            ],
             'Cms' => [
                 'SiteResource' => 10,
             ],
