@@ -567,3 +567,59 @@ Key config options in `config/activitylog.php`:
 - `actions.clean_log`: Action class for cleaning old activities
 
 </laravel-boost-guidelines>
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+FoundationOS is a single Laravel 13 + Filament v5 application backed by SQLite (default). No Docker, Redis, or external databases are required for local development.
+
+### Running the application
+
+```bash
+# Start all dev services concurrently (server, queue, Vite, Pail logs):
+composer run dev
+
+# Or start just the HTTP server:
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+The admin panel is at `/admin/login`. Default credentials after seeding: `admin@admin.com` / `password`.
+
+### First-time database setup (only needed once per fresh DB)
+
+```bash
+cp .env.example .env
+php artisan key:generate --no-interaction
+touch database/database.sqlite
+php artisan migrate --no-interaction
+php artisan foundation:make-super-admin admin@admin.com --name="Administrator" --username=admin --password=password --no-interaction
+php artisan shield:super-admin --user=1 --tenant=1 --panel=admin --no-interaction
+php artisan optimize:clear
+```
+
+Note: The `db:seed` command has a known issue with `TenantAdminProvisioner` using `team_id` instead of `tenant_id`. Use the manual commands above instead.
+
+### Gotchas
+
+- The correct super-admin artisan command is `foundation:make-super-admin` (not `make:super-admin` as stated in README).
+- `shield:generate --all` can take 2-3 minutes on large module sets. Run it after adding new resources.
+- After running `shield:generate`, always run `php artisan optimize:clear`.
+- The `MvpDemoSeeder` fails mid-way due to a `team_id`/`tenant_id` mismatch in `TenantAdminProvisioner`. The seeder partially creates user + tenant but fails on role assignment. Use the manual super-admin commands listed above.
+- Pint and the translation linter both report pre-existing violations. This is expected and not blocking.
+- One pre-existing test failure exists in `ModuleFilamentResourceCoverageTest` (Exam module models without Filament resources).
+
+### Testing
+
+```bash
+php artisan test --compact                          # full suite
+php artisan test --compact --filter=testName        # single test
+vendor/bin/pint --dirty --format agent              # format changed PHP files
+composer run lint:translations                      # check translation labels
+```
+
+### Key references
+
+- Commands/scripts: see `composer.json` scripts section and `CLAUDE.md`
+- Module structure: `Modules/<Name>/app/`
+- All UI labels must use `FilamentUi` helpers (see "Translasi & Label" in `CLAUDE.md`)
