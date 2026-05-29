@@ -18,7 +18,7 @@ class ExamParticipantResource extends LocalizedResource
 {
     protected static ?string $model = ExamParticipant::class;
 
-    protected static ?string $recordTitleAttribute = 'display_name';
+    protected static ?string $recordTitleAttribute = 'student_name';
 
     public static function form(Schema $schema): Schema
     {

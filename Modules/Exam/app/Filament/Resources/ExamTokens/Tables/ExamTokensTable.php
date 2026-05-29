@@ -19,7 +19,7 @@ class ExamTokensTable
                 TextColumn::make('token')
                     ->label(FilamentUi::field('token'))
                     ->searchable(),
-                TextColumn::make('examParticipant.display_name')
+                TextColumn::make('examParticipant.student_name')
                     ->label(FilamentUi::field('exam_participant_id'))
                     ->searchable(),
                 IconColumn::make('is_active')

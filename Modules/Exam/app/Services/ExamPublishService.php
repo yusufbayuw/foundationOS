@@ -2,20 +2,223 @@
 
 namespace Modules\Exam\Services;
 
-use Illuminate\Support\Facades\DB;
-use Modules\Exam\Contracts\RuntimePublisherInterface;
+use Illuminate\Support\Str;
+use Modules\Exam\Enums\ExamAuditAction;
+use Modules\Exam\Enums\ExamRuntimeSyncAction;
+use Modules\Exam\Enums\ExamRuntimeSyncStatus;
 use Modules\Exam\Enums\ExamStatus;
+use Modules\Exam\Exceptions\ExamRuntimeException;
 use Modules\Exam\Models\ExamDefinition;
 use Modules\Exam\Models\ExamPublishSnapshot;
+use Modules\Exam\Models\ExamRuntimeSyncLog;
 
 class ExamPublishService
 {
     public function __construct(
-        protected ExamContextResolver $contextResolver,
-        protected ?RuntimePublisherInterface $runtimePublisher = null,
+        protected ExamRuntimePayloadBuilder $payloadBuilder,
+        protected ExamRuntimeClient $runtimeClient,
+        protected ExamDefinitionScoreCalculator $scoreCalculator,
+        protected ExamAuditLogger $auditLogger,
+        protected ExamGradebookEventDispatcher $gradebookEvents,
     ) {}
 
-    public function createSnapshot(ExamDefinition $definition): ExamPublishSnapshot
+    public function publish(ExamDefinition $definition): ExamPublishSnapshot
+    {
+        if (! in_array($definition->status, [ExamStatus::Ready, ExamStatus::Scheduled], true)) {
+            throw new \InvalidArgumentException('Only ready exams can be published.');
+        }
+
+        if ($this->scoreCalculator->questionCount($definition) < 1) {
+            throw new \InvalidArgumentException('Add at least one question before publishing.');
+        }
+
+        return $this->pushToRuntime($definition, ExamRuntimeSyncAction::Publish, markPublished: true);
+    }
+
+    public function republish(ExamDefinition $definition): ExamPublishSnapshot
+    {
+        if (! in_array($definition->status, [ExamStatus::Published, ExamStatus::Scheduled, ExamStatus::Ready], true)) {
+            throw new \InvalidArgumentException('Only published or ready exams can be republished.');
+        }
+
+        if ($this->scoreCalculator->questionCount($definition) < 1) {
+            throw new \InvalidArgumentException('Add at least one question before republishing.');
+        }
+
+        return $this->pushToRuntime($definition, ExamRuntimeSyncAction::Republish, markPublished: false);
+    }
+
+    public function syncParticipantsOnly(ExamDefinition $definition): ExamRuntimeSyncLog
+    {
+        $this->assertRuntimeMapped($definition);
+
+        $payload = $this->payloadBuilder->buildParticipantsOnly($definition);
+
+        return $this->executeSync(
+            $definition,
+            ExamRuntimeSyncAction::SyncParticipants,
+            $payload,
+            fn () => $this->runtimeClient->syncParticipants($payload),
+        );
+    }
+
+    public function syncAdminAccessOnly(ExamDefinition $definition): ExamRuntimeSyncLog
+    {
+        $this->assertRuntimeMapped($definition);
+
+        $payload = $this->payloadBuilder->buildAdminAccessOnly($definition);
+
+        return $this->executeSync(
+            $definition,
+            ExamRuntimeSyncAction::SyncAdminAccess,
+            $payload,
+            fn () => $this->runtimeClient->syncAdminAccess($payload),
+        );
+    }
+
+    protected function pushToRuntime(
+        ExamDefinition $definition,
+        ExamRuntimeSyncAction $action,
+        bool $markPublished,
+    ): ExamPublishSnapshot {
+        if ($definition->max_score === null) {
+            $definition->forceFill([
+                'max_score' => $this->scoreCalculator->totalScore($definition),
+            ])->save();
+        }
+
+        $payload = $this->payloadBuilder->buildFull($definition);
+        $snapshot = $this->createSnapshot($definition, $payload);
+
+        try {
+            $response = $this->runtimeClient->publishExam($payload);
+            $parsed = $this->runtimeClient->parsePublishResponse($response);
+
+            $this->writeSyncLog(
+                $definition,
+                $action,
+                ExamRuntimeSyncStatus::Success,
+                $payload,
+                $response,
+                null,
+                $parsed['runtime_exam_id'],
+            );
+
+            $snapshot->forceFill([
+                'runtime_exam_id' => $parsed['runtime_exam_id'],
+                'publish_status' => $parsed['publish_status'],
+                'published_at' => now(),
+                'error_message' => null,
+            ])->save();
+
+            $definition->forceFill([
+                'runtime_exam_id' => $parsed['runtime_exam_id'],
+                'last_published_at' => now(),
+            ]);
+
+            if ($markPublished) {
+                $definition->forceFill([
+                    'status' => ExamStatus::Published,
+                    'published_at' => $definition->published_at ?? now(),
+                ]);
+            }
+
+            $definition->save();
+
+            $this->auditLogger->log(
+                $action === ExamRuntimeSyncAction::Republish
+                    ? ExamAuditAction::RepublishExam
+                    : ExamAuditAction::PublishExam,
+                $definition,
+                $action === ExamRuntimeSyncAction::Republish
+                    ? 'Exam republished to runtime.'
+                    : 'Exam published to runtime.',
+                newValues: [
+                    'runtime_exam_id' => $parsed['runtime_exam_id'],
+                    'exam_definition_id' => $definition->id,
+                ],
+            );
+
+            if ($markPublished) {
+                $this->gradebookEvents->published($definition, [
+                    'runtime_exam_id' => $parsed['runtime_exam_id'],
+                ]);
+            }
+
+            return $snapshot->refresh();
+        } catch (ExamRuntimeException $exception) {
+            $this->writeSyncLog(
+                $definition,
+                $action,
+                ExamRuntimeSyncStatus::Failed,
+                $payload,
+                $exception->responseBody,
+                $exception->getMessage(),
+                $this->normalizeRuntimeId($definition->runtime_exam_id),
+            );
+
+            $snapshot->forceFill([
+                'publish_status' => 'failed',
+                'error_message' => $exception->getMessage(),
+            ])->save();
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  callable(): array<string, mixed>  $callback
+     */
+    protected function executeSync(
+        ExamDefinition $definition,
+        ExamRuntimeSyncAction $action,
+        array $payload,
+        callable $callback,
+    ): ExamRuntimeSyncLog {
+        try {
+            $response = $callback();
+            $runtimeId = (string) ($response['runtime_id'] ?? $definition->runtime_exam_id ?? '');
+
+            $log = $this->writeSyncLog(
+                $definition,
+                $action,
+                ExamRuntimeSyncStatus::Success,
+                $payload,
+                $response,
+                null,
+                Str::isUuid($runtimeId) ? $runtimeId : $this->normalizeRuntimeId($definition->runtime_exam_id),
+            );
+
+            if ($action === ExamRuntimeSyncAction::SyncParticipants) {
+                $this->auditLogger->log(
+                    ExamAuditAction::SyncParticipants,
+                    $definition,
+                    'Exam participants synced to runtime.',
+                    newValues: ['participant_count' => $log->request_summary['participant_count'] ?? null],
+                );
+            }
+
+            return $log;
+        } catch (ExamRuntimeException $exception) {
+            $this->writeSyncLog(
+                $definition,
+                $action,
+                ExamRuntimeSyncStatus::Failed,
+                $payload,
+                $exception->responseBody,
+                $exception->getMessage(),
+                $this->normalizeRuntimeId($definition->runtime_exam_id),
+            );
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function createSnapshot(ExamDefinition $definition, array $payload): ExamPublishSnapshot
     {
         $version = (int) $definition->examPublishSnapshots()->max('version') + 1;
 
@@ -23,95 +226,67 @@ class ExamPublishService
             'tenant_id' => $definition->tenant_id,
             'exam_definition_id' => $definition->id,
             'version' => $version,
-            'payload_json' => $this->buildPayload($definition),
+            'payload_json' => $payload,
             'publish_status' => 'pending',
         ]);
     }
 
-    public function publish(ExamDefinition $definition): ExamPublishSnapshot
-    {
-        return DB::transaction(function () use ($definition): ExamPublishSnapshot {
-            $snapshot = $this->createSnapshot($definition);
-
-            if ($this->runtimePublisher !== null) {
-                $result = $this->runtimePublisher->publish($definition, $snapshot);
-
-                $snapshot->forceFill([
-                    'runtime_exam_id' => $result['runtime_exam_id'] ?? null,
-                    'publish_status' => $result['publish_status'] ?? 'published',
-                    'published_at' => now(),
-                ])->save();
-            } else {
-                $snapshot->forceFill([
-                    'publish_status' => 'stubbed',
-                    'published_at' => now(),
-                ])->save();
-            }
-
-            $definition->forceFill([
-                'status' => ExamStatus::Published,
-                'published_at' => $definition->published_at ?? now(),
-                'last_published_at' => now(),
-                'runtime_exam_id' => $snapshot->runtime_exam_id ?? $definition->runtime_exam_id,
-            ])->save();
-
-            return $snapshot->refresh();
-        });
+    /**
+     * @param  array<string, mixed>  $payload
+     * @param  array<string, mixed>|null  $response
+     */
+    protected function writeSyncLog(
+        ExamDefinition $definition,
+        ExamRuntimeSyncAction $action,
+        ExamRuntimeSyncStatus $status,
+        array $payload,
+        ?array $response,
+        ?string $errorMessage,
+        ?string $runtimeId,
+    ): ExamRuntimeSyncLog {
+        return ExamRuntimeSyncLog::query()->create([
+            'tenant_id' => $definition->tenant_id,
+            'exam_definition_id' => $definition->id,
+            'action' => $action,
+            'status' => $status,
+            'runtime_id' => $runtimeId,
+            'request_summary' => $this->payloadBuilder->summarizeForLog($payload),
+            'response_summary' => $this->summarizeResponse($response),
+            'error_message' => $errorMessage,
+        ]);
     }
 
     /**
-     * @return array<string, mixed>
+     * @param  array<string, mixed>|null  $response
+     * @return array<string, mixed>|null
      */
-    protected function buildPayload(ExamDefinition $definition): array
+    protected function summarizeResponse(?array $response): ?array
     {
-        $definition->loadMissing([
-            'tenant',
-            'examPackages.examQuestionBank.examQuestions.examQuestionOptions',
-            'organization',
-            'academicPeriod',
-        ]);
+        if ($response === null) {
+            return null;
+        }
 
         return [
-            'exam_definition_id' => $definition->id,
-            'tenant_uuid' => $definition->tenant?->uuid,
-            'tenant_id' => $definition->tenant_id,
-            'organization_id' => $definition->organization_id,
-            'exam_academic_context' => $definition->exam_academic_context?->value,
-            'exam_purpose' => $definition->exam_purpose?->value,
-            'context' => $this->contextResolver->resolveDefinitionContext($definition),
-            'settings' => [
-                'name' => $definition->name,
-                'code' => $definition->code,
-                'duration_minutes' => $definition->duration_minutes,
-                'max_attempts' => $definition->max_attempts,
-                'max_score' => $definition->max_score,
-                'passing_score' => $definition->passing_score,
-                'shuffle_questions' => $definition->shuffle_questions,
-                'starts_at' => $definition->starts_at?->toIso8601String(),
-                'ends_at' => $definition->ends_at?->toIso8601String(),
-            ],
-            'packages' => $definition->examPackages->map(function ($package) {
-                $bank = $package->examQuestionBank;
-
-                return [
-                    'id' => $package->id,
-                    'name' => $package->name,
-                    'question_bank_id' => $package->exam_question_bank_id,
-                    'questions' => $bank?->examQuestions->map(fn ($question) => [
-                        'id' => $question->id,
-                        'type' => $question->type?->value,
-                        'topic' => $question->topic,
-                        'question_text' => $question->question_text,
-                        'score' => $question->score,
-                        'options' => $question->examQuestionOptions->map(fn ($option) => [
-                            'id' => $option->id,
-                            'option_text' => $option->option_text,
-                            'is_correct' => $option->is_correct,
-                            'sort_order' => $option->sort_order,
-                        ])->values()->all(),
-                    ])->values()->all() ?? [],
-                ];
-            })->values()->all(),
+            'runtime_id' => $response['runtime_id'] ?? $response['data']['runtime_id'] ?? null,
+            'external_id' => $response['external_id'] ?? $response['foundation_id'] ?? null,
+            'status' => $response['status'] ?? null,
+            'message' => $response['message'] ?? null,
         ];
+    }
+
+    protected function assertRuntimeMapped(ExamDefinition $definition): void
+    {
+        if (! Str::isUuid((string) $definition->runtime_exam_id)) {
+            throw new \InvalidArgumentException('Publish the exam to runtime before running this sync.');
+        }
+    }
+
+    protected function normalizeRuntimeId(?string $runtimeId): ?string
+    {
+        if ($runtimeId === null || $runtimeId === '') {
+            return null;
+        }
+
+        return Str::isUuid($runtimeId) ? $runtimeId : null;
     }
 }

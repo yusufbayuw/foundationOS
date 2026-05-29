@@ -8,6 +8,7 @@ use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Core\Services\TenantAdminProvisioner;
+use Modules\Exam\Database\Seeders\ExamMvpDemoSeeder;
 
 class MvpDemoSeeder extends Seeder
 {
@@ -72,5 +73,7 @@ class MvpDemoSeeder extends Seeder
             $tenant,
             $organization->getKey(),
         );
+
+        $this->call(ExamMvpDemoSeeder::class);
     }
 }

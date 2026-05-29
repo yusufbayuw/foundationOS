@@ -99,9 +99,11 @@ class ExamSchoolBridgeTest extends TestCase
         $participant = ExamParticipant::withoutTenantScope()->create([
             'tenant_id' => $tenant->id,
             'exam_definition_id' => $definition->id,
-            'display_name' => 'Student 99001',
+            'student_name' => 'Student 99001',
+            'participant_source' => 'school_student',
+            'school_student_reference' => $student->id,
             'context_reference_type' => Student::class,
-            'context_reference_id' => $student->id,
+            'participant_legacy_id' => $student->id,
         ]);
 
         $attemptSync = ExamAttemptSync::withoutTenantScope()->create([

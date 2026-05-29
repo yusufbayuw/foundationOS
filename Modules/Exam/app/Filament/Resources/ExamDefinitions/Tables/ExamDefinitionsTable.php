@@ -31,6 +31,9 @@ class ExamDefinitionsTable
                 TextColumn::make('exam_academic_context')
                     ->label(FilamentUi::field('exam_academic_context'))
                     ->badge(),
+                TextColumn::make('exam_type')
+                    ->label(FilamentUi::field('exam_type'))
+                    ->badge(),
                 TextColumn::make('exam_purpose')
                     ->label(FilamentUi::field('exam_purpose'))
                     ->toggleable(isToggledHiddenByDefault: true),

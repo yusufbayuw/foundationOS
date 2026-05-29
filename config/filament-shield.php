@@ -44,7 +44,6 @@ return [
 
     'tenant_model' => 'Modules\Core\Models\Tenant',
 
-
     /*
     |--------------------------------------------------------------------------
     | User Model
@@ -233,7 +232,24 @@ return [
     |
     */
 
-    'custom_permissions' => [],
+    'custom_permissions' => [
+        'view_exam' => 'View exams',
+        'create_exam' => 'Create exams',
+        'update_exam' => 'Update exams',
+        'delete_exam' => 'Delete exams',
+        'publish_exam' => 'Publish exams',
+        'sync_exam_result' => 'Sync exam results',
+        'push_exam_gradebook' => 'Push exam results to gradebook',
+        'grade_exam_answer' => 'Grade exam answers',
+        'export_exam_result' => 'Export exam results',
+        'manage_question_bank' => 'Manage question banks',
+        'import_question' => 'Import questions',
+        'generate_question_ai' => 'Generate questions with AI',
+        'manage_osn_prep' => 'Manage OSN preparation',
+        'manage_exam_token' => 'Manage exam tokens',
+        'manage_exam_proctor' => 'Manage exam proctors',
+        'open_control_room' => 'Open control room',
+    ],
 
     /*
     |--------------------------------------------------------------------------

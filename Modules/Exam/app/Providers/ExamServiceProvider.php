@@ -2,10 +2,27 @@
 
 namespace Modules\Exam\Providers;
 
+use Modules\Exam\Console\Commands\ProvisionExamSecurityCommand;
+use Modules\Exam\Console\Commands\SyncExamResultsCommand;
 use Modules\Exam\Services\CampusGradeBridgeService;
+use Modules\Exam\Services\ExamAcademicContextService;
+use Modules\Exam\Services\ExamAnalyticsService;
+use Modules\Exam\Services\ExamAuditLogger;
+use Modules\Exam\Services\ExamAuthorizationService;
 use Modules\Exam\Services\ExamContextResolver;
+use Modules\Exam\Services\ExamDefinitionScoreCalculator;
+use Modules\Exam\Services\ExamGradebookEventDispatcher;
+use Modules\Exam\Services\ExamGradebookExportService;
+use Modules\Exam\Services\ExamManualGradingService;
+use Modules\Exam\Services\ExamParticipantResolver;
+use Modules\Exam\Services\ExamParticipantSyncService;
 use Modules\Exam\Services\ExamPublishService;
+use Modules\Exam\Services\ExamResultExportService;
+use Modules\Exam\Services\ExamResultSyncService;
+use Modules\Exam\Services\ExamRuntimeClient;
+use Modules\Exam\Services\ExamRuntimePayloadBuilder;
 use Modules\Exam\Services\ExamRuntimeSyncService;
+use Modules\Exam\Services\ExamShieldProvisioner;
 use Modules\Exam\Services\ExamTokenService;
 use Modules\Exam\Services\SchoolGradeBridgeService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
@@ -21,6 +38,11 @@ class ExamServiceProvider extends ModuleServiceProvider
         RouteServiceProvider::class,
     ];
 
+    protected array $commands = [
+        SyncExamResultsCommand::class,
+        ProvisionExamSecurityCommand::class,
+    ];
+
     public function register(): void
     {
         parent::register();
@@ -29,14 +51,25 @@ class ExamServiceProvider extends ModuleServiceProvider
 
         $this->app->singleton(ExamContextResolver::class);
         $this->app->singleton(ExamTokenService::class);
+        $this->app->singleton(ExamParticipantResolver::class);
+        $this->app->singleton(ExamParticipantSyncService::class);
         $this->app->singleton(SchoolGradeBridgeService::class);
         $this->app->singleton(CampusGradeBridgeService::class);
 
-        $this->app->singleton(ExamPublishService::class, function ($app): ExamPublishService {
-            return new ExamPublishService(
-                $app->make(ExamContextResolver::class),
-            );
-        });
+        $this->app->singleton(ExamDefinitionScoreCalculator::class);
+        $this->app->singleton(ExamAcademicContextService::class);
+        $this->app->singleton(ExamRuntimeClient::class);
+        $this->app->singleton(ExamRuntimePayloadBuilder::class);
+        $this->app->singleton(ExamPublishService::class);
+        $this->app->singleton(ExamResultSyncService::class);
+        $this->app->singleton(ExamManualGradingService::class);
+        $this->app->singleton(ExamAnalyticsService::class);
+        $this->app->singleton(ExamResultExportService::class);
+        $this->app->singleton(ExamGradebookEventDispatcher::class);
+        $this->app->singleton(ExamGradebookExportService::class);
+        $this->app->singleton(ExamAuthorizationService::class);
+        $this->app->singleton(ExamAuditLogger::class);
+        $this->app->singleton(ExamShieldProvisioner::class);
 
         $this->app->singleton(ExamRuntimeSyncService::class, function ($app): ExamRuntimeSyncService {
             return new ExamRuntimeSyncService([

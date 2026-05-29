@@ -5,6 +5,7 @@ namespace Modules\Exam\Enums;
 enum ExamStatus: string
 {
     case Draft = 'draft';
+    case Ready = 'ready';
     case Scheduled = 'scheduled';
     case Published = 'published';
     case Closed = 'closed';
@@ -14,6 +15,7 @@ enum ExamStatus: string
     {
         return match ($this) {
             self::Draft => 'Draft',
+            self::Ready => 'Ready',
             self::Scheduled => 'Scheduled',
             self::Published => 'Published',
             self::Closed => 'Closed',

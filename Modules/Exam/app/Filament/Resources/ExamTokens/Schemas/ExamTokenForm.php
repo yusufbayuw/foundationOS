@@ -23,7 +23,7 @@ class ExamTokenForm
                         TenantField::make(),
                         Select::make('exam_participant_id')
                             ->label(FilamentUi::field('exam_participant_id'))
-                            ->relationship('examParticipant', 'display_name')
+                            ->relationship('examParticipant', 'student_name')
                             ->required()
                             ->searchable(),
                         TextInput::make('token')

@@ -14,7 +14,7 @@ class ExamTokenInfolist
         return $schema
             ->components([
                 TextEntry::make('token')->label(FilamentUi::field('token')),
-                TextEntry::make('examParticipant.display_name')
+                TextEntry::make('examParticipant.student_name')
                     ->label(FilamentUi::field('exam_participant_id')),
                 IconEntry::make('is_active')->label(FilamentUi::field('is_active'))->boolean(),
             ]);

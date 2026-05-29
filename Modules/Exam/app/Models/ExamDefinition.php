@@ -3,16 +3,27 @@
 namespace Modules\Exam\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Campus\Models\Course;
+use Modules\Campus\Models\CourseOffering;
+use Modules\Campus\Models\Faculty;
+use Modules\Campus\Models\Lecturer;
+use Modules\Campus\Models\StudyProgram;
 use Modules\Core\Models\AcademicPeriod;
+use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
 use Modules\Exam\Enums\ExamAcademicContext;
 use Modules\Exam\Enums\ExamPurpose;
 use Modules\Exam\Enums\ExamStatus;
+use Modules\Exam\Enums\ExamType;
 use Modules\Exam\Enums\GradeSyncMode;
 use Modules\School\Models\Assessment;
+use Modules\School\Models\SchoolClass;
+use Modules\School\Models\Subject;
+use Modules\School\Models\Teacher;
 
 class ExamDefinition extends ExamModel
 {
@@ -26,12 +37,29 @@ class ExamDefinition extends ExamModel
         'school_assessment_id',
         'exam_academic_context',
         'exam_purpose',
+        'exam_type',
         'context_reference_type',
         'context_reference_id',
         'context_reference_uuid',
         'metadata_json',
         'grade_sync_mode',
         'grade_sync_target',
+        'academic_year_reference',
+        'school_semester_reference',
+        'school_class_reference',
+        'school_subject_reference',
+        'school_grade_level_reference',
+        'school_teacher_reference',
+        'campus_academic_year_reference',
+        'campus_academic_term_reference',
+        'campus_faculty_reference',
+        'campus_study_program_reference',
+        'campus_course_reference',
+        'campus_class_reference',
+        'campus_lecturer_reference',
+        'standalone_subject',
+        'standalone_level',
+        'target_description',
         'name',
         'code',
         'description',
@@ -41,6 +69,9 @@ class ExamDefinition extends ExamModel
         'duration_minutes',
         'max_attempts',
         'shuffle_questions',
+        'shuffle_options',
+        'show_result',
+        'show_explanation',
         'starts_at',
         'ends_at',
         'runtime_exam_id',
@@ -53,6 +84,7 @@ class ExamDefinition extends ExamModel
         return [
             'exam_academic_context' => ExamAcademicContext::class,
             'exam_purpose' => ExamPurpose::class,
+            'exam_type' => ExamType::class,
             'status' => ExamStatus::class,
             'grade_sync_mode' => GradeSyncMode::class,
             'metadata_json' => 'array',
@@ -61,11 +93,29 @@ class ExamDefinition extends ExamModel
             'duration_minutes' => 'integer',
             'max_attempts' => 'integer',
             'shuffle_questions' => 'boolean',
+            'shuffle_options' => 'boolean',
+            'show_result' => 'boolean',
+            'show_explanation' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'published_at' => 'datetime',
             'last_published_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (ExamDefinition $definition): void {
+            if ($definition->exam_type !== null && $definition->exam_purpose === null) {
+                $definition->exam_purpose = $definition->exam_type->toExamPurpose();
+            }
+
+            if ($definition->school_semester_reference !== null) {
+                $definition->academic_period_id = $definition->school_semester_reference;
+            } elseif ($definition->campus_academic_term_reference !== null) {
+                $definition->academic_period_id = $definition->campus_academic_term_reference;
+            }
+        });
     }
 
     public function organization(): BelongsTo
@@ -88,9 +138,83 @@ class ExamDefinition extends ExamModel
         return $this->belongsTo(Assessment::class, 'school_assessment_id');
     }
 
+    public function academicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class, 'academic_year_reference');
+    }
+
+    public function schoolSemester(): BelongsTo
+    {
+        return $this->belongsTo(AcademicPeriod::class, 'school_semester_reference');
+    }
+
+    public function schoolClass(): BelongsTo
+    {
+        return $this->belongsTo(SchoolClass::class, 'school_class_reference');
+    }
+
+    public function schoolSubject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class, 'school_subject_reference');
+    }
+
+    public function schoolTeacher(): BelongsTo
+    {
+        return $this->belongsTo(Teacher::class, 'school_teacher_reference');
+    }
+
+    public function campusAcademicYear(): BelongsTo
+    {
+        return $this->belongsTo(AcademicYear::class, 'campus_academic_year_reference');
+    }
+
+    public function campusAcademicTerm(): BelongsTo
+    {
+        return $this->belongsTo(AcademicPeriod::class, 'campus_academic_term_reference');
+    }
+
+    public function campusFaculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class, 'campus_faculty_reference');
+    }
+
+    public function campusStudyProgram(): BelongsTo
+    {
+        return $this->belongsTo(StudyProgram::class, 'campus_study_program_reference');
+    }
+
+    public function campusCourse(): BelongsTo
+    {
+        return $this->belongsTo(Course::class, 'campus_course_reference');
+    }
+
+    public function campusClass(): BelongsTo
+    {
+        return $this->belongsTo(CourseOffering::class, 'campus_class_reference');
+    }
+
+    public function campusLecturer(): BelongsTo
+    {
+        return $this->belongsTo(Lecturer::class, 'campus_lecturer_reference');
+    }
+
     public function examPackages(): HasMany
     {
         return $this->hasMany(ExamPackage::class);
+    }
+
+    public function examDefinitionQuestions(): HasMany
+    {
+        return $this->hasMany(ExamDefinitionQuestion::class)->orderBy('sort_order');
+    }
+
+    public function examQuestions(): BelongsToMany
+    {
+        return $this->belongsToMany(ExamQuestion::class, 'exam_definition_questions')
+            ->using(ExamDefinitionQuestion::class)
+            ->withPivot(['id', 'sort_order', 'score_override'])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
     }
 
     public function examParticipants(): HasMany
@@ -106,5 +230,63 @@ class ExamDefinition extends ExamModel
     public function examAttemptSyncs(): HasMany
     {
         return $this->hasMany(ExamAttemptSync::class);
+    }
+
+    public function examRuntimeSyncLogs(): HasMany
+    {
+        return $this->hasMany(ExamRuntimeSyncLog::class);
+    }
+
+    public function examAttempts(): HasMany
+    {
+        return $this->hasMany(ExamAttempt::class);
+    }
+
+    public function examResults(): HasMany
+    {
+        return $this->hasMany(ExamResult::class);
+    }
+
+    /**
+     * Alias for analytics tab (same underlying results).
+     */
+    public function examAnalytics(): HasMany
+    {
+        return $this->hasMany(ExamResult::class);
+    }
+
+    public function examAnswers(): HasMany
+    {
+        return $this->hasMany(ExamAnswer::class);
+    }
+
+    public function examActivityLogs(): HasMany
+    {
+        return $this->hasMany(ExamActivityLog::class);
+    }
+
+    public function examExportLogs(): HasMany
+    {
+        return $this->hasMany(ExamExportLog::class);
+    }
+
+    public function examGradebookExportLogs(): HasMany
+    {
+        return $this->hasMany(ExamGradebookExportLog::class);
+    }
+
+    public function isSchool(): bool
+    {
+        return $this->exam_academic_context === ExamAcademicContext::School;
+    }
+
+    public function isCampus(): bool
+    {
+        return $this->exam_academic_context === ExamAcademicContext::Campus;
+    }
+
+    public function isStandalone(): bool
+    {
+        return $this->exam_academic_context === ExamAcademicContext::Standalone;
     }
 }

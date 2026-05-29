@@ -1,0 +1,95 @@
+<?php
+
+namespace Modules\Exam\Services;
+
+use Illuminate\Database\Eloquent\Builder;
+use Modules\Core\Models\User;
+use Modules\Exam\Enums\ExamAcademicContext;
+use Modules\Exam\Enums\QuestionStatus;
+use Modules\Exam\Models\ExamDefinition;
+use Modules\Exam\Models\ExamQuestion;
+
+class ExamDefinitionQuestionQuery
+{
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    public function forPicker(ExamDefinition $definition, User $user, array $filters = [], bool $includeCrossContext = false): Builder
+    {
+        $query = ExamQuestion::query()
+            ->with(['examQuestionBank'])
+            ->where('tenant_id', $definition->tenant_id)
+            ->where('status', QuestionStatus::Active);
+
+        if (! $includeCrossContext || ! $user->isGlobalSuperAdmin()) {
+            $context = $definition->exam_academic_context;
+
+            if ($context !== null) {
+                $query->whereHas('examQuestionBank', function (Builder $bankQuery) use ($context): void {
+                    $bankQuery->where('academic_context_type', $context->value);
+                });
+            }
+        }
+
+        if (filled($filters['type'] ?? null)) {
+            $query->where('type', $filters['type']);
+        }
+
+        if (filled($filters['difficulty'] ?? null)) {
+            $query->where('difficulty', $filters['difficulty']);
+        }
+
+        if (filled($filters['topic'] ?? null)) {
+            $query->where('topic', 'like', '%'.$filters['topic'].'%');
+        }
+
+        if (filled($filters['subtopic'] ?? null)) {
+            $query->where('subtopic', 'like', '%'.$filters['subtopic'].'%');
+        }
+
+        if (filled($filters['olympiad_level'] ?? null)) {
+            $query->where('metadata_json->olympiad_level', $filters['olympiad_level']);
+        }
+
+        if ($definition->exam_academic_context === ExamAcademicContext::School && filled($filters['subject'] ?? null)) {
+            $query->whereHas('examQuestionBank.schoolSubject', function (Builder $subjectQuery) use ($filters): void {
+                $subjectQuery->where('name', 'like', '%'.$filters['subject'].'%');
+            });
+        }
+
+        if ($definition->exam_academic_context === ExamAcademicContext::Campus && filled($filters['course'] ?? null)) {
+            $query->whereHas('examQuestionBank.campusCourse', function (Builder $courseQuery) use ($filters): void {
+                $courseQuery->where('name', 'like', '%'.$filters['course'].'%');
+            });
+        }
+
+        if ($definition->exam_academic_context === ExamAcademicContext::Standalone && filled($filters['subject'] ?? null)) {
+            $query->whereHas('examQuestionBank', function (Builder $bankQuery) use ($filters): void {
+                $bankQuery->where('standalone_subject', 'like', '%'.$filters['subject'].'%');
+            });
+        }
+
+        return $query;
+    }
+
+    public function assertQuestionAttachable(ExamDefinition $definition, ExamQuestion $question, User $user, bool $includeCrossContext = false): void
+    {
+        if ($question->tenant_id !== $definition->tenant_id) {
+            throw new \InvalidArgumentException('Question does not belong to this tenant.');
+        }
+
+        if ($question->status !== QuestionStatus::Active) {
+            throw new \InvalidArgumentException('Only active questions can be added to an exam.');
+        }
+
+        if ($includeCrossContext && $user->isGlobalSuperAdmin()) {
+            return;
+        }
+
+        $bankContext = $question->examQuestionBank?->academic_context_type;
+
+        if ($bankContext !== $definition->exam_academic_context) {
+            throw new \InvalidArgumentException('Question academic context does not match the exam.');
+        }
+    }
+}
