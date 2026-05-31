@@ -3,6 +3,20 @@
 namespace Tests\Feature;
 
 use Modules\Core\Filament\Support\ModuleResource;
+use Modules\Exam\Models\ExamActivityLog;
+use Modules\Exam\Models\ExamAnswer;
+use Modules\Exam\Models\ExamAttempt;
+use Modules\Exam\Models\ExamAttemptSync;
+use Modules\Exam\Models\ExamDefinitionQuestion;
+use Modules\Exam\Models\ExamExportLog;
+use Modules\Exam\Models\ExamGradebookExportLog;
+use Modules\Exam\Models\ExamManualScore;
+use Modules\Exam\Models\ExamPackage;
+use Modules\Exam\Models\ExamPublishSnapshot;
+use Modules\Exam\Models\ExamQuestionOption;
+use Modules\Exam\Models\ExamResult;
+use Modules\Exam\Models\ExamRuntimeSyncLog;
+use Modules\Monitoring\Models\PrintExportLog;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -80,14 +94,56 @@ class ModuleFilamentResourceCoverageTest extends TestCase
 
             $class = $this->classNameFromFile($file->getPathname());
 
-            if ($class !== null) {
-                $classes[] = $class;
+            if ($class === null || ! class_exists($class)) {
+                continue;
             }
+
+            $reflection = new ReflectionClass($class);
+
+            if ($reflection->isAbstract()) {
+                continue;
+            }
+
+            if ($this->isExcludedFromFilamentResourceCoverage($class)) {
+                continue;
+            }
+
+            $classes[] = $class;
         }
 
         sort($classes);
 
         return $classes;
+    }
+
+    /**
+     * Models without top-level Filament resources (relation managers, pipelines, or audit logs).
+     *
+     * @return list<class-string>
+     */
+    private function modelsExcludedFromFilamentResourceCoverage(): array
+    {
+        return [
+            PrintExportLog::class,
+            ExamActivityLog::class,
+            ExamAnswer::class,
+            ExamAttempt::class,
+            ExamAttemptSync::class,
+            ExamDefinitionQuestion::class,
+            ExamExportLog::class,
+            ExamGradebookExportLog::class,
+            ExamManualScore::class,
+            ExamPackage::class,
+            ExamPublishSnapshot::class,
+            ExamQuestionOption::class,
+            ExamResult::class,
+            ExamRuntimeSyncLog::class,
+        ];
+    }
+
+    private function isExcludedFromFilamentResourceCoverage(string $modelClass): bool
+    {
+        return in_array($modelClass, $this->modelsExcludedFromFilamentResourceCoverage(), true);
     }
 
     /**
