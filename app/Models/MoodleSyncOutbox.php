@@ -47,5 +47,32 @@ class MoodleSyncOutbox extends Model
                     ->orWhere('next_retry_at', '<=', now());
             });
     }
+
+    /**
+     * Atomically claim a row for processing (prevents duplicate workers).
+     */
+    public static function tryClaim(int $id): ?self
+    {
+        $updated = static::query()
+            ->whereKey($id)
+            ->whereIn('status', [self::STATUS_PENDING, self::STATUS_FAILED])
+            ->update([
+                'status' => self::STATUS_PROCESSING,
+                'last_error' => null,
+            ]);
+
+        if ($updated !== 1) {
+            return null;
+        }
+
+        return static::query()->find($id);
+    }
+
+    public function scopeStaleProcessing(Builder $query, int $minutes): Builder
+    {
+        return $query
+            ->where('status', self::STATUS_PROCESSING)
+            ->where('updated_at', '<=', now()->subMinutes($minutes));
+    }
 }
 

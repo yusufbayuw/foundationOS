@@ -69,9 +69,9 @@ class UserIdentityAccessTest extends TestCase
 
     public function test_user_panel_access_respects_platform_admin_and_unknown_panel_rules(): void
     {
-        $plainUser = User::factory()->create(['is_super_admin' => false]);
-        $tenantUser = User::factory()->create(['is_super_admin' => false]);
-        $superAdmin = User::factory()->create(['is_super_admin' => true]);
+        $plainUser = User::factory()->create();
+        $tenantUser = User::factory()->create();
+        $superAdmin = User::factory()->superAdmin()->create();
         $platformOwner = $this->createPlatformOwner();
 
         $this->assignUserToTenant($tenantUser, $this->createTenant('panel-tenant'));
@@ -115,7 +115,7 @@ class UserIdentityAccessTest extends TestCase
 
     private function createPlatformOwner(): User
     {
-        $user = User::factory()->create(['is_super_admin' => false]);
+        $user = User::factory()->create();
         $role = Role::firstOrCreate(['name' => 'platform_owner', 'guard_name' => 'web']);
 
         setPermissionsTeamId(0);

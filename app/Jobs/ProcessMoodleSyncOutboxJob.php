@@ -29,20 +29,11 @@ class ProcessMoodleSyncOutboxJob implements ShouldQueue
             return;
         }
 
-        /** @var MoodleSyncOutbox|null $outbox */
-        $outbox = MoodleSyncOutbox::query()->find($this->outboxId);
+        $outbox = MoodleSyncOutbox::tryClaim($this->outboxId);
+
         if (! $outbox) {
             return;
         }
-
-        if (! in_array($outbox->status, [MoodleSyncOutbox::STATUS_PENDING, MoodleSyncOutbox::STATUS_FAILED], true)) {
-            return;
-        }
-
-        $outbox->forceFill([
-            'status' => MoodleSyncOutbox::STATUS_PROCESSING,
-            'last_error' => null,
-        ])->save();
 
         try {
             $syncService->syncOutboxItem($outbox);

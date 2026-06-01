@@ -63,7 +63,7 @@ class ExamDefinitionSuperAdminCrossContextTest extends TestCase
             'status' => QuestionStatus::Active,
         ]);
 
-        $superAdmin = User::factory()->create(['is_super_admin' => true]);
+        $superAdmin = User::factory()->superAdmin()->create();
 
         app(ExamDefinitionQuestionQuery::class)->assertQuestionAttachable(
             $schoolExam,

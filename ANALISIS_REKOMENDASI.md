@@ -258,16 +258,16 @@ Hanya dua workflow GitHub Actions:
 ## 10. Roadmap Perbaikan (Prioritas)
 
 ### Gelombang 1 — Stabilisasi (risiko tertinggi, usaha rendah)
-- [ ] Buat `tests.yml` CI + jadikan required check pada `main`.
-- [ ] Perbaiki bug `AcademicPeriodObserver` (argumen `enqueue`) + test regresi.
-- [ ] Pin `barryvdh/laravel-dompdf`; selaraskan PHP `^8.4`.
-- [ ] Pindahkan `is_super_admin` keluar dari `$fillable`.
+- [x] Buat `tests.yml` CI + jadikan required check pada `main`. *(branch protection: set di GitHub UI)*
+- [x] Perbaiki bug `AcademicPeriodObserver` (argumen `enqueue`) + test regresi.
+- [x] Pin `barryvdh/laravel-dompdf`; selaraskan PHP `^8.4`.
+- [x] Pindahkan `is_super_admin` keluar dari `$fillable` (`$guarded` + `promoteToGlobalSuperAdmin()`).
 
 ### Gelombang 2 — Hardening keamanan & keandalan
-- [ ] Klaim outbox atomik + sweeper `processing` tersangkut.
-- [ ] Wajibkan `tenant_id` pada token API; mode fail-closed untuk web/API.
+- [x] Klaim outbox atomik + sweeper `processing` tersangkut (`tryClaim`, `fos:moodle:sweep-stale-processing`).
+- [x] Wajibkan `tenant_id` pada token API (`config/tenancy.php`, `ResolveApiTenant`).
 - [ ] Tambah `lockForUpdate` pada `cancel/return/reassign` workflow; queue-kan listener automasi.
-- [ ] Tambah `BelongsToTenant` pada `LibraryPolicy`/`BookReservation`; tegakkan `expires_at`.
+- [x] Tambah `BelongsToTenant` pada `LibraryPolicy`/`BookReservation`; tegakkan `expires_at`.
 - [ ] Audit lint `Select::make('tenant_id')` → `TenantField`.
 
 ### Gelombang 3 — Kualitas & performa

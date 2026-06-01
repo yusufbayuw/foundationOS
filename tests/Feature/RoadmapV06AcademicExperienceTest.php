@@ -66,7 +66,7 @@ class RoadmapV06AcademicExperienceTest extends TestCase
     {
         $tenant = $this->makeTenant();
         $staff = User::factory()->create();
-        $superAdmin = User::factory()->create(['is_super_admin' => true]);
+        $superAdmin = User::factory()->superAdmin()->create();
 
         $note = CounselingNote::query()->create([
             'tenant_id' => $tenant->getKey(),

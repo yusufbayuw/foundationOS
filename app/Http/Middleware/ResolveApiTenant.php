@@ -16,9 +16,19 @@ class ResolveApiTenant
     {
         $token = $request->user()?->currentAccessToken();
 
-        if ($token instanceof PersonalAccessToken && $token->tenant_id !== null) {
-            $this->currentTenant->set($token->tenant_id);
+        if (! $token instanceof PersonalAccessToken) {
+            return $next($request);
         }
+
+        if ($token->tenant_id === null) {
+            if (config('tenancy.api_require_tenant', true)) {
+                abort(403, 'API token must be scoped to a tenant.');
+            }
+
+            return $next($request);
+        }
+
+        $this->currentTenant->set($token->tenant_id);
 
         return $next($request);
     }

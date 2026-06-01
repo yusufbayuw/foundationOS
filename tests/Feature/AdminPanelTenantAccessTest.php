@@ -19,9 +19,7 @@ class AdminPanelTenantAccessTest extends TestCase
 
     public function test_global_super_admin_cannot_access_tenant_without_membership(): void
     {
-        $user = User::factory()->create([
-            'is_super_admin' => true,
-        ]);
+        $user = User::factory()->superAdmin()->create();
 
         $memberTenant = $this->createTenantWithMembership($user, 'member-tenant');
         $foreignTenant = $this->createTenantWithMembership(
@@ -42,9 +40,7 @@ class AdminPanelTenantAccessTest extends TestCase
 
     public function test_numeric_tenant_id_in_url_is_not_resolved(): void
     {
-        $user = User::factory()->create([
-            'is_super_admin' => true,
-        ]);
+        $user = User::factory()->superAdmin()->create();
 
         $tenant = $this->createTenantWithMembership($user, 'uuid-tenant');
 
@@ -55,9 +51,7 @@ class AdminPanelTenantAccessTest extends TestCase
 
     public function test_provisioner_enables_tenant_modules_for_navigation(): void
     {
-        $user = User::factory()->create([
-            'is_super_admin' => true,
-        ]);
+        $user = User::factory()->superAdmin()->create();
 
         $tenant = $this->createTenantWithMembership($user, 'modules-tenant');
 

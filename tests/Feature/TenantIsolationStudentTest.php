@@ -95,9 +95,9 @@ class TenantIsolationStudentTest extends TestCase
     {
         $assignedTenant = Tenant::factory()->create(['code' => 'assigned']);
         $foreignTenant = Tenant::factory()->create(['code' => 'foreign']);
-        $tenantUser = User::factory()->create(['is_super_admin' => false]);
-        $plainUser = User::factory()->create(['is_super_admin' => false]);
-        $superAdmin = User::factory()->create(['is_super_admin' => true]);
+        $tenantUser = User::factory()->create();
+        $plainUser = User::factory()->create();
+        $superAdmin = User::factory()->superAdmin()->create();
 
         $this->assignUserToTenant($tenantUser, $assignedTenant);
 

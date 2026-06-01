@@ -10,7 +10,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class LibraryPolicy extends Model
 {
-    use SoftDeletes;
+    use BelongsToTenant, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',

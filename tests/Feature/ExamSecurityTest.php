@@ -200,7 +200,7 @@ class ExamSecurityTest extends TestCase
 
     protected function makeTenantUser(Tenant $tenant, ExamRole $role): User
     {
-        $user = User::factory()->create(['is_super_admin' => false]);
+        $user = User::factory()->create();
 
         app(ExamShieldProvisioner::class)->provisionForTenant($tenant);
 

@@ -82,17 +82,27 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'locale',
         'preferred_locale',
         'status',
-        'is_super_admin',
         'pinned_menus',
         'app_authentication_secret',
         'app_authentication_recovery_codes',
         'has_email_authentication',
     ];
 
+    protected $guarded = [
+        'is_super_admin',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    public function promoteToGlobalSuperAdmin(): static
+    {
+        $this->forceFill(['is_super_admin' => true])->save();
+
+        return $this;
+    }
 
     protected function casts(): array
     {
@@ -151,18 +161,31 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             return false;
         }
 
-        return $this->userTenantRoles()
+        return $this->activeUserTenantRolesQuery()
             ->where('tenant_id', $tenant->getKey())
             ->exists();
     }
 
     public function getTenants(Panel $panel): array|Collection
     {
-        return $this->tenants()
-            ->select('tenants.*')
-            ->distinct()
-            ->orderBy('tenants.name')
+        $tenantIds = $this->activeUserTenantRolesQuery()->pluck('tenant_id');
+
+        return Tenant::query()
+            ->whereIn('id', $tenantIds)
+            ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * Membership rows that are not expired.
+     */
+    protected function activeUserTenantRolesQuery(): HasMany
+    {
+        return $this->userTenantRoles()
+            ->where(function ($query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 
     public function getDefaultTenant(Panel $panel): ?Model

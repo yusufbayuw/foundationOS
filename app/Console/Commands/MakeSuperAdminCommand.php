@@ -54,8 +54,8 @@ class MakeSuperAdminCommand extends Command
             $user->password = Hash::make($generatedPassword);
         }
 
-        $user->is_super_admin = true;
         $user->save();
+        $user->promoteToGlobalSuperAdmin();
 
         $this->info($isNewUser
             ? "Global super-admin berhasil dibuat untuk {$email}."

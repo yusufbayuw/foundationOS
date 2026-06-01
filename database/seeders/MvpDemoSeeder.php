@@ -25,9 +25,10 @@ class MvpDemoSeeder extends Seeder
                 'email_verified_at' => now(),
                 'timezone' => 'Asia/Jakarta',
                 'locale' => 'id',
-                'is_super_admin' => true,
             ],
         );
+
+        $admin->promoteToGlobalSuperAdmin();
 
         $tenant = Tenant::query()->updateOrCreate(
             ['code' => 'FOUNDATION-DEMO'],

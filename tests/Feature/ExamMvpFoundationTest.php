@@ -279,7 +279,7 @@ class ExamMvpFoundationTest extends TestCase
             'status' => ExamStatus::Draft,
         ]);
 
-        $user = User::factory()->create(['is_super_admin' => false]);
+        $user = User::factory()->create();
         $this->assignExamAdmin($user, $tenantA);
 
         app(CurrentTenant::class)->set($tenantA);

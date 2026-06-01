@@ -29,7 +29,7 @@ class ExamDefinitionQuestionBuilderTest extends TestCase
     {
         [$tenant, $schoolExam, $schoolQuestion, $campusQuestion] = $this->seedQuestions();
 
-        $user = User::factory()->create(['is_super_admin' => false]);
+        $user = User::factory()->create();
 
         $pickerIds = app(ExamDefinitionQuestionQuery::class)
             ->forPicker($schoolExam, $user)
@@ -43,7 +43,7 @@ class ExamDefinitionQuestionBuilderTest extends TestCase
     public function test_attach_rejects_mismatched_context(): void
     {
         [$tenant, $schoolExam, $schoolQuestion, $campusQuestion] = $this->seedQuestions();
-        $user = User::factory()->create(['is_super_admin' => false]);
+        $user = User::factory()->create();
 
         $this->expectException(\InvalidArgumentException::class);
 

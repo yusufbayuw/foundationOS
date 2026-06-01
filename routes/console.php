@@ -12,6 +12,10 @@ Schedule::command('fos:moodle:drain-outbox')
     ->everyMinute()
     ->withoutOverlapping();
 
+Schedule::command('fos:moodle:sweep-stale-processing')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();
+
 Schedule::command('fos:moodle:reconcile all --dry-run --limit=500')
     ->hourly()
     ->withoutOverlapping();
