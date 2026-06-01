@@ -72,14 +72,7 @@ class UpdateRegistrationOnInvoicePaid implements ShouldQueue
         }
 
         try {
-            Notification::make()
-                ->title('Registration payment confirmed')
-                ->body(sprintf(
-                    'Invoice %s is fully paid. Registration status updated.',
-                    $event->invoice->invoice_number,
-                ))
-                ->success()
-                ->sendToDatabase($event->actor);
+            NotificationService::registrationPaymentConfirmed($event->invoice, $event->actor);
         } catch (\Throwable) {
             // Best-effort notification.
         }
