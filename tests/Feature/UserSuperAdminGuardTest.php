@@ -25,13 +25,13 @@ class UserSuperAdminGuardTest extends TestCase
 
         $user->promoteToGlobalSuperAdmin();
 
-        $this->assertTrue((bool) $user->fresh()->is_super_admin);
+        $this->assertTrue($user->fresh()->isGlobalSuperAdmin());
     }
 
     public function test_factory_super_admin_state_works(): void
     {
         $user = User::factory()->superAdmin()->create();
 
-        $this->assertTrue((bool) $user->is_super_admin);
+        $this->assertTrue($user->isGlobalSuperAdmin());
     }
 }
