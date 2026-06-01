@@ -176,6 +176,21 @@ class NotificationService
     }
 
     /**
+     * Notify staff when an applicant registration invoice is fully paid.
+     */
+    public static function registrationPaymentConfirmed(
+        \Modules\Finance\Models\StudentInvoice $invoice,
+        User $recipient,
+    ): void {
+        Notification::make()
+            ->title('Pembayaran Pendaftaran Lunas')
+            ->body("Tagihan {$invoice->invoice_number} telah lunas. Status pendaftaran diperbarui.")
+            ->icon('heroicon-o-check-circle')
+            ->success()
+            ->sendToDatabase($recipient);
+    }
+
+    /**
      * Send a generic notification to a user.
      */
     public static function send(

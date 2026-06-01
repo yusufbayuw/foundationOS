@@ -11,12 +11,15 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Concerns\AppliesContextDefaults;
 use Modules\Core\Filament\Support\TenantField;
 use Modules\Core\Support\FilamentUi;
 use Modules\Enrollment\Filament\Resources\Applicants\ApplicantResource;
 
 class CreateApplicant extends CreateRecord
 {
+    use AppliesContextDefaults;
+
     protected static string $resource = ApplicantResource::class;
 
     public function form(Schema $schema): Schema

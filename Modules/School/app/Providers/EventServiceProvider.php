@@ -3,6 +3,8 @@
 namespace Modules\School\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Enrollment\Events\ApplicantAccepted;
+use Modules\School\Listeners\CreateStudentFromAcceptedApplicant;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,11 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        ApplicantAccepted::class => [
+            CreateStudentFromAcceptedApplicant::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.

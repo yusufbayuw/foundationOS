@@ -10,6 +10,7 @@ use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
+use Modules\Finance\Events\StudentInvoicePaid;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Monitoring\Models\AuditLog;
@@ -55,7 +56,7 @@ class FinanceControlService
                 'verification_notes' => $this->appendNotes($payment->verification_notes, $notes),
             ])->save();
 
-            $invoice = $this->recalculateInvoice($payment->studentInvoice->fresh());
+            $invoice = $this->recalculateInvoice($payment->studentInvoice->fresh(), $actor);
             $journal = $this->createPaymentJournalEntry($payment->fresh(['studentInvoice', 'chartOfAccount']), $actor);
 
             $this->audit($payment, $actor, 'finance_payment_verified', [
@@ -86,7 +87,7 @@ class FinanceControlService
                 'verification_notes' => $this->appendNotes($payment->verification_notes, $notes),
             ])->save();
 
-            $this->recalculateInvoice($payment->studentInvoice->fresh());
+            $this->recalculateInvoice($payment->studentInvoice->fresh(), $actor);
 
             $this->audit($payment, $actor, 'finance_payment_rejected', [
                 'status' => $payment->status,
@@ -182,8 +183,10 @@ class FinanceControlService
         });
     }
 
-    public function recalculateInvoice(StudentInvoice $invoice): StudentInvoice
+    public function recalculateInvoice(StudentInvoice $invoice, ?User $actor = null): StudentInvoice
     {
+        $previousStatus = $invoice->status;
+
         $verifiedTotal = (float) $invoice->payments()
             ->where('status', 'verified')
             ->sum('amount');
@@ -203,7 +206,13 @@ class FinanceControlService
             'status' => $status,
         ])->save();
 
-        return $invoice->fresh();
+        $invoice = $invoice->fresh();
+
+        if ($invoice->status === 'paid' && $previousStatus !== 'paid') {
+            StudentInvoicePaid::dispatch($invoice, $actor);
+        }
+
+        return $invoice;
     }
 
     protected function createPaymentJournalEntry(Payment $payment, User $actor): JournalEntry

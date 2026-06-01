@@ -11,9 +11,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Department;
+use Modules\Core\Models\User;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
+use Modules\Enrollment\Events\ApplicantAcceptanceReverted;
+use Modules\Enrollment\Events\ApplicantAccepted;
 use Modules\School\Models\Student;
 
 class Applicant extends Model
@@ -60,6 +63,29 @@ class Applicant extends Model
     {
         static::updating(function (self $applicant): void {
             $applicant->previousAdmissionPeriodId = $applicant->getOriginal('admission_period_id');
+        });
+
+        static::updated(function (self $applicant): void {
+            if (! $applicant->wasChanged('status')) {
+                return;
+            }
+
+            $user = auth()->user();
+            $actor = $user instanceof User ? $user : null;
+
+            if ($applicant->status === 'accepted') {
+                ApplicantAccepted::dispatch($applicant->fresh(), $actor);
+
+                return;
+            }
+
+            if ($applicant->getOriginal('status') === 'accepted') {
+                ApplicantAcceptanceReverted::dispatch(
+                    $applicant->fresh(),
+                    'accepted',
+                    $actor,
+                );
+            }
         });
 
         static::saved(function (self $applicant): void {

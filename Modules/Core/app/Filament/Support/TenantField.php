@@ -5,6 +5,8 @@ namespace Modules\Core\Filament\Support;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
+use Modules\Core\Models\AcademicPeriod;
+use Modules\Core\Services\ContextDefaults;
 
 class TenantField
 {
@@ -33,5 +35,50 @@ class TenantField
                 'name',
                 fn ($query) => $query->where('tenant_id', Filament::getTenant()?->getKey()),
             );
+    }
+
+    /**
+     * Hidden organization_id defaulting from the user's primary tenant membership.
+     */
+    public static function organizationHidden(): Hidden
+    {
+        return Hidden::make('organization_id')
+            ->default(fn () => app(ContextDefaults::class)->resolveOrganizationId(
+                auth()->user(),
+                Filament::getTenant()?->getKey(),
+            ))
+            ->dehydrateStateUsing(fn ($state) => $state ?: app(ContextDefaults::class)->resolveOrganizationId(
+                auth()->user(),
+                Filament::getTenant()?->getKey(),
+            ));
+    }
+
+    /**
+     * Hidden academic_period_id defaulting to the tenant's active period.
+     */
+    public static function academicPeriodHidden(): Hidden
+    {
+        return Hidden::make('academic_period_id')
+            ->default(fn () => app(ContextDefaults::class)->resolveAcademicPeriodId(
+                Filament::getTenant()?->getKey(),
+            ))
+            ->dehydrateStateUsing(fn ($state) => $state ?: app(ContextDefaults::class)->resolveAcademicPeriodId(
+                Filament::getTenant()?->getKey(),
+            ));
+    }
+
+    /**
+     * Select for academic period — use when the user must override the default.
+     */
+    public static function academicPeriodSelect(): Select
+    {
+        return Select::make('academic_period_id')
+            ->label(\Modules\Core\Support\FilamentUi::field('academic_period_id'))
+            ->options(fn () => AcademicPeriod::query()
+                ->where('tenant_id', Filament::getTenant()?->getKey())
+                ->orderByDesc('is_active')
+                ->orderByDesc('start_date')
+                ->pluck('name', 'id')
+                ->all());
     }
 }
