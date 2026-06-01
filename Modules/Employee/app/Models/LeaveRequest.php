@@ -98,4 +98,9 @@ class LeaveRequest extends Model implements ProvidesWorkflowContext, StartsWorkf
     {
         return self::class;
     }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status === 'approved';
+    }
 }

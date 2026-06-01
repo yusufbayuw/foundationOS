@@ -52,13 +52,11 @@ class ExecutiveMetricsService
 
     protected function revenueMtd(int $tenantId): float
     {
-        $start = now()->startOfMonth()->toDateString();
-        $end = now()->endOfMonth()->toDateString();
-
         return (float) Payment::query()
             ->where('tenant_id', $tenantId)
             ->where('status', 'verified')
-            ->whereBetween('payment_date', [$start, $end])
+            ->whereYear('payment_date', now()->year)
+            ->whereMonth('payment_date', now()->month)
             ->sum('amount');
     }
 
@@ -102,14 +100,12 @@ class ExecutiveMetricsService
      */
     public function journalRevenueMtd(int $tenantId): float
     {
-        $start = now()->startOfMonth()->toDateString();
-        $end = now()->endOfMonth()->toDateString();
-
         return (float) JournalEntryLine::query()
             ->where('tenant_id', $tenantId)
             ->whereHas('journalEntry', fn ($q) => $q
                 ->where('is_posted', true)
-                ->whereBetween('date', [$start, $end]))
+                ->whereYear('date', now()->year)
+                ->whereMonth('date', now()->month))
             ->where('credit', '>', 0)
             ->sum('credit');
     }

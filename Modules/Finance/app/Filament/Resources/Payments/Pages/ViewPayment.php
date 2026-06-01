@@ -24,6 +24,13 @@ class ViewPayment extends ViewRecord
         $record = $this->getRecord();
 
         return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => $record->isPrintable())
+                ->url(fn (): string => route('finance.payments.pdf', $record))
+                ->openUrlInNewTab(),
             Action::make('verifyPayment')
                 ->label(FilamentUi::text('Verify Payment'))
                 ->icon('heroicon-o-check-badge')

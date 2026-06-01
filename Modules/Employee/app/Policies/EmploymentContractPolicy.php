@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Employee\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\Employee\Models\EmploymentContract;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\Employee\Models\EmploymentContract;
 
 class EmploymentContractPolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:EmploymentContract');
@@ -71,5 +72,4 @@ class EmploymentContractPolicy
     {
         return $authUser->can('Reorder:EmploymentContract');
     }
-
 }

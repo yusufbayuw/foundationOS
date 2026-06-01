@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Library\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\Library\Models\Fine;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\Library\Models\Fine;
 
 class FinePolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Fine');
@@ -71,5 +72,4 @@ class FinePolicy
     {
         return $authUser->can('Reorder:Fine');
     }
-
 }

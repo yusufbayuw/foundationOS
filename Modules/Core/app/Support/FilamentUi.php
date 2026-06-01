@@ -494,6 +494,8 @@ class FilamentUi
         'Payroll calculated.' => 'Payroll berhasil dihitung.',
         'Salary slip marked as paid.' => 'Slip gaji ditandai lunas.',
         'Download PDF' => 'Unduh PDF',
+        'Download bulk PDF' => 'Unduh PDF massal',
+        'Class grade ledger' => 'Buku nilai kelas',
         'Approve Slip' => 'Setujui Slip',
         'Mark as Paid' => 'Tandai Lunas',
         'Paid At' => 'Dibayar Pada',

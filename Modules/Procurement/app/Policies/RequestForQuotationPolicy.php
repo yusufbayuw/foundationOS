@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Procurement\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\Procurement\Models\RequestForQuotation;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\Procurement\Models\RequestForQuotation;
 
 class RequestForQuotationPolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:RequestForQuotation');
@@ -71,5 +72,4 @@ class RequestForQuotationPolicy
     {
         return $authUser->can('Reorder:RequestForQuotation');
     }
-
 }

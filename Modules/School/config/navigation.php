@@ -28,6 +28,7 @@ return [
     'pages' => [
         'AttendanceRecapPage' => 190,
         'ReportCardPage' => 195,
+        'ClassGradeLedgerPage' => 196,
         'AcademicAnalytics' => 200,
     ],
 ];

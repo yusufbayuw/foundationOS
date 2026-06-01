@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Procurement\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\Procurement\Models\PurchaseRequisition;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\Procurement\Models\PurchaseRequisition;
 
 class PurchaseRequisitionPolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:PurchaseRequisition');
@@ -71,5 +72,4 @@ class PurchaseRequisitionPolicy
     {
         return $authUser->can('Reorder:PurchaseRequisition');
     }
-
 }

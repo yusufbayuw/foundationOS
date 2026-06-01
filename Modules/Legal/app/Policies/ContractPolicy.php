@@ -6,11 +6,12 @@ namespace Modules\Legal\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
 use Modules\Legal\Models\Contract;
 
 class ContractPolicy
 {
-    use HandlesAuthorization;
+    use AuthorizesPrint, HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {

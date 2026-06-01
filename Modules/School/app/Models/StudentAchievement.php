@@ -4,16 +4,16 @@ namespace Modules\School\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\AcademicYear;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class StudentAchievement extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -49,6 +49,7 @@ class StudentAchievement extends Model
             'is_featured' => 'boolean',
         ];
     }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -72,5 +73,10 @@ class StudentAchievement extends Model
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function isPrintable(): bool
+    {
+        return $this->verified_at !== null;
     }
 }

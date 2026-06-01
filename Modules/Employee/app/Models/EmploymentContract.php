@@ -4,13 +4,13 @@ namespace Modules\Employee\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class EmploymentContract extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -47,6 +47,7 @@ class EmploymentContract extends Model
             'signed_by_employer' => 'boolean',
         ];
     }
+
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
@@ -55,5 +56,10 @@ class EmploymentContract extends Model
     public function previousContract(): BelongsTo
     {
         return $this->belongsTo(self::class, 'previous_contract_id');
+    }
+
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['draft', 'terminated', 'cancelled'], true);
     }
 }

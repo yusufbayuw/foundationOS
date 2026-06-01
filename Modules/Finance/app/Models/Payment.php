@@ -75,4 +75,9 @@ class Payment extends Model
     {
         return in_array((string) $this->status, ['verified', 'rejected', 'reversed'], true);
     }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status === 'verified';
+    }
 }

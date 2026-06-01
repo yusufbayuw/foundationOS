@@ -4,14 +4,14 @@ namespace Modules\Enrollment\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\User;
 
 class Registration extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -38,6 +38,7 @@ class Registration extends Model
             'completed_at' => 'datetime',
         ];
     }
+
     public function applicant(): BelongsTo
     {
         return $this->belongsTo(Applicant::class);
@@ -46,5 +47,10 @@ class Registration extends Model
     public function completedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'completed_by');
+    }
+
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['pending', 'cancelled'], true);
     }
 }

@@ -21,6 +21,13 @@ class ViewLeaveRequest extends ViewRecord
         $record = $this->getRecord();
 
         return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => $record->isPrintable())
+                ->url(fn (): string => route('employee.leave-requests.pdf', $record))
+                ->openUrlInNewTab(),
             Action::make('submitForApproval')
                 ->label(FilamentUi::text('Submit for Approval'))
                 ->icon('heroicon-o-paper-airplane')

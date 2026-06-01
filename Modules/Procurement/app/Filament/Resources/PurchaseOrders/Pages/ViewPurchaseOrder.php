@@ -9,6 +9,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Support\FilamentUi;
 use Modules\Procurement\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
+use Modules\Procurement\Models\PurchaseOrder;
 use Throwable;
 
 class ViewPurchaseOrder extends ViewRecord
@@ -17,7 +18,17 @@ class ViewPurchaseOrder extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var PurchaseOrder $record */
+        $record = $this->getRecord();
+
         return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => $record->isPrintable())
+                ->url(fn (): string => route('procurement.purchase-orders.pdf', $record))
+                ->openUrlInNewTab(),
             Action::make('approvePurchaseOrder')
                 ->label(FilamentUi::text('Approve PO'))
                 ->icon('heroicon-o-check-circle')

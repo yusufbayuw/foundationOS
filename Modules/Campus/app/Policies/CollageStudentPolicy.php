@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Campus\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Campus\Models\CollageStudent;
-use Illuminate\Auth\Access\HandlesAuthorization;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
 
 class CollageStudentPolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:CollageStudent');
@@ -71,5 +72,4 @@ class CollageStudentPolicy
     {
         return $authUser->can('Reorder:CollageStudent');
     }
-
 }

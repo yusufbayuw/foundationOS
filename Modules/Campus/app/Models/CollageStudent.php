@@ -4,20 +4,20 @@ namespace Modules\Campus\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class CollageStudent extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -47,6 +47,7 @@ class CollageStudent extends Model
             'graduation_date' => 'date',
         ];
     }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -90,5 +91,10 @@ class CollageStudent extends Model
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');
+    }
+
+    public function isPrintable(): bool
+    {
+        return in_array((string) $this->status, ['active', 'graduated'], true);
     }
 }

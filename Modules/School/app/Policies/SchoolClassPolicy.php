@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\School\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\School\Models\SchoolClass;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\School\Models\SchoolClass;
 
 class SchoolClassPolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:SchoolClass');
@@ -71,5 +72,4 @@ class SchoolClassPolicy
     {
         return $authUser->can('Reorder:SchoolClass');
     }
-
 }

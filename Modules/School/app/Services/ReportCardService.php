@@ -2,11 +2,12 @@
 
 namespace Modules\School\Services;
 
-use Modules\School\Models\Student;
 use Modules\Core\Models\AcademicPeriod;
-use Modules\School\Models\StudentGrade;
 use Modules\School\Models\Attendance;
+use Modules\School\Models\ClassStudent;
+use Modules\School\Models\Student;
 use Modules\School\Models\StudentAchievement;
+use Modules\School\Models\StudentGrade;
 use Modules\School\Models\Violation;
 
 class ReportCardService
@@ -22,10 +23,10 @@ class ReportCardService
         // Identify class logic: fallback to checking any schedule or class link.
         // Here we just grab the class from an assessment or first class student link.
         $className = 'N/A';
-        $classLink = \Modules\School\Models\ClassStudent::where('student_id', $studentId)
+        $classLink = ClassStudent::where('student_id', $studentId)
             ->with('schoolClass')
             ->first();
-            
+
         if ($classLink && $classLink->schoolClass) {
             $className = $classLink->schoolClass->name;
         }
@@ -43,18 +44,18 @@ class ReportCardService
 
         foreach ($grades as $grade) {
             $assessment = $grade->assessment;
-            if (!$assessment || !$assessment->subject) {
+            if (! $assessment || ! $assessment->subject) {
                 continue;
             }
 
             $subjectId = $assessment->subject_id;
-            if (!isset($subjects[$subjectId])) {
+            if (! isset($subjects[$subjectId])) {
                 $subjects[$subjectId] = [
                     'name' => $assessment->subject->name,
                     'assessments' => [],
                     'average' => 0,
                     'total_score' => 0,
-                    'count' => 0
+                    'count' => 0,
                 ];
             }
 
@@ -96,14 +97,14 @@ class ReportCardService
         $end = $period->end_date;
 
         $achievements = StudentAchievement::where('student_id', $studentId)
-            ->when($start, fn($q) => $q->where('date', '>=', $start))
-            ->when($end, fn($q) => $q->where('date', '<=', $end))
-            ->orderBy('date', 'desc')
+            ->when($start, fn ($q) => $q->where('event_date', '>=', $start))
+            ->when($end, fn ($q) => $q->where('event_date', '<=', $end))
+            ->orderBy('event_date', 'desc')
             ->get();
 
         $violations = Violation::where('student_id', $studentId)
-            ->when($start, fn($q) => $q->where('date', '>=', $start))
-            ->when($end, fn($q) => $q->where('date', '<=', $end))
+            ->when($start, fn ($q) => $q->where('date', '>=', $start))
+            ->when($end, fn ($q) => $q->where('date', '<=', $end))
             ->orderBy('date', 'desc')
             ->get();
 

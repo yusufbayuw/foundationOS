@@ -6,11 +6,12 @@ namespace Modules\EOffice\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
 use Modules\EOffice\Models\Letter;
 
 class LetterPolicy
 {
-    use HandlesAuthorization;
+    use AuthorizesPrint, HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {

@@ -1,11 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Library\Http\Controllers\FinePdfController;
 use Modules\Library\Http\Controllers\LibraryController;
+use Modules\Library\Http\Controllers\LoanPdfController;
 use Modules\Library\Http\Controllers\PublicOpacController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('libraries', LibraryController::class)->names('library');
+    Route::get('/library/loans/{loan}/pdf', LoanPdfController::class)
+        ->name('library.loans.pdf');
+    Route::get('/library/fines/{fine}/pdf', FinePdfController::class)
+        ->name('library.fines.pdf');
 });
 
 Route::prefix('opac/{tenant}')->name('library.opac.')->group(function () {

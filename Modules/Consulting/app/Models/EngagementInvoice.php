@@ -37,4 +37,9 @@ class EngagementInvoice extends Model
     {
         return $this->belongsTo(Organization::class);
     }
+
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['draft', 'cancelled', 'void'], true);
+    }
 }

@@ -2,9 +2,12 @@
 
 namespace Modules\Finance\Filament\Resources\CustomerInvoices\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Filament\Resources\CustomerInvoices\CustomerInvoiceResource;
+use Modules\Finance\Models\CustomerInvoice;
 
 class ViewCustomerInvoice extends ViewRecord
 {
@@ -12,6 +15,18 @@ class ViewCustomerInvoice extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        return [EditAction::make()];
+        /** @var CustomerInvoice $record */
+        $record = $this->getRecord();
+
+        return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => $record->isPrintable())
+                ->url(fn (): string => route('finance.customer-invoices.pdf', $record))
+                ->openUrlInNewTab(),
+            EditAction::make(),
+        ];
     }
 }

@@ -4,16 +4,16 @@ namespace Modules\Campus\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\AcademicPeriod;
-use Modules\Core\Models\User;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\User;
 
 class StudyPlan extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -36,6 +36,7 @@ class StudyPlan extends Model
             'approved_at' => 'datetime',
         ];
     }
+
     public function collageStudent(): BelongsTo
     {
         return $this->belongsTo(CollageStudent::class);
@@ -54,5 +55,10 @@ class StudyPlan extends Model
     public function items(): HasMany
     {
         return $this->hasMany(StudyPlanItem::class);
+    }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status === 'approved';
     }
 }

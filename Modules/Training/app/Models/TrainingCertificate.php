@@ -27,4 +27,9 @@ class TrainingCertificate extends Model
     {
         return $this->belongsTo(TrainingEnrollment::class, 'training_enrollment_id');
     }
+
+    public function isPrintable(): bool
+    {
+        return $this->issued_at !== null;
+    }
 }

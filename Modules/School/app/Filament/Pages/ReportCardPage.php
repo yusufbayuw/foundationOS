@@ -80,8 +80,18 @@ class ReportCardPage extends Page implements HasForms
                 ->label(FilamentUi::text('Download PDF'))
                 ->icon('heroicon-o-arrow-down-tray')
                 ->disabled(fn () => ! $this->academic_period_id || ! $this->student_id)
-                ->url(fn () => route('school.report-card.download', [
+                ->url(fn () => route('school.report-card.pdf', [
                     'student' => $this->student_id,
+                    'period' => $this->academic_period_id,
+                ]))
+                ->openUrlInNewTab(),
+            Action::make('downloadBulk')
+                ->label(FilamentUi::text('Download bulk PDF'))
+                ->icon('heroicon-o-archive-box-arrow-down')
+                ->color('gray')
+                ->disabled(fn () => ! $this->academic_period_id || ! $this->class_id)
+                ->url(fn () => route('school.report-card.bulk.pdf', [
+                    'schoolClass' => $this->class_id,
                     'period' => $this->academic_period_id,
                 ]))
                 ->openUrlInNewTab(),

@@ -23,6 +23,13 @@ class ViewStudentInvoice extends ViewRecord
         $record = $this->getRecord();
 
         return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => $record->isPrintable())
+                ->url(fn (): string => route('finance.student-invoices.pdf', $record))
+                ->openUrlInNewTab(),
             Action::make('markIssued')
                 ->label(FilamentUi::text('Mark Issued'))
                 ->icon('heroicon-o-paper-airplane')

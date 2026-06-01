@@ -42,4 +42,9 @@ class StudyResult extends Model
     {
         return $this->belongsTo(StudyPlanItem::class);
     }
+
+    public function isPrintable(): bool
+    {
+        return $this->published_at !== null;
+    }
 }

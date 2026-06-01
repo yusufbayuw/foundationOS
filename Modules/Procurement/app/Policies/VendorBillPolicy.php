@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Procurement\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\Procurement\Models\VendorBill;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\Procurement\Models\VendorBill;
 
 class VendorBillPolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:VendorBill');
@@ -71,5 +72,4 @@ class VendorBillPolicy
     {
         return $authUser->can('Reorder:VendorBill');
     }
-
 }

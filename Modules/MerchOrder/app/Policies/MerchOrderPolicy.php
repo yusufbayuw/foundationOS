@@ -6,11 +6,12 @@ namespace Modules\MerchOrder\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
 use Modules\MerchOrder\Models\MerchOrder;
 
 class MerchOrderPolicy
 {
-    use HandlesAuthorization;
+    use AuthorizesPrint, HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {

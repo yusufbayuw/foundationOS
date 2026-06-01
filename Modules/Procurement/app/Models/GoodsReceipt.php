@@ -69,4 +69,9 @@ class GoodsReceipt extends Model
     {
         return $this->morphMany(FileUpload::class, 'fileable');
     }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status !== 'draft';
+    }
 }

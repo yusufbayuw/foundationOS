@@ -45,4 +45,9 @@ class SalesOrder extends Model
     {
         return $this->hasMany(SalesOrderItem::class);
     }
+
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['draft', 'cancelled', 'void'], true);
+    }
 }

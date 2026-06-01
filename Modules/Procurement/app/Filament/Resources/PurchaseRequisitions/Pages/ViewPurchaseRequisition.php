@@ -10,6 +10,7 @@ use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\PurchaseRequisitionResource;
+use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Contracts\WorkflowResolver;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource;
@@ -22,7 +23,17 @@ class ViewPurchaseRequisition extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var PurchaseRequisition $record */
+        $record = $this->getRecord();
+
         return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn (): bool => $record->isPrintable())
+                ->url(fn (): string => route('procurement.purchase-requisitions.pdf', $record))
+                ->openUrlInNewTab(),
             Action::make('openWorkflow')
                 ->label(FilamentUi::text('Open Active Workflow'))
                 ->icon('heroicon-o-arrow-top-right-on-square')

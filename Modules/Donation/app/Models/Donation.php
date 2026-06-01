@@ -46,4 +46,9 @@ class Donation extends Model
     {
         return $this->belongsTo(JournalEntry::class);
     }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->payment_status === 'paid';
+    }
 }

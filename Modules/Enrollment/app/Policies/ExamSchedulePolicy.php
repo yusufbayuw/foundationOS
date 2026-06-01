@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Enrollment\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
-use Modules\Enrollment\Models\ExamSchedule;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
+use Modules\Core\Policies\Concerns\AuthorizesPrint;
+use Modules\Enrollment\Models\ExamSchedule;
 
 class ExamSchedulePolicy
 {
-    use HandlesAuthorization;
-    
+    use AuthorizesPrint, HandlesAuthorization;
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ExamSchedule');
@@ -71,5 +72,4 @@ class ExamSchedulePolicy
     {
         return $authUser->can('Reorder:ExamSchedule');
     }
-
 }

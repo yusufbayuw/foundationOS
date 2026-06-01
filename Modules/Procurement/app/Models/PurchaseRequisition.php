@@ -4,20 +4,20 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Workflow\Contracts\ProvidesWorkflowContext;
 use Modules\Workflow\Contracts\StartsWorkflow;
 use Modules\Workflow\Models\WorkflowInstance;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class PurchaseRequisition extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -50,13 +50,40 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
         ];
     }
 
-    public function tenant(): BelongsTo { return $this->belongsTo(Tenant::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function requester(): BelongsTo { return $this->belongsTo(User::class, 'requested_by'); }
-    public function approver(): BelongsTo { return $this->belongsTo(User::class, 'approved_by'); }
-    public function items(): HasMany { return $this->hasMany(PurchaseRequisitionItem::class); }
-    public function rfqs(): HasMany { return $this->hasMany(RequestForQuotation::class); }
-    public function workflowInstances(): MorphMany { return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id'); }
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function requester(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'requested_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseRequisitionItem::class);
+    }
+
+    public function rfqs(): HasMany
+    {
+        return $this->hasMany(RequestForQuotation::class);
+    }
+
+    public function workflowInstances(): MorphMany
+    {
+        return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');
+    }
 
     public function workflowCode(): string
     {
@@ -92,5 +119,10 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
     public function isLockedForMutation(): bool
     {
         return in_array((string) $this->status, ['submitted', 'in_review', 'approved', 'rejected', 'cancelled'], true);
+    }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status === 'approved';
     }
 }

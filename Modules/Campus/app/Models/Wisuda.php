@@ -30,4 +30,9 @@ class Wisuda extends Model
     {
         return $this->belongsTo(Yudisium::class);
     }
+
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['planned', 'cancelled'], true);
+    }
 }

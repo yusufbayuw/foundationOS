@@ -4,16 +4,16 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class RequestForQuotation extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -39,10 +39,38 @@ class RequestForQuotation extends Model
         ];
     }
 
-    public function tenant(): BelongsTo { return $this->belongsTo(Tenant::class); }
-    public function purchaseRequisition(): BelongsTo { return $this->belongsTo(PurchaseRequisition::class); }
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function vendors(): HasMany { return $this->hasMany(RfqVendor::class); }
-    public function items(): HasMany { return $this->hasMany(RfqItem::class); }
-    public function purchaseOrders(): HasMany { return $this->hasMany(PurchaseOrder::class); }
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function purchaseRequisition(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseRequisition::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function vendors(): HasMany
+    {
+        return $this->hasMany(RfqVendor::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(RfqItem::class);
+    }
+
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status !== 'draft';
+    }
 }

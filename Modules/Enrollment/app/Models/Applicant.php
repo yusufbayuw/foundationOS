@@ -217,4 +217,19 @@ class Applicant extends Model
     {
         return $this->morphMany(FileUpload::class, 'fileable');
     }
+
+    public function isPrintable(): bool
+    {
+        return $this->canPrintAcceptanceLetter() || $this->canPrintRejectionLetter();
+    }
+
+    public function canPrintAcceptanceLetter(): bool
+    {
+        return in_array((string) $this->status, ['accepted', 'enrolled'], true);
+    }
+
+    public function canPrintRejectionLetter(): bool
+    {
+        return (string) $this->status === 'rejected';
+    }
 }

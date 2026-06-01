@@ -91,6 +91,11 @@ class CustomerInvoice extends Model
         return in_array((string) $this->status, ['paid', 'void', 'cancelled'], true);
     }
 
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['draft', 'void', 'cancelled'], true);
+    }
+
     public function recalculate(): void
     {
         $this->load('items');

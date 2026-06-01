@@ -13,6 +13,8 @@ class Yudisium extends Model
 {
     use BelongsToTenant, SoftDeletes;
 
+    protected $table = 'yudisiums';
+
     protected $fillable = [
         'tenant_id',
         'organization_id',
@@ -37,5 +39,10 @@ class Yudisium extends Model
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function isPrintable(): bool
+    {
+        return ! in_array((string) $this->status, ['planned', 'cancelled'], true);
     }
 }

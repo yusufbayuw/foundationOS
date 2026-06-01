@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Pages;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -91,26 +92,37 @@ class AttendanceRecapPage extends Page implements HasForms
             return collect();
         }
 
-        // Standard Filament generic tenant resolution
-        $tenantId = null;
-        if (filament()->hasTenancy()) {
-            $tenantId = filament()->getTenant()?->id;
-        }
+        $tenantId = filament()->getTenant()?->id
+            ?? SchoolClass::query()->find($this->class_id)?->tenant_id;
 
         if (! $tenantId) {
-            // Fallback for safety if somehow outside standard tenant bounds
-            // Assuming tenant_id = 1 for local test if absolutely needed or user first tenant
-            $tenantId = auth()->user()?->organizations()?->first()?->id ?? 1;
+            return collect();
         }
 
-        $service = new AttendanceRecapService;
-
-        return $service->getStudentRecap(
+        return app(AttendanceRecapService::class)->getStudentRecap(
             $tenantId,
             $this->academic_period_id,
             $this->class_id,
             $this->month,
-            $this->year
+            $this->year,
         );
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('downloadPdf')
+                ->label(FilamentUi::text('Download PDF'))
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->disabled(fn () => ! $this->academic_period_id || ! $this->class_id || ! $this->month || ! $this->year)
+                ->url(fn () => route('school.attendance-recap.pdf', [
+                    'schoolClass' => $this->class_id,
+                    'period' => $this->academic_period_id,
+                    'month' => $this->month,
+                    'year' => $this->year,
+                ]))
+                ->openUrlInNewTab(),
+        ];
     }
 }

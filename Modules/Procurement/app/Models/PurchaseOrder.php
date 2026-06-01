@@ -116,4 +116,9 @@ class PurchaseOrder extends Model
     {
         return $this->morphMany(FileUpload::class, 'fileable');
     }
+
+    public function isPrintable(): bool
+    {
+        return in_array((string) $this->status, ['approved', 'sent'], true);
+    }
 }

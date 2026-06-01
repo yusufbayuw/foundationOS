@@ -37,4 +37,9 @@ class MerchOrder extends Model
     {
         return $this->belongsTo(Organization::class);
     }
+
+    public function isPrintable(): bool
+    {
+        return (string) $this->status === 'active';
+    }
 }
