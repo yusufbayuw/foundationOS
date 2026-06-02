@@ -16,7 +16,11 @@ use Modules\Risk\Models\RiskCategory;
 use Modules\Sales\Models\Customer;
 use Modules\Training\Models\Instructor;
 use Modules\Asset\Models\AssetCategory;
+use Modules\Boarding\Models\Dormitory;
+use Modules\Cafeteria\Models\Menu;
+use Modules\Dms\Models\DocumentFolder;
 use Modules\EOffice\Models\LetterCategory;
+use Modules\ItOps\Models\SoftwareLicense;
 use Modules\Facility\Models\Room;
 use Modules\Helpdesk\Models\TicketCategory;
 use Modules\Transport\Models\Route;
@@ -111,6 +115,10 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\TicketCategoryImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\RoomImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\LetterCategoryImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\DocumentFolderImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\SoftwareLicenseImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\DormitoryImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\MenuImporter::getColumns()));
     }
 
     public function test_marketplace_cms_legal_factories_persist(): void
@@ -170,5 +178,37 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThan(0, $ticketCategory->response_hours);
         $this->assertTrue($room->is_bookable);
         $this->assertNotEmpty($letterCategory->code);
+    }
+
+    public function test_dms_itops_boarding_cafeteria_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext([
+            'core', 'dms', 'itops', 'boarding', 'cafeteria',
+        ]);
+
+        $folder = DocumentFolder::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $license = SoftwareLicense::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $dormitory = Dormitory::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $menu = Menu::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertNotEmpty($folder->code);
+        $this->assertNotEmpty($license->code);
+        $this->assertNotEmpty($dormitory->code);
+        $this->assertNotEmpty($menu->code);
     }
 }

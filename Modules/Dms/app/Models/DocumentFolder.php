@@ -14,6 +14,11 @@ class DocumentFolder extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Dms\Database\Factories\DocumentFolderFactory
+    {
+        return \Modules\Dms\Database\Factories\DocumentFolderFactory::new();
+    }
+
     protected $table = 'document_folders';
 
     protected $fillable = [

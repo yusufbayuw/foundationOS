@@ -14,6 +14,11 @@ class Dormitory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Boarding\Database\Factories\DormitoryFactory
+    {
+        return \Modules\Boarding\Database\Factories\DormitoryFactory::new();
+    }
+
     protected $table = 'dormitories';
 
     protected $fillable = [

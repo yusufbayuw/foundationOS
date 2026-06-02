@@ -32,6 +32,7 @@ class ModuleMaturityConfigTest extends TestCase
         foreach ([
             'Risk', 'Donation', 'Sales', 'Transport', 'Property', 'Training',
             'Marketplace', 'Cms', 'Legal', 'Asset', 'Helpdesk', 'Facility', 'EOffice',
+            'Dms', 'ItOps', 'Boarding', 'Cafeteria',
         ] as $module) {
             $this->assertContains($module, $config['ga']);
             $this->assertNotContains($module, $config['experimental']);

@@ -36,6 +36,10 @@ return [
         'Helpdesk',
         'Facility',
         'EOffice',
+        'Dms',
+        'ItOps',
+        'Boarding',
+        'Cafeteria',
     ],
 
     /**
@@ -44,10 +48,6 @@ return [
     'maturing' => [],
 
     'experimental' => [
-        'Dms',
-        'ItOps',
-        'Boarding',
-        'Cafeteria',
         'PhysicalSecurity',
         'Counseling',
         'Clinic',

@@ -25,6 +25,10 @@ parameters:
         - Modules/Helpdesk
         - Modules/Facility
         - Modules/EOffice
+        - Modules/Dms
+        - Modules/ItOps
+        - Modules/Boarding
+        - Modules/Cafeteria
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false

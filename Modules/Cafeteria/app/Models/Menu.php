@@ -14,6 +14,11 @@ class Menu extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Cafeteria\Database\Factories\MenuFactory
+    {
+        return \Modules\Cafeteria\Database\Factories\MenuFactory::new();
+    }
+
     protected $table = 'menus';
 
     protected $fillable = [

@@ -14,6 +14,11 @@ class SoftwareLicense extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\ItOps\Database\Factories\SoftwareLicenseFactory
+    {
+        return \Modules\ItOps\Database\Factories\SoftwareLicenseFactory::new();
+    }
+
     protected $table = 'software_licenses';
 
     protected $fillable = [
