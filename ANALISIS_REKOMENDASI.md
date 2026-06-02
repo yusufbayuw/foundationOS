@@ -266,14 +266,16 @@ Hanya dua workflow GitHub Actions:
 ### Gelombang 2 — Hardening keamanan & keandalan
 - [x] Klaim outbox atomik + sweeper `processing` tersangkut (`tryClaim`, `fos:moodle:sweep-stale-processing`).
 - [x] Wajibkan `tenant_id` pada token API (`config/tenancy.php`, `ResolveApiTenant`).
-- [ ] Tambah `lockForUpdate` pada `cancel/return/reassign` workflow; queue-kan listener automasi.
+- [x] Tambah `lockForUpdate` pada `cancel/return/reassign` workflow; evidence gate di dalam lock; queue-kan `RunWorkflowAutomatedActions`.
+- [x] SLA breach idempoten (`markBreached` skip jika log sudah ada).
 - [x] Tambah `BelongsToTenant` pada `LibraryPolicy`/`BookReservation`; tegakkan `expires_at`.
-- [ ] Audit lint `Select::make('tenant_id')` → `TenantField`.
+- [x] Lint `Select::make('tenant_id')` → `scripts/lint-tenant-fields.php` + `composer lint:tenant-fields` (modul matang).
 
 ### Gelombang 3 — Kualitas & performa
-- [ ] Larastan + Pint sebagai gate CI (level bertahap).
-- [ ] Factory per model + base `TestCase` bersama + `LazilyRefreshDatabase`.
-- [ ] Eager-loading pada list page bertrafik tinggi + index komposit.
+- [ ] Larastan + Pint sebagai gate CI (level bertahap). *(Pint sudah di `static.yml`)*
+- [x] Trait `Tests\Concerns\CreatesTenantForTests` untuk konteks tenant bersama.
+- [ ] `LazilyRefreshDatabase` — migrasi bertahap per file test.
+- [x] Eager-loading contoh: `StudentInvoicesTable`, `ApplicantsTable` + index `(tenant_id, status)`.
 - [ ] Test Livewire untuk CRUD inti (Finance/School/Enrollment).
 
 ### Gelombang 4 — Pematangan modul roadmap
