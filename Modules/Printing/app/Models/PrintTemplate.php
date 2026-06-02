@@ -14,6 +14,11 @@ class PrintTemplate extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Printing\Database\Factories\PrintTemplateFactory
+    {
+        return \Modules\Printing\Database\Factories\PrintTemplateFactory::new();
+    }
+
     protected $table = 'print_templates';
 
     protected $fillable = [

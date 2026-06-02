@@ -14,6 +14,11 @@ class UniformPackage extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\MerchOrder\Database\Factories\UniformPackageFactory
+    {
+        return \Modules\MerchOrder\Database\Factories\UniformPackageFactory::new();
+    }
+
     protected $table = 'uniform_packages';
 
     protected $fillable = [

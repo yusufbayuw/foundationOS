@@ -44,6 +44,10 @@ return [
         'Counseling',
         'Clinic',
         'Event',
+        'MerchOrder',
+        'Alumni',
+        'Messaging',
+        'Printing',
     ],
 
     /**
@@ -52,8 +56,6 @@ return [
     'maturing' => [],
 
     'experimental' => [
-        'MerchOrder',
-        'Alumni',
         'InternalAudit',
         'IsoCompliance',
         'EducationQa',
@@ -61,8 +63,6 @@ return [
         'KpiEnterprise',
         'Capacity',
         'Ai',
-        'Messaging',
-        'Printing',
         'Consulting',
     ],
 

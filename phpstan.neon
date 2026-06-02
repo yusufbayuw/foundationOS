@@ -33,6 +33,10 @@ parameters:
         - Modules/Counseling
         - Modules/Clinic
         - Modules/Event
+        - Modules/MerchOrder
+        - Modules/Alumni
+        - Modules/Messaging
+        - Modules/Printing
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false

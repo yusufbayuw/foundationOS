@@ -14,6 +14,11 @@ class CompanyPartner extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Alumni\Database\Factories\CompanyPartnerFactory
+    {
+        return \Modules\Alumni\Database\Factories\CompanyPartnerFactory::new();
+    }
+
     protected $table = 'company_partners';
 
     protected $fillable = [

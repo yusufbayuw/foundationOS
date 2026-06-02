@@ -15,6 +15,7 @@ use Modules\Property\Models\Property as PropertyModel;
 use Modules\Risk\Models\RiskCategory;
 use Modules\Sales\Models\Customer;
 use Modules\Training\Models\Instructor;
+use Modules\Alumni\Models\CompanyPartner;
 use Modules\Asset\Models\AssetCategory;
 use Modules\Boarding\Models\Dormitory;
 use Modules\Cafeteria\Models\Menu;
@@ -27,6 +28,9 @@ use Modules\EOffice\Models\LetterCategory;
 use Modules\ItOps\Models\SoftwareLicense;
 use Modules\Facility\Models\Room;
 use Modules\Helpdesk\Models\TicketCategory;
+use Modules\MerchOrder\Models\UniformPackage;
+use Modules\Messaging\Models\NotificationTemplate;
+use Modules\Printing\Models\PrintTemplate;
 use Modules\Transport\Models\Route;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
@@ -127,6 +131,10 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\CounselorImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\AllergyImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\EventImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\UniformPackageImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\CompanyPartnerImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\NotificationTemplateImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\PrintTemplateImporter::getColumns()));
     }
 
     public function test_marketplace_cms_legal_factories_persist(): void
@@ -250,5 +258,37 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertNotEmpty($counselor->code);
         $this->assertNotEmpty($allergy->code);
         $this->assertNotEmpty($event->code);
+    }
+
+    public function test_merchorder_alumni_messaging_printing_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext([
+            'core', 'merchorder', 'alumni', 'messaging', 'printing',
+        ]);
+
+        $package = UniformPackage::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $partner = CompanyPartner::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $template = NotificationTemplate::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $printTemplate = PrintTemplate::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertNotEmpty($package->code);
+        $this->assertNotEmpty($partner->code);
+        $this->assertNotEmpty($template->code);
+        $this->assertNotEmpty($printTemplate->code);
     }
 }

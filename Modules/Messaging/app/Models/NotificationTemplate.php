@@ -14,6 +14,11 @@ class NotificationTemplate extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Messaging\Database\Factories\NotificationTemplateFactory
+    {
+        return \Modules\Messaging\Database\Factories\NotificationTemplateFactory::new();
+    }
+
     protected $table = 'notification_templates';
 
     protected $fillable = [
