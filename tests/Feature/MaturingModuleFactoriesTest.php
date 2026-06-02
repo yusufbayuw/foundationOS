@@ -7,6 +7,10 @@ use App\Filament\Imports\DonorImporter;
 use App\Filament\Imports\RiskCategoryImporter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Donation\Models\Donor;
+use Modules\Cms\Models\Page;
+use Modules\Cms\Models\Site;
+use Modules\Legal\Models\LegalDocument;
+use Modules\Marketplace\Models\Seller;
 use Modules\Property\Models\Property as PropertyModel;
 use Modules\Risk\Models\RiskCategory;
 use Modules\Sales\Models\Customer;
@@ -96,5 +100,35 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\RouteImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\PropertyImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\InstructorImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\SellerImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\LegalDocumentImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(2, count(\App\Filament\Imports\CmsSiteImporter::getColumns()));
+    }
+
+    public function test_marketplace_cms_legal_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext([
+            'core', 'marketplace', 'cms', 'legal',
+        ]);
+
+        $seller = Seller::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $site = Site::factory()->create(['tenant_id' => $tenant->id]);
+        $page = Page::factory()->create([
+            'tenant_id' => $tenant->id,
+            'site_id' => $site->id,
+        ]);
+
+        $document = LegalDocument::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertNotEmpty($seller->code);
+        $this->assertNotEmpty($page->slug);
+        $this->assertNotEmpty($document->code);
     }
 }

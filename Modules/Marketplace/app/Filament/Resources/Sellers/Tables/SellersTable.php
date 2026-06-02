@@ -2,12 +2,15 @@
 
 namespace Modules\Marketplace\Filament\Resources\Sellers\Tables;
 
+use App\Filament\Imports\SellerImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class SellersTable
 {
@@ -15,45 +18,27 @@ class SellersTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->searchable(),
-                TextColumn::make('organization_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('code')
-                    ->searchable(),
-                TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('seller_type')
-                    ->searchable(),
-                TextColumn::make('seller_id')
-                    ->numeric()
+                    ->label(FilamentUi::field('code'))
+                    ->searchable()
                     ->sortable(),
+                TextColumn::make('name')
+                    ->label(FilamentUi::field('name'))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label(FilamentUi::field('status'))
+                    ->badge(),
                 TextColumn::make('verification_status')
-                    ->searchable(),
-            ])
-            ->filters([
-                //
+                    ->label(FilamentUi::field('verification_status'))
+                    ->badge(),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ...ImportTableActions::make(SellerImporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

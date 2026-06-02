@@ -2,15 +2,23 @@
 
 namespace Modules\Cms\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Cms\Database\Factories\PageFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Page extends Model
 {
-    use BelongsToTenant, SoftDeletes;
+    /** @use HasFactory<PageFactory> */
+    use BelongsToTenant, HasFactory, SoftDeletes;
+
+    protected static function newFactory(): PageFactory
+    {
+        return PageFactory::new();
+    }
 
     protected $fillable = [
         'tenant_id',

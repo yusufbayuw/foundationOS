@@ -2,13 +2,22 @@
 
 namespace Modules\Marketplace\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Marketplace\Database\Factories\SellerFactory;
 
 class Seller extends Model
 {
-    use BelongsToTenant;
+    /** @use HasFactory<SellerFactory> */
+    use BelongsToTenant, HasFactory, SoftDeletes;
+
+    protected static function newFactory(): SellerFactory
+    {
+        return SellerFactory::new();
+    }
 
     protected $fillable = [
         'tenant_id',

@@ -7,8 +7,10 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class PageForm
 {
@@ -16,34 +18,51 @@ class PageForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
-                TenantField::organizationSelect(),
-                TextInput::make('code'),
-                TextInput::make('name'),
-                TextInput::make('status')
-                    ->required()
-                    ->default('active'),
-                Textarea::make('description')
-                    ->columnSpanFull(),
-                Textarea::make('meta')
-                    ->columnSpanFull(),
-                Select::make('site_id')
-                    ->relationship('site', 'name'),
-                TextInput::make('slug'),
-                TextInput::make('title_id'),
-                TextInput::make('title_en'),
-                TextInput::make('template')
-                    ->required()
-                    ->default('default'),
-                TextInput::make('meta_title'),
-                Textarea::make('meta_description')
-                    ->columnSpanFull(),
-                FileUpload::make('og_image')
-                    ->image(),
-                DateTimePicker::make('publish_at'),
-                DateTimePicker::make('published_at'),
+                Section::make(FilamentUi::text('Page content'))
+                    ->schema([
+                        TenantField::make(),
+                        Select::make('site_id')
+                            ->label(FilamentUi::field('site_id'))
+                            ->relationship('site', 'name')
+                            ->required(),
+                        TextInput::make('slug')
+                            ->label(FilamentUi::field('slug'))
+                            ->required(),
+                        TextInput::make('title_id')
+                            ->label(FilamentUi::field('title_id'))
+                            ->required(),
+                        TextInput::make('title_en')
+                            ->label(FilamentUi::field('title_en')),
+                        TextInput::make('template')
+                            ->label(FilamentUi::field('template'))
+                            ->default('default')
+                            ->required(),
+                        Select::make('status')
+                            ->label(FilamentUi::field('status'))
+                            ->options([
+                                'draft' => FilamentUi::text('Draft'),
+                                'published' => FilamentUi::text('Published'),
+                            ])
+                            ->default('draft')
+                            ->required(),
+                    ])
+                    ->columns(2),
+                Section::make(FilamentUi::text('SEO'))
+                    ->schema([
+                        TextInput::make('meta_title')
+                            ->label(FilamentUi::field('meta_title')),
+                        Textarea::make('meta_description')
+                            ->label(FilamentUi::field('meta_description'))
+                            ->columnSpanFull(),
+                        FileUpload::make('og_image')
+                            ->label(FilamentUi::field('og_image'))
+                            ->image(),
+                        DateTimePicker::make('publish_at')
+                            ->label(FilamentUi::field('publish_at')),
+                        DateTimePicker::make('published_at')
+                            ->label(FilamentUi::field('published_at')),
+                    ])
+                    ->columns(2),
             ]);
     }
 }

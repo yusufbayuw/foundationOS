@@ -8,10 +8,10 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Modules\Core\Support\FilamentUi;
 
 class PagesTable
 {
@@ -19,48 +19,25 @@ class PagesTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->searchable(),
-                TextColumn::make('organization_id')
-                    ->numeric()
+                TextColumn::make('site.name')
+                    ->label(FilamentUi::field('site_id'))
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('code')
-                    ->searchable(),
-                TextColumn::make('name')
+                TextColumn::make('slug')
+                    ->label(FilamentUi::field('slug'))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('title_id')
+                    ->label(FilamentUi::field('title_id'))
                     ->searchable(),
                 TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('site.name')
-                    ->searchable(),
-                TextColumn::make('slug')
-                    ->searchable(),
-                TextColumn::make('title_id')
-                    ->searchable(),
-                TextColumn::make('title_en')
-                    ->searchable(),
-                TextColumn::make('template')
-                    ->searchable(),
-                TextColumn::make('meta_title')
-                    ->searchable(),
-                ImageColumn::make('og_image'),
-                TextColumn::make('publish_at')
-                    ->dateTime()
-                    ->sortable(),
+                    ->label(FilamentUi::field('status'))
+                    ->badge(),
                 TextColumn::make('published_at')
+                    ->label(FilamentUi::field('published_at'))
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 TrashedFilter::make(),

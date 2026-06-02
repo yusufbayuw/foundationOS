@@ -14,6 +14,11 @@ class LegalDocument extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Legal\Database\Factories\LegalDocumentFactory
+    {
+        return \Modules\Legal\Database\Factories\LegalDocumentFactory::new();
+    }
+
     protected $table = 'legal_documents';
 
     protected $fillable = [

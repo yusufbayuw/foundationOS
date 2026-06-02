@@ -29,6 +29,9 @@ return [
         'Transport',
         'Property',
         'Training',
+        'Marketplace',
+        'Cms',
+        'Legal',
     ],
 
     /**
@@ -37,7 +40,6 @@ return [
     'maturing' => [],
 
     'experimental' => [
-        'Legal',
         'Asset',
         'Dms',
         'Helpdesk',
@@ -52,7 +54,6 @@ return [
         'Event',
         'MerchOrder',
         'Alumni',
-        'Cms',
         'InternalAudit',
         'IsoCompliance',
         'EducationQa',
@@ -63,7 +64,6 @@ return [
         'Messaging',
         'Printing',
         'Consulting',
-        'Marketplace',
     ],
 
     /**

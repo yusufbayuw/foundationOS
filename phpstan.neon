@@ -18,6 +18,9 @@ parameters:
         - Modules/Transport
         - Modules/Property
         - Modules/Training
+        - Modules/Marketplace
+        - Modules/Cms
+        - Modules/Legal
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false
