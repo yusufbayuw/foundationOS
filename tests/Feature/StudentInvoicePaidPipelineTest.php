@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Modules\Core\Models\ChartOfAccount;
@@ -23,7 +23,7 @@ use Tests\TestCase;
 
 class StudentInvoicePaidPipelineTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_recalculate_dispatches_event_when_invoice_becomes_paid(): void
     {

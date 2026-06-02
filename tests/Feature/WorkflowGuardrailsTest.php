@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -22,7 +22,7 @@ use Tests\TestCase;
 
 class WorkflowGuardrailsTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_requester_manager_assignee_resolves_from_workflow_context(): void
     {

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -23,7 +23,7 @@ use Tests\TestCase;
 
 class WorkflowParallelGatewayTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_majority_quorum_advances_after_two_of_three_approve(): void
     {
