@@ -112,6 +112,9 @@
         "lint": [
             "vendor/bin/pint --test"
         ],
+        "lint:tenant-fields": [
+            "@php scripts/lint-tenant-fields.php"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",

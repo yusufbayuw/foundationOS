@@ -51,7 +51,11 @@ class WorkflowAutomatedActionRunner
         } catch (Throwable $exception) {
             $this->writeFailureAudit($instance, $type, $config, $exception, $context);
 
-            throw $exception;
+            report($exception);
+
+            if (config('workflow.automation.rethrow_on_failure')) {
+                throw $exception;
+            }
         }
     }
 

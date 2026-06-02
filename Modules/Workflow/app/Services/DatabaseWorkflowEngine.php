@@ -35,21 +35,6 @@ class DatabaseWorkflowEngine implements WorkflowEngine
 
     public function advance(WorkflowInstance $instance, string $actionName, array $formData, User $actor, ?string $notes = null): WorkflowInstance
     {
-        // Evidence gate — checked before acquiring the row lock to fail fast.
-        $currentStep = $instance->currentStep;
-        if ($currentStep?->requiresEvidence()) {
-            $uploaded = $instance->evidences()
-                ->where('workflow_step_id', $currentStep->getKey())
-                ->count();
-            if ($uploaded < $currentStep->requiredEvidenceCount()) {
-                throw new WorkflowEvidenceRequiredException(
-                    $currentStep->name,
-                    $currentStep->requiredEvidenceCount(),
-                    $uploaded,
-                );
-            }
-        }
-
         $result = DB::transaction(function () use ($instance, $actionName, $formData, $actor, $notes): array {
             // Row-lock the instance to serialize concurrent advance() calls
             // from parallel approvers.
@@ -62,6 +47,20 @@ class DatabaseWorkflowEngine implements WorkflowEngine
             $this->authorizeActor($instance, $actor);
 
             $currentStep = $instance->currentStep;
+
+            if ($currentStep?->requiresEvidence()) {
+                $uploaded = $instance->evidences()
+                    ->where('workflow_step_id', $currentStep->getKey())
+                    ->count();
+
+                if ($uploaded < $currentStep->requiredEvidenceCount()) {
+                    throw new WorkflowEvidenceRequiredException(
+                        $currentStep->name,
+                        $currentStep->requiredEvidenceCount(),
+                        $uploaded,
+                    );
+                }
+            }
             $currentStepId = $instance->current_step_id;
             $statusBefore = $instance->status->value;
             $incomingContext = WorkflowContextData::fromInstance($instance, $formData);
@@ -249,7 +248,12 @@ class DatabaseWorkflowEngine implements WorkflowEngine
     public function returnToStep(WorkflowInstance $instance, int $targetStepId, array $formData, User $actor, ?string $notes = null): WorkflowInstance
     {
         $instance = DB::transaction(function () use ($instance, $targetStepId, $formData, $actor, $notes) {
-            $instance = $instance->fresh(['workflow.steps', 'assignments']);
+            $instance = WorkflowInstance::query()
+                ->whereKey($instance->getKey())
+                ->lockForUpdate()
+                ->first()
+                ->load(['workflow.steps', 'assignments', 'currentStep']);
+
             $this->authorizeActor($instance, $actor);
             $statusBefore = $instance->status->value;
 
@@ -305,7 +309,12 @@ class DatabaseWorkflowEngine implements WorkflowEngine
     public function cancel(WorkflowInstance $instance, User $actor, ?string $reason = null): WorkflowInstance
     {
         $instance = DB::transaction(function () use ($instance, $actor, $reason) {
-            $instance = $instance->fresh(['assignments']);
+            $instance = WorkflowInstance::query()
+                ->whereKey($instance->getKey())
+                ->lockForUpdate()
+                ->first()
+                ->load(['assignments', 'currentStep']);
+
             $this->authorizeActor($instance, $actor);
             $statusBefore = $instance->status->value;
             $payloadBefore = $this->payloadSnapshot($instance);
@@ -347,6 +356,16 @@ class DatabaseWorkflowEngine implements WorkflowEngine
     {
         return DB::transaction(function () use ($assignment, $actor, $targetUser, $reason) {
             $assignment = $assignment->fresh(['instance', 'step']);
+
+            $instance = WorkflowInstance::query()
+                ->whereKey($assignment->workflow_instance_id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($instance) {
+                $assignment->setRelation('instance', $instance);
+            }
+
             $this->authorizeActor($assignment->instance, $actor);
 
             $assignment->forceFill([

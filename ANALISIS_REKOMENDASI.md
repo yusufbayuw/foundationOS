@@ -20,7 +20,7 @@ Namun, terdapat **kesenjangan kematangan yang lebar** antara domain inti yang te
 |---------|:----:|---------|
 | Arsitektur inti | **A−** | Tenancy + Workflow + Exam + Procurement dirancang dengan baik & teruji |
 | Keamanan & isolasi tenant | **B** | Pola kuat, tetapi *fail-open* by design + beberapa celah model/form |
-| Keandalan integrasi (Moodle/Workflow) | **B−** | Outbox pattern solid, tapi ada bug observer & race condition |
+| Keandalan integrasi (Moodle/Workflow) | **B** | Outbox atomik + sweeper; workflow lock & queued automation (Gelombang 2) |
 | Layer Filament | **A−** | Konsistensi struktural sangat tinggi (378 resource, 1 base class) |
 | Kematangan testing | **B−** | Volume tinggi, tetapi sempit; UI/Livewire & factory minim |
 | Kematangan CI/CD | **D** | Hanya lint translasi + mobile-shell; **test tidak dijalankan di CI** |

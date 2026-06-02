@@ -211,6 +211,24 @@ class WorkflowEngineTest extends TestCase
         ]);
     }
 
+    public function test_sla_breach_logging_is_idempotent(): void
+    {
+        [$tenant, $organizationA, , $user] = $this->makeTenantContext();
+
+        $workflow = $this->makeWorkflow($tenant, $organizationA, $user);
+        $instance = app(WorkflowInstanceStarter::class)->start($workflow, $user);
+
+        $sla = app(WorkflowSlaService::class);
+
+        $sla->markBreached($instance->fresh());
+        $sla->markBreached($instance->fresh());
+
+        $this->assertSame(
+            1,
+            $instance->logs()->where('log_type', 'sla_breached')->count(),
+        );
+    }
+
     protected function makeWorkflow(Tenant $tenant, Organization $organization, User $user): Workflow
     {
         $workflow = Workflow::create([

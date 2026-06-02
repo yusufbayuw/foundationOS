@@ -15,7 +15,12 @@
     <source>
         <include>
             <directory>app</directory>
+            <directory>Modules</directory>
         </include>
+        <exclude>
+            <directory>Modules/*/vendor</directory>
+            <directory>Modules/*/database/seeders</directory>
+        </exclude>
     </source>
     <php>
         <ini name="memory_limit" value="1G"/>

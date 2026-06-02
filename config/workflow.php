@@ -20,4 +20,17 @@ return [
         'static',
     ],
     'allowed_automation_jobs' => [],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Automation failure handling
+    |--------------------------------------------------------------------------
+    |
+    | When false (default), automated actions log failures without breaking
+    | the HTTP advance() response. Retry via fos:workflow:retry-automation.
+    |
+    */
+    'automation' => [
+        'rethrow_on_failure' => (bool) env('WORKFLOW_AUTOMATION_RETHROW', false),
+    ],
 ];

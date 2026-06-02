@@ -40,6 +40,12 @@ class QueuedWorkflowSlaService implements WorkflowSlaService
 
     public function markBreached(WorkflowInstance $instance): void
     {
+        $instance = $instance->fresh();
+
+        if ($instance->logs()->where('log_type', WorkflowLogType::SlaBreached->value)->exists()) {
+            return;
+        }
+
         $this->auditLogger->log($instance, WorkflowLogType::SlaBreached->value, [
             'notes' => 'Workflow SLA breached.',
         ]);

@@ -22,6 +22,7 @@ class ApplicantsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['tenant', 'admissionPeriod']))
             ->columns([
                 TextColumn::make('tenant.name')
                     ->label(FilamentUi::field('tenant.name'))

@@ -1,0 +1,31 @@
+name: Tenant Field Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Modules/**/Filament/**/*.php'
+      - 'scripts/lint-tenant-fields.php'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Modules/**/Filament/**/*.php'
+      - 'scripts/lint-tenant-fields.php'
+
+jobs:
+  lint-tenant-fields:
+    name: Check tenant_id Select usage (mature modules)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Run tenant field linter
+        run: php scripts/lint-tenant-fields.php
