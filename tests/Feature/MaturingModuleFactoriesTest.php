@@ -18,7 +18,11 @@ use Modules\Training\Models\Instructor;
 use Modules\Asset\Models\AssetCategory;
 use Modules\Boarding\Models\Dormitory;
 use Modules\Cafeteria\Models\Menu;
+use Modules\Clinic\Models\Allergy;
+use Modules\Counseling\Models\Counselor;
 use Modules\Dms\Models\DocumentFolder;
+use Modules\Event\Models\Event as EventModel;
+use Modules\PhysicalSecurity\Models\Guard;
 use Modules\EOffice\Models\LetterCategory;
 use Modules\ItOps\Models\SoftwareLicense;
 use Modules\Facility\Models\Room;
@@ -119,6 +123,10 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\SoftwareLicenseImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\DormitoryImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\MenuImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\GuardImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\CounselorImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\AllergyImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\EventImporter::getColumns()));
     }
 
     public function test_marketplace_cms_legal_factories_persist(): void
@@ -210,5 +218,37 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertNotEmpty($license->code);
         $this->assertNotEmpty($dormitory->code);
         $this->assertNotEmpty($menu->code);
+    }
+
+    public function test_physicalsecurity_counseling_clinic_event_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext([
+            'core', 'physicalsecurity', 'counseling', 'clinic', 'event',
+        ]);
+
+        $guard = Guard::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $counselor = Counselor::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $allergy = Allergy::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $event = EventModel::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertNotEmpty($guard->code);
+        $this->assertNotEmpty($counselor->code);
+        $this->assertNotEmpty($allergy->code);
+        $this->assertNotEmpty($event->code);
     }
 }

@@ -14,6 +14,11 @@ class Allergy extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Clinic\Database\Factories\AllergyFactory
+    {
+        return \Modules\Clinic\Database\Factories\AllergyFactory::new();
+    }
+
     protected $table = 'allergies';
 
     protected $fillable = [

@@ -14,6 +14,11 @@ class Counselor extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Counseling\Database\Factories\CounselorFactory
+    {
+        return \Modules\Counseling\Database\Factories\CounselorFactory::new();
+    }
+
     protected $table = 'counselors';
 
     protected $fillable = [

@@ -14,6 +14,11 @@ class Guard extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\PhysicalSecurity\Database\Factories\GuardFactory
+    {
+        return \Modules\PhysicalSecurity\Database\Factories\GuardFactory::new();
+    }
+
     protected $table = 'guards';
 
     protected $fillable = [

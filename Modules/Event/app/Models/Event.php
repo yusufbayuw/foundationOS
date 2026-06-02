@@ -14,6 +14,11 @@ class Event extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Event\Database\Factories\EventFactory
+    {
+        return \Modules\Event\Database\Factories\EventFactory::new();
+    }
+
     protected $table = 'events';
 
     protected $fillable = [

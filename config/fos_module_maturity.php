@@ -40,6 +40,10 @@ return [
         'ItOps',
         'Boarding',
         'Cafeteria',
+        'PhysicalSecurity',
+        'Counseling',
+        'Clinic',
+        'Event',
     ],
 
     /**
@@ -48,10 +52,6 @@ return [
     'maturing' => [],
 
     'experimental' => [
-        'PhysicalSecurity',
-        'Counseling',
-        'Clinic',
-        'Event',
         'MerchOrder',
         'Alumni',
         'InternalAudit',

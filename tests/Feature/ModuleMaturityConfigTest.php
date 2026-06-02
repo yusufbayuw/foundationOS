@@ -33,6 +33,7 @@ class ModuleMaturityConfigTest extends TestCase
             'Risk', 'Donation', 'Sales', 'Transport', 'Property', 'Training',
             'Marketplace', 'Cms', 'Legal', 'Asset', 'Helpdesk', 'Facility', 'EOffice',
             'Dms', 'ItOps', 'Boarding', 'Cafeteria',
+            'PhysicalSecurity', 'Counseling', 'Clinic', 'Event',
         ] as $module) {
             $this->assertContains($module, $config['ga']);
             $this->assertNotContains($module, $config['experimental']);

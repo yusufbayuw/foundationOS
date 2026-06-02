@@ -29,6 +29,10 @@ parameters:
         - Modules/ItOps
         - Modules/Boarding
         - Modules/Cafeteria
+        - Modules/PhysicalSecurity
+        - Modules/Counseling
+        - Modules/Clinic
+        - Modules/Event
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false
