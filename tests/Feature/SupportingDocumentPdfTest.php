@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Boarding\Models\BoardingLeavePermit;
 use Modules\Consulting\Models\EngagementInvoice;
@@ -36,7 +36,7 @@ use Tests\TestCase;
 class SupportingDocumentPdfTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_guest_cannot_download_supporting_module_pdfs(): void
     {

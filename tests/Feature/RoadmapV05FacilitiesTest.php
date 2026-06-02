@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Asset\Models\Asset;
 use Modules\Asset\Services\AssetDepreciationService;
@@ -23,7 +23,7 @@ use Tests\TestCase;
 
 class RoadmapV05FacilitiesTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_asset_depreciation_service_creates_journal(): void
     {

@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\PersonalAccessToken;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class ApiTenantTokenRequirementTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_api_rejects_token_without_tenant_id(): void
     {

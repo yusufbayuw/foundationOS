@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class AdminPanelTenantAccessTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_global_super_admin_cannot_access_tenant_without_membership(): void
     {

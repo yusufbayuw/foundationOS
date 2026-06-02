@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Cms\Models\Page;
 use Modules\Cms\Models\Site;
@@ -37,7 +37,7 @@ use Tests\TestCase;
 
 class RoadmapV07RevenueEngineTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_public_inquiry_creates_lead_with_utm(): void
     {

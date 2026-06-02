@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 class HrmWorkflowSetupTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_setup_hrm_workflows_creates_active_leave_and_salary_slip_definitions(): void
     {

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -19,7 +19,7 @@ use Tests\TestCase;
 
 class ExamResultExportTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_csv_export_creates_uuid_export_log(): void
     {

@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\BillingService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\SubscriptionPlan;
@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class BillingWebhookSecurityTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private Tenant $tenant;
 

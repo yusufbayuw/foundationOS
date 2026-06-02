@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\DeliverWebhookJob;
 use App\Services\TenantMigrationService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Modules\Core\Models\Organization;
@@ -30,7 +30,7 @@ use Tests\TestCase;
 
 class RoadmapV09PlatformExtensionTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_whatsapp_dispatch_is_feature_flagged_idempotent_and_uses_mock_provider(): void
     {

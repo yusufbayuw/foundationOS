@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Events\TenantSwitched;
 use App\Listeners\LogTenantSwitchAudit;
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
@@ -16,7 +16,7 @@ use Tests\TestCase;
 
 class TenancySwitchAuditTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private function createPlan(): SubscriptionPlan
     {

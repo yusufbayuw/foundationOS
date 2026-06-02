@@ -8,7 +8,7 @@ use App\Queue\Middleware\WithTenantContext;
 use App\Support\CurrentTenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Artisan;
@@ -41,7 +41,7 @@ class TenantAwareCaptureJob implements ShouldQueue
 
 class JobRestoresTenantContextTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

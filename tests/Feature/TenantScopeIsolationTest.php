@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Scopes\TenantScope;
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class TenantScopeIsolationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

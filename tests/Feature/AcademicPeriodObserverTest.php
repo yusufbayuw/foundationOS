@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Models\MoodleSyncOutbox;
 use App\Observers\AcademicPeriodObserver;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 class AcademicPeriodObserverTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

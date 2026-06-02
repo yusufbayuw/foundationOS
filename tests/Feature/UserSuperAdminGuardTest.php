@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\User;
 use Tests\TestCase;
 
 class UserSuperAdminGuardTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_is_super_admin_cannot_be_mass_assigned(): void
     {

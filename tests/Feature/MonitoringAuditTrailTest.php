@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 class MonitoringAuditTrailTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_warehouse_create_writes_audit_log_with_morph_alias(): void
     {

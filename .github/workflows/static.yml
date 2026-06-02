@@ -28,7 +28,7 @@ jobs:
         run: vendor/bin/pint --test
 
   phpstan:
-    name: Larastan (level 0)
+    name: Larastan (level 0, maturing modules)
     runs-on: ubuntu-latest
 
     steps:

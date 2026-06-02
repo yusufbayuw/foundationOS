@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Observers\AcademicPeriodObserver;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Mockery;
 use Modules\Core\Models\AcademicPeriod;
@@ -16,7 +16,7 @@ use Tests\TestCase;
 
 class AcademicCalendarSyncTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private Tenant $tenant;
 

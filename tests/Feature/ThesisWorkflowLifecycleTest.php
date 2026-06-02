@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\Workflow\StaticMultiUserResolver;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Thesis;
@@ -22,7 +22,7 @@ use Tests\TestCase;
 
 class ThesisWorkflowLifecycleTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private Tenant $tenant;
 

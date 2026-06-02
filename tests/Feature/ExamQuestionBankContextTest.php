@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\Faculty;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 class ExamQuestionBankContextTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_school_question_bank_can_be_created(): void
     {

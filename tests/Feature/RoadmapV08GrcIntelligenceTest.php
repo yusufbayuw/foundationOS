@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\ExecutiveWarningService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Ai\Services\AiAdvisorService;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -21,7 +21,7 @@ use Tests\TestCase;
 
 class RoadmapV08GrcIntelligenceTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_high_audit_finding_creates_linked_risk(): void
     {

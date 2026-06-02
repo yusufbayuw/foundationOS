@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
@@ -25,7 +25,7 @@ use Tests\TestCase;
 
 class ExamParticipantResolverCampusTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_resolve_from_campus_class_creates_participants_from_study_plan_items(): void
     {

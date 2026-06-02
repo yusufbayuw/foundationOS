@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
@@ -38,7 +38,7 @@ use Tests\TestCase;
 
 class ProcurementCampusMonitoringFoundationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_procurement_entities_follow_tenant_relations(): void
     {

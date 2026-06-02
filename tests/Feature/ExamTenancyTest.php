@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class ExamTenancyTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_exam_definition_uses_uuid_primary_key_and_tenant_scope(): void
     {

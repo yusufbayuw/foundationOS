@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Modules\Core\Models\ParentStudent;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 
 class RoadmapV04WaveATest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_contract_expiring_soon_event_fires(): void
     {

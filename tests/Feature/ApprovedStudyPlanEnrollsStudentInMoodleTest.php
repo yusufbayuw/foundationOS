@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Models\MoodleSyncOutbox;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
@@ -24,7 +24,7 @@ use Tests\TestCase;
 
 class ApprovedStudyPlanEnrollsStudentInMoodleTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

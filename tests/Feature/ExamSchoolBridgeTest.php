@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -24,7 +24,7 @@ use Tests\TestCase;
 
 class ExamSchoolBridgeTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_school_grade_bridge_upserts_student_grade_when_assessment_linked(): void
     {

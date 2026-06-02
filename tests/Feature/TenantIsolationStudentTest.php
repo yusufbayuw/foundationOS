@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
 use Filament\Panel;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class TenantIsolationStudentTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

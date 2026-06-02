@@ -7,7 +7,7 @@ use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncService;
 use App\Models\MoodleEntityMapping;
 use App\Models\MoodleSyncOutbox;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -23,7 +23,7 @@ use Tests\TestCase;
 
 class CourseOfferingSyncsToMoodleTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

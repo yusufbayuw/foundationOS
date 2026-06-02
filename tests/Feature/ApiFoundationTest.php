@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\PersonalAccessToken;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Modules\Core\Models\SubscriptionPlan;
@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class ApiFoundationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private User $user;
 

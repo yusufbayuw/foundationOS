@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
@@ -23,7 +23,7 @@ use Tests\TestCase;
 
 class ExamDefinitionLifecycleTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_mark_ready_requires_questions(): void
     {

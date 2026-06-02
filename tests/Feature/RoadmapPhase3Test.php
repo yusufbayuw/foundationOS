@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Services\CrossModuleReportService;
 use App\Services\ExecutiveMetricsService;
 use Illuminate\Auth\Events\Failed;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -32,7 +32,7 @@ use Tests\TestCase;
 
 class RoadmapPhase3Test extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_executive_metrics_service_returns_expected_keys(): void
     {

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
@@ -37,7 +37,7 @@ use Tests\TestCase;
 
 class ExamGradebookExportTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_school_gradebook_export_creates_student_grade_and_uuid_log(): void
     {

@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Database\QueryException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 class EnrollmentIntegrityTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_exam_result_belongs_to_specific_exam_schedule(): void
     {

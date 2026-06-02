@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Announcement;
@@ -24,7 +24,7 @@ use Tests\TestCase;
 
 class RoadmapV06AcademicExperienceTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_parent_panel_isolates_children_between_parents(): void
     {

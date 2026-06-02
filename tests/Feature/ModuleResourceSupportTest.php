@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use Filament\Facades\Filament;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Filament\Resources\Organizations\OrganizationResource;
 use Modules\Core\Filament\Support\Guards\GlobalResourceGuard;
@@ -24,7 +24,7 @@ use Tests\TestCase;
 
 class ModuleResourceSupportTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function tearDown(): void
     {

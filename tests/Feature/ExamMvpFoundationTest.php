@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
@@ -42,7 +42,7 @@ use Tests\TestCase;
  */
 class ExamMvpFoundationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_model_relationships_are_wired(): void
     {

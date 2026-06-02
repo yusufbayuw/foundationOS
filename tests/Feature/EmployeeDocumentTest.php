@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class EmployeeDocumentTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_employee_document_tracks_private_file_metadata_for_core_document_types(): void
     {

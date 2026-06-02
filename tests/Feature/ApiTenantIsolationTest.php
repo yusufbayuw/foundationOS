@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\PersonalAccessToken;
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\School\Models\Student;
@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class ApiTenantIsolationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function tearDown(): void
     {

@@ -4,13 +4,13 @@ namespace Tests\Feature;
 
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class MoodleOutboxAtomicClaimTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_try_claim_only_allows_one_worker(): void
     {

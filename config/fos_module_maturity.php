@@ -25,8 +25,16 @@ return [
         'Inventory',
     ],
 
-    'experimental' => [
+    /**
+     * Modules with domain services + tests; not yet full GA.
+     */
+    'maturing' => [
+        'Risk',
+        'Donation',
         'Sales',
+    ],
+
+    'experimental' => [
         'Legal',
         'Asset',
         'Dms',
@@ -44,9 +52,7 @@ return [
         'MerchOrder',
         'Alumni',
         'Cms',
-        'Donation',
         'Training',
-        'Risk',
         'InternalAudit',
         'IsoCompliance',
         'EducationQa',

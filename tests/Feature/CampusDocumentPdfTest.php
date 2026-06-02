@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
@@ -27,7 +27,7 @@ use Tests\TestCase;
 class CampusDocumentPdfTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_guest_cannot_download_transcript_pdf(): void
     {

@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 class DynamicOptionsResolverTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private Tenant $tenantA;
 

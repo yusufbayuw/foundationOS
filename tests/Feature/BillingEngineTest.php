@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\BillingService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionLog;
@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class BillingEngineTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private SubscriptionPlan $plan;
 

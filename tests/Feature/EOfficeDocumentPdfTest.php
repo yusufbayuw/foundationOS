@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 class EOfficeDocumentPdfTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_guest_cannot_download_letter_pdf(): void
     {

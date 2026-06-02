@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use InvalidArgumentException;
 use Modules\Core\Models\User;
 use Modules\Finance\Models\StudentInvoice;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 class PrintTemplateResolverTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_resolver_returns_hardcoded_defaults_when_no_db_override(): void
     {

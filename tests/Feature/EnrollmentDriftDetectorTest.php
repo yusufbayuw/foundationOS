@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Integrations\Moodle\MoodleEnrollmentReconciler;
 use App\Models\MoodleClassCourseMapping;
 use App\Models\MoodleEnrollmentDrift;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 class EnrollmentDriftDetectorTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_three_drift_types_detected_from_seeded_mismatches(): void
     {

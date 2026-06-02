@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Filament\Panel;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class UserIdentityAccessTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_user_can_access_only_assigned_tenants(): void
     {

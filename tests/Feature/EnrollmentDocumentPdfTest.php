@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Organization;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 class EnrollmentDocumentPdfTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_guest_cannot_download_acceptance_letter_pdf(): void
     {

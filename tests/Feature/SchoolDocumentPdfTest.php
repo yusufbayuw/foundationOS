@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\Organization;
@@ -26,7 +26,7 @@ use Tests\TestCase;
 class SchoolDocumentPdfTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_guest_cannot_download_school_pdfs(): void
     {

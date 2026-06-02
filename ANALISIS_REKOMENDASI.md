@@ -281,8 +281,9 @@ Hanya dua workflow GitHub Actions:
 ### Gelombang 4 — Pematangan modul roadmap
 - [x] Tandai modul scaffold sebagai *experimental* di `config/fos_module_maturity.php` + Definition of Done.
 - [x] Ganti `TextInput('organization_id')` → `TenantField::organizationSelect()` di modul experimental (31 form); contoh `meta` → `KeyValue` di Risk.
-- [x] Tambah service domain + test untuk modul pilot GA (`RiskCategoryService` + `RiskCategoryServiceTest`).
-- [x] `LazilyRefreshDatabase` diperluas ke suite workflow/procurement/finance inti (16 file test).
+- [x] Tambah service domain + test untuk modul pilot GA (`RiskCategoryService`, `DonorRegistrationService`, `CustomerRegistrationService` + tests).
+- [x] Tier `maturing` di `config/fos_module_maturity.php` (Risk, Donation, Sales).
+- [x] `LazilyRefreshDatabase` pada seluruh `tests/Feature/*` (kecuali `ExampleTest`).
 - [x] Resolusi transisi workflow dari snapshot (`JsonLogicWorkflowTransitionResolver` + test).
 
 ---

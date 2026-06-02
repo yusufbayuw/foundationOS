@@ -3,14 +3,14 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\Tenancy\RegisterTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Tests\TestCase;
 
 class SelfRegistrationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_registration_page_is_accessible(): void
     {

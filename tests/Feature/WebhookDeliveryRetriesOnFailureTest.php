@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Jobs\DeliverWebhookJob;
 use App\Services\WebhookDispatcher;
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
@@ -18,7 +18,7 @@ use Tests\TestCase;
 
 class WebhookDeliveryRetriesOnFailureTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     private Tenant $tenant;
 

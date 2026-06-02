@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -22,7 +22,7 @@ use Tests\TestCase;
 
 class ExamDefinitionContextTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_school_exam_definition_can_be_created_with_references(): void
     {

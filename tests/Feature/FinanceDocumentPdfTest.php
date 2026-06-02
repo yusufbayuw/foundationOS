@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\User;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\CustomerInvoice;
@@ -17,7 +17,7 @@ use Tests\TestCase;
 class FinanceDocumentPdfTest extends TestCase
 {
     use InteractsWithPdfDocuments;
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_guest_cannot_download_student_invoice_pdf(): void
     {

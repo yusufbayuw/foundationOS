@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Integrations\Moodle\MoodleEnrollmentDriftFixer;
 use App\Models\MoodleEnrollmentDrift;
 use App\Models\MoodleSyncOutbox;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -21,7 +21,7 @@ use Tests\TestCase;
 
 class EnrollmentDriftAutoFixTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     protected function setUp(): void
     {

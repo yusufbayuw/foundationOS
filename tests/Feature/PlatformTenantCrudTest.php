@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Platform\Resources\Tenants\TenantResource;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
 use Spatie\Permission\Models\Role;
@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class PlatformTenantCrudTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_platform_owner_can_access_tenant_crud_pages(): void
     {

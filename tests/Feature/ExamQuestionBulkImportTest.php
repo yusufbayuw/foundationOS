@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Imports\ExamQuestionBulkImporter;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -20,7 +20,7 @@ use Tests\TestCase;
 
 class ExamQuestionBulkImportTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_bulk_import_creates_question_with_uuid_and_options(): void
     {

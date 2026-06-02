@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Integrations\Moodle\MoodleDetailedGradePullService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
@@ -26,7 +26,7 @@ use Tests\TestCase;
 
 class DetailedGradePullPopulatesStudyResultTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_grade_items_are_mapped_to_breakdown_and_weighted_score(): void
     {

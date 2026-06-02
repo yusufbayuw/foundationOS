@@ -25,6 +25,16 @@ class ModuleMaturityConfigTest extends TestCase
         $this->assertContains('Factory + feature tests for primary flows', $criteria);
     }
 
+    public function test_maturing_modules_are_not_listed_as_experimental(): void
+    {
+        $config = config('fos_module_maturity');
+
+        foreach (['Risk', 'Donation', 'Sales'] as $module) {
+            $this->assertContains($module, $config['maturing']);
+            $this->assertNotContains($module, $config['experimental']);
+        }
+    }
+
     /**
      * @return array<string, array{0: string}>
      */

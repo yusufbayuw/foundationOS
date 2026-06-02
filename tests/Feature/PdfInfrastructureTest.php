@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class PdfInfrastructureTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_tenant_document_context_resolves_branding_settings(): void
     {

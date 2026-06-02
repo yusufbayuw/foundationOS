@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class UserTenantMembershipExpiryTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_expired_membership_denies_tenant_access(): void
     {

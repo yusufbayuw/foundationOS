@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
@@ -22,7 +22,7 @@ use Tests\TestCase;
 
 class EmployeePayrollCalculationTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_payroll_calculation_creates_complete_salary_slip_from_components_and_attendance(): void
     {
