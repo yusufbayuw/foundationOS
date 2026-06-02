@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -27,7 +27,7 @@ use Tests\TestCase;
 
 class ApplicantAcceptedPipelineTest extends TestCase
 {
-    use RefreshDatabase;
+    use LazilyRefreshDatabase;
 
     public function test_accepting_applicant_dispatches_event(): void
     {

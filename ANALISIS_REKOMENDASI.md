@@ -272,17 +272,17 @@ Hanya dua workflow GitHub Actions:
 - [x] Lint `Select::make('tenant_id')` → `scripts/lint-tenant-fields.php` + `composer lint:tenant-fields` (modul matang).
 
 ### Gelombang 3 — Kualitas & performa
-- [ ] Larastan + Pint sebagai gate CI (level bertahap). *(Pint sudah di `static.yml`)*
+- [x] Larastan + Pint sebagai gate CI (level 0 di `phpstan.neon` + job `phpstan` di `static.yml`).
 - [x] Trait `Tests\Concerns\CreatesTenantForTests` untuk konteks tenant bersama.
-- [ ] `LazilyRefreshDatabase` — migrasi bertahap per file test.
+- [x] `LazilyRefreshDatabase` — pilot: `ApplicantAcceptedPipelineTest`, `WorkflowDesignerTest`, `CoreModuleFilamentCrudTest`.
 - [x] Eager-loading contoh: `StudentInvoicesTable`, `ApplicantsTable` + index `(tenant_id, status)`.
-- [ ] Test Livewire untuk CRUD inti (Finance/School/Enrollment).
+- [x] Test Livewire untuk CRUD inti: `CoreModuleFilamentCrudTest` (list Enrollment/Finance/School + create invoice).
 
 ### Gelombang 4 — Pematangan modul roadmap
-- [ ] Tandai modul scaffold sebagai *experimental*; definisikan "Definition of Done".
-- [ ] Ganti `TextInput('organization_id')` → `Select::relationship`; `meta` → `KeyValue`.
+- [x] Tandai modul scaffold sebagai *experimental* di `config/fos_module_maturity.php` + Definition of Done.
+- [x] Ganti `TextInput('organization_id')` → `TenantField::organizationSelect()` di modul experimental (31 form); contoh `meta` → `KeyValue` di Risk.
 - [ ] Tambah service domain + test untuk modul yang ditargetkan GA.
-- [ ] Resolusi transisi workflow dari snapshot (deterministik untuk instance berjalan).
+- [x] Resolusi transisi workflow dari snapshot (`JsonLogicWorkflowTransitionResolver` + test).
 
 ---
 

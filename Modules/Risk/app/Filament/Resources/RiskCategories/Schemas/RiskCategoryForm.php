@@ -2,6 +2,7 @@
 
 namespace Modules\Risk\Filament\Resources\RiskCategories\Schemas;
 
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -17,9 +18,7 @@ class RiskCategoryForm
             Section::make(FilamentUi::text('General information'))
                 ->schema([
                     TenantField::make(),
-                    TextInput::make('organization_id')
-                        ->label(FilamentUi::field('organization_id'))
-                        ->numeric(),
+                    TenantField::organizationSelect(),
                     TextInput::make('code')
                         ->label(FilamentUi::field('code')),
                     TextInput::make('name')
@@ -29,7 +28,7 @@ class RiskCategoryForm
                     Textarea::make('description')
                         ->label(FilamentUi::field('description'))
                         ->columnSpanFull(),
-                    Textarea::make('meta')
+                    KeyValue::make('meta')
                         ->label(FilamentUi::field('meta'))
                         ->columnSpanFull(),
                 ])

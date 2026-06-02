@@ -16,9 +16,7 @@ class SalesOrderForm
             Section::make(FilamentUi::text('General information'))
                 ->schema([
                     TenantField::make(),
-                    TextInput::make('organization_id')
-                        ->label(FilamentUi::field('organization_id'))
-                        ->numeric(),
+                    TenantField::organizationSelect(),
                     TextInput::make('customer_id')
                         ->label(FilamentUi::field('customer_id'))
                         ->numeric(),

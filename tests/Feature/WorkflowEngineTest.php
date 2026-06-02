@@ -196,6 +196,34 @@ class WorkflowEngineTest extends TestCase
         $this->assertNotSame($workflow->fresh()->name, $instance->workflow_snapshot['workflow']['name']);
     }
 
+    public function test_advance_uses_snapshot_when_live_transition_is_removed(): void
+    {
+        [$tenant, $organizationA, , $user] = $this->makeTenantContext();
+
+        $workflow = $this->makeWorkflow($tenant, $organizationA, $user);
+        $instance = app(WorkflowInstanceStarter::class)->start($workflow, $user, ['requested_total' => 2500000]);
+
+        WorkflowTransition::query()
+            ->where('workflow_id', $workflow->id)
+            ->where('action_name', 'approve')
+            ->delete();
+
+        $result = app(WorkflowEngine::class)->advance(
+            $instance->fresh(),
+            'approve',
+            ['approval_note' => 'Approved using frozen snapshot transitions.'],
+            $user,
+            'Approved after definition change',
+        );
+
+        $this->assertSame('completed', $result->status->value);
+        $this->assertDatabaseHas('workflow_instance_logs', [
+            'workflow_instance_id' => $instance->id,
+            'log_type' => 'advanced',
+            'action_taken' => 'approve',
+        ]);
+    }
+
     public function test_sla_service_marks_breached_and_logs_it(): void
     {
         [$tenant, $organizationA, , $user] = $this->makeTenantContext();

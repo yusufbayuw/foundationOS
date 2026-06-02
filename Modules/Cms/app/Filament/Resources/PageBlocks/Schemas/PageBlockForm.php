@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class PageBlockForm
 {
@@ -16,8 +17,7 @@ class PageBlockForm
                 TextInput::make('tenant_id')
                     ->required()
                     ->numeric(),
-                TextInput::make('organization_id')
-                    ->numeric(),
+                TenantField::organizationSelect(),
                 TextInput::make('code'),
                 TextInput::make('name'),
                 TextInput::make('status')

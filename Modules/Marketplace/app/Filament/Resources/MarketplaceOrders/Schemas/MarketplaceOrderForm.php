@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class MarketplaceOrderForm
 {
@@ -16,8 +17,7 @@ class MarketplaceOrderForm
                 Select::make('tenant_id')
                     ->relationship('tenant', 'name')
                     ->required(),
-                TextInput::make('organization_id')
-                    ->numeric(),
+                TenantField::organizationSelect(),
                 TextInput::make('code'),
                 TextInput::make('name'),
                 TextInput::make('status')
