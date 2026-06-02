@@ -14,6 +14,11 @@ class AssetCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Asset\Database\Factories\AssetCategoryFactory
+    {
+        return \Modules\Asset\Database\Factories\AssetCategoryFactory::new();
+    }
+
     protected $table = 'asset_categories';
 
     protected $fillable = [

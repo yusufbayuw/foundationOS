@@ -15,6 +15,10 @@ use Modules\Property\Models\Property as PropertyModel;
 use Modules\Risk\Models\RiskCategory;
 use Modules\Sales\Models\Customer;
 use Modules\Training\Models\Instructor;
+use Modules\Asset\Models\AssetCategory;
+use Modules\EOffice\Models\LetterCategory;
+use Modules\Facility\Models\Room;
+use Modules\Helpdesk\Models\TicketCategory;
 use Modules\Transport\Models\Route;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
@@ -103,6 +107,10 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\SellerImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\LegalDocumentImporter::getColumns()));
         $this->assertGreaterThanOrEqual(2, count(\App\Filament\Imports\CmsSiteImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\AssetCategoryImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\TicketCategoryImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\RoomImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\LetterCategoryImporter::getColumns()));
     }
 
     public function test_marketplace_cms_legal_factories_persist(): void
@@ -130,5 +138,37 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertNotEmpty($seller->code);
         $this->assertNotEmpty($page->slug);
         $this->assertNotEmpty($document->code);
+    }
+
+    public function test_asset_helpdesk_facility_eoffice_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext([
+            'core', 'asset', 'helpdesk', 'facility', 'eoffice',
+        ]);
+
+        $assetCategory = AssetCategory::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $ticketCategory = TicketCategory::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $room = Room::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $letterCategory = LetterCategory::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertNotEmpty($assetCategory->code);
+        $this->assertGreaterThan(0, $ticketCategory->response_hours);
+        $this->assertTrue($room->is_bookable);
+        $this->assertNotEmpty($letterCategory->code);
     }
 }

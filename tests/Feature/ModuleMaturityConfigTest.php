@@ -29,7 +29,10 @@ class ModuleMaturityConfigTest extends TestCase
     {
         $config = config('fos_module_maturity');
 
-        foreach (['Risk', 'Donation', 'Sales', 'Transport', 'Property', 'Training', 'Marketplace', 'Cms', 'Legal'] as $module) {
+        foreach ([
+            'Risk', 'Donation', 'Sales', 'Transport', 'Property', 'Training',
+            'Marketplace', 'Cms', 'Legal', 'Asset', 'Helpdesk', 'Facility', 'EOffice',
+        ] as $module) {
             $this->assertContains($module, $config['ga']);
             $this->assertNotContains($module, $config['experimental']);
         }

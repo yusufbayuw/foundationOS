@@ -14,6 +14,11 @@ class LetterCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\EOffice\Database\Factories\LetterCategoryFactory
+    {
+        return \Modules\EOffice\Database\Factories\LetterCategoryFactory::new();
+    }
+
     protected $table = 'letter_categories';
 
     protected $fillable = [

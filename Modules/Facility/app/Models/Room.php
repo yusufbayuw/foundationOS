@@ -14,6 +14,11 @@ class Room extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Facility\Database\Factories\RoomFactory
+    {
+        return \Modules\Facility\Database\Factories\RoomFactory::new();
+    }
+
     protected $table = 'rooms';
 
     protected $fillable = [

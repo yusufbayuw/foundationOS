@@ -14,6 +14,11 @@ class TicketCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Helpdesk\Database\Factories\TicketCategoryFactory
+    {
+        return \Modules\Helpdesk\Database\Factories\TicketCategoryFactory::new();
+    }
+
     protected $table = 'ticket_categories';
 
     protected $fillable = [

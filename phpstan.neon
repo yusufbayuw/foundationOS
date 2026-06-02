@@ -21,6 +21,10 @@ parameters:
         - Modules/Marketplace
         - Modules/Cms
         - Modules/Legal
+        - Modules/Asset
+        - Modules/Helpdesk
+        - Modules/Facility
+        - Modules/EOffice
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false

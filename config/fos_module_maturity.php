@@ -32,6 +32,10 @@ return [
         'Marketplace',
         'Cms',
         'Legal',
+        'Asset',
+        'Helpdesk',
+        'Facility',
+        'EOffice',
     ],
 
     /**
@@ -40,11 +44,7 @@ return [
     'maturing' => [],
 
     'experimental' => [
-        'Asset',
         'Dms',
-        'Helpdesk',
-        'Facility',
-        'EOffice',
         'ItOps',
         'Boarding',
         'Cafeteria',

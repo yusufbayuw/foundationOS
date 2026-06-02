@@ -2,15 +2,15 @@
 
 namespace Modules\Helpdesk\Filament\Resources\TicketCategories\Tables;
 
+use App\Filament\Imports\TicketCategoryImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class TicketCategoriesTable
 {
@@ -18,50 +18,38 @@ class TicketCategoriesTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->searchable(),
-                TextColumn::make('organization.name')
-                    ->searchable(),
                 TextColumn::make('code')
-                    ->searchable(),
+                    ->label(FilamentUi::field('code'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label(FilamentUi::field('name'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label(FilamentUi::field('status'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('response_hours')
+                    ->label(FilamentUi::field('response_hours'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('resolution_hours')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('default_assignee_user_id')
+                    ->label(FilamentUi::field('resolution_hours'))
                     ->numeric()
                     ->sortable(),
             ])
             ->filters([
-                TrashedFilter::make(),
+                //
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ...ImportTableActions::make(TicketCategoryImporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
