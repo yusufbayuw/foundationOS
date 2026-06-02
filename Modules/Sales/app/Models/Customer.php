@@ -2,14 +2,22 @@
 
 namespace Modules\Sales\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Sales\Database\Factories\CustomerFactory;
 
 class Customer extends Model
 {
-    use BelongsToTenant, SoftDeletes;
+    /** @use HasFactory<CustomerFactory> */
+    use BelongsToTenant, HasFactory, SoftDeletes;
+
+    protected static function newFactory(): CustomerFactory
+    {
+        return CustomerFactory::new();
+    }
 
     protected $fillable = [
         'tenant_id',

@@ -2,15 +2,19 @@
 
 namespace Modules\Donation\Filament\Resources\Donors\Tables;
 
+use App\Filament\Imports\DonorImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class DonorsTable
 {
@@ -18,26 +22,22 @@ class DonorsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.name')
-                    ->searchable(),
-                TextColumn::make('organization_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('code')
-                    ->searchable(),
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->searchable(),
+                    ->label(FilamentUi::field('name'))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->label(FilamentUi::field('email'))
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('phone')
+                    ->label(FilamentUi::field('phone'))
+                    ->toggleable(),
+                IconColumn::make('is_anonymous')
+                    ->label(FilamentUi::field('is_anonymous'))
+                    ->boolean(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -50,6 +50,7 @@ class DonorsTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ...ImportTableActions::make(DonorImporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

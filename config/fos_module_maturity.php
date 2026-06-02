@@ -23,16 +23,15 @@ return [
         'Monitoring',
         'Workflow',
         'Inventory',
-    ],
-
-    /**
-     * Modules with domain services + tests; not yet full GA.
-     */
-    'maturing' => [
         'Risk',
         'Donation',
         'Sales',
     ],
+
+    /**
+     * Modules approaching GA (domain services + factories + importers in progress).
+     */
+    'maturing' => [],
 
     'experimental' => [
         'Legal',

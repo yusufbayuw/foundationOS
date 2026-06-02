@@ -776,6 +776,7 @@ class FilamentUi
         'advisor' => 'pembimbing',
         'allow' => 'izinkan',
         'amount' => 'jumlah',
+        'anonymous' => 'anonim',
         'applicant' => 'pendaftar',
         'assessment' => 'asesmen',
         'assistant' => 'asisten',

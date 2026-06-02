@@ -282,7 +282,7 @@ Hanya dua workflow GitHub Actions:
 - [x] Tandai modul scaffold sebagai *experimental* di `config/fos_module_maturity.php` + Definition of Done.
 - [x] Ganti `TextInput('organization_id')` → `TenantField::organizationSelect()` di modul experimental (31 form); contoh `meta` → `KeyValue` di Risk.
 - [x] Tambah service domain + test untuk modul pilot GA (`RiskCategoryService`, `DonorRegistrationService`, `CustomerRegistrationService` + tests).
-- [x] Tier `maturing` di `config/fos_module_maturity.php` (Risk, Donation, Sales).
+- [x] Tier `maturing` di `config/fos_module_maturity.php`; Risk/Donation/Sales dipromosikan ke **GA** (factory, importer, form alignment).
 - [x] `LazilyRefreshDatabase` pada seluruh `tests/Feature/*` (kecuali `ExampleTest`).
 - [x] Resolusi transisi workflow dari snapshot (`JsonLogicWorkflowTransitionResolver` + test).
 

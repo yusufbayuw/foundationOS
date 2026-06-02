@@ -2,12 +2,14 @@
 
 namespace Modules\Risk\Filament\Resources\RiskCategories\Tables;
 
+use App\Filament\Imports\RiskCategoryImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
 
 class RiskCategoriesTable
@@ -37,6 +39,7 @@ class RiskCategoriesTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ...ImportTableActions::make(RiskCategoryImporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

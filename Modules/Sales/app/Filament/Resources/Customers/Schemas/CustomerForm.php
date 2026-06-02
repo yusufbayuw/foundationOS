@@ -4,6 +4,7 @@ namespace Modules\Sales\Filament\Resources\Customers\Schemas;
 
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
@@ -29,10 +30,13 @@ class CustomerForm
                     Textarea::make('address')
                         ->label(FilamentUi::field('address'))
                         ->columnSpanFull(),
-                    TextInput::make('is_active')
-                        ->label(FilamentUi::field('is_active')),
-                    TextInput::make('is_cooperative_member')
-                        ->label(FilamentUi::field('is_cooperative_member')),
+                    Toggle::make('is_active')
+                        ->label(FilamentUi::field('is_active'))
+                        ->default(true),
+                    Toggle::make('is_cooperative_member')
+                        ->label(FilamentUi::field('is_cooperative_member'))
+                        ->default(false)
+                        ->live(),
                     TextInput::make('member_number')
                         ->label(FilamentUi::field('member_number')),
                     TextInput::make('member_discount_percent')

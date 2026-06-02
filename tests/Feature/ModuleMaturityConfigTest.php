@@ -25,14 +25,19 @@ class ModuleMaturityConfigTest extends TestCase
         $this->assertContains('Factory + feature tests for primary flows', $criteria);
     }
 
-    public function test_maturing_modules_are_not_listed_as_experimental(): void
+    public function test_promoted_modules_are_ga_not_experimental(): void
     {
         $config = config('fos_module_maturity');
 
         foreach (['Risk', 'Donation', 'Sales'] as $module) {
-            $this->assertContains($module, $config['maturing']);
+            $this->assertContains($module, $config['ga']);
             $this->assertNotContains($module, $config['experimental']);
         }
+    }
+
+    public function test_maturing_tier_is_empty_until_next_promotion(): void
+    {
+        $this->assertSame([], config('fos_module_maturity.maturing'));
     }
 
     /**

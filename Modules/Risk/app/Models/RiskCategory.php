@@ -14,6 +14,11 @@ class RiskCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Risk\Database\Factories\RiskCategoryFactory
+    {
+        return \Modules\Risk\Database\Factories\RiskCategoryFactory::new();
+    }
+
     protected $table = 'risk_categories';
 
     protected $fillable = [
