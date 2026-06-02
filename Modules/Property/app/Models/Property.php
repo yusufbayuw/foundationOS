@@ -14,6 +14,11 @@ class Property extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Property\Database\Factories\PropertyFactory
+    {
+        return \Modules\Property\Database\Factories\PropertyFactory::new();
+    }
+
     protected $table = 'properties';
 
     protected $fillable = [

@@ -26,6 +26,9 @@ return [
         'Risk',
         'Donation',
         'Sales',
+        'Transport',
+        'Property',
+        'Training',
     ],
 
     /**
@@ -41,7 +44,6 @@ return [
         'Facility',
         'EOffice',
         'ItOps',
-        'Transport',
         'Boarding',
         'Cafeteria',
         'PhysicalSecurity',
@@ -51,7 +53,6 @@ return [
         'MerchOrder',
         'Alumni',
         'Cms',
-        'Training',
         'InternalAudit',
         'IsoCompliance',
         'EducationQa',
@@ -62,7 +63,6 @@ return [
         'Messaging',
         'Printing',
         'Consulting',
-        'Property',
         'Marketplace',
     ],
 

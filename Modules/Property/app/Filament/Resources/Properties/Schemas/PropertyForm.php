@@ -2,6 +2,7 @@
 
 namespace Modules\Property\Filament\Resources\Properties\Schemas;
 
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -27,7 +28,7 @@ class PropertyForm
                     Textarea::make('description')
                         ->label(FilamentUi::field('description'))
                         ->columnSpanFull(),
-                    Textarea::make('meta')
+                    KeyValue::make('meta')
                         ->label(FilamentUi::field('meta'))
                         ->columnSpanFull(),
                 ])

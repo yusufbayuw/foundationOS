@@ -2,12 +2,14 @@
 
 namespace Modules\Transport\Filament\Resources\Routes\Tables;
 
+use App\Filament\Imports\RouteImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
 
 class RoutesTable
@@ -37,6 +39,7 @@ class RoutesTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ...ImportTableActions::make(RouteImporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

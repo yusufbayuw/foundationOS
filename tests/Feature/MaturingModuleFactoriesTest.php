@@ -7,8 +7,11 @@ use App\Filament\Imports\DonorImporter;
 use App\Filament\Imports\RiskCategoryImporter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Donation\Models\Donor;
+use Modules\Property\Models\Property as PropertyModel;
 use Modules\Risk\Models\RiskCategory;
 use Modules\Sales\Models\Customer;
+use Modules\Training\Models\Instructor;
+use Modules\Transport\Models\Route;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
 
@@ -55,10 +58,43 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertNotEmpty($category->code);
     }
 
+    public function test_route_factory_persists_for_tenant(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext(['core', 'transport']);
+
+        $route = Route::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertSame('active', $route->status);
+    }
+
+    public function test_property_and_instructor_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext(['core', 'property', 'training']);
+
+        $property = PropertyModel::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $instructor = Instructor::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ]);
+
+        $this->assertNotEmpty($property->code);
+        $this->assertNotEmpty($instructor->code);
+    }
+
     public function test_ga_modules_expose_csv_import_columns(): void
     {
         $this->assertGreaterThanOrEqual(3, count(DonorImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(CustomerImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(RiskCategoryImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\RouteImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\PropertyImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\InstructorImporter::getColumns()));
     }
 }

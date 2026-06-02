@@ -14,6 +14,11 @@ class Route extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Transport\Database\Factories\RouteFactory
+    {
+        return \Modules\Transport\Database\Factories\RouteFactory::new();
+    }
+
     protected $table = 'routes';
 
     protected $fillable = [

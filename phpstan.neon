@@ -15,6 +15,9 @@ parameters:
         - Modules/Risk
         - Modules/Donation
         - Modules/Sales
+        - Modules/Transport
+        - Modules/Property
+        - Modules/Training
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false

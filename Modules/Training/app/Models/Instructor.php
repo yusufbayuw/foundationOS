@@ -14,6 +14,11 @@ class Instructor extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Training\Database\Factories\InstructorFactory
+    {
+        return \Modules\Training\Database\Factories\InstructorFactory::new();
+    }
+
     protected $table = 'instructors';
 
     protected $fillable = [
