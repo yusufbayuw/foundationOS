@@ -182,6 +182,7 @@ class NavigationSortRegistry
             'Monitoring' => [
                 'FileUploadResource' => 10,
                 'AuditLogResource' => 20,
+                'MoodleSyncOutboxResource' => 25,
             ],
             'Legal' => [
                 'LegalDocumentResource' => 10,

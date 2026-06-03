@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Concerns\InteractsWithTenant;
+use App\Integrations\Moodle\Exceptions\MoodleReadonlySkipException;
 use App\Integrations\Moodle\MoodleSyncRetry;
 use App\Integrations\Moodle\MoodleSyncService;
 use App\Models\MoodleSyncOutbox;
@@ -43,6 +44,13 @@ class ProcessMoodleSyncOutboxJob implements ShouldQueue
                 'synced_at' => now(),
                 'next_retry_at' => null,
                 'last_error' => null,
+            ])->save();
+        } catch (MoodleReadonlySkipException) {
+            $outbox->forceFill([
+                'status' => MoodleSyncOutbox::STATUS_SKIPPED,
+                'last_error' => 'MOODLE_SYNC_READONLY=true',
+                'synced_at' => null,
+                'next_retry_at' => null,
             ])->save();
         } catch (Throwable $exception) {
             $attempts = (int) $outbox->attempts + 1;

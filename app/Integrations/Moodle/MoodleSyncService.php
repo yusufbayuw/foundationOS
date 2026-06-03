@@ -3,6 +3,7 @@
 namespace App\Integrations\Moodle;
 
 use App\Integrations\Moodle\Exceptions\MoodleIntegrationException;
+use App\Integrations\Moodle\Exceptions\MoodleReadonlySkipException;
 use App\Models\MoodleClassCourseMapping;
 use App\Models\MoodleEntityMapping;
 use App\Models\MoodleSyncOutbox;
@@ -703,9 +704,26 @@ class MoodleSyncService
 
     public function enrollUser(int $moodleUserId, int $moodleCourseId, ?int $roleId = null): void
     {
-        $this->callMoodle('enrol_manual_enrol_users', [
-            'enrolments' => [$this->mapper->mapEnrollment($moodleUserId, $moodleCourseId, $roleId)],
-        ]);
+        try {
+            $this->callMoodle('enrol_manual_enrol_users', [
+                'enrolments' => [$this->mapper->mapEnrollment($moodleUserId, $moodleCourseId, $roleId)],
+            ]);
+        } catch (MoodleIntegrationException $exception) {
+            if ($this->isAlreadyEnrolledError($exception)) {
+                return;
+            }
+
+            throw $exception;
+        }
+    }
+
+    protected function isAlreadyEnrolledError(MoodleIntegrationException $exception): bool
+    {
+        $message = strtolower($exception->getMessage());
+
+        return str_contains($message, 'already enrolled')
+            || str_contains($message, 'wsuseralreadyenrolled')
+            || str_contains($message, 'user is already enrolled');
     }
 
     public function unenrollUser(int $moodleUserId, int $moodleCourseId): void
@@ -992,7 +1010,7 @@ class MoodleSyncService
     protected function callMoodle(string $function, array $params): array
     {
         if (config('moodle.readonly', false)) {
-            return [];
+            throw new MoodleReadonlySkipException;
         }
 
         return $this->client->call($function, $params);

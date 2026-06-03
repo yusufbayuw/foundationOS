@@ -8,9 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class MoodleSyncOutbox extends Model
 {
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_PROCESSING = 'processing';
+
     public const STATUS_SYNCED = 'synced';
+
     public const STATUS_FAILED = 'failed';
+
+    public const STATUS_SKIPPED = 'skipped';
 
     protected $table = 'moodle_sync_outbox';
 
@@ -75,4 +80,3 @@ class MoodleSyncOutbox extends Model
             ->where('updated_at', '<=', now()->subMinutes($minutes));
     }
 }
-
