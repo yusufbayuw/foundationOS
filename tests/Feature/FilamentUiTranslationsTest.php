@@ -49,6 +49,8 @@ namespace Tests\Feature {
                 'Status' => ['Status', 'Status'],
                 'Exam definition' => ['Exam definition', 'Definisi ujian'],
                 'Ai prompt template' => ['Ai prompt template', 'Template prompt AI'],
+                'Workflow designer' => ['Workflow designer', 'Perancang workflow'],
+                'New workflow' => ['New workflow', 'Workflow baru'],
                 'Active' => ['Active', 'Aktif'],
                 'Inactive' => ['Inactive', 'Nonaktif'],
                 'Exam question bank' => ['Exam question bank', 'Bank soal ujian'],

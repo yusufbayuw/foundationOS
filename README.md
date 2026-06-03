@@ -567,6 +567,8 @@ Key `.env` variables:
 ```env
 # Multi-Tenancy
 TENANCY_ENABLED=true
+# Optional: reject HTTP queries without tenant context (console/queue exempt). Enable after smoke tests.
+TENANCY_SCOPE_FAIL_CLOSED=false
 
 # Database
 DB_CONNECTION=mysql

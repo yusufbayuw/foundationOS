@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
+use App\Http\Controllers\Api\v2\AuthController as V2AuthController;
+use App\Http\Controllers\Api\v2\VersionController as V2VersionController;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -71,5 +73,14 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
         Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
+    });
+});
+
+Route::prefix('v2')->middleware(['throttle:api'])->group(function () {
+    Route::get('/', [V2VersionController::class, 'show']);
+
+    Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
+        Route::get('me', [V2AuthController::class, 'me']);
+        Route::get('tenants/current', [V2AuthController::class, 'currentTenant']);
     });
 });

@@ -24,7 +24,7 @@ class WorkflowDesignerPage extends Page
 
     public static function getNavigationLabel(): string
     {
-        return FilamentUi::text('workflow_designer', 'Workflow Designer');
+        return FilamentUi::text('Workflow designer');
     }
 
     public static function getNavigationGroup(): string|\UnitEnum|null
@@ -42,9 +42,9 @@ class WorkflowDesignerPage extends Page
         if ($this->workflowId) {
             $workflow = Workflow::find($this->workflowId);
 
-            return ($workflow?->name ?? 'Workflow').' — Designer';
+            return ($workflow?->name ?? FilamentUi::text('Workflow')).' — '.FilamentUi::text('Workflow designer');
         }
 
-        return 'New Workflow — Designer';
+        return FilamentUi::text('New workflow').' — '.FilamentUi::text('Workflow designer');
     }
 }

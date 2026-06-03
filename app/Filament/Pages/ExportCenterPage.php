@@ -4,8 +4,6 @@ namespace App\Filament\Pages;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
-use Filament\Actions\Exports\Enums\ExportFormat;
-use Filament\Actions\Exports\Jobs\ExportCsv;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
@@ -67,14 +65,6 @@ class ExportCenterPage extends Page implements HasTable
                     ->visible(fn (Export $record): bool => $record->completed_at !== null && $record->file_name)
                     ->url(fn (Export $record): string => Storage::disk($record->file_disk)->url($record->file_name))
                     ->openUrlInNewTab(),
-                Action::make('retry')
-                    ->label(FilamentUi::text('Retry failed'))
-                    ->icon('heroicon-o-arrow-path')
-                    ->visible(fn (Export $record): bool => $record->completed_at === null)
-                    ->requiresConfirmation()
-                    ->action(function (Export $record): void {
-                        dispatch(new ExportCsv($record, ExportFormat::Csv, []));
-                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }

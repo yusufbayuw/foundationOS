@@ -288,10 +288,12 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] Larastan mencakup modul inti yang sebelumnya terlewat (`Global`, `Campus`, `Employee`, `Monitoring`, `Inventory`).
 - [x] Opsi `tenancy.scope_fail_closed` + `MissingTenantContextException` + test.
 - [x] Test: semua modul di `modules_statuses.json` harus ada di tier `ga`.
-- [x] PHPStan **level 1** + `phpstan-baseline.neon` (316 temuan ter-baseline; perbaiki bertahap).
+- [x] PHPStan **level 1** + `phpstan-baseline.neon` (302 temuan; turun dari 316 setelah perbaikan duplikat & ExportCenter).
 - [x] Perbaikan bug: duplikat key `academic_period_id` di `AcademicPeriodObserver` payload outbox.
 - [x] Filament resource `AiPromptTemplate` (modul Ai).
-- [ ] Epik ROADMAP lanjutan: public API v2, Workflow V3 designer polish.
+- [x] Fondasi **API v2** (`GET /api/v2`, `/api/v2/me`, `/api/v2/tenants/current` + meta `api_version`).
+- [x] Perbaikan `FilamentUi` duplicate keys, `WorkflowDesignerPage::text()`, hapus retry export rusak.
+- [ ] Epik ROADMAP lanjutan: endpoint v2 read/write penuh, Workflow V3 designer polish.
 
 ---
 

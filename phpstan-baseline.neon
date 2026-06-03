@@ -97,78 +97,6 @@ parameters:
 			path: Modules/Core/app/Models/User.php
 
 		-
-			message: '#^Array has 2 duplicate keys with value ''Absent'' \(''Absent'', ''Absent''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Enrollment'' \(''Enrollment'', ''Enrollment''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Exam results'' \(''Exam results'', ''Exam results''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''General information'' \(''General information'', ''General information''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Loan limits'' \(''Loan limits'', ''Loan limits''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Payment details'' \(''Payment details'', ''Payment details''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Study program'' \(''Study program'', ''Study program''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''Subscription plan'' \(''Subscription plan'', ''Subscription plan''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''achievement'' \(''achievement'', ''achievement''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''kpi'' \(''kpi'', ''kpi''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''thesis'' \(''thesis'', ''thesis''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
-			message: '#^Array has 2 duplicate keys with value ''violation'' \(''violation'', ''violation''\)\.$#'
-			identifier: array.duplicateKey
-			count: 1
-			path: Modules/Core/app/Support/FilamentUi.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Donation\\Models\\Donation\:\:\$payment_status\.$#'
 			identifier: property.notFound
 			count: 1
@@ -961,12 +889,6 @@ parameters:
 			path: Modules/Training/app/Models/TrainingCertificate.php
 
 		-
-			message: '#^Static method Modules\\Core\\Support\\FilamentUi\:\:text\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: Modules/Workflow/app/Filament/Pages/WorkflowDesignerPage.php
-
-		-
 			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\CreateAction\.$#'
 			identifier: class.notFound
 			count: 1
@@ -995,12 +917,6 @@ parameters:
 			identifier: staticMethod.notFound
 			count: 3
 			path: app/Console/Commands/SetupStudentGradeRevisionWorkflowCommand.php
-
-		-
-			message: '#^Class Filament\\Actions\\Exports\\Jobs\\ExportCsv constructor invoked with 3 parameters, 5\-6 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Filament/Pages/ExportCenterPage.php
 
 		-
 			message: '#^Access to an undefined property App\\Filament\\Parent\\Pages\\ParentSurveyPage\:\:\$form\.$#'

@@ -119,6 +119,8 @@ class FilamentUi
         'Exam answers' => 'Jawaban ujian',
         'Ai prompt template' => 'Template prompt AI',
         'Ai prompt templates' => 'Template prompt AI',
+        'Workflow designer' => 'Perancang workflow',
+        'New workflow' => 'Workflow baru',
         'Active' => 'Aktif',
         'Inactive' => 'Nonaktif',
         'Stored uppercase. Must be unique per tenant and organization.' => 'Disimpan huruf besar. Harus unik per tenant dan organisasi.',
@@ -288,7 +290,6 @@ class FilamentUi
         'Study result' => 'Hasil studi',
         'Subject' => 'Mata pelajaran',
         'Subscription log' => 'Riwayat langganan',
-        'Subscription plan' => 'Paket langganan',
         'Teacher' => 'Guru',
         'Tenant module' => 'Modul tenant',
         'Tenant role' => 'Peran tenant',
@@ -367,7 +368,6 @@ class FilamentUi
         'Districts' => 'Kecamatan',
         'Employees' => 'Karyawan',
         'Employment contracts' => 'Kontrak Kerja',
-        'Exam results' => 'Hasil Ujian',
         'Exam schedules' => 'Jadwal Ujian',
         'Faculties' => 'Fakultas',
         'Feeder logs' => 'Log Feeder',
@@ -437,7 +437,6 @@ class FilamentUi
         'Violations' => 'Pelanggaran',
 
         // ── Specific field/relation labels ──────────────────────────────────────
-        'Study program' => 'Program Studi',    // field: studyProgram.name
         'Academic advisor' => 'Dosen Pembimbing', // field: academicAdvisor
         'Student number' => 'NIM',
         'National student number' => 'NISN/NIM Nasional',
@@ -519,7 +518,6 @@ class FilamentUi
         'Accuracy (m)' => 'Akurasi (m)',
         'Capture GPS coordinates via the browser geolocation API.' => 'Tangkap koordinat GPS melalui API geolokasi browser.',
         'Present' => 'Hadir',
-        'Absent' => 'Tidak Hadir',
         'Late' => 'Terlambat',
         'Leave' => 'Cuti',
         'Holiday' => 'Libur',
@@ -647,7 +645,6 @@ class FilamentUi
         'Contact details' => 'Detail kontak',
         'Parent contact' => 'Kontak orang tua',
         'Enrollment details' => 'Detail pendaftaran',
-        'Enrollment' => 'Pendaftaran',
         'Timestamps' => 'Waktu',
         'Status & timestamps' => 'Status & waktu',
         'Status & approval' => 'Status & persetujuan',
@@ -686,7 +683,6 @@ class FilamentUi
         'Certificate & media' => 'Sertifikat & media',
         'Thesis details' => 'Detail tesis',
         'Library policy' => 'Kebijakan perpustakaan',
-        'Loan limits' => 'Batas peminjaman',
         'Loan details' => 'Detail peminjaman',
         'Fine details' => 'Detail denda',
         'Activity & fines' => 'Aktivitas & denda',
@@ -707,7 +703,6 @@ class FilamentUi
         'Budget & status' => 'Anggaran & status',
         'Budget account' => 'Akun anggaran',
         'Bill details' => 'Detail tagihan',
-        'Payment details' => 'Detail pembayaran',
         'Receipt information' => 'Informasi penerimaan',
         'Attempt information' => 'Informasi percobaan',
         'Requirements & criteria' => 'Persyaratan & kriteria',
@@ -752,7 +747,6 @@ class FilamentUi
         'Parent portal' => 'Portal orang tua',
         'My children' => 'Anak saya',
         'Child' => 'Anak',
-        'General information' => 'Informasi umum',
         'Foundation structure' => 'Struktur yayasan',
         'Helpdesk dashboard' => 'Dasbor helpdesk',
         'Sustainability dashboard' => 'Dasbor keberlanjutan',
@@ -938,7 +932,6 @@ class FilamentUi
         'locale' => 'bahasa',
         'sla' => 'SLA',
         'rfq' => 'RFQ',
-        'kpi' => 'KPI',
         'tax' => 'pajak',
         'discount' => 'diskon',
         'quantity' => 'jumlah',
@@ -996,7 +989,6 @@ class FilamentUi
         'reservation' => 'reservasi',
         'timeline' => 'linimasa',
         'timestamps' => 'waktu',
-        'thesis' => 'tesis',
         'capacity' => 'kapasitas',
         'handling' => 'penanganan',
         'scoring' => 'penilaian',
@@ -1006,8 +998,6 @@ class FilamentUi
         'supplier' => 'pemasok',
         'detail' => 'detail',
         'details' => 'detail',
-        'violation' => 'pelanggaran',
-        'achievement' => 'prestasi',
     ];
 
     public static function text(string $value): string
