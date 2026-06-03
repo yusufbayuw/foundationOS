@@ -567,7 +567,9 @@ Key `.env` variables:
 ```env
 # Multi-Tenancy
 TENANCY_ENABLED=true
-# Optional: reject HTTP queries without tenant context (console/queue exempt). Enable after smoke tests.
+TENANCY_API_REQUIRE_TENANT=true
+# Production: defaults to true when APP_ENV=production (fail-closed tenant scope on HTTP).
+# Local: set false in .env (see .env.example).
 TENANCY_SCOPE_FAIL_CLOSED=false
 
 # Database
@@ -603,6 +605,8 @@ Kami menerima kontribusi dari community! Berikut guidelines:
 3. **Tulis tests** untuk fitur baru (PHPUnit)
 4. **Format code** dengan `vendor/bin/pint --dirty`
 5. **Buat pull request** dengan deskripsi jelas
+
+Repository admins: enable **branch protection** on `main` per [.github/BRANCH_PROTECTION.md](.github/BRANCH_PROTECTION.md) (required status checks: Pint, Larastan, PHPUnit).
 
 ### Branch Naming
 

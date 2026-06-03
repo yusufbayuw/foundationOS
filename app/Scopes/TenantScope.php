@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Scope;
 /**
  * Global scope that restricts queries to the active tenant's records.
  *
- * No-op when no tenant context is bound — allows console/seeder cross-tenant work.
+ * When tenancy.scope_fail_closed is enabled, HTTP requests and PHPUnit runs
+ * without tenant context throw MissingTenantContextException. Real Artisan/queue
+ * console (non-test) stays fail-open for cross-tenant commands.
  */
 class TenantScope implements Scope
 {
@@ -47,6 +49,10 @@ class TenantScope implements Scope
             return false;
         }
 
-        return ! app()->runningInConsole();
+        if (! app()->runningInConsole()) {
+            return true;
+        }
+
+        return app()->runningUnitTests();
     }
 }

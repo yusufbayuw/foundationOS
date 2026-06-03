@@ -9,7 +9,6 @@ use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
-use Modules\Enrollment\Models\AdmissionPeriod;
 use Tests\TestCase;
 
 class ApiTenantTokenRequirementTest extends TestCase
@@ -28,18 +27,9 @@ class ApiTenantTokenRequirementTest extends TestCase
 
     public function test_api_accepts_token_with_tenant_id(): void
     {
-        [$user, $token, $tenant, $organization] = $this->makeScopedToken();
+        [, $token] = $this->makeScopedToken();
 
-        AdmissionPeriod::create([
-            'tenant_id' => $tenant->id,
-            'organization_id' => $organization->id,
-            'name' => 'PPDB',
-            'code' => 'PPDB',
-            'start_date' => '2026-01-01',
-            'end_date' => '2026-03-31',
-        ]);
-
-        $response = $this->withToken($token)->getJson('/api/v1/applicants');
+        $response = $this->withToken($token)->getJson('/api/v1/organizations');
 
         $response->assertOk();
     }

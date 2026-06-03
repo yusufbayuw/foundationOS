@@ -287,6 +287,7 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 ### Gelombang 5 — Pasca-GA (kualitas & hardening)
 - [x] Larastan mencakup modul inti yang sebelumnya terlewat (`Global`, `Campus`, `Employee`, `Monitoring`, `Inventory`).
 - [x] Opsi `tenancy.scope_fail_closed` + `MissingTenantContextException` + test.
+- [x] Produksi: `scope_fail_closed` default **true** bila `APP_ENV=production`; panduan [.github/BRANCH_PROTECTION.md](.github/BRANCH_PROTECTION.md).
 - [x] Test: semua modul di `modules_statuses.json` harus ada di tier `ga`.
 - [x] PHPStan **level 1** + `phpstan-baseline.neon` (302 temuan; turun dari 316 setelah perbaikan duplikat & ExportCenter).
 - [x] Perbaikan bug: duplikat key `academic_period_id` di `AcademicPeriodObserver` payload outbox.
@@ -303,7 +304,7 @@ FoundationOS memiliki **pondasi arsitektur kelas produksi** pada domain intinya 
 
 Kelemahan utama bersifat **operasional dan kedalaman fitur**, bukan desain fundamental:
 - **PHPStan level 1 + baseline** — CI hijau; kurangi baseline secara bertahap (target level 2+).
-- **Tenant scope fail-open by default** — aktifkan `TENANCY_SCOPE_FAIL_CLOSED` di produksi setelah validasi.
+- **Tenant scope** — produksi default fail-closed; lokal tetap `TENANCY_SCOPE_FAIL_CLOSED=false` di `.env`.
 - **Epik integrasi lanjutan** — sebagian besar Epic 3–6 & 5 di `ROADMAP.md` sudah `[x]`; sisa polish dan API v2.
 
 Platform kini **GA penuh pada modul aktif**, dengan CI test + static analysis. Fokus berikutnya: hardening produksi dan epik roadmap bernilai tinggi.
