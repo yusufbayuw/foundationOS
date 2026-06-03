@@ -35,6 +35,7 @@ class WorkflowDefinitionLifecycleService
                     }
                 })
                 ->update([
+                    'status' => WorkflowDefinitionStatus::Archived,
                     'is_active' => false,
                     'updated_by' => $actorId,
                     'updated_at' => now(),

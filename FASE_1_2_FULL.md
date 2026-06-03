@@ -1,6 +1,6 @@
 # Fase 1.2 — Visual Workflow Designer (Full Scope)
 
-Dokumen ini merencanakan implementasi **lengkap** Fase 1.2 dari [ROADMAP.md](ROADMAP.md): Visual Workflow Designer dengan drag-drop, versioning otomatis, dan import/export JSON. Belum dieksekusi — ini blueprint untuk dipecah jadi 1+ PR.
+Dokumen ini merencanakan implementasi **lengkap** Fase 1.2 dari [ROADMAP.md](ROADMAP.md): Visual Workflow Designer dengan drag-drop, versioning otomatis, dan import/export JSON. **Status: selesai 2026-06-03** — lihat `WORKFLOW.md` dan test `WorkflowDesigner*`.
 
 ---
 

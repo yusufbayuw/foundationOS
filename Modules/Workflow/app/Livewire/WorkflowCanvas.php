@@ -276,6 +276,77 @@ class WorkflowCanvas extends Component
         $this->dispatch('workflow-canvas:download-json', payload: $payload, filename: "workflow_{$workflow->code}_v{$workflow->version}.json");
     }
 
+    public function openImportModal(): void
+    {
+        $this->showImportModal = true;
+    }
+
+    public function closeImportModal(): void
+    {
+        $this->showImportModal = false;
+        $this->importPayload = '';
+    }
+
+    public function importFromJson(): void
+    {
+        $tenantId = app(CurrentTenant::class)->id();
+
+        if (! $tenantId) {
+            Notification::make()->danger()->title('No tenant context')->send();
+
+            return;
+        }
+
+        $decoded = json_decode($this->importPayload, true);
+
+        if (! is_array($decoded)) {
+            Notification::make()
+                ->danger()
+                ->title('Invalid JSON')
+                ->body('Payload must be valid JSON.')
+                ->send();
+
+            return;
+        }
+
+        $porter = app(WorkflowDefinitionPorter::class);
+        $errors = $porter->validatePayload($decoded);
+
+        if ($errors !== []) {
+            Notification::make()
+                ->danger()
+                ->title('Import validation failed')
+                ->body(implode("\n", array_slice($errors, 0, 5)))
+                ->send();
+
+            return;
+        }
+
+        try {
+            $workflow = $porter->import($decoded, $tenantId);
+        } catch (\InvalidArgumentException $e) {
+            Notification::make()
+                ->danger()
+                ->title('Import failed')
+                ->body($e->getMessage())
+                ->send();
+
+            return;
+        }
+
+        $this->workflowId = $workflow->id;
+        $this->loadWorkflow($workflow->id);
+        $this->isDirty = false;
+        $this->closeImportModal();
+
+        Notification::make()
+            ->success()
+            ->title('Workflow imported as draft')
+            ->send();
+
+        $this->dispatch('workflow-canvas:state-updated', steps: $this->steps, transitions: $this->transitions);
+    }
+
     private function persistToDatabase(int $tenantId): void
     {
         DB::transaction(function () use ($tenantId) {

@@ -44,6 +44,12 @@
                 </button>
             @endif
 
+            <button wire:click="openImportModal"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                <x-heroicon-o-arrow-down-on-square class="h-4 w-4" />
+                Import JSON
+            </button>
+
             @if ($workflowId)
                 <button wire:click="exportJson"
                     class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">

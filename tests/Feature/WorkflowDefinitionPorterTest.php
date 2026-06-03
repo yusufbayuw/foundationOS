@@ -372,4 +372,17 @@ class WorkflowDefinitionPorterTest extends TestCase
         $this->assertSame(WorkflowDefinitionStatus::Active, $published->status);
         $this->assertTrue($published->is_active);
     }
+
+    public function test_publish_archives_other_active_versions_with_same_code(): void
+    {
+        $v1 = $this->makeWorkflow('archive_on_publish');
+        $v1->update(['status' => WorkflowDefinitionStatus::Active, 'is_active' => true, 'version' => 1]);
+
+        $v2 = $this->lifecycle->duplicateAsNewVersion($v1->fresh());
+        $this->lifecycle->publish($v2->fresh());
+
+        $v1->refresh();
+        $this->assertSame(WorkflowDefinitionStatus::Archived, $v1->status);
+        $this->assertFalse($v1->is_active);
+    }
 }

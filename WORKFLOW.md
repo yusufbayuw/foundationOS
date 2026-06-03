@@ -375,15 +375,15 @@ Periksa:
 Yang sudah ada:
 
 - linear + branching approval
-- tenant scope
-- workflow snapshot
-- worklist
-- automated actions dasar
+- parallel gateway & quorum approval
+- visual workflow designer (canvas + draft/versioning + JSON import/export)
+- dynamic form `options_source` (eloquent + enum; endpoint kind belum)
+- tenant scope & workflow snapshot deterministik (transisi dari snapshot instance)
+- worklist & automated actions dasar
 - pilot Procurement
 
 Yang belum penuh:
 
-- parallel gateway / quorum approval
-- visual designer flow
-- dynamic options source non-static
+- `options_source` kind `endpoint` (internal API)
+- editing lock multi-admin pada designer (opsional)
 - supervisor delegation flow yang lebih kaya

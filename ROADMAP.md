@@ -44,7 +44,7 @@ Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai
 
 ---
 
-### Fase 1.2 — Visual Workflow Designer `[~]` (fungsional 2026-05-22; AC penuh lihat FASE_1_2_FULL.md)
+### Fase 1.2 — Visual Workflow Designer `[x]` 2026-06-03
 
 **Konteks.** Saat ini definisi workflow dibuat manual via seeder/command (`SetupBudgetWorkflowCommand`, `SetupProcurementWorkflowPilotCommand`). Tenant non-teknis tidak bisa mendesain workflow sendiri.
 
