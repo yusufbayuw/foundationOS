@@ -23,7 +23,7 @@ Semua modul yang diaktifkan di `modules_statuses.json` telah dipromosikan ke tie
 | Keandalan integrasi (Moodle/Workflow) | **B** | Outbox atomik + sweeper; workflow lock & queued automation (Gelombang 2) |
 | Layer Filament | **A−** | Konsistensi struktural sangat tinggi (378 resource, 1 base class) |
 | Kematangan testing | **B−** | Volume tinggi, tetapi sempit; UI/Livewire & factory minim |
-| Kematangan CI/CD | **B−** | `tests.yml` + `static.yml` (Pint + Larastan level 0); branch protection disarankan di GitHub |
+| Kematangan CI/CD | **B** | `tests.yml` + `static.yml` (Pint + Larastan **level 1** + baseline); branch protection disarankan di GitHub |
 | Kesiapan performa | **C+** | Index FK ada, tetapi risiko N+1 & index komposit kurang |
 | Konsistensi antar modul | **B** | Pola seragam, tetapi 18+ modul masih scaffold tanpa test |
 
@@ -288,8 +288,9 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] Larastan mencakup modul inti yang sebelumnya terlewat (`Global`, `Campus`, `Employee`, `Monitoring`, `Inventory`).
 - [x] Opsi `tenancy.scope_fail_closed` + `MissingTenantContextException` + test.
 - [x] Test: semua modul di `modules_statuses.json` harus ada di tier `ga`.
-- [ ] PHPStan **level 1** + baseline (jalankan lokal: `vendor/bin/phpstan analyse --generate-baseline`).
-- [ ] Epik ROADMAP: Moodle reconcile, public API, Workflow V3 fase lanjutan.
+- [x] PHPStan **level 1** + `phpstan-baseline.neon` (316 temuan ter-baseline; perbaiki bertahap).
+- [x] Perbaikan bug: duplikat key `academic_period_id` di `AcademicPeriodObserver` payload outbox.
+- [ ] Epik ROADMAP lanjutan: public API v2, Workflow V3 designer polish, modul Ai Filament resource (opsional).
 
 ---
 
@@ -298,9 +299,9 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 FoundationOS memiliki **pondasi arsitektur kelas produksi** pada domain intinya — multi-tenancy, workflow engine, dan integrasi Moodle dirancang dengan pola yang benar dan teruji. Aplikasi ini **layak produksi untuk alur akademik/keuangan/procurement** yang sudah tertutup test.
 
 Kelemahan utama bersifat **operasional dan kedalaman fitur**, bukan desain fundamental:
-- **PHPStan masih level 0** — naikkan bertahap dengan baseline.
+- **PHPStan level 1 + baseline** — CI hijau; kurangi baseline secara bertahap (target level 2+).
 - **Tenant scope fail-open by default** — aktifkan `TENANCY_SCOPE_FAIL_CLOSED` di produksi setelah validasi.
-- **Epik integrasi & API** di `ROADMAP.md` belum selesai (Moodle reconcile, public API).
+- **Epik integrasi lanjutan** — sebagian besar Epic 3–6 & 5 di `ROADMAP.md` sudah `[x]`; sisa polish dan API v2.
 
 Platform kini **GA penuh pada modul aktif**, dengan CI test + static analysis. Fokus berikutnya: hardening produksi dan epik roadmap bernilai tinggi.
 

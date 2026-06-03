@@ -1,0 +1,1597 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Modules\\Boarding\\Models\\BoardingLeavePermit\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Boarding/app/Models/BoardingLeavePermit.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Campus\\Models\\CollageStudent\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Campus/app/Models/CollageStudent.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Campus\\Models\\StudyPlan\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Campus/app/Models/StudyPlan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Campus\\Models\\StudyResult\:\:\$published_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Campus/app/Models/StudyResult.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Campus\\Models\\Thesis\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Campus/app/Models/Thesis.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Consulting\\Models\\EngagementInvoice\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Consulting/app/Models/EngagementInvoice.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Filament\\Pages\\BrandingSettingsPage\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Filament/Pages/BrandingSettingsPage.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\SubscriptionPlan\:\:\$free_modules\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/SubscriptionPlan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\SubscriptionPlan\:\:\$free_seats\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/SubscriptionPlan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\SubscriptionPlan\:\:\$price_monthly\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/SubscriptionPlan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\SubscriptionPlan\:\:\$price_per_module\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/SubscriptionPlan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\SubscriptionPlan\:\:\$price_per_seat\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/SubscriptionPlan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\Tenant\:\:\$grace_period_ends_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Core/app/Models/Tenant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\Tenant\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Core/app/Models/Tenant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\Tenant\:\:\$subscription_expires_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/Tenant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Core\\Models\\User\:\:\$is_super_admin\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Core/app/Models/User.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Absent'' \(''Absent'', ''Absent''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Enrollment'' \(''Enrollment'', ''Enrollment''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Exam results'' \(''Exam results'', ''Exam results''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''General information'' \(''General information'', ''General information''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Loan limits'' \(''Loan limits'', ''Loan limits''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Payment details'' \(''Payment details'', ''Payment details''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Study program'' \(''Study program'', ''Study program''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Subscription plan'' \(''Subscription plan'', ''Subscription plan''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''achievement'' \(''achievement'', ''achievement''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''kpi'' \(''kpi'', ''kpi''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''thesis'' \(''thesis'', ''thesis''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''violation'' \(''violation'', ''violation''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: Modules/Core/app/Support/FilamentUi.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Donation\\Models\\Donation\:\:\$payment_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Donation/app/Models/Donation.php
+
+		-
+			message: '#^Access to an undefined property Modules\\EOffice\\Models\\Letter\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/EOffice/app/Models/Letter.php
+
+		-
+			message: '#^Access to an undefined property Modules\\EOffice\\Models\\Letter\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/EOffice/app/Models/Letter.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\Action\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Employee/app/Filament/Resources/Employees/RelationManagers/DocumentsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\CreateAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Employee/app/Filament/Resources/Employees/RelationManagers/DocumentsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\DeleteAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Employee/app/Filament/Resources/Employees/RelationManagers/DocumentsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\EditAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Employee/app/Filament/Resources/Employees/RelationManagers/DocumentsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\ViewAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Employee/app/Filament/Resources/LeaveRequests/RelationManagers/WorkflowInstancesRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\ViewAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Employee/app/Filament/Resources/SalarySlips/RelationManagers/WorkflowInstancesRelationManager.php
+
+		-
+			message: '#^Call to an undefined method Modules\\Employee\\Http\\Controllers\\SalarySlipController\:\:authorize\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Modules/Employee/app/Http/Controllers/SalarySlipController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\EmploymentContract\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/EmploymentContract.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$employee_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$end_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$leave_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$start_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\LeaveRequest\:\:\$total_days\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/LeaveRequest.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$employee_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$net_salary\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$period_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$total_deductions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Employee\\Models\\SalarySlip\:\:\$total_earnings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Employee/app/Models/SalarySlip.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\Applicant\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Enrollment/app/Models/Applicant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\ExamSchedule\:\:\$date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/ExamSchedule.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\ExamSchedule\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/ExamSchedule.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\MarketingCampaign\:\:\$spend_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/MarketingCampaign.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\PromoCode\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/PromoCode.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\PromoCode\:\:\$max_uses\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/PromoCode.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\PromoCode\:\:\$used_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/PromoCode.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\PromoCode\:\:\$valid_from\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/PromoCode.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\PromoCode\:\:\$valid_until\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/PromoCode.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Enrollment\\Models\\Registration\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Enrollment/app/Models/Registration.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Event\\Models\\EventCertificate\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Event/app/Models/EventCertificate.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Schemas\\Components\\Placeholder\.$#'
+			identifier: class.notFound
+			count: 2
+			path: Modules/Exam/app/Filament/Resources/ExamDefinitions/RelationManagers/ExamAnalyticsRelationManager.php
+
+		-
+			message: '#^Call to an undefined method Modules\\Exam\\Http\\Controllers\\ExamParticipantTokenPdfController\:\:authorize\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: Modules/Exam/app/Http/Controllers/ExamParticipantTokenPdfController.php
+
+		-
+			message: '#^Call to an undefined method Modules\\Exam\\Http\\Controllers\\ExamResultsPdfController\:\:authorize\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: Modules/Exam/app/Http/Controllers/ExamResultsPdfController.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamAnswer\:\:\$manual_score\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamAnswer.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamAnswer\:\:\$score\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamAnswer.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamDefinition\:\:\$exam_academic_context\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Exam/app/Models/ExamDefinition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamDefinitionQuestion\:\:\$score_override\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamDefinitionQuestion.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamParticipant\:\:\$participant_legacy_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamParticipant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamParticipant\:\:\$participant_uuid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamParticipant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamParticipant\:\:\$student_identifier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamParticipant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamParticipant\:\:\$student_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Exam/app/Models/ExamParticipant.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Exam\\Models\\ExamQuestionBank\:\:\$academic_context_type\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Exam/app/Models/ExamQuestionBank.php
+
+		-
+			message: '#^Instantiated class Modules\\Exam\\Policies\\ExamDefinition not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Exam/app/Policies/ExamQuestionBankPolicy.php
+
+		-
+			message: '#^Method Modules\\Exam\\Policies\\ExamQuestionBankPolicy\:\:asExamTenantProxy\(\) has invalid return type Modules\\Exam\\Policies\\ExamDefinition\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Exam/app/Policies/ExamQuestionBankPolicy.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 6
+			path: Modules/Exam/config/exam.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\ViewAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/Budgets/RelationManagers/WorkflowInstancesRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\CreateAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/RelationManagers/ItemsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\DeleteAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/RelationManagers/ItemsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\EditAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/RelationManagers/ItemsRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\DeleteAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/Tables/CustomerInvoicesTable.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\EditAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/Tables/CustomerInvoicesTable.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\ViewAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/Tables/CustomerInvoicesTable.php
+
+		-
+			message: '#^Class Modules\\Finance\\Filament\\Resources\\JournalEntries\\RelationManagers\\LinesRelationManager not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/JournalEntries/JournalEntryResource.php
+
+		-
+			message: '#^Class Modules\\Finance\\Filament\\Resources\\StudentInvoices\\RelationManagers\\ItemsRelationManager not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/StudentInvoices/StudentInvoiceResource.php
+
+		-
+			message: '#^Class Modules\\Finance\\Filament\\Resources\\StudentInvoices\\RelationManagers\\PaymentsRelationManager not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Finance/app/Filament/Resources/StudentInvoices/StudentInvoiceResource.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$allocated_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$fiscal_year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$remaining_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Budget\:\:\$used_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/Budget.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\JournalEntry\:\:\$is_posted\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/JournalEntry.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\JournalEntry\:\:\$is_reversed\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Finance/app/Models/JournalEntry.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\Payment\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Finance/app/Models/Payment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Finance\\Models\\StudentInvoice\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Finance/app/Models/StudentInvoice.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Inventory\\Models\\StockAdjustment\:\:\$adjustment_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Inventory/app/Models/StockAdjustment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Inventory\\Models\\StockAdjustment\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Inventory/app/Models/StockAdjustment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Inventory\\Models\\StockAdjustment\:\:\$reason\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Inventory/app/Models/StockAdjustment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Inventory\\Models\\StockAdjustment\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Inventory/app/Models/StockAdjustment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Inventory\\Models\\StockAdjustment\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Inventory/app/Models/StockAdjustment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Inventory\\Models\\StockAdjustment\:\:\$total_value_impact\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Inventory/app/Models/StockAdjustment.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Legal\\Models\\Contract\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Legal/app/Models/Contract.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Library\\Models\\Fine\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Library/app/Models/Fine.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Library\\Models\\Loan\:\:\$return_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Library/app/Models/Loan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Library\\Models\\Loan\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Library/app/Models/Loan.php
+
+		-
+			message: '#^Access to an undefined property Modules\\MerchOrder\\Models\\MerchOrder\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/MerchOrder/app/Models/MerchOrder.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 5
+			path: Modules/Messaging/config/config.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$auditable_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$auditable_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$category\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$error_message\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$ip_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$new_values\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$old_values\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$request_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$user_agent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\AuditLog\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Monitoring/app/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Monitoring\\Models\\WebhookDelivery\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Monitoring/app/Models/WebhookDelivery.php
+
+		-
+			message: '#^Access to an undefined property Modules\\PhysicalSecurity\\Filament\\Pages\\VisitorKioskPage\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/PhysicalSecurity/app/Filament/Pages/VisitorKioskPage.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\ViewAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Procurement/app/Filament/Resources/PurchaseRequisitions/RelationManagers/WorkflowInstancesRelationManager.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\GoodsReceipt\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/GoodsReceipt.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseOrder\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseOrder.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$justification\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$priority\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$ready_for_sourcing\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$request_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$requested_by\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$total_estimated_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\PurchaseRequisition\:\:\$total_items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/PurchaseRequisition.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\RequestForQuotation\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/RequestForQuotation.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Procurement\\Models\\VendorBill\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Procurement/app/Models/VendorBill.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Property\\Models\\LeaseInvoice\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Property/app/Models/LeaseInvoice.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Sales\\Models\\SalesOrder\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Sales/app/Models/SalesOrder.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Filament\\Pages\\AttendanceRecapPage\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Filament/Pages/AttendanceRecapPage.php
+
+		-
+			message: '#^Parameter \$get of anonymous function has invalid type Filament\\Forms\\Get\.$#'
+			identifier: class.notFound
+			count: 6
+			path: Modules/School/app/Filament/Resources/Schedules/Schemas/ScheduleForm.php
+
+		-
+			message: '#^Parameter \$get of method Modules\\School\\Filament\\Resources\\Schedules\\Schemas\\ScheduleForm\:\:checkConflicts\(\) has invalid type Filament\\Forms\\Get\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/School/app/Filament/Resources/Schedules/Schemas/ScheduleForm.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentAchievement\:\:\$verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentAchievement.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentGrade\:\:\$assessment_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentGrade.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentGrade\:\:\$final_score\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentGrade.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentGrade\:\:\$is_locked\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentGrade.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentGrade\:\:\$score\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentGrade.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentGrade\:\:\$student_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentGrade.php
+
+		-
+			message: '#^Access to an undefined property Modules\\School\\Models\\StudentGrade\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/School/app/Models/StudentGrade.php
+
+		-
+			message: '#^Access to an undefined property Modules\\Training\\Models\\TrainingCertificate\:\:\$issued_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: Modules/Training/app/Models/TrainingCertificate.php
+
+		-
+			message: '#^Static method Modules\\Core\\Support\\FilamentUi\:\:text\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: Modules/Workflow/app/Filament/Pages/WorkflowDesignerPage.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\CreateAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Workflow/app/Filament/Resources/WorkflowInstances/RelationManagers/EvidencesRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\DeleteAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Workflow/app/Filament/Resources/WorkflowInstances/RelationManagers/EvidencesRelationManager.php
+
+		-
+			message: '#^Call to static method make\(\) on an unknown class Filament\\Tables\\Actions\\ViewAction\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Modules/Workflow/app/Filament/Resources/WorkflowInstances/RelationManagers/LogsRelationManager.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 7
+			path: Modules/Workflow/config/config.php
+
+		-
+			message: '#^Call to an undefined static method Modules\\Workflow\\Models\\WorkflowStep\:\:withoutTenantScope\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 3
+			path: app/Console/Commands/SetupStudentGradeRevisionWorkflowCommand.php
+
+		-
+			message: '#^Class Filament\\Actions\\Exports\\Jobs\\ExportCsv constructor invoked with 3 parameters, 5\-6 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Filament/Pages/ExportCenterPage.php
+
+		-
+			message: '#^Access to an undefined property App\\Filament\\Parent\\Pages\\ParentSurveyPage\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Filament/Parent/Pages/ParentSurveyPage.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$admission_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$current_semester\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$entry_semester\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$entry_year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$graduation_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$national_student_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$organization\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$student_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$study_program_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CollegeStudentResource\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CollegeStudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$course_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$credits\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$is_mandatory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$practicum_credits\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$semester_level\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$study_program_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\CourseResource\:\:\$theory_credits\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/CourseResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$department_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$employee_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$employment_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$employment_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$end_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$gender\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$join_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$organization\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$position_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\EmployeeResource\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/EmployeeResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$established_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$is_main\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$level\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$npsn\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$short_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\OrganizationResource\:\:\$website\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/OrganizationResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$academic_period_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$capacity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$department_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$grade_level\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$organization\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\SchoolClassResource\:\:\$student_count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/SchoolClassResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$academic_year_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$entry_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$entry_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$graduation_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$nis\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$nisn\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$organization\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$organization_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$track\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\StudentResource\:\:\$user_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/StudentResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\TenantResource\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/TenantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\TenantResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/TenantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\TenantResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/TenantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\TenantResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/TenantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\TenantResource\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/TenantResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\UserResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\UserResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\UserResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/UserResource.php
+
+		-
+			message: '#^Access to an undefined property App\\Http\\Resources\\Api\\v1\\UserResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Resources/Api/v1/UserResource.php

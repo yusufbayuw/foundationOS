@@ -38,11 +38,10 @@ class AcademicPeriodObserver
                     [
                         'tenant_id' => (int) $offering->tenant_id,
                         'course_id' => (int) $offering->course_id,
-                        'academic_period_id' => (int) $offering->academic_period_id,
+                        'academic_period_id' => (int) $period->id,
                         'class_code' => $offering->class_code,
                         'status' => $offering->status,
                         'trigger' => 'academic_period_updated',
-                        'academic_period_id' => (int) $period->id,
                     ],
                     $dedupe,
                 );
