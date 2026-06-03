@@ -37,6 +37,14 @@ parameters:
         - Modules/Alumni
         - Modules/Messaging
         - Modules/Printing
+        - Modules/InternalAudit
+        - Modules/IsoCompliance
+        - Modules/EducationQa
+        - Modules/Exam
+        - Modules/KpiEnterprise
+        - Modules/Capacity
+        - Modules/Ai
+        - Modules/Consulting
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false

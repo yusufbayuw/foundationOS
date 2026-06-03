@@ -14,6 +14,11 @@ class KpiArea extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\KpiEnterprise\Database\Factories\KpiAreaFactory
+    {
+        return \Modules\KpiEnterprise\Database\Factories\KpiAreaFactory::new();
+    }
+
     protected $table = 'kpi_areas';
 
     protected $fillable = [

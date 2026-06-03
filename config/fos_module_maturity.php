@@ -48,14 +48,6 @@ return [
         'Alumni',
         'Messaging',
         'Printing',
-    ],
-
-    /**
-     * Modules approaching GA (domain services + factories + importers in progress).
-     */
-    'maturing' => [],
-
-    'experimental' => [
         'InternalAudit',
         'IsoCompliance',
         'EducationQa',
@@ -65,6 +57,13 @@ return [
         'Ai',
         'Consulting',
     ],
+
+    /**
+     * Modules approaching GA (domain services + factories + importers in progress).
+     */
+    'maturing' => [],
+
+    'experimental' => [],
 
     /**
      * Definition of Done for promoting a module from experimental → GA.

@@ -14,6 +14,11 @@ class CapacityResource extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Capacity\Database\Factories\CapacityResourceFactory
+    {
+        return \Modules\Capacity\Database\Factories\CapacityResourceFactory::new();
+    }
+
     protected $table = 'capacity_resources';
 
     protected $fillable = [

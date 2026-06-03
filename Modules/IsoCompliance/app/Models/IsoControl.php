@@ -14,6 +14,11 @@ class IsoControl extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\IsoCompliance\Database\Factories\IsoControlFactory
+    {
+        return \Modules\IsoCompliance\Database\Factories\IsoControlFactory::new();
+    }
+
     protected $table = 'iso_controls';
 
     protected $fillable = [

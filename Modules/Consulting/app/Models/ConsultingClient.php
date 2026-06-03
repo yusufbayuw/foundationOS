@@ -14,6 +14,11 @@ class ConsultingClient extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\Consulting\Database\Factories\ConsultingClientFactory
+    {
+        return \Modules\Consulting\Database\Factories\ConsultingClientFactory::new();
+    }
+
     protected $table = 'consulting_clients';
 
     protected $fillable = [

@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,7 +16,13 @@ use Modules\School\Models\Subject;
 
 class ExamQuestionBank extends ExamModel
 {
+    use HasFactory;
     use SoftDeletes;
+
+    protected static function newFactory(): \Modules\Exam\Database\Factories\ExamQuestionBankFactory
+    {
+        return \Modules\Exam\Database\Factories\ExamQuestionBankFactory::new();
+    }
 
     protected $fillable = [
         'tenant_id',

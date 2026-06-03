@@ -46,6 +46,24 @@ class ModuleMaturityConfigTest extends TestCase
         $this->assertSame([], config('fos_module_maturity.maturing'));
     }
 
+    public function test_experimental_tier_is_empty_after_final_ga_promotion(): void
+    {
+        $this->assertSame([], config('fos_module_maturity.experimental'));
+    }
+
+    public function test_all_promoted_modules_are_ga(): void
+    {
+        $config = config('fos_module_maturity');
+
+        foreach ([
+            'InternalAudit', 'IsoCompliance', 'EducationQa', 'Exam',
+            'KpiEnterprise', 'Capacity', 'Ai', 'Consulting',
+        ] as $module) {
+            $this->assertContains($module, $config['ga']);
+            $this->assertNotContains($module, $config['experimental']);
+        }
+    }
+
     /**
      * @return array<string, array{0: string}>
      */

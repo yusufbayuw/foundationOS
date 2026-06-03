@@ -14,6 +14,11 @@ class AuditProgram extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\InternalAudit\Database\Factories\AuditProgramFactory
+    {
+        return \Modules\InternalAudit\Database\Factories\AuditProgramFactory::new();
+    }
+
     protected $table = 'audit_programs';
 
     protected $fillable = [

@@ -14,6 +14,11 @@ class QualityStandard extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
+    protected static function newFactory(): \Modules\EducationQa\Database\Factories\QualityStandardFactory
+    {
+        return \Modules\EducationQa\Database\Factories\QualityStandardFactory::new();
+    }
+
     protected $table = 'quality_standards';
 
     protected $fillable = [

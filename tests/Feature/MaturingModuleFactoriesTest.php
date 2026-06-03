@@ -15,7 +15,15 @@ use Modules\Property\Models\Property as PropertyModel;
 use Modules\Risk\Models\RiskCategory;
 use Modules\Sales\Models\Customer;
 use Modules\Training\Models\Instructor;
+use Modules\Ai\Models\AiPromptTemplate;
 use Modules\Alumni\Models\CompanyPartner;
+use Modules\Capacity\Models\CapacityResource;
+use Modules\Consulting\Models\ConsultingClient;
+use Modules\EducationQa\Models\QualityStandard;
+use Modules\Exam\Models\ExamQuestionBank;
+use Modules\InternalAudit\Models\AuditProgram;
+use Modules\IsoCompliance\Models\IsoControl;
+use Modules\KpiEnterprise\Models\KpiArea;
 use Modules\Asset\Models\AssetCategory;
 use Modules\Boarding\Models\Dormitory;
 use Modules\Cafeteria\Models\Menu;
@@ -135,6 +143,14 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\CompanyPartnerImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\NotificationTemplateImporter::getColumns()));
         $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\PrintTemplateImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\AuditProgramImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\IsoControlImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\QualityStandardImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\KpiAreaImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\CapacityResourceImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\ConsultingClientImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\ExamQuestionBankImporter::getColumns()));
+        $this->assertGreaterThanOrEqual(3, count(\App\Filament\Imports\AiPromptTemplateImporter::getColumns()));
     }
 
     public function test_marketplace_cms_legal_factories_persist(): void
@@ -290,5 +306,53 @@ class MaturingModuleFactoriesTest extends TestCase
         $this->assertNotEmpty($partner->code);
         $this->assertNotEmpty($template->code);
         $this->assertNotEmpty($printTemplate->code);
+    }
+
+    public function test_final_batch_factories_persist(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization] = $this->makeTenantContext([
+            'core', 'internalaudit', 'isocompliance', 'educationqa', 'exam',
+            'kpienterprise', 'capacity', 'ai', 'consulting',
+        ]);
+
+        $this->assertNotEmpty(AuditProgram::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(IsoControl::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(QualityStandard::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(ExamQuestionBank::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(KpiArea::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(CapacityResource::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(AiPromptTemplate::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
+
+        $this->assertNotEmpty(ConsultingClient::factory()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+        ])->code);
     }
 }
