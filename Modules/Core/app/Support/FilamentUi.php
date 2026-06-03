@@ -117,6 +117,11 @@ class FilamentUi
         'Exam results' => 'Hasil ujian',
         'Final scores synced from Cloudflare runtime.' => 'Skor akhir disinkronkan dari runtime Cloudflare.',
         'Exam answers' => 'Jawaban ujian',
+        'Ai prompt template' => 'Template prompt AI',
+        'Ai prompt templates' => 'Template prompt AI',
+        'Active' => 'Aktif',
+        'Inactive' => 'Nonaktif',
+        'Stored uppercase. Must be unique per tenant and organization.' => 'Disimpan huruf besar. Harus unik per tenant dan organisasi.',
         'Review synced answers and grade essay responses manually.' => 'Tinjau jawaban tersinkron dan nilai esai secara manual.',
         'Grade essay' => 'Nilai esai',
         'Essay graded successfully.' => 'Esai berhasil dinilai.',
@@ -1142,6 +1147,7 @@ class FilamentUi
             'Course', 'Curriculum', 'Subject', 'ClassStudent', 'SchoolClass' => Heroicon::AcademicCap,
             'Department', 'Employee', 'EmploymentContract', 'LeaveRequest', 'PayrollComponent', 'Position', 'SalarySlip', 'SalarySlipComponent' => Heroicon::Identification,
             'Faculty', 'StudyPlan', 'StudyPlanItem', 'StudyProgram', 'Thesis' => Heroicon::BuildingLibrary,
+            'AiPromptTemplate' => Heroicon::Sparkles,
             'GoodsReceipt', 'GoodsReceiptItem', 'ProcurementCategory', 'ProcurementItem', 'PurchaseOrder', 'PurchaseOrderItem', 'PurchaseRequisition', 'PurchaseRequisitionItem', 'RequestForQuotation', 'RfqItem', 'RfqVendor', 'Vendor', 'VendorBill', 'VendorBillItem', 'StockAdjustment', 'StockAdjustmentLine', 'StockItem', 'StockLevel', 'StockMove', 'Warehouse' => Heroicon::Truck,
             'Module', 'Organization', 'OrganizationSetting', 'Tenant', 'TenantModule', 'TenantRole', 'TenantSetting', 'UserTenantRole', 'SubscriptionLog', 'SubscriptionPlan' => Heroicon::Cog6Tooth,
             default => static::navigationIcon(static::moduleNameFromClass($modelClass)),
@@ -1168,6 +1174,7 @@ class FilamentUi
             'Inventory' => Heroicon::Cube,
             'School' => Heroicon::AcademicCap,
             'Exam' => Heroicon::ClipboardDocumentCheck,
+            'Ai' => Heroicon::Sparkles,
             default => Heroicon::RectangleStack,
         };
     }

@@ -219,6 +219,9 @@ class NavigationSortRegistry
             'PhysicalSecurity' => [
                 'VisitorResource' => 10,
             ],
+            'Ai' => [
+                'AiPromptTemplateResource' => 10,
+            ],
         ];
     }
 }

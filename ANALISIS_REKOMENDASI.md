@@ -55,7 +55,7 @@ Semua modul yang diaktifkan di `modules_statuses.json` telah dipromosikan ke tie
 ```
   `organization_id` sebagai `TextInput()->numeric()` alih-alih `Select::relationship()` — anti-pola yang akan menimbulkan masalah integritas referensial dan UX.
 
-- **Modul `Ai` advisor-only**: `AiAdvisorService` + registry `AiPromptTemplate`; belum ada Filament resource untuk prompt templates (opsional).
+- **Modul `Ai`**: `AiAdvisorService` + registry `AiPromptTemplate` dengan Filament resource `AiPromptTemplateResource` (CRUD + impor CSV).
 - **`meta` sebagai `Textarea` JSON** di modul scaffold — rapuh, tanpa validasi skema.
 
 ### Rekomendasi
@@ -290,7 +290,8 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] Test: semua modul di `modules_statuses.json` harus ada di tier `ga`.
 - [x] PHPStan **level 1** + `phpstan-baseline.neon` (316 temuan ter-baseline; perbaiki bertahap).
 - [x] Perbaikan bug: duplikat key `academic_period_id` di `AcademicPeriodObserver` payload outbox.
-- [ ] Epik ROADMAP lanjutan: public API v2, Workflow V3 designer polish, modul Ai Filament resource (opsional).
+- [x] Filament resource `AiPromptTemplate` (modul Ai).
+- [ ] Epik ROADMAP lanjutan: public API v2, Workflow V3 designer polish.
 
 ---
 
