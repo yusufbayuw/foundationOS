@@ -4,6 +4,8 @@ includes:
 
 parameters:
     level: 1
+    checkModelProperties: true
+    reportUnmatchedIgnoredErrors: false
     paths:
         - app
         - Modules/Global
@@ -54,4 +56,3 @@ parameters:
     excludePaths:
         - Modules/*/database/migrations/*
     checkOctaneCompatibility: false
-    reportUnmatchedIgnoredErrors: false

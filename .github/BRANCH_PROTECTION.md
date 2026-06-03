@@ -60,6 +60,7 @@ Add these workflow names (exact names from `.github/workflows/`):
 
 - `Laravel Pint` (job in `static.yml`)
 - `Larastan (level 1 + baseline, all GA modules)` (job in `static.yml`)
+- `Larastan API resources (level 1, no baseline)` (job in `static.yml`)
 - `test` or the PHPUnit job name from `tests.yml` — open a recent PR on `main` to see the check names GitHub reports
 
 Also enable if you use them:
