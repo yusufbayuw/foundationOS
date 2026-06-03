@@ -6,6 +6,7 @@ use App\Jobs\DeliverWebhookJob;
 use App\Services\TenantMigrationService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -25,6 +26,7 @@ use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowDelegation;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
+use Modules\Workflow\Notifications\InternalWorkflowNotification;
 use Modules\Workflow\Services\WorkflowEscalationService;
 use Tests\TestCase;
 
@@ -233,6 +235,8 @@ class RoadmapV09PlatformExtensionTest extends TestCase
 
         $assignment->update(['due_at' => now('Asia/Jakarta')->subMinute()]);
 
+        Notification::fake();
+
         $escalated = app(WorkflowEscalationService::class)->escalateOverdue(now('Asia/Jakarta'));
 
         $this->assertSame(1, $escalated);
@@ -241,6 +245,9 @@ class RoadmapV09PlatformExtensionTest extends TestCase
             'status' => WorkflowAssignmentStatus::Pending->value,
         ]);
         $this->assertSame('overdue', $assignment->refresh()->meta['sla_state'] ?? null);
+        Notification::assertSentTo($to, InternalWorkflowNotification::class);
+
+        $this->assertSame(0, app(WorkflowEscalationService::class)->escalateOverdue(now('Asia/Jakarta')));
     }
 
     public function test_pwa_and_native_shell_artifacts_exist_for_ci(): void

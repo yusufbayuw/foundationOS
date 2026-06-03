@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use Illuminate\Support\Collection;
 use Modules\Workflow\Contracts\RuleEngine;
 use Modules\Workflow\Contracts\WorkflowTransitionResolver;
 use Modules\Workflow\Exceptions\NoValidWorkflowTransitionException;
@@ -11,7 +12,10 @@ use Modules\Workflow\Models\WorkflowTransition;
 
 class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
 {
-    public function __construct(private readonly RuleEngine $ruleEngine) {}
+    public function __construct(
+        private readonly RuleEngine $ruleEngine,
+        private readonly WorkflowSnapshotStepResolver $snapshotStepResolver,
+    ) {}
 
     public function resolve(WorkflowInstance $instance, WorkflowStep $step, string $actionName, array $incomingData): WorkflowTransition
     {
@@ -19,6 +23,7 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
 
         if ($snapshotTransitions->isNotEmpty()) {
             $fromSnapshot = $this->resolveFromSnapshot(
+                $instance,
                 $snapshotTransitions,
                 $step->getKey(),
                 $actionName,
@@ -28,16 +33,21 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
             if ($fromSnapshot !== null) {
                 return $fromSnapshot;
             }
+
+            throw new NoValidWorkflowTransitionException(
+                "No valid workflow transition found in snapshot for action [{$actionName}] on step [{$step->code}].",
+            );
         }
 
         return $this->resolveFromLiveDefinition($step, $actionName, $incomingData);
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, array<string, mixed>>  $snapshotTransitions
+     * @param  Collection<int, array<string, mixed>>  $snapshotTransitions
      */
     protected function resolveFromSnapshot(
-        \Illuminate\Support\Collection $snapshotTransitions,
+        WorkflowInstance $instance,
+        Collection $snapshotTransitions,
         int|string $fromStepId,
         string $actionName,
         array $incomingData,
@@ -60,11 +70,11 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
             $rules = $snapshot['condition_rules'] ?? null;
 
             if (empty($rules)) {
-                return $this->materializeTransition($snapshot);
+                return $this->materializeTransition($instance, $snapshot);
             }
 
             if ($this->ruleEngine->matches($rules, $incomingData)) {
-                return $this->materializeTransition($snapshot);
+                return $this->materializeTransition($instance, $snapshot);
             }
         }
 
@@ -74,23 +84,21 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
     /**
      * @param  array<string, mixed>  $snapshot
      */
-    protected function materializeTransition(array $snapshot): WorkflowTransition
+    protected function materializeTransition(WorkflowInstance $instance, array $snapshot): WorkflowTransition
     {
         $transition = WorkflowTransition::query()->find($snapshot['id'] ?? null);
 
-        if ($transition !== null) {
-            return $transition;
-        }
+        if ($transition === null) {
+            $transition = new WorkflowTransition($snapshot);
+            $transition->exists = isset($snapshot['id']);
 
-        $transition = new WorkflowTransition($snapshot);
-        $transition->exists = isset($snapshot['id']);
-
-        if (isset($snapshot['id'])) {
-            $transition->setAttribute($transition->getKeyName(), $snapshot['id']);
+            if (isset($snapshot['id'])) {
+                $transition->setAttribute($transition->getKeyName(), $snapshot['id']);
+            }
         }
 
         if (isset($snapshot['to_step_id'])) {
-            $toStep = WorkflowStep::query()->find($snapshot['to_step_id']);
+            $toStep = $this->snapshotStepResolver->materialize($instance, (int) $snapshot['to_step_id']);
             if ($toStep !== null) {
                 $transition->setRelation('toStep', $toStep);
             }
