@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Integrations\Moodle\MoodleClient;
 use App\Integrations\Moodle\Exceptions\MoodleIntegrationException;
+use App\Integrations\Moodle\MoodleClient;
 use Illuminate\Console\Command;
 
 class MoodleHealthCheckCommand extends Command
@@ -70,7 +70,19 @@ class MoodleHealthCheckCommand extends Command
         $token = (string) config('moodle.token');
         $enabled = (bool) config('moodle.enabled', false);
 
+        $readonly = (bool) config('moodle.readonly', false);
+        $readonlyInProduction = $readonly && app()->environment('production');
+
         $rows[] = ['Config enabled', $enabled ? 'OK' : 'FAIL', $enabled ? '-' : 'Set MOODLE_SYNC_ENABLED=true'];
+        $rows[] = [
+            'Readonly mode',
+            $readonlyInProduction ? 'FAIL' : ($readonly ? 'WARN' : 'OK'),
+            $readonly
+                ? ($readonlyInProduction
+                    ? 'Disable MOODLE_SYNC_READONLY in production'
+                    : 'Readonly skips outbox with status skipped (dev/staging only)')
+                : 'Writes enabled',
+        ];
         $rows[] = ['Base URL', $baseUrl !== '' ? 'OK' : 'FAIL', $baseUrl !== '' ? $baseUrl : 'Set MOODLE_BASE_URL'];
         $rows[] = ['Token', $token !== '' ? 'OK' : 'FAIL', $token !== '' ? 'Configured' : 'Set MOODLE_WS_TOKEN'];
 
@@ -112,6 +124,7 @@ class MoodleHealthCheckCommand extends Command
 
             if (! $enabled) {
                 $rows[] = [$label, 'SKIP', 'Feature disabled'];
+
                 continue;
             }
 

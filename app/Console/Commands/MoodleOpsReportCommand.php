@@ -18,6 +18,7 @@ class MoodleOpsReportCommand extends Command
         $processing = MoodleSyncOutbox::query()->where('status', MoodleSyncOutbox::STATUS_PROCESSING)->count();
         $synced = MoodleSyncOutbox::query()->where('status', MoodleSyncOutbox::STATUS_SYNCED)->count();
         $failed = MoodleSyncOutbox::query()->where('status', MoodleSyncOutbox::STATUS_FAILED)->count();
+        $skipped = MoodleSyncOutbox::query()->where('status', MoodleSyncOutbox::STATUS_SKIPPED)->count();
 
         $oldestPending = MoodleSyncOutbox::query()
             ->where('status', MoodleSyncOutbox::STATUS_PENDING)
@@ -48,6 +49,7 @@ class MoodleOpsReportCommand extends Command
                 'processing' => $processing,
                 'synced' => $synced,
                 'failed' => $failed,
+                'skipped' => $skipped,
                 'oldest_pending_at' => $oldestPending ? (string) $oldestPending : null,
                 'failed_by_entity' => $failedByEntity,
             ],
@@ -59,6 +61,7 @@ class MoodleOpsReportCommand extends Command
 
         if ((bool) $this->option('json')) {
             $this->line(json_encode($report, JSON_PRETTY_PRINT));
+
             return self::SUCCESS;
         }
 
@@ -69,6 +72,7 @@ class MoodleOpsReportCommand extends Command
                 ['outbox.processing', (string) $processing],
                 ['outbox.synced', (string) $synced],
                 ['outbox.failed', (string) $failed],
+                ['outbox.skipped', (string) $skipped],
                 ['outbox.oldest_pending_at', $oldestPending ? (string) $oldestPending : '-'],
                 ['learning_pull.snapshots_last_24h', (string) $pullLast24h],
             ],

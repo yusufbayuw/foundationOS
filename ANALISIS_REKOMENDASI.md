@@ -298,6 +298,7 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] Perbaikan `FilamentUi` duplicate keys, `WorkflowDesignerPage::text()`, hapus retry export rusak.
 - [x] **OpenAPI v2** (`GET /api/v2/openapi.json` — mirror path catalog + `ApiMeta` schema).
 - [x] **Workflow determinisme + notifikasi (F1, F6, A6)** — step/transisi dari snapshot; eskalasi SLA kirim notifikasi; assignee dapat `InternalWorkflowNotification`.
+- [x] **Moodle operasional (G1, G5)** — enrol idempoten (`already enrolled`); readonly → status `skipped` (bukan `synced`); Filament `MoodleSyncOutbox` + retry; ops-report `skipped`.
 - [ ] Epik ROADMAP lanjutan: Workflow V3 designer polish.
 
 ---
