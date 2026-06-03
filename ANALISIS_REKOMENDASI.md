@@ -295,7 +295,8 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] Fondasi **API v2** (`GET /api/v2`, `/api/v2/me`, `/api/v2/tenants/current` + meta `api_version`).
 - [x] **API v2 parity** — mirror v1 read/write/mobile routes + middleware `api.version.meta:v2`.
 - [x] Perbaikan `FilamentUi` duplicate keys, `WorkflowDesignerPage::text()`, hapus retry export rusak.
-- [ ] Epik ROADMAP lanjutan: OpenAPI v2, Workflow V3 designer polish.
+- [x] **OpenAPI v2** (`GET /api/v2/openapi.json` — mirror path catalog + `ApiMeta` schema).
+- [ ] Epik ROADMAP lanjutan: Workflow V3 designer polish.
 
 ---
 

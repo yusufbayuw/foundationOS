@@ -31,8 +31,11 @@ RateLimiter::for('api', function (Request $request) {
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->name('webhooks.whatsapp');
 
-Route::get('/openapi.json', OpenApiController::class)
+Route::get('/openapi.json', [OpenApiController::class, 'v1'])
     ->name('api.openapi');
+
+Route::get('/v2/openapi.json', [OpenApiController::class, 'v2'])
+    ->name('api.openapi.v2');
 
 Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'show'])
     ->name('letters.verify');

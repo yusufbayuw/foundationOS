@@ -113,6 +113,22 @@ class ApiV2ParityTest extends TestCase
             ->assertJsonPath('data.registration_number', 'REG-V2-001');
     }
 
+    public function test_v2_openapi_contract_lists_v2_paths(): void
+    {
+        $response = $this->getJson('/api/v2/openapi.json');
+
+        $response->assertOk()
+            ->assertJsonPath('info.version', 'v2')
+            ->assertJsonPath('paths./api/v2/organizations.get.security.0.sanctum.0', 'organizations:read')
+            ->assertJsonStructure([
+                'paths' => [
+                    '/api/v2/me',
+                    '/api/v2/students/{id}/dashboard',
+                    '/api/v2/applicants',
+                ],
+            ]);
+    }
+
     public function test_v2_me_matches_v1_payload_with_version_meta(): void
     {
         $v1 = $this->withToken($this->token)->getJson('/api/v1/me')->json('data');
