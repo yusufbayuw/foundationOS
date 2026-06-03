@@ -13,7 +13,6 @@ use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
-use App\Http\Controllers\Api\v2\AuthController as V2AuthController;
 use App\Http\Controllers\Api\v2\VersionController as V2VersionController;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -32,8 +31,11 @@ RateLimiter::for('api', function (Request $request) {
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->name('webhooks.whatsapp');
 
-Route::get('/openapi.json', OpenApiController::class)
+Route::get('/openapi.json', [OpenApiController::class, 'v1'])
     ->name('api.openapi');
+
+Route::get('/v2/openapi.json', [OpenApiController::class, 'v2'])
+    ->name('api.openapi.v2');
 
 Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'show'])
     ->name('letters.verify');
@@ -76,11 +78,39 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
     });
 });
 
-Route::prefix('v2')->middleware(['throttle:api'])->group(function () {
+Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(function () {
     Route::get('/', [V2VersionController::class, 'show']);
 
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
-        Route::get('me', [V2AuthController::class, 'me']);
-        Route::get('tenants/current', [V2AuthController::class, 'currentTenant']);
+        Route::get('me', [AuthController::class, 'me']);
+        Route::get('tenants/current', [AuthController::class, 'currentTenant']);
+
+        Route::get('organizations', [OrganizationController::class, 'index']);
+        Route::get('organizations/{id}', [OrganizationController::class, 'show']);
+
+        Route::get('students', [StudentController::class, 'index']);
+        Route::get('students/{id}', [StudentController::class, 'show']);
+
+        Route::get('college-students', [CollegeStudentController::class, 'index']);
+        Route::get('college-students/{id}', [CollegeStudentController::class, 'show']);
+
+        Route::get('classes', [SchoolClassController::class, 'index']);
+        Route::get('classes/{id}', [SchoolClassController::class, 'show']);
+
+        Route::get('courses', [CourseController::class, 'index']);
+        Route::get('courses/{id}', [CourseController::class, 'show']);
+
+        Route::get('employees', [EmployeeController::class, 'index']);
+        Route::get('employees/{id}', [EmployeeController::class, 'show']);
+
+        Route::middleware(['idempotency'])->group(function () {
+            Route::post('applicants', [ApplicantController::class, 'store']);
+            Route::post('payments', [PaymentController::class, 'store']);
+            Route::post('leave-requests', [LeaveRequestController::class, 'store']);
+        });
+
+        Route::post('devices', [DeviceController::class, 'store']);
+        Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
+        Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
     });
 });

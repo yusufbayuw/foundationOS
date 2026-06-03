@@ -12,7 +12,7 @@ class VersionController extends ApiController
             'version' => 'v2',
             'status' => 'available',
             'policy' => 'additive_minor_breaking_major',
-            'documentation' => url('/api/openapi.json'),
+            'documentation' => url('/api/v2/openapi.json'),
         ]);
     }
 }
