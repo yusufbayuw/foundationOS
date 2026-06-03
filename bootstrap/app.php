@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AttachApiVersionMeta;
 use App\Http\Middleware\EnsureTenantSubscriptionActive;
 use App\Http\Middleware\IdempotencyKey;
 use App\Http\Middleware\ResolveApiTenant;
@@ -31,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'donation/webhook',
         ]);
         $middleware->alias([
+            'api.version.meta' => AttachApiVersionMeta::class,
             'resolve.api.tenant' => ResolveApiTenant::class,
             'idempotency' => IdempotencyKey::class,
             'subscription.active' => EnsureTenantSubscriptionActive::class,
