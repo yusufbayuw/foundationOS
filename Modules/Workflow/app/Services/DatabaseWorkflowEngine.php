@@ -31,6 +31,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         private readonly WorkflowAuditLogger $auditLogger,
         private readonly WorkflowSlaService $slaService,
         private readonly WorkflowParallelCoordinator $parallelCoordinator,
+        private readonly WorkflowSnapshotStepResolver $snapshotStepResolver,
     ) {}
 
     public function advance(WorkflowInstance $instance, string $actionName, array $formData, User $actor, ?string $notes = null): WorkflowInstance
@@ -46,7 +47,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
 
             $this->authorizeActor($instance, $actor);
 
-            $currentStep = $instance->currentStep;
+            $currentStep = $this->snapshotStepResolver->resolveCurrent($instance);
 
             if ($currentStep?->requiresEvidence()) {
                 $uploaded = $instance->evidences()
@@ -257,15 +258,15 @@ class DatabaseWorkflowEngine implements WorkflowEngine
             $this->authorizeActor($instance, $actor);
             $statusBefore = $instance->status->value;
 
-            /** @var WorkflowStep|null $targetStep */
-            $targetStep = $instance->workflow->steps->firstWhere('id', $targetStepId);
+            $targetStep = $this->snapshotStepResolver->materialize($instance, $targetStepId);
 
             if (! $targetStep) {
                 throw new WorkflowAuthorizationException('Target return step is not part of the workflow.');
             }
 
+            $currentStep = $this->snapshotStepResolver->resolveCurrent($instance);
             $incomingContext = WorkflowContextData::fromInstance($instance, $formData);
-            $validated = $this->validator->validate($instance->currentStep, $formData, $incomingContext);
+            $validated = $this->validator->validate($currentStep, $formData, $incomingContext);
             $payloadBefore = $this->payloadSnapshot($instance);
 
             $instance->assignments()
@@ -301,7 +302,12 @@ class DatabaseWorkflowEngine implements WorkflowEngine
             return $instance->fresh(['currentStep', 'assignments', 'logs']);
         });
 
-        WorkflowReturned::dispatch($instance, $instance->currentStep, $actor, $notes);
+        WorkflowReturned::dispatch(
+            $instance,
+            $this->snapshotStepResolver->resolveCurrent($instance),
+            $actor,
+            $notes,
+        );
 
         return $instance;
     }

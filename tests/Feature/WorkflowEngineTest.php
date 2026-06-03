@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -14,10 +15,12 @@ use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Contracts\WorkflowResolver;
 use Modules\Workflow\Contracts\WorkflowSlaService;
+use Modules\Workflow\Exceptions\WorkflowAuthorizationException;
 use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAssignment;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
+use Modules\Workflow\Notifications\InternalWorkflowNotification;
 use Tests\TestCase;
 
 class WorkflowEngineTest extends TestCase
@@ -135,7 +138,7 @@ class WorkflowEngineTest extends TestCase
         $workflow = $this->makeWorkflow($tenant, $organizationA, $user);
         $instance = app(WorkflowInstanceStarter::class)->start($workflow, $user);
 
-        $this->expectException(\Modules\Workflow\Exceptions\WorkflowAuthorizationException::class);
+        $this->expectException(WorkflowAuthorizationException::class);
 
         app(WorkflowEngine::class)->advance(
             $instance,
@@ -237,6 +240,55 @@ class WorkflowEngineTest extends TestCase
             'workflow_instance_id' => $instance->id,
             'log_type' => 'sla_breached',
         ]);
+    }
+
+    public function test_advance_uses_snapshot_step_schema_when_live_step_changes(): void
+    {
+        [$tenant, $organizationA, , $user] = $this->makeTenantContext();
+
+        $workflow = $this->makeWorkflow($tenant, $organizationA, $user);
+        $instance = app(WorkflowInstanceStarter::class)->start($workflow, $user, ['requested_total' => 2_500_000]);
+
+        $startStep = $workflow->steps()->where('is_initial', true)->firstOrFail();
+        $startStep->update([
+            'form_schema' => [
+                [
+                    'name' => 'approval_note',
+                    'label' => 'Approval Note',
+                    'type' => 'textarea',
+                    'required' => true,
+                    'validation' => ['min:50'],
+                ],
+                [
+                    'name' => 'executive_signoff',
+                    'label' => 'Executive Signoff',
+                    'type' => 'text',
+                    'required' => true,
+                ],
+            ],
+        ]);
+
+        $result = app(WorkflowEngine::class)->advance(
+            $instance->fresh(),
+            'approve',
+            ['approval_note' => 'Valid under snapshot rules.'],
+            $user,
+            'Approved with frozen step schema',
+        );
+
+        $this->assertSame('completed', $result->status->value);
+    }
+
+    public function test_assignment_created_notifies_assignee_in_database_channel(): void
+    {
+        Notification::fake();
+
+        [$tenant, $organizationA, , $user] = $this->makeTenantContext();
+
+        $workflow = $this->makeWorkflow($tenant, $organizationA, $user);
+        app(WorkflowInstanceStarter::class)->start($workflow, $user, ['requested_total' => 2_500_000]);
+
+        Notification::assertSentTo($user, InternalWorkflowNotification::class);
     }
 
     public function test_sla_breach_logging_is_idempotent(): void

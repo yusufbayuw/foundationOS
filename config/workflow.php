@@ -33,4 +33,8 @@ return [
     'automation' => [
         'rethrow_on_failure' => (bool) env('WORKFLOW_AUTOMATION_RETHROW', false),
     ],
+
+    'escalation' => [
+        'notify_assignee' => (bool) env('WORKFLOW_ESCALATION_NOTIFY', true),
+    ],
 ];

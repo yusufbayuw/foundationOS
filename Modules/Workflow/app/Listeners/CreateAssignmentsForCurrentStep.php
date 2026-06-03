@@ -7,16 +7,21 @@ use Modules\Workflow\Events\WorkflowAdvanced;
 use Modules\Workflow\Events\WorkflowAssignmentCreated;
 use Modules\Workflow\Events\WorkflowReturned;
 use Modules\Workflow\Events\WorkflowStarted;
-use Modules\Workflow\Models\WorkflowAssignment;
+use Modules\Workflow\Services\WorkflowEscalationService;
+use Modules\Workflow\Services\WorkflowSnapshotStepResolver;
 
 class CreateAssignmentsForCurrentStep
 {
-    public function __construct(private readonly WorkflowAssigneeResolver $resolver) {}
+    public function __construct(
+        private readonly WorkflowAssigneeResolver $resolver,
+        private readonly WorkflowSnapshotStepResolver $snapshotStepResolver,
+        private readonly WorkflowEscalationService $escalationService,
+    ) {}
 
     public function handle(WorkflowStarted|WorkflowAdvanced|WorkflowReturned $event): void
     {
-        $instance = $event->instance->fresh(['currentStep', 'assignments']);
-        $step = $instance?->currentStep;
+        $instance = $event->instance->fresh(['assignments']);
+        $step = $instance ? $this->snapshotStepResolver->resolveCurrent($instance) : null;
 
         if (! $instance || ! $step || $step->is_terminal) {
             return;
@@ -35,20 +40,15 @@ class CreateAssignmentsForCurrentStep
         $currentAssignees = [];
 
         foreach ($users as $user) {
-            $assignment = WorkflowAssignment::query()->create([
-                'workflow_instance_id' => $instance->getKey(),
-                'step_id' => $step->getKey(),
-                'assigned_to_type' => 'user',
-                'assigned_to_id' => $user->getKey(),
-                'assignment_role' => $step->assignee_type?->value,
-                'status' => 'pending',
-                'assigned_at' => now(),
-                'due_at' => $instance->due_at,
-                'meta' => [
+            $assignment = $this->escalationService->createAssignmentWithDelegation($instance, $step, $user);
+            $assignment->forceFill([
+                'assignment_role' => $step->assignee_type?->value ?? $assignment->assignment_role,
+                'due_at' => $instance->due_at ?? $assignment->due_at,
+                'meta' => array_merge($assignment->meta ?? [], [
                     'user_name' => $user->name,
                     'user_email' => $user->email,
-                ],
-            ]);
+                ]),
+            ])->save();
 
             $currentAssignees[] = [
                 'id' => $user->getKey(),

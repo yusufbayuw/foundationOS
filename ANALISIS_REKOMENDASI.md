@@ -297,6 +297,7 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] **API v2 parity** — mirror v1 read/write/mobile routes + middleware `api.version.meta:v2`.
 - [x] Perbaikan `FilamentUi` duplicate keys, `WorkflowDesignerPage::text()`, hapus retry export rusak.
 - [x] **OpenAPI v2** (`GET /api/v2/openapi.json` — mirror path catalog + `ApiMeta` schema).
+- [x] **Workflow determinisme + notifikasi (F1, F6, A6)** — step/transisi dari snapshot; eskalasi SLA kirim notifikasi; assignee dapat `InternalWorkflowNotification`.
 - [ ] Epik ROADMAP lanjutan: Workflow V3 designer polish.
 
 ---
