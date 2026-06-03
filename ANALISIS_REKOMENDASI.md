@@ -12,7 +12,7 @@
 
 FoundationOS adalah ERP modular untuk lembaga pendidikan dengan **fondasi arsitektur yang matang dan konsisten** pada domain inti (Tenancy, Workflow, Exam, Procurement, Finance, Moodle). Pola multi-tenancy, base class `ModuleResource`, dan engine workflow berbasis metadata menunjukkan disiplin engineering yang baik.
 
-Namun, terdapat **kesenjangan kematangan yang lebar** antara domain inti yang teruji vs ~18-20 modul "roadmap" yang masih berupa *scaffolding* CRUD tanpa logika bisnis maupun test. Risiko paling material bukan pada desain, melainkan pada **gerbang kualitas (CI), keandalan operasional integrasi, dan kesiapan performa di skala produksi**.
+Semua modul yang diaktifkan di `modules_statuses.json` telah dipromosikan ke tier **GA** (`config/fos_module_maturity.php`: 45 modul GA, `experimental` kosong). Risiko paling material kini bergeser ke **peningkatan PHPStan bertahap, opsi tenancy fail-closed di produksi, dan epik ROADMAP** (Workflow V3 lanjutan, Moodle reconcile, public API).
 
 ### Penilaian per dimensi
 
@@ -23,7 +23,7 @@ Namun, terdapat **kesenjangan kematangan yang lebar** antara domain inti yang te
 | Keandalan integrasi (Moodle/Workflow) | **B** | Outbox atomik + sweeper; workflow lock & queued automation (Gelombang 2) |
 | Layer Filament | **A−** | Konsistensi struktural sangat tinggi (378 resource, 1 base class) |
 | Kematangan testing | **B−** | Volume tinggi, tetapi sempit; UI/Livewire & factory minim |
-| Kematangan CI/CD | **D** | Hanya lint translasi + mobile-shell; **test tidak dijalankan di CI** |
+| Kematangan CI/CD | **B−** | `tests.yml` + `static.yml` (Pint + Larastan level 0); branch protection disarankan di GitHub |
 | Kesiapan performa | **C+** | Index FK ada, tetapi risiko N+1 & index komposit kurang |
 | Konsistensi antar modul | **B** | Pola seragam, tetapi 18+ modul masih scaffold tanpa test |
 
@@ -43,7 +43,7 @@ Namun, terdapat **kesenjangan kematangan yang lebar** antara domain inti yang te
 - **Bilingual terpusat** melalui `Modules\Core\Support\FilamentUi` + linter anti-hardcode.
 
 ### Kelemahan
-- **Dua kelas kematangan modul.** Domain inti kaya logika; ~18 modul roadmap (`Property`, `Transport`, `Cafeteria`, `Boarding`, `Clinic`, `Event`, `MerchOrder`, `Printing`, dll.) hanya CRUD generik. Contoh pola scaffold:
+- **Kedalaman domain masih tidak seragam.** Semua modul aktif sudah GA (service registrasi + factory + importer + test), tetapi banyak entitas sekunder di modul besar masih CRUD tanpa service khusus. Contoh pola lama yang perlu diaudit berkala:
 
 ```16:24:Modules/Property/app/Filament/Resources/Properties/Schemas/PropertyForm.php
             Section::make(FilamentUi::text('General information'))
@@ -55,7 +55,7 @@ Namun, terdapat **kesenjangan kematangan yang lebar** antara domain inti yang te
 ```
   `organization_id` sebagai `TextInput()->numeric()` alih-alih `Select::relationship()` — anti-pola yang akan menimbulkan masalah integritas referensial dan UX.
 
-- **Modul `Ai` adalah stub**: `AiAdvisorService` memakai provider palsu, tanpa migrasi maupun resource Filament di `Modules/Ai/`.
+- **Modul `Ai` advisor-only**: `AiAdvisorService` + registry `AiPromptTemplate`; belum ada Filament resource untuk prompt templates (opsional).
 - **`meta` sebagai `Textarea` JSON** di modul scaffold — rapuh, tanpa validasi skema.
 
 ### Rekomendasi
@@ -203,22 +203,19 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 ## 7. CI/CD & Gerbang Kualitas
 
 ### Kondisi saat ini
-Hanya dua workflow GitHub Actions:
 
 | Workflow | Fungsi |
 |----------|--------|
-| `lint-translations.yml` | Jalankan `scripts/lint-translations.php` |
+| `tests.yml` | PHPUnit penuh pada PHP 8.4 |
+| `static.yml` | Laravel Pint + Larastan level 0 (semua modul GA) |
+| `lint-translations.yml` | `scripts/lint-translations.php` |
+| `lint-tenant-fields.yml` | `scripts/lint-tenant-fields.php` |
 | `mobile-shell.yml` | Validasi Capacitor/PWA manifest |
 
-**Tidak ada**: `php artisan test` di CI (meski script `composer test` tersedia), Laravel Pint sebagai gate, dan **tidak ada PHPStan/Larastan** (tidak ada di `require-dev`, tidak ada `phpstan.neon`).
-
-> Ini adalah **risiko terbesar yang paling mudah diperbaiki**: 400+ test ada tapi tidak menjaga `main`. Regresi bisa masuk tanpa terdeteksi.
-
 ### Rekomendasi (prioritas tinggi)
-1. **`tests.yml`**: matriks PHP 8.4, `composer install`, `php artisan test --compact`. Jadikan *required check* untuk merge ke `main`.
-2. **`static.yml`**: tambahkan `larastan/larastan` + `phpstan.neon` (mulai level rendah, naikkan bertahap) dan `vendor/bin/pint --test`.
-3. Aktifkan **branch protection** pada `main` (require PR + status checks hijau).
-4. Tambahkan `composer run lint` (Pint) sebagai script.
+1. Aktifkan **branch protection** pada `main` (require PR + status checks hijau).
+2. Naikkan PHPStan ke **level 1** dengan baseline (`composer analyse` → generate baseline bila perlu).
+3. Produksi: set `TENANCY_SCOPE_FAIL_CLOSED=true` setelah smoke test panel/API.
 
 ---
 
@@ -285,6 +282,14 @@ Hanya dua workflow GitHub Actions:
 - [x] Tier `maturing` di `config/fos_module_maturity.php`; Risk/Donation/Sales dipromosikan ke **GA** (factory, importer, form alignment).
 - [x] `LazilyRefreshDatabase` pada seluruh `tests/Feature/*` (kecuali `ExampleTest`).
 - [x] Resolusi transisi workflow dari snapshot (`JsonLogicWorkflowTransitionResolver` + test).
+- [x] Promosi batch GA modul experimental → **45 modul GA**, tier `experimental` kosong.
+
+### Gelombang 5 — Pasca-GA (kualitas & hardening)
+- [x] Larastan mencakup modul inti yang sebelumnya terlewat (`Global`, `Campus`, `Employee`, `Monitoring`, `Inventory`).
+- [x] Opsi `tenancy.scope_fail_closed` + `MissingTenantContextException` + test.
+- [x] Test: semua modul di `modules_statuses.json` harus ada di tier `ga`.
+- [ ] PHPStan **level 1** + baseline (jalankan lokal: `vendor/bin/phpstan analyse --generate-baseline`).
+- [ ] Epik ROADMAP: Moodle reconcile, public API, Workflow V3 fase lanjutan.
 
 ---
 
@@ -292,12 +297,12 @@ Hanya dua workflow GitHub Actions:
 
 FoundationOS memiliki **pondasi arsitektur kelas produksi** pada domain intinya — multi-tenancy, workflow engine, dan integrasi Moodle dirancang dengan pola yang benar dan teruji. Aplikasi ini **layak produksi untuk alur akademik/keuangan/procurement** yang sudah tertutup test.
 
-Kelemahan utama bersifat **operasional dan disiplin proses**, bukan desain fundamental:
-- **Gerbang kualitas (CI) belum menegakkan test** — ini fondasi yang harus segera dipasang.
-- **Beberapa bug & race condition konkret** pada integrasi yang harus ditutup sebelum skala.
-- **Kesenjangan kematangan modul** yang perlu dikomunikasikan jujur (GA vs experimental).
+Kelemahan utama bersifat **operasional dan kedalaman fitur**, bukan desain fundamental:
+- **PHPStan masih level 0** — naikkan bertahap dengan baseline.
+- **Tenant scope fail-open by default** — aktifkan `TENANCY_SCOPE_FAIL_CLOSED` di produksi setelah validasi.
+- **Epik integrasi & API** di `ROADMAP.md` belum selesai (Moodle reconcile, public API).
 
-Dengan menutup Gelombang 1–2, platform akan naik signifikan dari "berfungsi pada jalur yang teruji" menjadi "tervalidasi dan tahan regresi secara menyeluruh".
+Platform kini **GA penuh pada modul aktif**, dengan CI test + static analysis. Fokus berikutnya: hardening produksi dan epik roadmap bernilai tinggi.
 
 ---
 

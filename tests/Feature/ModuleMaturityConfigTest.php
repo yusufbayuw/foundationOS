@@ -51,6 +51,24 @@ class ModuleMaturityConfigTest extends TestCase
         $this->assertSame([], config('fos_module_maturity.experimental'));
     }
 
+    public function test_all_enabled_modules_are_listed_as_ga(): void
+    {
+        $enabled = array_keys(array_filter(
+            json_decode((string) file_get_contents(base_path('modules_statuses.json')), true),
+            fn (bool $active): bool => $active,
+        ));
+
+        $ga = config('fos_module_maturity.ga');
+
+        foreach ($enabled as $module) {
+            $this->assertContains(
+                $module,
+                $ga,
+                "Enabled module [{$module}] must be in fos_module_maturity.ga",
+            );
+        }
+    }
+
     public function test_all_promoted_modules_are_ga(): void
     {
         $config = config('fos_module_maturity');

@@ -15,6 +15,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Fail-closed tenant scope (HTTP only)
+    |--------------------------------------------------------------------------
+    |
+    | When true, Eloquent queries on BelongsToTenant models without CurrentTenant
+    | bound will throw instead of returning all rows. Console and PHPUnit are
+    | always exempt so seeders and tests keep working.
+    |
+    */
+    'scope_fail_closed' => env('TENANCY_SCOPE_FAIL_CLOSED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Stale Moodle outbox processing recovery
     |--------------------------------------------------------------------------
     */

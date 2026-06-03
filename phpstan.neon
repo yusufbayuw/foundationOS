@@ -5,6 +5,11 @@ parameters:
     level: 0
     paths:
         - app
+        - Modules/Global
+        - Modules/Campus
+        - Modules/Employee
+        - Modules/Monitoring
+        - Modules/Inventory
         - Modules/Core
         - Modules/Enrollment
         - Modules/Finance
