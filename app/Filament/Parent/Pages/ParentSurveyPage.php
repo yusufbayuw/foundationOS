@@ -14,6 +14,9 @@ use Modules\Core\Models\ParentSurvey;
 use Modules\Core\Models\ParentSurveyResponse;
 use Modules\Core\Support\FilamentUi;
 
+/**
+ * @property Schema $form
+ */
 class ParentSurveyPage extends Page implements HasForms
 {
     use InteractsWithForms;

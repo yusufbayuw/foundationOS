@@ -120,6 +120,9 @@
         "analyse": [
             "vendor/bin/phpstan analyse --memory-limit=1G"
         ],
+        "analyse:app": [
+            "vendor/bin/phpstan analyse --configuration=phpstan-app.neon --memory-limit=512M"
+        ],
         "analyse:baseline": [
             "vendor/bin/phpstan analyse --memory-limit=1G --generate-baseline"
         ],

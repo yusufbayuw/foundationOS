@@ -289,7 +289,8 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] Opsi `tenancy.scope_fail_closed` + `MissingTenantContextException` + test.
 - [x] Produksi: `scope_fail_closed` default **true** bila `APP_ENV=production`; panduan [.github/BRANCH_PROTECTION.md](.github/BRANCH_PROTECTION.md).
 - [x] Test: semua modul di `modules_statuses.json` harus ada di tier `ga`.
-- [x] PHPStan **level 1** + `phpstan-baseline.neon` (302 temuan; turun dari 316 setelah perbaikan duplikat & ExportCenter).
+- [x] PHPStan **level 1** + `phpstan-baseline.neon` (~152 entri aktif setelah C1–C3; `checkModelProperties: true`).
+- [x] **PHPStan C1–C3** — API resources tanpa baseline (`$this->resource` typed); `checkModelProperties: true`; baseline modul ~152 (dari ~252); CI gate `phpstan-app.neon` + `composer analyse:app`.
 - [x] Perbaikan bug: duplikat key `academic_period_id` di `AcademicPeriodObserver` payload outbox.
 - [x] Filament resource `AiPromptTemplate` (modul Ai).
 - [x] Fondasi **API v2** (`GET /api/v2`, `/api/v2/me`, `/api/v2/tenants/current` + meta `api_version`).
@@ -305,7 +306,7 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 FoundationOS memiliki **pondasi arsitektur kelas produksi** pada domain intinya — multi-tenancy, workflow engine, dan integrasi Moodle dirancang dengan pola yang benar dan teruji. Aplikasi ini **layak produksi untuk alur akademik/keuangan/procurement** yang sudah tertutup test.
 
 Kelemahan utama bersifat **operasional dan kedalaman fitur**, bukan desain fundamental:
-- **PHPStan level 1 + baseline** — CI hijau; kurangi baseline secara bertahap (target level 2+).
+- **PHPStan** — modul GA level 1 + baseline (~152); layer `app/` level 2 tanpa baseline di CI. Kurangi baseline modul secara bertahap.
 - **Tenant scope** — produksi default fail-closed; lokal tetap `TENANCY_SCOPE_FAIL_CLOSED=false` di `.env`.
 - **Epik integrasi lanjutan** — sebagian besar Epic 3–6 & 5 di `ROADMAP.md` sudah `[x]`; sisa polish dan API v2.
 

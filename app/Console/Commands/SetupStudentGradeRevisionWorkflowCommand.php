@@ -42,9 +42,9 @@ class SetupStudentGradeRevisionWorkflowCommand extends Command
             ],
         );
 
-        WorkflowStep::withoutTenantScope()->where('workflow_id', $workflow->id)->delete();
+        WorkflowStep::query()->where('workflow_id', $workflow->id)->delete();
 
-        WorkflowStep::withoutTenantScope()->create([
+        WorkflowStep::query()->create([
             'workflow_id' => $workflow->id,
             'tenant_id' => $tenant->id,
             'name' => 'Homeroom Teacher Review',
@@ -54,7 +54,7 @@ class SetupStudentGradeRevisionWorkflowCommand extends Command
             'sla_hours' => 48,
         ]);
 
-        WorkflowStep::withoutTenantScope()->create([
+        WorkflowStep::query()->create([
             'workflow_id' => $workflow->id,
             'tenant_id' => $tenant->id,
             'name' => 'Principal Approval',
