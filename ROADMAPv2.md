@@ -1,5 +1,7 @@
 # FoundationOS Development Roadmap V2 — Standardisasi Translasi UI
 
+> **Status terpusat:** [PLAN_STATUS.md](PLAN_STATUS.md) — Epic 1 locale & switcher sebagian besar sudah `[x]` di kode; checkbox di dokumen ini belum disinkronkan penuh.
+
 Dokumen ini fokus pada **satu inisiatif besar**: merapikan dan menstandarisasi translasi (label, judul, placeholder, helper) di seluruh resource, form, infolist, dan table Filament. Saat ini implementasi sangat tidak konsisten — sebagian module memakai `FilamentUi::field()` / `FilamentUi::text()`, sebagian lain hardcode English, sebagian lagi hardcode Indonesian, dan banyak yang mengandalkan auto-generated label Filament tanpa lapisan translasi.
 
 Roadmap ini dibagi per epic seperti `ROADMAP.md` utama. Status legend: `[ ]` belum mulai · `[~]` sedang berjalan · `[x]` selesai.

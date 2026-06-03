@@ -22,7 +22,7 @@ Dokumen ini melacak gap Fase 1 (foundation multi-tenant SaaS) terhadap implement
 - [ ] Audit Log via `spatie/laravel-activitylog` (modul `Monitoring` saat ini punya `AuditLog` custom, bukan Spatie)
 
 ### 4. Billing & Subscription
-- [ ] Payment Gateway integration (Cashier / Midtrans)
+- [~] Payment Gateway integration (Midtrans webhook + `BillingService` / `BillingPage`; recurring engine belum lengkap)
 - [ ] Pay-per-Module + per-seat calculator (model `SubscriptionPlan`, `SubscriptionLog` sudah ada, engine belum)
 - [ ] Grace Period & auto-lock
 

@@ -27,7 +27,7 @@ Audit gap Fase 3 (Global Dashboard, Reporting Engine, Global Search, Audit Trail
 
 ### 5. Sinkronisasi Antar-Modul (Bridging)
 - [x] Inventory → Finance — modul Inventory + integrasi procurement (ROADMAPv02)
-- [ ] HR → Finance — auto-journal payroll belum ada (PayrollService belum dibangun — lihat ROADMAPv02 Sprint 1.3)
+- [x] HR → Finance — auto-journal payroll (`PayrollJournalService` + integrasi salary slip; lihat ROADMAPv02 Sprint 1.3)
 - [~] Sales/POS → Finance & Inventory — modul **Sales** (migration + model skeleton); POS UI & auto-journal listener belum lengkap
 - [x] School (SPP) → Finance — `Student` morphMany `StudentInvoice`, `TuitionType` + `Payment` aktif
 
