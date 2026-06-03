@@ -12,7 +12,7 @@ Dokumen ini adalah **sumber kebenaran terpusat** untuk status rencana. Roadmap i
 
 | Sumber rencana | Selesai | Sebagian | Belum | Catatan |
 |----------------|--------:|---------:|------:|---------|
-| [ROADMAP.md](ROADMAP.md) (Epic 1–6) | 18 fase | 1 fase | 0 fase | Epic 1.2 designer: fungsional, AC FASE_1_2 belum semua |
+| [ROADMAP.md](ROADMAP.md) (Epic 1–6) | 19 fase | 0 fase | 0 fase | Epic 1.2 designer selesai 2026-06-03 |
 | [ROADMAPv01.md](ROADMAPv01.md) Fase 1 SaaS | 8 | 2 | 7 | Banyak item sudah di kode tapi checkbox dokumen belum diupdate |
 | [ROADMAPv02.md](ROADMAPv02.md) Operasional | 22 | 2 | 0 | Hampir lengkap |
 | [ROADMAPv03.md](ROADMAPv03.md) BI & polish | 14 | 2 | 2 | HR→Finance sebenarnya sudah ada |
@@ -22,7 +22,7 @@ Dokumen ini adalah **sumber kebenaran terpusat** untuk status rencana. Roadmap i
 | [MOODLE_HARDENING_CHECKLIST.md](MOODLE_HARDENING_CHECKLIST.md) | 0 | — | 12 bagian | Checklist operasional go-live, bukan kode |
 | [ANALISIS_REKOMENDASI.md](ANALISIS_REKOMENDASI.md) Gelombang 1–5 | 28 | 0 | 1 | Gelombang 1–5 hampir seluruhnya `[x]` |
 
-**Kesimpulan singkat:** Domain inti (tenancy, workflow V2+V3 parsial, procurement automation, Moodle campus, API v1/v2) **sudah diimplementasi dan tertutup test**. Yang belum terutama: **SaaS monetization penuh**, **cleanup translasi massal**, **sprint v05–v09 (fitur mendalam)**, **checklist operasional Moodle go-live**, dan **polish visual workflow designer**.
+**Kesimpulan singkat:** Domain inti (tenancy, workflow V2+V3 parsial, procurement automation, Moodle campus, API v1/v2) **sudah diimplementasi dan tertutup test**. Yang belum terutama: **SaaS monetization penuh**, **cleanup translasi massal**, **sprint v05–v09 (fitur mendalam)**, dan **checklist operasional Moodle go-live**.
 
 ---
 
@@ -31,7 +31,7 @@ Dokumen ini adalah **sumber kebenaran terpusat** untuk status rencana. Roadmap i
 | Fase | Status | Verifikasi kode |
 |------|--------|-----------------|
 | **Epic 1.1** Parallel Gateway & Quorum | `[x]` | `WorkflowParallelCoordinator`, `WorkflowParallelGatewayTest`, gateway columns |
-| **Epic 1.2** Visual Workflow Designer | `[~]` | `WorkflowDesignerPage`, `WorkflowCanvas`, `workflow-designer.js`, `WorkflowDesignerTest`, `WorkflowDefinitionPorter` — **tanpa** `WorkflowDesignerSavesValidDefinitionTest` / versioning test terpisah; AC drag-drop 5 step+2 gateway belum diverifikasi otomatis |
+| **Epic 1.2** Visual Workflow Designer | `[x]` | Designer + import JSON + publish archives; tests AC5–AC8, parallel gateway, Vite bundle separation |
 | **Epic 1.3** Dynamic Form Data Source | `[x]` | `DynamicOptionsResolver`, `workflow-dynamic-sources.php`, `DynamicOptionsResolverTest`; **endpoint kind belum** |
 | **Epic 2.1** Auto RFQ dari PR | `[x]` | `RfqAutoCreationService`, `CreateRfqFromApprovedPurchaseRequisition`, tests |
 | **Epic 2.2** RFQ → PO | `[x]` | `PurchaseOrderAutoCreationService`, award flow, tests |
@@ -51,7 +51,6 @@ Dokumen ini adalah **sumber kebenaran terpusat** untuk status rencana. Roadmap i
 | **Epic 6.6** Academic calendar sync | `[x]` | calendar events, offering dates |
 
 **Belum / sisa epic ROADMAP.md:**
-- `[~]` Workflow V3 **designer polish** (drag-drop UX, dokumentasi WORKFLOW.md visual section, bundle size gate AC9 FASE_1_2)
 - `[ ]` `options_source` kind **endpoint** (hanya eloqent + enum)
 - `[ ]` Study plan **grace period** timer terjadwal (unenroll langsung saat status berubah)
 
@@ -183,7 +182,7 @@ Ini berarti: **scaffold GA** (resource, factory, importer, test tipis H2/H3) —
 | AC1: 5 step + 2 parallel gateway tanpa kode | `[~]` — manual/UI belum diverifikasi test |
 | AC2: draft tidak mempengaruhi instance running | `[~]` — perlu `WorkflowDesignerVersioningTest` |
 | AC3–AC4: publish + export/import parity | `[~]` — `WorkflowDefinitionPorterTest` ada |
-| AC5–AC8: test suite designer lengkap | `[ ]` sebagian |
+| AC5–AC8: test suite designer lengkap | `[x]` |
 | AC9: bundle size gate | `[ ]` |
 | AC10: WORKFLOW.md visual section | `[ ]` |
 | Definition of Done (pint, shield, npm build) | `[~]` |
@@ -205,7 +204,7 @@ Semua **12 section** masih `[ ]` — ini **checklist deployment/ops**, bukan fit
 | Gelombang 3 — Larastan/Pint CI, LazilyRefreshDatabase, eager load, Livewire CRUD sample | `[x]` |
 | Gelombang 4 — GA modul, organizationSelect, domain services pilot, snapshot transition | `[x]` |
 | Gelombang 5 — fail-closed tenancy, PHPStan L1, API v2, OpenAPI, workflow notif, Moodle G1/G5, thin GA tests H2/H3 | `[x]` |
-| Sisa eksplisit | `[ ]` Epik ROADMAP: Workflow V3 designer polish |
+| Sisa eksplisit | — Gelombang 5 ANALISIS selesai (2026-06-03) |
 
 ---
 
@@ -213,7 +212,7 @@ Semua **12 section** masih `[ ]` — ini **checklist deployment/ops**, bukan fit
 
 | Dokumen | Peran | Status |
 |---------|-------|--------|
-| [WORKFLOW.md](WORKFLOW.md) | Runbook workflow V2/V3 | `[x]` terdokumentasi; section visual designer belum |
+| [WORKFLOW.md](WORKFLOW.md) | Runbook workflow V2/V3 | `[x]` termasuk § Visual Designer & Parallel Gateway |
 | [PROCUREMENT.md](PROCUREMENT.md) | Pipeline PR→bill | `[x]` selaras kode |
 | [MOODLE.md](MOODLE.md) | Integrasi Moodle | `[x]`; enrollment reconcile ditambahkan |
 | [FINANCE.md](FINANCE.md) | Golden path finance | `[x]` |
@@ -227,7 +226,6 @@ Semua **12 section** masih `[ ]` — ini **checklist deployment/ops**, bukan fit
 
 ## 11. Prioritas Berikutnya (disarankan)
 
-1. **`[ ]` Workflow designer** — tutup AC FASE_1_2 (tests versioning, WORKFLOW.md, bundle gate).
 2. **`[ ]` ROADMAPv2 cleanup** — jalankan `composer run lint:translations` hingga exit 0; tambahkan ke CI.
 3. **`[ ]` ROADMAPv01 monetization** — billing engine + grace lock produksi.
 4. **`[ ]` v06 Parent Portal** — modul belum ada di `Modules/`.
