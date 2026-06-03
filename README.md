@@ -604,9 +604,9 @@ Kami menerima kontribusi dari community! Berikut guidelines:
 2. **Ikuti code conventions** (lihat [code-style.md](./docs/code-style.md))
 3. **Tulis tests** untuk fitur baru (PHPUnit)
 4. **Format code** dengan `vendor/bin/pint --dirty`
-5. **Buat pull request** dengan deskripsi jelas
+5. **Buat pull request** ke `main`, tunggu CI hijau, lalu **merge** (alur: PR → `main`, bukan push langsung ke `main`)
 
-Repository admins: enable **branch protection** on `main` per [.github/BRANCH_PROTECTION.md](.github/BRANCH_PROTECTION.md) (required status checks: Pint, Larastan, PHPUnit).
+Lihat [.github/BRANCH_PROTECTION.md](.github/BRANCH_PROTECTION.md) untuk langkah PR + (opsional) branch protection di GitHub.
 
 ### Branch Naming
 
