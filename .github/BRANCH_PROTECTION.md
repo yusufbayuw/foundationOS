@@ -1,4 +1,45 @@
-# Branch protection for `main` (required for production security)
+# Alur kerja: PR lalu `main`
+
+Standar untuk FoundationOS: **jangan push langsung ke `main`**. Buat branch → buka Pull Request → tunggu CI hijau → merge.
+
+## Langkah developer (setiap fitur)
+
+```bash
+git checkout main
+git pull origin main
+
+git checkout -b cursor/nama-fitur-6d50   # atau feature/nama-fitur
+
+# ... edit, commit ...
+git add .
+git commit -m "Deskripsi perubahan"
+git push -u origin cursor/nama-fitur-6d50
+```
+
+Di GitHub:
+
+1. Buka repo → **Pull requests** → **New pull request**
+2. Base: `main` ← Compare: branch Anda
+3. Isi judul & deskripsi → **Create pull request**
+4. Tunggu centang hijau (Pint, Larastan, PHPUnit)
+5. **Merge pull request** (squash atau merge commit, sesuai kebiasaan tim)
+6. Lokal: `git checkout main && git pull origin main`
+
+## Ringkasan
+
+| Langkah | Di mana |
+|---------|---------|
+| Kode | Branch `cursor/...-6d50` atau `feature/...` |
+| Review & CI | Pull Request ke `main` |
+| Produksi / referensi stabil | `main` setelah merge |
+
+Commit yang sudah ada di `main` tidak perlu di-PR ulang. Aturan ini berlaku untuk **perubahan berikutnya**.
+
+---
+
+# Branch protection (opsional, mengunci aturan di GitHub)
+
+Kalau Anda ingin GitHub **menolak** push langsung ke `main`, aktifkan branch protection.
 
 Configure in GitHub: **Settings → Branches → Branch protection rules → Add rule** (or edit existing rule for `main`).
 
