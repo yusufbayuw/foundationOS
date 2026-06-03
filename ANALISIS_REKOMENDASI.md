@@ -299,6 +299,7 @@ Pola *transactional outbox*: observer → `moodle_sync_outbox` → `ProcessMoodl
 - [x] **OpenAPI v2** (`GET /api/v2/openapi.json` — mirror path catalog + `ApiMeta` schema).
 - [x] **Workflow determinisme + notifikasi (F1, F6, A6)** — step/transisi dari snapshot; eskalasi SLA kirim notifikasi; assignee dapat `InternalWorkflowNotification`.
 - [x] **Moodle operasional (G1, G5)** — enrol idempoten (`already enrolled`); readonly → status `skipped` (bukan `synced`); Filament `MoodleSyncOutbox` + retry; ops-report `skipped`.
+- [x] **Testing modul tipis (H2, H3)** — `ThinGaModuleCatalog`; H2 factory/BelongsToTenant/feature-test gate; H3 Livewire list smoke untuk 13 modul GA tipis.
 - [ ] Epik ROADMAP lanjutan: Workflow V3 designer polish.
 
 ---
