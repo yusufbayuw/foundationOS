@@ -47,8 +47,8 @@ FoundationOS is a **modular SaaS ERP for educational institutions** implemented 
 | Filament admin resources | **257** `ModuleResource` subclasses | `find Modules -name '*Resource.php' \| grep ModuleResource` |
 | Database tables | **434** | `storage/app/entity-catalog.json` |
 | Eloquent models | **402** | `storage/app/entity-catalog-extract.md` |
-| Application routes (except vendor) | **1782** | `php artisan route:list --except-vendor` |
-| API routes (except vendor) | **105** | `php artisan route:list --except-vendor --path=api` |
+| Application routes (except vendor) | **1781** | `php artisan route:list --except-vendor` |
+| API routes (except vendor) | **104** | `php artisan route:list --except-vendor --path=api` |
 | Filament panels | **3** (`admin`, `platform`, `parent`) | `app/Providers/Filament/*PanelProvider.php` |
 | CSV importers | **132** | `app/Filament/Imports/*Importer.php` |
 | PDF report controllers | **39** | `Modules/*/Http/Controllers/*PdfController.php` |
@@ -677,38 +677,51 @@ Full FK catalog: `storage/app/verified-fks.json` (~5472 entries). Eloquent relat
 
 ### Hub ERD (tenant-scoped core + major domains)
 
+Table names match `storage/app/entity-catalog.json`. FK edges cite migration `constrained()`; morph edges are polymorphic (no DB FK).
+
 ```mermaid
 erDiagram
-    tenants ||--o{ organizations : has
-    tenants ||--o{ user_tenant_roles : has
-    users ||--o{ user_tenant_roles : has
-    tenant_roles ||--o{ user_tenant_roles : defines
-    organizations ||--o{ academic_years : has
-    academic_years ||--o{ academic_periods : has
+    tenants ||--o{ organizations : tenant_id
+    tenants ||--o{ user_tenant_roles : tenant_id
+    users ||--o{ user_tenant_roles : user_id
+    tenant_roles ||--o{ user_tenant_roles : tenant_role_id
+    organizations ||--o{ academic_years : organization_id
+    academic_years ||--o{ academic_periods : academic_year_id
 
-    tenants ||--o{ school_students : scopes
-    organizations ||--o{ school_students : optional
-    school_students ||--o{ class_students : enrolls
-    school_classes ||--o{ class_students : contains
+    tenants ||--o{ students : tenant_id
+    organizations ||--o{ students : organization_id
+    students ||--o{ class_students : student_id
+    classes ||--o{ class_students : class_id
 
-    tenants ||--o{ enrollment_applicants : scopes
-    enrollment_applicants ||--o| school_students : converts_to
-    enrollment_applicants ||--o{ enrollment_registrations : has
+    tenants ||--o{ applicants : tenant_id
+    applicants ||--o| students : converted_to_student_id
+    applicants ||--o{ registrations : applicant_id
 
-    tenants ||--o{ finance_student_invoices : scopes
-    finance_student_invoices ||--o{ finance_payments : paid_by
-    enrollment_registrations }o--|| finance_student_invoices : morph
+    tenants ||--o{ student_invoices : tenant_id
+    student_invoices ||--o{ payments : student_invoice_id
+    applicants }o--o{ student_invoices : invoiceable_morph
 
-    tenants ||--o{ procurement_purchase_requisitions : scopes
-    procurement_purchase_requisitions ||--o| workflow_instances : triggers
-    workflow_instances ||--o{ workflow_assignments : has
+    tenants ||--o{ purchase_requisitions : tenant_id
+    workflow_instances ||--o{ workflow_assignments : workflow_instance_id
+    purchase_requisitions }o--o{ workflow_instances : subject_morph
 
-    tenants ||--o{ library_books : scopes
-    library_books ||--o{ library_book_copies : has
-    library_members ||--o{ library_loans : borrows
+    tenants ||--o{ books : tenant_id
+    books ||--o{ book_copies : book_id
+    tenants ||--o{ members : tenant_id
+    members ||--o{ loans : member_id
+    book_copies ||--o{ loans : book_copy_id
 ```
 
-**Naming note:** Table names in diagram are illustrative; exact names per `entity-catalog.json` (e.g. `students`, `applicants`, `student_invoices`).
+| Edge | Evidence |
+|------|----------|
+| `students.tenant_id`, `students.organization_id` | `Modules/School/database/migrations/2026_03_24_152528_create_students_table.php` |
+| `class_students.class_id` → `classes` | `Modules/School/database/migrations/2026_03_24_152531_create_class_students_table.php` |
+| `applicants.converted_to_student_id` → `students` | `Modules/Enrollment/database/migrations/2026_03_24_152536_create_applicants_table.php` |
+| `registrations.applicant_id` → `applicants` | `Modules/Enrollment/database/migrations/2026_03_24_152537_create_registrations_table.php` |
+| `payments.student_invoice_id` → `student_invoices` | `Modules/Finance/database/migrations/2026_03_24_152535_create_payments_table.php` |
+| `student_invoices` `invoiceable_type` / `invoiceable_id` | `Modules/Finance/database/migrations/2026_03_24_152535_create_student_invoices_table.php`; morph target `Applicant` in `ApplicantOnboardingInvoiceService.php` |
+| `workflow_instances.subject_type` / `subject_id` | `Modules/Workflow/database/migrations/2026_03_26_210300_create_workflow_instances_table.php` |
+| `loans.member_id`, `loans.book_copy_id` | `Modules/Library/database/migrations/2026_03_24_152543_create_loans_table.php` |
 
 ### Tenancy FK pattern
 
@@ -875,7 +888,8 @@ flowchart TB
 | 45 modules | Directory count | `Modules/` |
 | 257 Filament resources | Class extends | `grep extends ModuleResource` |
 | 434 tables | JSON catalog | `storage/app/entity-catalog.json` |
-| 1782 routes | Artisan | `php artisan route:list --except-vendor` |
+| 1781 routes | Artisan | `php artisan route:list --except-vendor` |
+| 104 API routes | Artisan | `php artisan route:list --except-vendor --path=api` |
 | Shared DB tenancy | Trait + docs | `BelongsToTenant.php`, `CLAUDE.md` |
 | 3 panels | Provider classes | `app/Providers/Filament/` |
 | Panel access rules | Method | `User.php:463-484` |
