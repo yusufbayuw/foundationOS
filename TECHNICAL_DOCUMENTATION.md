@@ -971,6 +971,7 @@ flowchart TB
 | `ARCHITECTURE.md` | Layered architecture, integration maps |
 | `AUTHORIZATION_MATRIX.md` | Shield permissions, panel access, per-module resources |
 | `API_ROUTES.md` | Full `api/*` route table (101 routes) |
+| `REAP_AUDIT.md` | REAP v1.0 compliance audit, EV-IDs, conflicts, stage gate |
 | `EVENTS.md` | Cross-module domain events |
 | `CLAUDE.md` | Agent/dev conventions |
 | `README.md` | Project overview |
