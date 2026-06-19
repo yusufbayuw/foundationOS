@@ -32,7 +32,8 @@
 | Event catalog | Cross-module events | `EVENTS.md` | **Verified** (pre-existing; listener files confirmed) |
 | Entity catalog | 434 tables / 402 models | `storage/app/entity-catalog.json` | **UNVERIFIED in git** — file not committed |
 | FK catalog | Foreign keys | `storage/app/verified-fks.json` | **UNVERIFIED in git** — file not committed |
-| REAP Audit (this file) | Protocol compliance & validation | `REAP_AUDIT.md` | **Final** for current stage |
+| REAP Audit (this file) | Protocol compliance & validation | `REAP_AUDIT.md` | **Final** for discovery stage |
+| Repository Manifest | Stage 01 scope boundary | `00-repository-manifest.md` | **Verified** |
 
 ---
 
