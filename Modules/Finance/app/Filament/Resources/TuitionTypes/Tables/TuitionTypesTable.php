@@ -2,17 +2,19 @@
 
 namespace Modules\Finance\Filament\Resources\TuitionTypes\Tables;
 
+use App\Filament\Imports\TuitionTypeImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class TuitionTypesTable
 {
@@ -21,56 +23,56 @@ class TuitionTypesTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization.name'))
+                    ->label(FilamentUi::field('organization.name'))
                     ->searchable(),
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('education_level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('education_level'))
+                    ->label(FilamentUi::field('education_level'))
                     ->searchable(),
                 TextColumn::make('amount')
-                    ->label(\Modules\Core\Support\FilamentUi::field('amount'))
+                    ->label(FilamentUi::field('amount'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('frequency')
-                    ->label(\Modules\Core\Support\FilamentUi::field('frequency'))
+                    ->label(FilamentUi::field('frequency'))
                     ->searchable(),
                 TextColumn::make('due_day')
-                    ->label(\Modules\Core\Support\FilamentUi::field('due_day'))
+                    ->label(FilamentUi::field('due_day'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('grace_period_days')
-                    ->label(\Modules\Core\Support\FilamentUi::field('grace_period_days'))
+                    ->label(FilamentUi::field('grace_period_days'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('late_fee_percentage')
-                    ->label(\Modules\Core\Support\FilamentUi::field('late_fee_percentage'))
+                    ->label(FilamentUi::field('late_fee_percentage'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('late_fee_fixed')
-                    ->label(\Modules\Core\Support\FilamentUi::field('late_fee_fixed'))
+                    ->label(FilamentUi::field('late_fee_fixed'))
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('discount_eligible')
-                    ->label(\Modules\Core\Support\FilamentUi::field('discount_eligible'))
+                    ->label(FilamentUi::field('discount_eligible'))
                     ->boolean(),
                 IconColumn::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->label(FilamentUi::field('is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -83,14 +85,14 @@ class TuitionTypesTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\TuitionTypeImporter::class),
+                ...ImportTableActions::make(TuitionTypeImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

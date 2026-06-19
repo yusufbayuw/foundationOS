@@ -12,7 +12,7 @@ if (! file_exists($moodleConfigPath)) {
 define('CLI_SCRIPT', true);
 require $moodleConfigPath;
 
-$envPath = __DIR__ . '/../.env';
+$envPath = __DIR__.'/../.env';
 $token = getenv('MOODLE_WS_TOKEN') ?: '';
 
 if ($token === '' && file_exists($envPath)) {
@@ -64,7 +64,7 @@ $result = $statement->get_result();
 $tokenRow = $result->fetch_assoc();
 
 if (! $tokenRow) {
-    echo json_encode(['token_found' => false], JSON_PRETTY_PRINT) . PHP_EOL;
+    echo json_encode(['token_found' => false], JSON_PRETTY_PRINT).PHP_EOL;
     exit(0);
 }
 
@@ -104,4 +104,4 @@ echo json_encode([
     ],
     'service_functions_count' => count($functions),
     'service_functions' => $functions,
-], JSON_PRETTY_PRINT) . PHP_EOL;
+], JSON_PRETTY_PRINT).PHP_EOL;

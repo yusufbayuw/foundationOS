@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Resources\Faculties;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\Faculties\Pages\CreateFaculty;
@@ -14,6 +13,7 @@ use Modules\Campus\Filament\Resources\Faculties\Schemas\FacultyForm;
 use Modules\Campus\Filament\Resources\Faculties\Schemas\FacultyInfolist;
 use Modules\Campus\Filament\Resources\Faculties\Tables\FacultiesTable;
 use Modules\Campus\Models\Faculty;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class FacultyResource extends LocalizedResource
 {

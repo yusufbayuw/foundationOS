@@ -35,12 +35,14 @@ class MoodleReconcileCommand extends Command
     {
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync disabled.');
+
             return self::SUCCESS;
         }
 
         $entity = strtolower(trim((string) $this->argument('entity')));
         if (! in_array($entity, ['user', 'course', 'all'], true)) {
             $this->error('Entity harus salah satu dari: user, course, all.');
+
             return self::FAILURE;
         }
 
@@ -48,6 +50,7 @@ class MoodleReconcileCommand extends Command
         $fix = (bool) $this->option('fix');
         if ($dryRun && $fix) {
             $this->error('Gunakan salah satu: --dry-run atau --fix, bukan keduanya.');
+
             return self::FAILURE;
         }
 
@@ -113,6 +116,7 @@ class MoodleReconcileCommand extends Command
             } catch (MoodleIntegrationException $exception) {
                 $summary['errors']++;
                 $this->warn("User {$user->id}: {$exception->getMessage()}");
+
                 continue;
             }
 
@@ -136,6 +140,7 @@ class MoodleReconcileCommand extends Command
             } catch (MoodleIntegrationException $exception) {
                 $summary['errors']++;
                 $this->warn("User {$user->id}: {$exception->getMessage()}");
+
                 continue;
             }
 
@@ -182,6 +187,7 @@ class MoodleReconcileCommand extends Command
             } catch (MoodleIntegrationException $exception) {
                 $summary['errors']++;
                 $this->warn("Course {$course->id}: {$exception->getMessage()}");
+
                 continue;
             }
 

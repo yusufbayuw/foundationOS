@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\SubscriptionPlans;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Pages\CreateSubscriptionPlan;
@@ -15,6 +14,7 @@ use Modules\Core\Filament\Resources\SubscriptionPlans\RelationManagers\TenantsRe
 use Modules\Core\Filament\Resources\SubscriptionPlans\Schemas\SubscriptionPlanForm;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Schemas\SubscriptionPlanInfolist;
 use Modules\Core\Filament\Resources\SubscriptionPlans\Tables\SubscriptionPlansTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\SubscriptionPlan;
 
 class SubscriptionPlanResource extends LocalizedResource

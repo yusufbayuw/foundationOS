@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Violations;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Violations\Pages\CreateViolation;
 use Modules\School\Filament\Resources\Violations\Pages\EditViolation;
 use Modules\School\Filament\Resources\Violations\Pages\ListViolations;

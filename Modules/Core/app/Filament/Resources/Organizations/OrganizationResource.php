@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\Organizations;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\Organizations\Pages\CreateOrganization;
@@ -14,8 +13,8 @@ use Modules\Core\Filament\Resources\Organizations\RelationManagers\AcademicYears
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\AchievementTypesRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\AssessmentsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\AttachedFilesRelationManager;
-use Modules\Core\Filament\Resources\Organizations\RelationManagers\AuditLogsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\AuditableLogsRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\AuditLogsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\CollageStudentsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\CourseOfferingsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\CurriculaRelationManager;
@@ -32,12 +31,13 @@ use Modules\Core\Filament\Resources\Organizations\RelationManagers\StudentsRelat
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\StudyProgramsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\SubjectsRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\TeachersRelationManager;
-use Modules\Core\Filament\Resources\Organizations\RelationManagers\UserTenantRolesRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\UsersRelationManager;
+use Modules\Core\Filament\Resources\Organizations\RelationManagers\UserTenantRolesRelationManager;
 use Modules\Core\Filament\Resources\Organizations\RelationManagers\ViolationTypesRelationManager;
 use Modules\Core\Filament\Resources\Organizations\Schemas\OrganizationForm;
 use Modules\Core\Filament\Resources\Organizations\Schemas\OrganizationInfolist;
 use Modules\Core\Filament\Resources\Organizations\Tables\OrganizationsTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\Organization;
 
 class OrganizationResource extends LocalizedResource

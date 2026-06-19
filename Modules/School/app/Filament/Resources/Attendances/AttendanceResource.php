@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Attendances;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Attendances\Pages\CreateAttendance;
 use Modules\School\Filament\Resources\Attendances\Pages\EditAttendance;
 use Modules\School\Filament\Resources\Attendances\Pages\ListAttendances;

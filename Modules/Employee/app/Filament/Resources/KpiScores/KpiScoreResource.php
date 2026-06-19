@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\KpiScores;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\KpiScores\Pages\CreateKpiScore;
 use Modules\Employee\Filament\Resources\KpiScores\Pages\EditKpiScore;
 use Modules\Employee\Filament\Resources\KpiScores\Pages\ListKpiScores;

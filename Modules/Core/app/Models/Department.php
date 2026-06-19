@@ -4,18 +4,18 @@ namespace Modules\Core\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Employee\Models\KpiTemplate;
 use Modules\Employee\Models\Position;
 use Modules\Enrollment\Models\Applicant;
 use Modules\School\Models\SchoolClass;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Department extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -32,6 +32,7 @@ class Department extends Model
             'is_active' => 'boolean',
         ];
     }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\StudyProgram;
 use Modules\Core\Models\Organization;
+use Modules\Exam\Database\Factories\ExamQuestionBankFactory;
 use Modules\Exam\Enums\ExamAcademicContext;
 use Modules\Exam\Enums\QuestionBankStatus;
 use Modules\School\Models\Curriculum;
@@ -19,9 +20,9 @@ class ExamQuestionBank extends ExamModel
     use HasFactory;
     use SoftDeletes;
 
-    protected static function newFactory(): \Modules\Exam\Database\Factories\ExamQuestionBankFactory
+    protected static function newFactory(): ExamQuestionBankFactory
     {
-        return \Modules\Exam\Database\Factories\ExamQuestionBankFactory::new();
+        return ExamQuestionBankFactory::new();
     }
 
     protected $fillable = [

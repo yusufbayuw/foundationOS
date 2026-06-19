@@ -2,17 +2,19 @@
 
 namespace Modules\Employee\Filament\Resources\Shifts\Tables;
 
+use App\Filament\Imports\ShiftImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class ShiftsTable
 {
@@ -21,45 +23,45 @@ class ShiftsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization.name'))
+                    ->label(FilamentUi::field('organization.name'))
                     ->searchable(),
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('start_time')
-                    ->label(\Modules\Core\Support\FilamentUi::field('start_time'))
+                    ->label(FilamentUi::field('start_time'))
                     ->time()
                     ->sortable(),
                 TextColumn::make('end_time')
-                    ->label(\Modules\Core\Support\FilamentUi::field('end_time'))
+                    ->label(FilamentUi::field('end_time'))
                     ->time()
                     ->sortable(),
                 TextColumn::make('break_duration_minutes')
-                    ->label(\Modules\Core\Support\FilamentUi::field('break_duration_minutes'))
+                    ->label(FilamentUi::field('break_duration_minutes'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('color')
-                    ->label(\Modules\Core\Support\FilamentUi::field('color'))
+                    ->label(FilamentUi::field('color'))
                     ->searchable(),
                 IconColumn::make('is_night_shift')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_night_shift'))
+                    ->label(FilamentUi::field('is_night_shift'))
                     ->boolean(),
                 IconColumn::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->label(FilamentUi::field('is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -72,14 +74,14 @@ class ShiftsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\ShiftImporter::class),
+                ...ImportTableActions::make(ShiftImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

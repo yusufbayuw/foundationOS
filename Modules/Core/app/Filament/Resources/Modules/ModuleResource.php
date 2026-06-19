@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\Modules;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\Modules\Pages\CreateModule;
@@ -14,6 +13,7 @@ use Modules\Core\Filament\Resources\Modules\RelationManagers\TenantsRelationMana
 use Modules\Core\Filament\Resources\Modules\Schemas\ModuleForm;
 use Modules\Core\Filament\Resources\Modules\Schemas\ModuleInfolist;
 use Modules\Core\Filament\Resources\Modules\Tables\ModulesTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\Module;
 
 class ModuleResource extends LocalizedResource

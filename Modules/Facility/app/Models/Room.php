@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Facility\Database\Factories\RoomFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class Room extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Facility\Database\Factories\RoomFactory
+    protected static function newFactory(): RoomFactory
     {
-        return \Modules\Facility\Database\Factories\RoomFactory::new();
+        return RoomFactory::new();
     }
 
     protected $table = 'rooms';

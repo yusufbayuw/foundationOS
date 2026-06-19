@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Assessments;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Assessments\Pages\CreateAssessment;
 use Modules\School\Filament\Resources\Assessments\Pages\EditAssessment;
 use Modules\School\Filament\Resources\Assessments\Pages\ListAssessments;

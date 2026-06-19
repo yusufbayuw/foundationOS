@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\InternalAudit\Database\Factories\AuditProgramFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class AuditProgram extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\InternalAudit\Database\Factories\AuditProgramFactory
+    protected static function newFactory(): AuditProgramFactory
     {
-        return \Modules\InternalAudit\Database\Factories\AuditProgramFactory::new();
+        return AuditProgramFactory::new();
     }
 
     protected $table = 'audit_programs';

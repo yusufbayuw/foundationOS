@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\Shifts;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\Shifts\Pages\CreateShift;
 use Modules\Employee\Filament\Resources\Shifts\Pages\EditShift;
 use Modules\Employee\Filament\Resources\Shifts\Pages\ListShifts;

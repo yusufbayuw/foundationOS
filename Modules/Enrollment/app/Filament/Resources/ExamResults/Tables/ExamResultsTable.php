@@ -2,17 +2,19 @@
 
 namespace Modules\Enrollment\Filament\Resources\ExamResults\Tables;
 
+use App\Filament\Imports\ExamResultImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class ExamResultsTable
 {
@@ -21,39 +23,39 @@ class ExamResultsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('applicant.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('applicant.id'))
+                    ->label(FilamentUi::field('applicant.id'))
                     ->searchable(),
                 TextColumn::make('examiner.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('examiner.name'))
+                    ->label(FilamentUi::field('examiner.name'))
                     ->searchable(),
                 TextColumn::make('seat_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('seat_number'))
+                    ->label(FilamentUi::field('seat_number'))
                     ->searchable(),
                 TextColumn::make('score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('score'))
+                    ->label(FilamentUi::field('score'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('grade')
-                    ->label(\Modules\Core\Support\FilamentUi::field('grade'))
+                    ->label(FilamentUi::field('grade'))
                     ->searchable(),
                 IconColumn::make('is_passed')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_passed'))
+                    ->label(FilamentUi::field('is_passed'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('examSchedule.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('examSchedule.name'))
+                    ->label(FilamentUi::field('examSchedule.name'))
                     ->searchable(),
             ])
             ->filters([
@@ -64,14 +66,14 @@ class ExamResultsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\ExamResultImporter::class),
+                ...ImportTableActions::make(ExamResultImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

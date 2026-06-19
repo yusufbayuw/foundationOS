@@ -50,7 +50,7 @@ class SchoolStatsWidget extends StatsOverviewWidget
             ->count();
 
         $attendanceRate = $todayAttendances > 0
-            ? round(($todayPresent / $todayAttendances) * 100, 1) . '%'
+            ? round(($todayPresent / $todayAttendances) * 100, 1).'%'
             : '-';
 
         return [

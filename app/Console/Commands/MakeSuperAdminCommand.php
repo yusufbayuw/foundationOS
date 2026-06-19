@@ -31,7 +31,7 @@ class MakeSuperAdminCommand extends Command
 
         if (! $user) {
             $isNewUser = true;
-            $user = new User();
+            $user = new User;
             $user->email = $email;
             $user->name = $nameOption !== '' ? $nameOption : str($email)->before('@')->replace('.', ' ')->title()->toString();
             $user->username = $usernameOption !== '' ? $usernameOption : str($email)->before('@')->replace('.', '_')->lower()->toString();
@@ -80,4 +80,3 @@ class MakeSuperAdminCommand extends Command
         return self::SUCCESS;
     }
 }
-

@@ -2,9 +2,9 @@
 
 namespace Modules\Global\Filament\Resources\Cities;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Global\Filament\Resources\Cities\Pages\CreateCity;
 use Modules\Global\Filament\Resources\Cities\Pages\EditCity;
 use Modules\Global\Filament\Resources\Cities\Pages\ListCities;

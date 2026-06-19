@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Capacity\Database\Factories\CapacityResourceFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
@@ -14,9 +15,9 @@ class CapacityResource extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Capacity\Database\Factories\CapacityResourceFactory
+    protected static function newFactory(): CapacityResourceFactory
     {
-        return \Modules\Capacity\Database\Factories\CapacityResourceFactory::new();
+        return CapacityResourceFactory::new();
     }
 
     protected $table = 'capacity_resources';

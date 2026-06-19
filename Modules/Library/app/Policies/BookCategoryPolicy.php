@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Library\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Library\Models\BookCategory;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BookCategoryPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:BookCategory');
@@ -71,5 +71,4 @@ class BookCategoryPolicy
     {
         return $authUser->can('Reorder:BookCategory');
     }
-
 }

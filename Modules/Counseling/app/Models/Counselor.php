@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Counseling\Database\Factories\CounselorFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class Counselor extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Counseling\Database\Factories\CounselorFactory
+    protected static function newFactory(): CounselorFactory
     {
-        return \Modules\Counseling\Database\Factories\CounselorFactory::new();
+        return CounselorFactory::new();
     }
 
     protected $table = 'counselors';

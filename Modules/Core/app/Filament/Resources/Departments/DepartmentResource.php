@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\Departments;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\Departments\Pages\CreateDepartment;
@@ -13,6 +12,7 @@ use Modules\Core\Filament\Resources\Departments\RelationManagers\SchoolClassesRe
 use Modules\Core\Filament\Resources\Departments\Schemas\DepartmentForm;
 use Modules\Core\Filament\Resources\Departments\Schemas\DepartmentInfolist;
 use Modules\Core\Filament\Resources\Departments\Tables\DepartmentsTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\Department;
 
 class DepartmentResource extends LocalizedResource

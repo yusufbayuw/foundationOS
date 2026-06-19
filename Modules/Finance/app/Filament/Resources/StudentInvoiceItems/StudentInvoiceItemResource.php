@@ -2,9 +2,9 @@
 
 namespace Modules\Finance\Filament\Resources\StudentInvoiceItems;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\StudentInvoiceItems\Pages\CreateStudentInvoiceItem;
 use Modules\Finance\Filament\Resources\StudentInvoiceItems\Pages\EditStudentInvoiceItem;
 use Modules\Finance\Filament\Resources\StudentInvoiceItems\Pages\ListStudentInvoiceItems;

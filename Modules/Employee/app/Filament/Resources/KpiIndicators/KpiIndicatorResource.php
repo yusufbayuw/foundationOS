@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\KpiIndicators;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\KpiIndicators\Pages\CreateKpiIndicator;
 use Modules\Employee\Filament\Resources\KpiIndicators\Pages\EditKpiIndicator;
 use Modules\Employee\Filament\Resources\KpiIndicators\Pages\ListKpiIndicators;

@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\MerchOrder\Database\Factories\UniformPackageFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class UniformPackage extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\MerchOrder\Database\Factories\UniformPackageFactory
+    protected static function newFactory(): UniformPackageFactory
     {
-        return \Modules\MerchOrder\Database\Factories\UniformPackageFactory::new();
+        return UniformPackageFactory::new();
     }
 
     protected $table = 'uniform_packages';

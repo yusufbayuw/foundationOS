@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\Users;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\Users\Pages\CreateUser;
@@ -31,6 +30,7 @@ use Modules\Core\Filament\Resources\Users\RelationManagers\VerifiedStudentAchiev
 use Modules\Core\Filament\Resources\Users\Schemas\UserForm;
 use Modules\Core\Filament\Resources\Users\Schemas\UserInfolist;
 use Modules\Core\Filament\Resources\Users\Tables\UsersTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\User;
 
 class UserResource extends LocalizedResource

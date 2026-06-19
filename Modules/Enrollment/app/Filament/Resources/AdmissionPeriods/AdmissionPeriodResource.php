@@ -2,9 +2,9 @@
 
 namespace Modules\Enrollment\Filament\Resources\AdmissionPeriods;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Enrollment\Filament\Resources\AdmissionPeriods\Pages\CreateAdmissionPeriod;
 use Modules\Enrollment\Filament\Resources\AdmissionPeriods\Pages\EditAdmissionPeriod;
 use Modules\Enrollment\Filament\Resources\AdmissionPeriods\Pages\ListAdmissionPeriods;

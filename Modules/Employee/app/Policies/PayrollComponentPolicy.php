@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Employee\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Employee\Models\PayrollComponent;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PayrollComponentPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:PayrollComponent');
@@ -71,5 +71,4 @@ class PayrollComponentPolicy
     {
         return $authUser->can('Reorder:PayrollComponent');
     }
-
 }

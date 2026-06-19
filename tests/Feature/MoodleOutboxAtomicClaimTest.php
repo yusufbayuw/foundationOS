@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Integrations\Moodle\MoodleSyncRetry;
+use App\Integrations\Moodle\MoodleSyncService;
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -69,8 +71,8 @@ class MoodleOutboxAtomicClaimTest extends TestCase
 
         $job = new ProcessMoodleSyncOutboxJob($row->id);
         $job->handle(
-            app(\App\Integrations\Moodle\MoodleSyncService::class),
-            app(\App\Integrations\Moodle\MoodleSyncRetry::class),
+            app(MoodleSyncService::class),
+            app(MoodleSyncRetry::class),
         );
 
         $this->assertSame(MoodleSyncOutbox::STATUS_PROCESSING, $row->fresh()->status);

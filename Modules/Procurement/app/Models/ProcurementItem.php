@@ -4,15 +4,15 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Finance\Models\ChartOfAccount;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Finance\Models\ChartOfAccount;
 
 class ProcurementItem extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -41,6 +41,7 @@ class ProcurementItem extends Model
             'is_active' => 'boolean',
         ];
     }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProcurementCategory::class, 'category_id');

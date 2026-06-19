@@ -2,9 +2,9 @@
 
 namespace Modules\Procurement\Filament\Resources\PurchaseOrderItems;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\PurchaseOrderItems\Pages\CreatePurchaseOrderItem;
 use Modules\Procurement\Filament\Resources\PurchaseOrderItems\Pages\EditPurchaseOrderItem;
 use Modules\Procurement\Filament\Resources\PurchaseOrderItems\Pages\ListPurchaseOrderItems;

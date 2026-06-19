@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Resources\StudyResults;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\StudyResults\Pages\CreateStudyResult;
@@ -13,6 +12,7 @@ use Modules\Campus\Filament\Resources\StudyResults\Schemas\StudyResultForm;
 use Modules\Campus\Filament\Resources\StudyResults\Schemas\StudyResultInfolist;
 use Modules\Campus\Filament\Resources\StudyResults\Tables\StudyResultsTable;
 use Modules\Campus\Models\StudyResult;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class StudyResultResource extends LocalizedResource
 {

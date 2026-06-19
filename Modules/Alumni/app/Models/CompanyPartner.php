@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Alumni\Database\Factories\CompanyPartnerFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
@@ -14,9 +15,9 @@ class CompanyPartner extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Alumni\Database\Factories\CompanyPartnerFactory
+    protected static function newFactory(): CompanyPartnerFactory
     {
-        return \Modules\Alumni\Database\Factories\CompanyPartnerFactory::new();
+        return CompanyPartnerFactory::new();
     }
 
     protected $table = 'company_partners';

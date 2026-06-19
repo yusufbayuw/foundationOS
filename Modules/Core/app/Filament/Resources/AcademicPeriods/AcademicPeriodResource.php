@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\AcademicPeriods;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\AcademicPeriods\Pages\CreateAcademicPeriod;
@@ -12,6 +11,7 @@ use Modules\Core\Filament\Resources\AcademicPeriods\Pages\ViewAcademicPeriod;
 use Modules\Core\Filament\Resources\AcademicPeriods\Schemas\AcademicPeriodForm;
 use Modules\Core\Filament\Resources\AcademicPeriods\Schemas\AcademicPeriodInfolist;
 use Modules\Core\Filament\Resources\AcademicPeriods\Tables\AcademicPeriodsTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\AcademicPeriod;
 
 class AcademicPeriodResource extends LocalizedResource

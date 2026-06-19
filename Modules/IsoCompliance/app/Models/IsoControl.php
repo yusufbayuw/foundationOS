@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\IsoCompliance\Database\Factories\IsoControlFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class IsoControl extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\IsoCompliance\Database\Factories\IsoControlFactory
+    protected static function newFactory(): IsoControlFactory
     {
-        return \Modules\IsoCompliance\Database\Factories\IsoControlFactory::new();
+        return IsoControlFactory::new();
     }
 
     protected $table = 'iso_controls';

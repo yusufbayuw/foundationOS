@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Core\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\OrganizationSetting;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class OrganizationSettingPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:OrganizationSetting');
@@ -71,5 +71,4 @@ class OrganizationSettingPolicy
     {
         return $authUser->can('Reorder:OrganizationSetting');
     }
-
 }

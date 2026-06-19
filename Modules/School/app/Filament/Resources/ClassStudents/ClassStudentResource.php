@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\ClassStudents;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\ClassStudents\Pages\CreateClassStudent;
 use Modules\School\Filament\Resources\ClassStudents\Pages\EditClassStudent;
 use Modules\School\Filament\Resources\ClassStudents\Pages\ListClassStudents;

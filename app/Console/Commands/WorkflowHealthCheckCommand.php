@@ -48,17 +48,17 @@ class WorkflowHealthCheckCommand extends Command
                 ->all();
 
             if ($nonTerminalWithoutTransitions !== []) {
-                $issues[] = 'missing transitions for: ' . implode(', ', $nonTerminalWithoutTransitions);
+                $issues[] = 'missing transitions for: '.implode(', ', $nonTerminalWithoutTransitions);
             }
 
             $defaultTransitionConflicts = $workflow->transitions
-                ->groupBy(fn ($transition) => $transition->from_step_id . ':' . $transition->action_name)
+                ->groupBy(fn ($transition) => $transition->from_step_id.':'.$transition->action_name)
                 ->filter(fn ($group) => $group->where('is_default', true)->count() > 1)
                 ->keys()
                 ->all();
 
             if ($defaultTransitionConflicts !== []) {
-                $issues[] = 'multiple default transitions on: ' . implode(', ', $defaultTransitionConflicts);
+                $issues[] = 'multiple default transitions on: '.implode(', ', $defaultTransitionConflicts);
             }
 
             foreach ($workflow->steps as $step) {

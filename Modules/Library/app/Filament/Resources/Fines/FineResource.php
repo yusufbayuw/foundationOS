@@ -4,7 +4,6 @@ namespace Modules\Library\Filament\Resources\Fines;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\Fines\Pages\CreateFine;
 use Modules\Library\Filament\Resources\Fines\Pages\EditFine;
 use Modules\Library\Filament\Resources\Fines\Pages\ListFines;
@@ -12,6 +11,7 @@ use Modules\Library\Filament\Resources\Fines\Pages\ViewFine;
 use Modules\Library\Filament\Resources\Fines\Schemas\FineForm;
 use Modules\Library\Filament\Resources\Fines\Schemas\FineInfolist;
 use Modules\Library\Filament\Resources\Fines\Tables\FinesTable;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Models\Fine;
 
 class FineResource extends LocalizedResource

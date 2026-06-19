@@ -32,6 +32,7 @@ class MoodleBackfillCommand extends Command
 
         if (! in_array($entity, ['user', 'course', 'enrollment', 'all'], true)) {
             $this->error('Entity harus salah satu dari: user, course, enrollment, all.');
+
             return self::FAILURE;
         }
 
@@ -221,4 +222,3 @@ class MoodleBackfillCommand extends Command
         return in_array($classStatus, ['inactive', 'nonaktif', 'keluar', 'left', 'withdrawn'], true);
     }
 }
-

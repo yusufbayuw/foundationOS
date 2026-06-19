@@ -9,14 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
+use Modules\Printing\Database\Factories\PrintTemplateFactory;
 
 class PrintTemplate extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Printing\Database\Factories\PrintTemplateFactory
+    protected static function newFactory(): PrintTemplateFactory
     {
-        return \Modules\Printing\Database\Factories\PrintTemplateFactory::new();
+        return PrintTemplateFactory::new();
     }
 
     protected $table = 'print_templates';

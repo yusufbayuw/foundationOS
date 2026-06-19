@@ -2,9 +2,9 @@
 
 namespace Modules\Finance\Filament\Resources\ChartOfAccounts;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\ChartOfAccounts\Pages\CreateChartOfAccount;
 use Modules\Finance\Filament\Resources\ChartOfAccounts\Pages\EditChartOfAccount;
 use Modules\Finance\Filament\Resources\ChartOfAccounts\Pages\ListChartOfAccounts;

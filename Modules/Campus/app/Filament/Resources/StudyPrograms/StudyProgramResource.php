@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Resources\StudyPrograms;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\StudyPrograms\Pages\CreateStudyProgram;
@@ -18,6 +17,7 @@ use Modules\Campus\Filament\Resources\StudyPrograms\Schemas\StudyProgramForm;
 use Modules\Campus\Filament\Resources\StudyPrograms\Schemas\StudyProgramInfolist;
 use Modules\Campus\Filament\Resources\StudyPrograms\Tables\StudyProgramsTable;
 use Modules\Campus\Models\StudyProgram;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class StudyProgramResource extends LocalizedResource
 {

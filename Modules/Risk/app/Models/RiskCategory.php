@@ -9,14 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
+use Modules\Risk\Database\Factories\RiskCategoryFactory;
 
 class RiskCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Risk\Database\Factories\RiskCategoryFactory
+    protected static function newFactory(): RiskCategoryFactory
     {
-        return \Modules\Risk\Database\Factories\RiskCategoryFactory::new();
+        return RiskCategoryFactory::new();
     }
 
     protected $table = 'risk_categories';

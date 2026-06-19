@@ -2,16 +2,18 @@
 
 namespace Modules\School\Filament\Resources\AssessmentItems\Tables;
 
+use App\Filament\Imports\AssessmentItemImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class AssessmentItemsTable
 {
@@ -20,42 +22,42 @@ class AssessmentItemsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('assessment.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('assessment.name'))
+                    ->label(FilamentUi::field('assessment.name'))
                     ->searchable(),
                 TextColumn::make('item_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('item_type'))
+                    ->label(FilamentUi::field('item_type'))
                     ->searchable(),
                 TextColumn::make('question_number')
-                    ->label(\Modules\Core\Support\FilamentUi::field('question_number'))
+                    ->label(FilamentUi::field('question_number'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('question_attachment')
-                    ->label(\Modules\Core\Support\FilamentUi::field('question_attachment'))
+                    ->label(FilamentUi::field('question_attachment'))
                     ->searchable(),
                 TextColumn::make('max_score')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_score'))
+                    ->label(FilamentUi::field('max_score'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('weight')
-                    ->label(\Modules\Core\Support\FilamentUi::field('weight'))
+                    ->label(FilamentUi::field('weight'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('difficulty_level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('difficulty_level'))
+                    ->label(FilamentUi::field('difficulty_level'))
                     ->searchable(),
                 TextColumn::make('cognitive_level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('cognitive_level'))
+                    ->label(FilamentUi::field('cognitive_level'))
                     ->searchable(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -68,14 +70,14 @@ class AssessmentItemsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\AssessmentItemImporter::class),
+                ...ImportTableActions::make(AssessmentItemImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

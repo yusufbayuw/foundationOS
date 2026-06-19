@@ -13,7 +13,6 @@ use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Contracts\WorkflowResolver;
-use Modules\Workflow\Models\WorkflowAssignment;
 use Tests\TestCase;
 
 class WorkflowProcurementPilotTest extends TestCase

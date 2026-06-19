@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Procurement\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Procurement\Models\ProcurementCategory;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProcurementCategoryPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ProcurementCategory');
@@ -71,5 +71,4 @@ class ProcurementCategoryPolicy
     {
         return $authUser->can('Reorder:ProcurementCategory');
     }
-
 }

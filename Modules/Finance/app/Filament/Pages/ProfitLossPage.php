@@ -24,7 +24,9 @@ class ProfitLossPage extends Page
     protected static ?int $navigationSort = 11;
 
     public string $dateFrom = '';
+
     public string $dateTo = '';
+
     public ?int $organizationId = null;
 
     public array $reportData = [];

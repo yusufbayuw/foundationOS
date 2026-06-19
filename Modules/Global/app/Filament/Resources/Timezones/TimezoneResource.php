@@ -2,9 +2,9 @@
 
 namespace Modules\Global\Filament\Resources\Timezones;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Global\Filament\Resources\Timezones\Pages\CreateTimezone;
 use Modules\Global\Filament\Resources\Timezones\Pages\EditTimezone;
 use Modules\Global\Filament\Resources\Timezones\Pages\ListTimezones;

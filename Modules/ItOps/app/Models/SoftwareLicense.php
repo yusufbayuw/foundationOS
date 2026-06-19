@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\ItOps\Database\Factories\SoftwareLicenseFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class SoftwareLicense extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\ItOps\Database\Factories\SoftwareLicenseFactory
+    protected static function newFactory(): SoftwareLicenseFactory
     {
-        return \Modules\ItOps\Database\Factories\SoftwareLicenseFactory::new();
+        return SoftwareLicenseFactory::new();
     }
 
     protected $table = 'software_licenses';

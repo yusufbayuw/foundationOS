@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Dms\Database\Factories\DocumentFolderFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class DocumentFolder extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Dms\Database\Factories\DocumentFolderFactory
+    protected static function newFactory(): DocumentFolderFactory
     {
-        return \Modules\Dms\Database\Factories\DocumentFolderFactory::new();
+        return DocumentFolderFactory::new();
     }
 
     protected $table = 'document_folders';

@@ -7,15 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Enums\WorkflowTriggerMode;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Workflow extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -44,6 +44,7 @@ class Workflow extends Model
             'published_at' => 'datetime',
         ];
     }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

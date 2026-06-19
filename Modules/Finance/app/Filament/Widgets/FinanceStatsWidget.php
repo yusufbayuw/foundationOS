@@ -58,11 +58,11 @@ class FinanceStatsWidget extends StatsOverviewWidget
             ->sum('used_amount');
 
         $budgetUsagePercent = $budgetAllocated > 0
-            ? round(($budgetUsed / $budgetAllocated) * 100, 1) . '%'
+            ? round(($budgetUsed / $budgetAllocated) * 100, 1).'%'
             : '-';
 
         return [
-            Stat::make('Tagihan Outstanding', 'Rp ' . number_format($outstandingAmount, 0, ',', '.'))
+            Stat::make('Tagihan Outstanding', 'Rp '.number_format($outstandingAmount, 0, ',', '.'))
                 ->description('Total sisa tagihan belum lunas')
                 ->icon('heroicon-o-document-text')
                 ->color($outstandingAmount > 0 ? 'danger' : 'success'),
@@ -70,16 +70,16 @@ class FinanceStatsWidget extends StatsOverviewWidget
                 ->description('Menunggu verifikasi')
                 ->icon('heroicon-o-clock')
                 ->color($pendingPayments > 0 ? 'warning' : 'success'),
-            Stat::make('Pembayaran Bulan Ini', 'Rp ' . number_format($verifiedPaymentsAmount, 0, ',', '.'))
-                ->description('Total verified ' . now()->translatedFormat('F Y'))
+            Stat::make('Pembayaran Bulan Ini', 'Rp '.number_format($verifiedPaymentsAmount, 0, ',', '.'))
+                ->description('Total verified '.now()->translatedFormat('F Y'))
                 ->icon('heroicon-o-banknotes')
                 ->color('success'),
             Stat::make('Realisasi Anggaran', $budgetUsagePercent)
-                ->description('Rp ' . number_format($budgetUsed, 0, ',', '.') . ' / Rp ' . number_format($budgetAllocated, 0, ',', '.'))
+                ->description('Rp '.number_format($budgetUsed, 0, ',', '.').' / Rp '.number_format($budgetAllocated, 0, ',', '.'))
                 ->icon('heroicon-o-chart-pie')
                 ->color('info'),
             Stat::make('Jurnal Posted', number_format($postedJournals))
-                ->description('Bulan ' . now()->translatedFormat('F Y'))
+                ->description('Bulan '.now()->translatedFormat('F Y'))
                 ->icon('heroicon-o-document-check')
                 ->color('info'),
         ];

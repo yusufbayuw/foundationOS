@@ -26,4 +26,3 @@ class MoodleClassCourseMapping extends Model
         ];
     }
 }
-

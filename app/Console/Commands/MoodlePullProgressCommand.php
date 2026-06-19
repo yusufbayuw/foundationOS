@@ -22,11 +22,13 @@ class MoodlePullProgressCommand extends Command
     {
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync disabled.');
+
             return self::SUCCESS;
         }
 
         if (! config('moodle.learning_pull_enabled', false)) {
             $this->warn('Learning pull disabled. Set MOODLE_LEARNING_PULL_ENABLED=true.');
+
             return self::SUCCESS;
         }
 
@@ -123,4 +125,3 @@ class MoodlePullProgressCommand extends Command
         return self::SUCCESS;
     }
 }
-

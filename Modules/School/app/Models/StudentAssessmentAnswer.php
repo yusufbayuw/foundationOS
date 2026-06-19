@@ -4,14 +4,14 @@ namespace Modules\School\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\User;
 
 class StudentAssessmentAnswer extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -43,6 +43,7 @@ class StudentAssessmentAnswer extends Model
             'time_spent_seconds' => 'integer',
         ];
     }
+
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);

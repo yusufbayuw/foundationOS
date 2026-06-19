@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Finance\Models\Budget;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAutomatedAction;
@@ -70,7 +71,7 @@ class SetupBudgetWorkflowCommand extends Command
             'name' => 'Budget Approval',
             'description' => 'Default budget approval workflow for Finance budgets.',
             'module' => 'Finance',
-            'subject_type' => \Modules\Finance\Models\Budget::class,
+            'subject_type' => Budget::class,
             'trigger_mode' => 'manual',
             'version' => $version,
             'status' => WorkflowDefinitionStatus::Draft,

@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\StudentAchievements;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\StudentAchievements\Pages\CreateStudentAchievement;
 use Modules\School\Filament\Resources\StudentAchievements\Pages\EditStudentAchievement;
 use Modules\School\Filament\Resources\StudentAchievements\Pages\ListStudentAchievements;

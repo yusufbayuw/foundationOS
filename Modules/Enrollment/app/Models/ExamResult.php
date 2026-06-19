@@ -4,16 +4,17 @@ namespace Modules\Enrollment\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Core\Models\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Modules\Core\Models\User;
 
 class ExamResult extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected ?int $previousExamScheduleId = null;
+
     protected ?int $previousApplicantId = null;
 
     protected static function booted(): void
@@ -72,6 +73,7 @@ class ExamResult extends Model
             'is_passed' => 'boolean',
         ];
     }
+
     public function applicant(): BelongsTo
     {
         return $this->belongsTo(Applicant::class);

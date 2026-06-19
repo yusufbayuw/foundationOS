@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Finance\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Finance\Models\JournalEntryLine;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class JournalEntryLinePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:JournalEntryLine');
@@ -71,5 +71,4 @@ class JournalEntryLinePolicy
     {
         return $authUser->can('Reorder:JournalEntryLine');
     }
-
 }

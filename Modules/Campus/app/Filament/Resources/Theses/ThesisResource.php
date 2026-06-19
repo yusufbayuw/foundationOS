@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Resources\Theses;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\Theses\Pages\CreateThesis;
@@ -13,6 +12,7 @@ use Modules\Campus\Filament\Resources\Theses\Schemas\ThesisForm;
 use Modules\Campus\Filament\Resources\Theses\Schemas\ThesisInfolist;
 use Modules\Campus\Filament\Resources\Theses\Tables\ThesesTable;
 use Modules\Campus\Models\Thesis;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class ThesisResource extends LocalizedResource
 {

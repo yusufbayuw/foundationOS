@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Library\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Library\Models\LibraryLocation;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class LibraryLocationPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:LibraryLocation');
@@ -71,5 +71,4 @@ class LibraryLocationPolicy
     {
         return $authUser->can('Reorder:LibraryLocation');
     }
-
 }

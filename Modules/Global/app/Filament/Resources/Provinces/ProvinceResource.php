@@ -2,9 +2,9 @@
 
 namespace Modules\Global\Filament\Resources\Provinces;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Global\Filament\Resources\Provinces\Pages\CreateProvince;
 use Modules\Global\Filament\Resources\Provinces\Pages\EditProvince;
 use Modules\Global\Filament\Resources\Provinces\Pages\ListProvinces;

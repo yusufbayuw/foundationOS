@@ -2,9 +2,9 @@
 
 namespace Modules\Monitoring\Filament\Resources\AuditLogs;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Monitoring\Filament\Resources\AuditLogs\Pages\CreateAuditLog;
 use Modules\Monitoring\Filament\Resources\AuditLogs\Pages\EditAuditLog;
 use Modules\Monitoring\Filament\Resources\AuditLogs\Pages\ListAuditLogs;

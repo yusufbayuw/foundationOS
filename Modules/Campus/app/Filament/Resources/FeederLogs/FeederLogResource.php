@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Resources\FeederLogs;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\FeederLogs\Pages\CreateFeederLog;
@@ -13,6 +12,7 @@ use Modules\Campus\Filament\Resources\FeederLogs\Schemas\FeederLogForm;
 use Modules\Campus\Filament\Resources\FeederLogs\Schemas\FeederLogInfolist;
 use Modules\Campus\Filament\Resources\FeederLogs\Tables\FeederLogsTable;
 use Modules\Campus\Models\FeederLog;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class FeederLogResource extends LocalizedResource
 {

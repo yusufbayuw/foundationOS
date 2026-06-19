@@ -24,6 +24,7 @@ class BalanceSheetPage extends Page
     protected static ?int $navigationSort = 12;
 
     public string $asOf = '';
+
     public ?int $organizationId = null;
 
     public array $reportData = [];

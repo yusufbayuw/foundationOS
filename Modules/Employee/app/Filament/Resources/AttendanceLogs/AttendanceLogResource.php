@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\AttendanceLogs;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\AttendanceLogs\Pages\CreateAttendanceLog;
 use Modules\Employee\Filament\Resources\AttendanceLogs\Pages\EditAttendanceLog;
 use Modules\Employee\Filament\Resources\AttendanceLogs\Pages\ListAttendanceLogs;

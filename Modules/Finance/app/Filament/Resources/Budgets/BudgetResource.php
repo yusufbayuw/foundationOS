@@ -2,9 +2,10 @@
 
 namespace Modules\Finance\Filament\Resources\Budgets;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\Budgets\Pages\CreateBudget;
 use Modules\Finance\Filament\Resources\Budgets\Pages\EditBudget;
 use Modules\Finance\Filament\Resources\Budgets\Pages\ListBudgets;
@@ -55,7 +56,7 @@ class BudgetResource extends LocalizedResource
         ];
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return $record instanceof Budget
             && ! $record->isLockedForMutation()

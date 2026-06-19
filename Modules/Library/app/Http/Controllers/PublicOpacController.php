@@ -9,16 +9,16 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Modules\Core\Models\User;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Models\User;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCopy;
-use Modules\Library\Models\Member;
 use Modules\Library\Models\Loan;
+use Modules\Library\Models\Member;
+use Modules\Library\Support\CirculationPolicyResolver;
 use Modules\Library\Support\LibraryCirculationService;
 use Modules\Library\Support\LibraryScopeResolver;
-use Modules\Library\Support\CirculationPolicyResolver;
 
 class PublicOpacController extends Controller
 {
@@ -676,7 +676,7 @@ class PublicOpacController extends Controller
                 'condition_on_return' => $issueType,
                 'notes' => trim(implode("\n", array_filter([
                     $existingNotes,
-                    $issueNotes !== '' ? '[' . strtoupper($issueType) . '] ' . $issueNotes : null,
+                    $issueNotes !== '' ? '['.strtoupper($issueType).'] '.$issueNotes : null,
                 ]))),
             ])->save();
 
@@ -685,7 +685,7 @@ class PublicOpacController extends Controller
                 'condition' => $issueType,
                 'notes' => trim(implode("\n", array_filter([
                     trim((string) $loan->bookCopy->notes),
-                    $issueNotes !== '' ? '[' . strtoupper($issueType) . '] ' . $issueNotes : null,
+                    $issueNotes !== '' ? '['.strtoupper($issueType).'] '.$issueNotes : null,
                 ]))),
             ])->save();
         });

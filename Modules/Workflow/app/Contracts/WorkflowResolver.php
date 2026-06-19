@@ -2,7 +2,6 @@
 
 namespace Modules\Workflow\Contracts;
 
-use Illuminate\Database\Eloquent\Model;
 use Modules\Workflow\Models\Workflow;
 
 interface WorkflowResolver

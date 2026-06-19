@@ -2,17 +2,19 @@
 
 namespace Modules\Core\Filament\Resources\Tenants\Tables;
 
+use App\Filament\Imports\TenantImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class TenantsTable
 {
@@ -21,90 +23,90 @@ class TenantsTable
         return $table
             ->columns([
                 TextColumn::make('uuid')
-                    ->label(\Modules\Core\Support\FilamentUi::text('UUID'))
+                    ->label(FilamentUi::text('UUID'))
                     ->searchable(),
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('domain')
-                    ->label(\Modules\Core\Support\FilamentUi::field('domain'))
+                    ->label(FilamentUi::field('domain'))
                     ->searchable(),
                 TextColumn::make('subdomain')
-                    ->label(\Modules\Core\Support\FilamentUi::field('subdomain'))
+                    ->label(FilamentUi::field('subdomain'))
                     ->searchable(),
                 ImageColumn::make('logo')
-                    ->label(\Modules\Core\Support\FilamentUi::field('logo'))
+                    ->label(FilamentUi::field('logo'))
                     ->disk('public')
                     ->square(),
                 ImageColumn::make('favicon')
-                    ->label(\Modules\Core\Support\FilamentUi::field('favicon'))
+                    ->label(FilamentUi::field('favicon'))
                     ->disk('public')
                     ->square(),
                 TextColumn::make('primary_color')
-                    ->label(\Modules\Core\Support\FilamentUi::field('primary_color'))
+                    ->label(FilamentUi::field('primary_color'))
                     ->searchable(),
                 TextColumn::make('secondary_color')
-                    ->label(\Modules\Core\Support\FilamentUi::field('secondary_color'))
+                    ->label(FilamentUi::field('secondary_color'))
                     ->searchable(),
                 TextColumn::make('timezone')
-                    ->label(\Modules\Core\Support\FilamentUi::field('timezone'))
+                    ->label(FilamentUi::field('timezone'))
                     ->searchable(),
                 TextColumn::make('currency')
-                    ->label(\Modules\Core\Support\FilamentUi::field('currency'))
+                    ->label(FilamentUi::field('currency'))
                     ->searchable(),
                 TextColumn::make('locale')
-                    ->label(\Modules\Core\Support\FilamentUi::field('locale'))
+                    ->label(FilamentUi::field('locale'))
                     ->searchable(),
                 TextColumn::make('billing_cycle')
-                    ->label(\Modules\Core\Support\FilamentUi::field('billing_cycle'))
+                    ->label(FilamentUi::field('billing_cycle'))
                     ->searchable(),
                 TextColumn::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                    ->label(FilamentUi::field('status'))
                     ->searchable(),
                 TextColumn::make('trial_ends_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('trial_ends_at'))
+                    ->label(FilamentUi::field('trial_ends_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('subscribed_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('subscribed_at'))
+                    ->label(FilamentUi::field('subscribed_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('subscription_expires_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('subscription_expires_at'))
+                    ->label(FilamentUi::field('subscription_expires_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('max_users')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_users'))
+                    ->label(FilamentUi::field('max_users'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('max_organizations')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_organizations'))
+                    ->label(FilamentUi::field('max_organizations'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('max_storage_mb')
-                    ->label(\Modules\Core\Support\FilamentUi::field('max_storage_mb'))
+                    ->label(FilamentUi::field('max_storage_mb'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('meta_title')
-                    ->label(\Modules\Core\Support\FilamentUi::field('meta_title'))
+                    ->label(FilamentUi::field('meta_title'))
                     ->searchable(),
                 TextColumn::make('subscriptionPlan.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('subscriptionPlan.name'))
+                    ->label(FilamentUi::field('subscriptionPlan.name'))
                     ->searchable(),
                 TextColumn::make('created_by')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_by'))
+                    ->label(FilamentUi::field('created_by'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -117,14 +119,14 @@ class TenantsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\TenantImporter::class),
+                ...ImportTableActions::make(TenantImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

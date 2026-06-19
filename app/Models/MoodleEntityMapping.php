@@ -23,4 +23,3 @@ class MoodleEntityMapping extends Model
         ];
     }
 }
-

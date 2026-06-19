@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Curricula;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Curricula\Pages\CreateCurriculum;
 use Modules\School\Filament\Resources\Curricula\Pages\EditCurriculum;
 use Modules\School\Filament\Resources\Curricula\Pages\ListCurricula;

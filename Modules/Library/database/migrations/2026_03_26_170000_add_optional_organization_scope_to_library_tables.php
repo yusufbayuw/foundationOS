@@ -29,7 +29,7 @@ return new class extends Migration
             Schema::table('book_categories', function (Blueprint $blueprint): void {
                 $blueprint->foreignId('organization_id')->nullable()->change();
             });
-        } catch (\Throwable) {
+        } catch (Throwable) {
             if (DB::getDriverName() === 'mysql') {
                 DB::statement('ALTER TABLE books MODIFY organization_id BIGINT UNSIGNED NULL');
                 DB::statement('ALTER TABLE book_categories MODIFY organization_id BIGINT UNSIGNED NULL');
@@ -46,7 +46,7 @@ return new class extends Migration
             Schema::table('book_categories', function (Blueprint $blueprint): void {
                 $blueprint->foreignId('organization_id')->nullable(false)->change();
             });
-        } catch (\Throwable) {
+        } catch (Throwable) {
             if (DB::getDriverName() === 'mysql') {
                 DB::statement('ALTER TABLE books MODIFY organization_id BIGINT UNSIGNED NOT NULL');
                 DB::statement('ALTER TABLE book_categories MODIFY organization_id BIGINT UNSIGNED NOT NULL');

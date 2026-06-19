@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\PayrollComponents;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\PayrollComponents\Pages\CreatePayrollComponent;
 use Modules\Employee\Filament\Resources\PayrollComponents\Pages\EditPayrollComponent;
 use Modules\Employee\Filament\Resources\PayrollComponents\Pages\ListPayrollComponents;

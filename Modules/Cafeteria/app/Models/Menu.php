@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Cafeteria\Database\Factories\MenuFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
@@ -14,9 +15,9 @@ class Menu extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Cafeteria\Database\Factories\MenuFactory
+    protected static function newFactory(): MenuFactory
     {
-        return \Modules\Cafeteria\Database\Factories\MenuFactory::new();
+        return MenuFactory::new();
     }
 
     protected $table = 'menus';

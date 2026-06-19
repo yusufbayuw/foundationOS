@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\EOffice\Database\Factories\LetterCategoryFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class LetterCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\EOffice\Database\Factories\LetterCategoryFactory
+    protected static function newFactory(): LetterCategoryFactory
     {
-        return \Modules\EOffice\Database\Factories\LetterCategoryFactory::new();
+        return LetterCategoryFactory::new();
     }
 
     protected $table = 'letter_categories';
