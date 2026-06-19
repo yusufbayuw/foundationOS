@@ -34,6 +34,7 @@
 | FK catalog | Foreign keys | `storage/app/verified-fks.json` | **UNVERIFIED in git** — file not committed |
 | REAP Audit (this file) | Protocol compliance & validation | `REAP_AUDIT.md` | **Final** for discovery stage |
 | Repository Manifest | Stage 01 scope boundary | `00-repository-manifest.md` | **Verified** |
+| Evidence Registry | Stage 02 full evidence index | `01-evidence-registry.json` | **Verified** |
 
 ---
 

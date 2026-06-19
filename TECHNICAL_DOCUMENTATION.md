@@ -972,6 +972,8 @@ flowchart TB
 | `AUTHORIZATION_MATRIX.md` | Shield permissions, panel access, per-module resources |
 | `API_ROUTES.md` | Full `api/*` route table (101 routes) |
 | `REAP_AUDIT.md` | REAP v1.0 compliance audit, EV-IDs, conflicts, stage gate |
+| `00-repository-manifest.md` | REAP Stage 01 repository scope manifest |
+| `01-evidence-registry.json` | REAP Stage 02 evidence registry (967 entries) |
 | `EVENTS.md` | Cross-module domain events |
 | `CLAUDE.md` | Agent/dev conventions |
 | `README.md` | Project overview |
