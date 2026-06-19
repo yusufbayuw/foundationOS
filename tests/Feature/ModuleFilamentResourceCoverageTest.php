@@ -16,6 +16,7 @@ use Modules\Exam\Models\ExamPublishSnapshot;
 use Modules\Exam\Models\ExamQuestionOption;
 use Modules\Exam\Models\ExamResult;
 use Modules\Exam\Models\ExamRuntimeSyncLog;
+use Modules\Monitoring\Models\AutomationRun;
 use Modules\Monitoring\Models\PrintExportLog;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -125,6 +126,7 @@ class ModuleFilamentResourceCoverageTest extends TestCase
     {
         return [
             PrintExportLog::class,
+            AutomationRun::class,
             ExamActivityLog::class,
             ExamAnswer::class,
             ExamAttempt::class,

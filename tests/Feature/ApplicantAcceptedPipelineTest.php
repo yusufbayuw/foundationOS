@@ -93,7 +93,7 @@ class ApplicantAcceptedPipelineTest extends TestCase
         $this->assertSame(1, StudentInvoice::withoutTenantScope()
             ->where('invoiceable_id', $applicant->id)
             ->count());
-        $this->assertSame(1, Member::withoutTenantScope()
+        $this->assertSame(0, Member::withoutTenantScope()
             ->where('member_number', $applicant->registration_number)
             ->count());
 

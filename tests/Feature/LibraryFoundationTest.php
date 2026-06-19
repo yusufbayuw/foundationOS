@@ -289,12 +289,9 @@ class LibraryFoundationTest extends TestCase
     {
         [$tenant] = $this->makeTenantContext();
 
-        $user = User::create([
-            'name' => 'Global Library Admin',
-            'email' => 'global-library-admin@example.com',
-            'password' => 'password',
-            'is_super_admin' => true,
-        ]);
+        $user = User::factory()->create();
+
+        $user->promoteToGlobalSuperAdmin();
 
         $response = $this->actingAs($user)->get('/opac/'.$tenant->code.'/circulation');
 

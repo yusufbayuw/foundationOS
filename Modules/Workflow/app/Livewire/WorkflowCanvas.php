@@ -32,6 +32,10 @@ class WorkflowCanvas extends Component
 
     public bool $isDirty = false;
 
+    public bool $showImportModal = false;
+
+    public string $importPayload = '';
+
     // Workflow metadata
     public string $workflowCode = '';
 

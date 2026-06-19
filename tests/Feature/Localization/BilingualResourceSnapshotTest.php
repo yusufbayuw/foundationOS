@@ -53,7 +53,7 @@ class BilingualResourceSnapshotTest extends TestCase
             'school: personal information' => ['Personal information', 'Informasi pribadi', 'Personal information'],
 
             // Campus
-            'campus: study program' => ['Study program', 'Program Studi', 'Study program'],
+            'campus: study program' => ['Study program', 'Program studi', 'Study program'],
             'campus: academic information' => ['Academic information', 'Informasi akademik', 'Academic information'],
             'campus: thesis details' => ['Thesis details', 'Detail tesis', 'Thesis details'],
             'campus: student number' => ['Student number', 'NIM', 'Student number'],

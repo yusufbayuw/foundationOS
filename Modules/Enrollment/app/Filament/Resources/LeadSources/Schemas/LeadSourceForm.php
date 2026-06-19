@@ -2,10 +2,10 @@
 
 namespace Modules\Enrollment\Filament\Resources\LeadSources\Schemas;
 
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class LeadSourceForm
 {
@@ -13,9 +13,7 @@ class LeadSourceForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 TextInput::make('code')
                     ->required(),
                 TextInput::make('name')

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class LeadActivityForm
 {
@@ -14,9 +15,7 @@ class LeadActivityForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('lead_id')
                     ->relationship('lead', 'id')
                     ->required(),

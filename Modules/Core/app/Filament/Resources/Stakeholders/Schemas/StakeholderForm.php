@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class StakeholderForm
 {
@@ -14,9 +15,7 @@ class StakeholderForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('organization_id')
                     ->relationship('organization', 'name'),
                 Select::make('user_id')

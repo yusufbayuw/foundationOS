@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class ParentStudentForm
 {
@@ -13,9 +14,7 @@ class ParentStudentForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('parent_user_id')
                     ->relationship('parentUser', 'name')
                     ->required(),

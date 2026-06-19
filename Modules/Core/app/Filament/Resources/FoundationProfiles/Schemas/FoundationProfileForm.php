@@ -2,10 +2,10 @@
 
 namespace Modules\Core\Filament\Resources\FoundationProfiles\Schemas;
 
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class FoundationProfileForm
 {
@@ -13,9 +13,7 @@ class FoundationProfileForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Textarea::make('vision')
                     ->columnSpanFull(),
                 Textarea::make('mission')

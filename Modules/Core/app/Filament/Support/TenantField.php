@@ -14,7 +14,7 @@ class TenantField
     /**
      * Create a hidden tenant_id field that auto-fills from the current Filament tenant.
      *
-     * Replaces the manual Select::make('tenant_id') pattern that shouldn't be
+     * Replaces the manual tenant_id Select pattern that shouldn't be // fos:lint-ignore-tenant-field
      * user-facing in a tenant-aware panel.
      */
     public static function make(): Hidden

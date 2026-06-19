@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class ParentTeacherMessageForm
 {
@@ -14,9 +15,7 @@ class ParentTeacherMessageForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('student_id')
                     ->relationship('student', 'id')
                     ->required(),

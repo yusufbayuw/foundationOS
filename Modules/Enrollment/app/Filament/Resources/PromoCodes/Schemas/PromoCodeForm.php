@@ -3,10 +3,10 @@
 namespace Modules\Enrollment\Filament\Resources\PromoCodes\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class PromoCodeForm
 {
@@ -14,9 +14,7 @@ class PromoCodeForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 TextInput::make('code')
                     ->required(),
                 TextInput::make('discount_percent')

@@ -12,7 +12,10 @@ class UserSuperAdminGuardTest extends TestCase
 
     public function test_is_super_admin_cannot_be_mass_assigned(): void
     {
-        $user = User::factory()->create([
+        $user = User::create([
+            'name' => 'Guard Test User',
+            'email' => 'guard-test@example.com',
+            'password' => 'password',
             'is_super_admin' => true,
         ]);
 

@@ -31,6 +31,10 @@ class LibraryMemberProvisioningService
         $applicant = $applicant->fresh(['admissionPeriod', 'convertedStudent']);
         $student ??= $applicant->convertedStudent;
 
+        if (! $student?->user_id) {
+            return null;
+        }
+
         $memberNumber = (string) ($applicant->registration_number ?: 'ADM-'.$applicant->getKey());
 
         return DB::transaction(function () use ($applicant, $student, $memberNumber): Member {

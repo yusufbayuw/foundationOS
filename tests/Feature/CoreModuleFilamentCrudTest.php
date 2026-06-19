@@ -15,6 +15,8 @@ use Modules\Core\Models\UserTenantRole;
 use Modules\Core\Services\ApplicationModuleCatalog;
 use Modules\Core\Services\TenantModuleProvisioner;
 use Modules\Enrollment\Filament\Resources\Applicants\Pages\ListApplicants;
+use Modules\Enrollment\Models\AdmissionPeriod;
+use Modules\Enrollment\Models\Applicant;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\CreateStudentInvoice;
 use Modules\Finance\Filament\Resources\StudentInvoices\Pages\ListStudentInvoices;
 use Modules\Finance\Models\StudentInvoice;
@@ -52,7 +54,24 @@ class CoreModuleFilamentCrudTest extends TestCase
 
     public function test_create_student_invoice_persists_record(): void
     {
-        ['tenant' => $tenant, 'user' => $user] = $this->bootstrapFilament(['core', 'finance']);
+        ['tenant' => $tenant, 'organization' => $organization, 'user' => $user] = $this->bootstrapFilament(['core', 'finance', 'enrollment']);
+
+        $period = AdmissionPeriod::create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'name' => 'PPDB Test',
+            'code' => 'PPDB-TEST',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addMonth()->toDateString(),
+        ]);
+
+        $applicant = Applicant::create([
+            'tenant_id' => $tenant->id,
+            'admission_period_id' => $period->id,
+            'registration_number' => 'REG-INV-001',
+            'full_name' => 'Invoice Applicant',
+            'status' => 'accepted',
+        ]);
 
         Livewire::test(CreateStudentInvoice::class)
             ->fillForm([
@@ -66,6 +85,8 @@ class CoreModuleFilamentCrudTest extends TestCase
                 'total_amount' => 100000,
                 'paid_amount' => 0,
                 'remaining_amount' => 100000,
+                'invoiceable_type' => $applicant->getMorphClass(),
+                'invoiceable_id' => $applicant->getKey(),
             ])
             ->call('create')
             ->assertHasNoFormErrors()
@@ -115,10 +136,10 @@ class CoreModuleFilamentCrudTest extends TestCase
             ->where('tenant_id', $context['tenant']->id)
             ->update(['is_enabled' => true]);
 
+        $this->actingAs($superAdmin);
         app(CurrentTenant::class)->set($context['tenant']);
         Filament::setTenant($context['tenant']);
         Filament::setCurrentPanel('admin');
-        $this->actingAs($superAdmin);
 
         return array_merge($context, ['user' => $superAdmin]);
     }

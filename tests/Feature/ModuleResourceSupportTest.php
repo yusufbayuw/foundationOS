@@ -95,8 +95,8 @@ class ModuleResourceSupportTest extends TestCase
 
     public function test_global_resource_guard_preserves_existing_mutation_gate_logic(): void
     {
-        $regularUser = User::factory()->make();
-        $superAdmin = User::factory()->superAdmin()->make();
+        $regularUser = User::factory()->create();
+        $superAdmin = User::factory()->superAdmin()->create();
 
         $this->assertFalse(GlobalResourceGuard::isMutationRestricted(true));
         $this->assertTrue(GlobalResourceGuard::isMutationRestricted(false));

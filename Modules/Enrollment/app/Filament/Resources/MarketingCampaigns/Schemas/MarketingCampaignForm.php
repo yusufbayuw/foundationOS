@@ -3,9 +3,9 @@
 namespace Modules\Enrollment\Filament\Resources\MarketingCampaigns\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class MarketingCampaignForm
 {
@@ -13,9 +13,7 @@ class MarketingCampaignForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 TextInput::make('code')
                     ->required(),
                 TextInput::make('name')

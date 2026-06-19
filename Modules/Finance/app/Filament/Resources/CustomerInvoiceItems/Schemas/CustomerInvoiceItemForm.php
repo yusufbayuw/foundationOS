@@ -5,6 +5,7 @@ namespace Modules\Finance\Filament\Resources\CustomerInvoiceItems\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Modules\Core\Filament\Support\TenantField;
 
 class CustomerInvoiceItemForm
 {
@@ -12,9 +13,7 @@ class CustomerInvoiceItemForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'name')
-                    ->required(),
+                TenantField::make(),
                 Select::make('customer_invoice_id')
                     ->relationship('customerInvoice', 'id')
                     ->required(),
