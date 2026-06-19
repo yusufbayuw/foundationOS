@@ -36,6 +36,7 @@
 | Repository Manifest | Stage 01 scope boundary | `00-repository-manifest.md` | **Verified** |
 | Evidence Registry | Stage 02 full evidence index | `01-evidence-registry.json` | **Verified** |
 | Structure Catalog | Stage 03 folders, modules, entrypoints | `02-structure-catalog.md` | **Verified** |
+| Module Dependency Map | Stage 04 inter-module graph, hub/leaf, Filament recount | `03-module-dependency-map.md` | **Verified** |
 
 ---
 
@@ -105,7 +106,8 @@
 | **CF-002** | `TECHNICAL_DOCUMENTATION.md` cites `storage/app/entity-catalog.json` | Git tree | Traceability | JSON not committed (`storage/app/.gitignore`). Either commit extract under `docs/catalogs/` or mark table/model counts **UNVERIFIED in repo**. |
 | **CF-003** | `USE_CASES.md` / older text uses **belum terverifikasi** | REAP requires **UNVERIFIED** | Terminology | Semantically equivalent; REAP audit standardizes on VERIFIED / INFERRED / UNVERIFIED. |
 | **CF-004** | Prior assistant messages cited route counts **1782/105/1781/104** | Current `route:list --json` | Historical drift | **Authoritative:** 1778 total, 101 API (`EV-00003`, `EV-00004`). Master doc updated; chat history may be stale. |
-| **CF-005** | `AUTHORIZATION_MATRIX.md` example subject `Competition` | School module listed first in sample table | Presentation | Example driven by alphabetical module sort in JSON (`School` resources); not a functional conflict. |
+| **CF-S04-01** | `02-structure-catalog.md` GAP-S03-03 (0 ModuleResource for Global/Procurement/Exam) | Source uses `ModuleResource as LocalizedResource` alias | False gap | 25 resources verified; grep methodology was incomplete. **Resolved in Stage 04.** |
+| **CF-S04-02** | `authorization-matrix.json` `resource_count: 257` | Stage 04 scan: 375 Filament resources | Undercount | `extract-authorization-matrix.php:67` regex misses `extends LocalizedResource`. **Open** — fix script. |
 
 ---
 
@@ -189,7 +191,7 @@
 | Question | Answer |
 |----------|--------|
 | May next REAP stage begin? | **Conditional yes** — documentation discovery artifacts exist, but **SD/STATE diagrams remain Draft** and **entity catalog not in git**. |
-| Recommended next stage | **REAP Stage 04:** Module deep-dive / inter-module dependency graph; commit entity/FK catalogs; fix `CF-001`. |
+| Recommended next stage | **REAP Stage 05:** Fix `extract-authorization-matrix.php` (CF-S04-02); commit entity/FK catalogs; FK dependency graph; fix `CF-001`. |
 | Forbidden until resolved | Treating all companion `.md` files as **Final** without line-reference audit. |
 
 ---

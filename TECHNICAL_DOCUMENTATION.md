@@ -975,6 +975,7 @@ flowchart TB
 | `00-repository-manifest.md` | REAP Stage 01 repository scope manifest |
 | `01-evidence-registry.json` | REAP Stage 02 evidence registry (968 entries) |
 | `02-structure-catalog.md` | REAP Stage 03 structure discovery (45 modules, entrypoints) |
+| `03-module-dependency-map.md` | REAP Stage 04 module dependency graph (hub/leaf, 375 Filament resources) |
 | `EVENTS.md` | Cross-module domain events |
 | `CLAUDE.md` | Agent/dev conventions |
 | `README.md` | Project overview |
