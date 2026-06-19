@@ -35,6 +35,7 @@
 | REAP Audit (this file) | Protocol compliance & validation | `REAP_AUDIT.md` | **Final** for discovery stage |
 | Repository Manifest | Stage 01 scope boundary | `00-repository-manifest.md` | **Verified** |
 | Evidence Registry | Stage 02 full evidence index | `01-evidence-registry.json` | **Verified** |
+| Structure Catalog | Stage 03 folders, modules, entrypoints | `02-structure-catalog.md` | **Verified** |
 
 ---
 
@@ -188,7 +189,7 @@
 | Question | Answer |
 |----------|--------|
 | May next REAP stage begin? | **Conditional yes** — documentation discovery artifacts exist, but **SD/STATE diagrams remain Draft** and **entity catalog not in git**. |
-| Recommended next stage | **REAP Stage 2:** Commit entity/FK catalogs; fix `CF-001`; OpenAPI diff (`GAP-003`); EV-ID backfill. |
+| Recommended next stage | **REAP Stage 04:** Module deep-dive / inter-module dependency graph; commit entity/FK catalogs; fix `CF-001`. |
 | Forbidden until resolved | Treating all companion `.md` files as **Final** without line-reference audit. |
 
 ---
