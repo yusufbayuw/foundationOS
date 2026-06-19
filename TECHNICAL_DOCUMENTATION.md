@@ -2,9 +2,9 @@
 
 **Master technical reference** consolidating verified repository discovery. This document cites code, routes, migrations, and configuration; items without direct evidence are marked **belum terverifikasi**.
 
-**Verification date:** 2026-06-19 (ERD hub + route counts re-verified) (ERD hub + route counts re-verified against repo)  
+**Verification date:** 2026-06-19 (ERD, route counts, authorization & API catalogs re-verified)  
 **Branch evidence:** `cursor/use-case-model-0a94`  
-**Companion artifacts:** `USE_CASES.md`, `SEQUENCE_DIAGRAMS.md`, `ACTIVITY_DIAGRAMS.md`, `STATE_DIAGRAMS.md`, `ARCHITECTURE.md`, `EVENTS.md`
+**Companion artifacts:** `USE_CASES.md`, `SEQUENCE_DIAGRAMS.md`, `ACTIVITY_DIAGRAMS.md`, `STATE_DIAGRAMS.md`, `ARCHITECTURE.md`, `EVENTS.md`, `AUTHORIZATION_MATRIX.md`, `API_ROUTES.md`
 
 ---
 
@@ -47,8 +47,9 @@ FoundationOS is a **modular SaaS ERP for educational institutions** implemented 
 | Filament admin resources | **257** `ModuleResource` subclasses | `find Modules -name '*Resource.php' \| grep ModuleResource` |
 | Database tables | **434** | `storage/app/entity-catalog.json` |
 | Eloquent models | **402** | `storage/app/entity-catalog-extract.md` |
-| Application routes (except vendor) | **1781** | `php artisan route:list --except-vendor` |
-| API routes (except vendor) | **104** | `php artisan route:list --except-vendor --path=api` |
+| Application routes (except vendor) | **1778** | `php artisan route:list --except-vendor --json` (array count) |
+| API routes (`api/*` prefix) | **101** | `scripts/extract-api-routes.php` |
+| Shield resource permissions (est.) | **~3100** | 257 resources × 12 policy methods + 16 custom (`AUTHORIZATION_MATRIX.md`) |
 | Filament panels | **3** (`admin`, `platform`, `parent`) | `app/Providers/Filament/*PanelProvider.php` |
 | CSV importers | **132** | `app/Filament/Imports/*Importer.php` |
 | PDF report controllers | **39** | `Modules/*/Http/Controllers/*PdfController.php` |
@@ -402,6 +403,26 @@ Manual-only states (UI without automated transition): see **`STATE_DIAGRAMS.md`*
 
 **Permission regeneration:** `php artisan shield:generate --all --panel=admin` (`CLAUDE.md`).
 
+### Full authorization matrix (generated)
+
+**Human-readable:** `AUTHORIZATION_MATRIX.md`  
+**Machine catalog:** `docs/catalogs/authorization-matrix.json`  
+**Regenerate:** `php scripts/extract-authorization-matrix.php`
+
+| Metric | Value | Source |
+|--------|-------|--------|
+| `ModuleResource` classes | **257** | Scanned from `Modules/*/app/Filament/Resources/**` |
+| Policy methods per resource | **12** | `config/filament-shield.php` `policies.methods` |
+| Permission name pattern | `{Method}:{ModelShortName}` (Pascal) | `config/filament-shield.php` `permissions` |
+| Custom permissions | **16** (Exam) | `config/filament-shield.php` `custom_permissions` |
+| Estimated permission keys | **~3100** | 257 × 12 + 16 |
+
+Example for `Student` resource: `ViewAny:Student`, `View:Student`, `Create:Student`, … `Reorder:Student`.
+
+Per-module resource counts and sample subjects: see **`AUTHORIZATION_MATRIX.md` § Resources by module**.
+
+> **Note:** Catalog is derived from resource classes + Shield config, not from a live `permissions` table dump. Runtime role assignments are tenant-specific (`tenant_id` team).
+
 ### Authorization flow
 
 ```mermaid
@@ -526,7 +547,31 @@ Default queue connection: `env('QUEUE_CONNECTION', 'database')` (`config/queue.p
 | DELETE | `/api/v1/devices/{token}` | Write | Device deactivation |
 | GET | `/api/v1/students/{id}/dashboard` | Read | Mobile dashboard aggregates |
 
-**Module API routes:** Additional routes registered in `Modules/*/routes/api.php` (e.g. Enrollment inquiry, Library). Full list: `php artisan route:list --except-vendor --path=api`.
+**Full catalog (101 routes):** `API_ROUTES.md` and `docs/catalogs/api-routes-catalog.json`  
+**Regenerate:** `php scripts/extract-api-routes.php`
+
+### Routes by module (summary)
+
+| Module | Routes | Examples |
+|--------|--------|----------|
+| Api | 43 | `api/v1/me`, `api/v1/students`, `api/v2/*`, OpenAPI |
+| Campus | 5 | `api/v1/campuses` REST scaffold |
+| Core | 5 | `api/v1/cores` REST scaffold |
+| Employee | 4 | `api/v1/employees` (+ module REST) |
+| Enrollment | 1 | `api/inquiry` (public POST) |
+| Exam | 1 | `api/exam/runtime/attempts` |
+| EOffice | 1 | `api/letters/verify/{token}` |
+| Finance | 5 | `api/v1/finances` REST scaffold |
+| Global | 5 | `api/v1/globals` REST scaffold |
+| Inventory | 5 | `api/v1/inventories` REST scaffold |
+| Library | 5 | `api/v1/libraries` REST scaffold |
+| Messaging | 1 | `api/webhooks/whatsapp/{provider}` |
+| Monitoring | 5 | `api/v1/monitorings` REST scaffold |
+| Procurement | 5 | `api/v1/procurements` REST scaffold |
+| Sales | 5 | `api/v1/sales` REST scaffold |
+| School | 5 | `api/v1/schools` REST scaffold |
+
+Module REST scaffolds (`api/v1/{module}` CRUD) are registered via module route service providers — see per-route middleware in **`API_ROUTES.md`**.
 
 **Rate limiting:** 60 requests/minute per token ID or IP (`routes/api.php:24-28`).
 
@@ -875,7 +920,8 @@ flowchart TB
 | Module events without cross-subscribers | Exam, Sales, Inventory, etc. | `EVENTS.md:79-81` |
 | Manual-only state labels | UI filters without transition code | `STATE_DIAGRAMS.md` |
 | `entity-relations.json` low verification | ERD relation edges uncertain | Use migrations + `verified-fks.json` |
-| OpenAPI coverage vs all module routes | **belum terverifikasi** full parity | OpenAPI controllers exist; module routes may extend beyond spec |
+| OpenAPI coverage vs module REST scaffolds | Partial — OpenAPI may not list all module CRUD routes | Compare `API_ROUTES.md` with `api/openapi.json` |
+| Permission matrix vs DB | Catalog from code/config; not live `permissions` table export | `docs/catalogs/authorization-matrix.json` |
 | Public API write surface | Limited to applicants, payments, leave | By design (`routes/api.php`) |
 | Automated production CD | CI tests only | No deploy workflow YAML |
 
@@ -888,8 +934,9 @@ flowchart TB
 | 45 modules | Directory count | `Modules/` |
 | 257 Filament resources | Class extends | `grep extends ModuleResource` |
 | 434 tables | JSON catalog | `storage/app/entity-catalog.json` |
-| 1781 routes | Artisan | `php artisan route:list --except-vendor` |
-| 104 API routes | Artisan | `php artisan route:list --except-vendor --path=api` |
+| 1778 routes | Artisan JSON count | `php artisan route:list --except-vendor --json` |
+| 101 API routes | Extract script | `docs/catalogs/api-routes-catalog.json` |
+| 257 Shield resources | Extract script | `docs/catalogs/authorization-matrix.json` |
 | Shared DB tenancy | Trait + docs | `BelongsToTenant.php`, `CLAUDE.md` |
 | 3 panels | Provider classes | `app/Providers/Filament/` |
 | Panel access rules | Method | `User.php:463-484` |
@@ -922,6 +969,8 @@ flowchart TB
 | `ACTIVITY_DIAGRAMS.md` | AD-01 – AD-07 |
 | `STATE_DIAGRAMS.md` | ST-01 – ST-13 |
 | `ARCHITECTURE.md` | Layered architecture, integration maps |
+| `AUTHORIZATION_MATRIX.md` | Shield permissions, panel access, per-module resources |
+| `API_ROUTES.md` | Full `api/*` route table (101 routes) |
 | `EVENTS.md` | Cross-module domain events |
 | `CLAUDE.md` | Agent/dev conventions |
 | `README.md` | Project overview |
@@ -941,6 +990,16 @@ flowchart TB
 | `storage/app/verified-fks.json` | Foreign key catalog |
 | `storage/app/entity-relations.json` | Eloquent relations (partial verification) |
 | `storage/app/entity-groups.json` | ERD grouping data |
+| `docs/catalogs/authorization-matrix.json` | 257 resources, ~3100 permission keys |
+| `docs/catalogs/api-routes-catalog.json` | 101 API routes with middleware |
+
+### Regeneration scripts
+
+| Script | Output |
+|--------|--------|
+| `scripts/extract-authorization-matrix.php` | `docs/catalogs/authorization-matrix.json` |
+| `scripts/extract-api-routes.php` | `docs/catalogs/api-routes-catalog.json` |
+| `scripts/generate-docs-appendices.php` | `AUTHORIZATION_MATRIX.md`, `API_ROUTES.md` |
 
 ### Critical code entry points
 

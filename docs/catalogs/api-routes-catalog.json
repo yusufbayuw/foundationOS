@@ -1,0 +1,3005 @@
+{
+    "generated_at": "2026-06-19T04:50:20+00:00",
+    "source": "scripts/extract-api-routes.php",
+    "route_count": 101,
+    "routes": [
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/exam/runtime/attempts",
+            "name": "api.exam.runtime.attempts.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Exam\\Http\\Controllers\\Api\\ExamRuntimeWebhookController@storeAttempt",
+            "module": "Exam"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/inquiry",
+            "name": "api.enrollment.inquiry",
+            "middleware": [
+                "api",
+                "throttle:10,1"
+            ],
+            "action": "Modules\\Enrollment\\Http\\Controllers\\InquiryController@store",
+            "module": "Enrollment"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/letters/verify/{token}",
+            "name": "letters.verify",
+            "middleware": [
+                "api"
+            ],
+            "action": "Modules\\EOffice\\Http\\Controllers\\LetterVerificationController@show",
+            "module": "EOffice"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/openapi.json",
+            "name": "api.openapi",
+            "middleware": [
+                "api"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\OpenApiController@v1",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/applicants",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant",
+                "idempotency"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\ApplicantController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/campuses/{campus}",
+            "name": "api.campus.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Campus\\Http\\Controllers\\CampusController@destroy",
+            "module": "Campus"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/campuses/{campus}",
+            "name": "api.campus.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Campus\\Http\\Controllers\\CampusController@show",
+            "module": "Campus"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/campuses/{campus}",
+            "name": "api.campus.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Campus\\Http\\Controllers\\CampusController@update",
+            "module": "Campus"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/campuses",
+            "name": "api.campus.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Campus\\Http\\Controllers\\CampusController@index",
+            "module": "Campus"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/campuses",
+            "name": "api.campus.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Campus\\Http\\Controllers\\CampusController@store",
+            "module": "Campus"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/classes/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/classes",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/college-students/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/college-students",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/cores/{core}",
+            "name": "api.core.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Core\\Http\\Controllers\\CoreController@destroy",
+            "module": "Core"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/cores/{core}",
+            "name": "api.core.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Core\\Http\\Controllers\\CoreController@show",
+            "module": "Core"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/cores/{core}",
+            "name": "api.core.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Core\\Http\\Controllers\\CoreController@update",
+            "module": "Core"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/cores",
+            "name": "api.core.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Core\\Http\\Controllers\\CoreController@index",
+            "module": "Core"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/cores",
+            "name": "api.core.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Core\\Http\\Controllers\\CoreController@store",
+            "module": "Core"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/courses/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/courses",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/devices/{token}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@destroy",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/devices",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/employees/{employee}",
+            "name": "api.employee.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@destroy",
+            "module": "Employee"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/employees/{employee}",
+            "name": "api.employee.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@show",
+            "module": "Employee"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/employees/{employee}",
+            "name": "api.employee.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@update",
+            "module": "Employee"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/employees/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/employees",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/employees",
+            "name": "api.employee.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@store",
+            "module": "Employee"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/finances/{finance}",
+            "name": "api.finance.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@destroy",
+            "module": "Finance"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/finances/{finance}",
+            "name": "api.finance.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@show",
+            "module": "Finance"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/finances/{finance}",
+            "name": "api.finance.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@update",
+            "module": "Finance"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/finances",
+            "name": "api.finance.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@index",
+            "module": "Finance"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/finances",
+            "name": "api.finance.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@store",
+            "module": "Finance"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/globals/{global}",
+            "name": "api.global.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Global\\Http\\Controllers\\GlobalController@destroy",
+            "module": "Global"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/globals/{global}",
+            "name": "api.global.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Global\\Http\\Controllers\\GlobalController@show",
+            "module": "Global"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/globals/{global}",
+            "name": "api.global.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Global\\Http\\Controllers\\GlobalController@update",
+            "module": "Global"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/globals",
+            "name": "api.global.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Global\\Http\\Controllers\\GlobalController@index",
+            "module": "Global"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/globals",
+            "name": "api.global.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Global\\Http\\Controllers\\GlobalController@store",
+            "module": "Global"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/inventories/{inventory}",
+            "name": "api.inventory.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@destroy",
+            "module": "Inventory"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/inventories/{inventory}",
+            "name": "api.inventory.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@show",
+            "module": "Inventory"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/inventories/{inventory}",
+            "name": "api.inventory.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@update",
+            "module": "Inventory"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/inventories",
+            "name": "api.inventory.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@index",
+            "module": "Inventory"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/inventories",
+            "name": "api.inventory.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@store",
+            "module": "Inventory"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/leave-requests",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant",
+                "idempotency"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\LeaveRequestController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/libraries/{library}",
+            "name": "api.library.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Library\\Http\\Controllers\\LibraryController@destroy",
+            "module": "Library"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/libraries/{library}",
+            "name": "api.library.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Library\\Http\\Controllers\\LibraryController@show",
+            "module": "Library"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/libraries/{library}",
+            "name": "api.library.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Library\\Http\\Controllers\\LibraryController@update",
+            "module": "Library"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/libraries",
+            "name": "api.library.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Library\\Http\\Controllers\\LibraryController@index",
+            "module": "Library"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/libraries",
+            "name": "api.library.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Library\\Http\\Controllers\\LibraryController@store",
+            "module": "Library"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/me",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@me",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/monitorings/{monitoring}",
+            "name": "api.monitoring.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@destroy",
+            "module": "Monitoring"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/monitorings/{monitoring}",
+            "name": "api.monitoring.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@show",
+            "module": "Monitoring"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/monitorings/{monitoring}",
+            "name": "api.monitoring.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@update",
+            "module": "Monitoring"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/monitorings",
+            "name": "api.monitoring.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@index",
+            "module": "Monitoring"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/monitorings",
+            "name": "api.monitoring.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@store",
+            "module": "Monitoring"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/organizations/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/organizations",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/payments",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant",
+                "idempotency"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\PaymentController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/procurements/{procurement}",
+            "name": "api.procurement.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@destroy",
+            "module": "Procurement"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/procurements/{procurement}",
+            "name": "api.procurement.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@show",
+            "module": "Procurement"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/procurements/{procurement}",
+            "name": "api.procurement.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@update",
+            "module": "Procurement"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/procurements",
+            "name": "api.procurement.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@index",
+            "module": "Procurement"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/procurements",
+            "name": "api.procurement.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@store",
+            "module": "Procurement"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/sales/{sale}",
+            "name": "api.sales.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Sales\\Http\\Controllers\\SalesController@destroy",
+            "module": "Sales"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/sales/{sale}",
+            "name": "api.sales.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Sales\\Http\\Controllers\\SalesController@show",
+            "module": "Sales"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/sales/{sale}",
+            "name": "api.sales.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Sales\\Http\\Controllers\\SalesController@update",
+            "module": "Sales"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/sales",
+            "name": "api.sales.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Sales\\Http\\Controllers\\SalesController@index",
+            "module": "Sales"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/sales",
+            "name": "api.sales.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\Sales\\Http\\Controllers\\SalesController@store",
+            "module": "Sales"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v1/schools/{school}",
+            "name": "api.school.destroy",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\School\\Http\\Controllers\\SchoolController@destroy",
+            "module": "School"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/schools/{school}",
+            "name": "api.school.show",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\School\\Http\\Controllers\\SchoolController@show",
+            "module": "School"
+        },
+        {
+            "methods": [
+                "PUT",
+                "PATCH"
+            ],
+            "uri": "api/v1/schools/{school}",
+            "name": "api.school.update",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\School\\Http\\Controllers\\SchoolController@update",
+            "module": "School"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/schools",
+            "name": "api.school.index",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\School\\Http\\Controllers\\SchoolController@index",
+            "module": "School"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v1/schools",
+            "name": "api.school.store",
+            "middleware": [
+                "api",
+                "auth:sanctum"
+            ],
+            "action": "Modules\\School\\Http\\Controllers\\SchoolController@store",
+            "module": "School"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/students/{id}/dashboard",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\StudentDashboardController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/students/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/students",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v1/tenants/current",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@currentTenant",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v2/applicants",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant",
+                "idempotency"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\ApplicantController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/classes/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/classes",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/college-students/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/college-students",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/courses/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/courses",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "DELETE"
+            ],
+            "uri": "api/v2/devices/{token}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@destroy",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v2/devices",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/employees/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/employees",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v2/leave-requests",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant",
+                "idempotency"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\LeaveRequestController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/me",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@me",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/openapi.json",
+            "name": "api.openapi.v2",
+            "middleware": [
+                "api"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\OpenApiController@v2",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/organizations/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/organizations",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/v2/payments",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant",
+                "idempotency"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\PaymentController@store",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/students/{id}/dashboard",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\StudentDashboardController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/students/{id}",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/students",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@index",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2/tenants/current",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2",
+                "auth:sanctum",
+                "resolve.api.tenant"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@currentTenant",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "GET",
+                "HEAD"
+            ],
+            "uri": "api/v2",
+            "name": null,
+            "middleware": [
+                "api",
+                "throttle:api",
+                "api.version.meta:v2"
+            ],
+            "action": "App\\Http\\Controllers\\Api\\v2\\VersionController@show",
+            "module": "Api"
+        },
+        {
+            "methods": [
+                "POST"
+            ],
+            "uri": "api/webhooks/whatsapp/{provider}",
+            "name": "webhooks.whatsapp",
+            "middleware": [
+                "api"
+            ],
+            "action": "Modules\\Messaging\\Http\\Controllers\\WhatsAppWebhookController@handle",
+            "module": "Messaging"
+        }
+    ],
+    "routes_by_module": {
+        "Exam": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/exam/runtime/attempts",
+                "name": "api.exam.runtime.attempts.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Exam\\Http\\Controllers\\Api\\ExamRuntimeWebhookController@storeAttempt",
+                "module": "Exam"
+            }
+        ],
+        "Enrollment": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/inquiry",
+                "name": "api.enrollment.inquiry",
+                "middleware": [
+                    "api",
+                    "throttle:10,1"
+                ],
+                "action": "Modules\\Enrollment\\Http\\Controllers\\InquiryController@store",
+                "module": "Enrollment"
+            }
+        ],
+        "EOffice": [
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/letters/verify/{token}",
+                "name": "letters.verify",
+                "middleware": [
+                    "api"
+                ],
+                "action": "Modules\\EOffice\\Http\\Controllers\\LetterVerificationController@show",
+                "module": "EOffice"
+            }
+        ],
+        "Api": [
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/openapi.json",
+                "name": "api.openapi",
+                "middleware": [
+                    "api"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\OpenApiController@v1",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/applicants",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant",
+                    "idempotency"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\ApplicantController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/classes/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/classes",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/college-students/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/college-students",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/courses/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/courses",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/devices/{token}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@destroy",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/devices",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/employees/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/employees",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/leave-requests",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant",
+                    "idempotency"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\LeaveRequestController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/me",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@me",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/organizations/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/organizations",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/payments",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant",
+                    "idempotency"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\PaymentController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/students/{id}/dashboard",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\StudentDashboardController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/students/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/students",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/tenants/current",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@currentTenant",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v2/applicants",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant",
+                    "idempotency"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\ApplicantController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/classes/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/classes",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\SchoolClassController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/college-students/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/college-students",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CollegeStudentController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/courses/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/courses",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\CourseController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v2/devices/{token}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@destroy",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v2/devices",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\DeviceController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/employees/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/employees",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\EmployeeController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v2/leave-requests",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant",
+                    "idempotency"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\LeaveRequestController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/me",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@me",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/openapi.json",
+                "name": "api.openapi.v2",
+                "middleware": [
+                    "api"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\OpenApiController@v2",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/organizations/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/organizations",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\OrganizationController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v2/payments",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant",
+                    "idempotency"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\PaymentController@store",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/students/{id}/dashboard",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\StudentDashboardController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/students/{id}",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@show",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/students",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\StudentController@index",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2/tenants/current",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2",
+                    "auth:sanctum",
+                    "resolve.api.tenant"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v1\\AuthController@currentTenant",
+                "module": "Api"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v2",
+                "name": null,
+                "middleware": [
+                    "api",
+                    "throttle:api",
+                    "api.version.meta:v2"
+                ],
+                "action": "App\\Http\\Controllers\\Api\\v2\\VersionController@show",
+                "module": "Api"
+            }
+        ],
+        "Campus": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/campuses/{campus}",
+                "name": "api.campus.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Campus\\Http\\Controllers\\CampusController@destroy",
+                "module": "Campus"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/campuses/{campus}",
+                "name": "api.campus.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Campus\\Http\\Controllers\\CampusController@show",
+                "module": "Campus"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/campuses/{campus}",
+                "name": "api.campus.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Campus\\Http\\Controllers\\CampusController@update",
+                "module": "Campus"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/campuses",
+                "name": "api.campus.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Campus\\Http\\Controllers\\CampusController@index",
+                "module": "Campus"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/campuses",
+                "name": "api.campus.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Campus\\Http\\Controllers\\CampusController@store",
+                "module": "Campus"
+            }
+        ],
+        "Core": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/cores/{core}",
+                "name": "api.core.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Core\\Http\\Controllers\\CoreController@destroy",
+                "module": "Core"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/cores/{core}",
+                "name": "api.core.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Core\\Http\\Controllers\\CoreController@show",
+                "module": "Core"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/cores/{core}",
+                "name": "api.core.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Core\\Http\\Controllers\\CoreController@update",
+                "module": "Core"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/cores",
+                "name": "api.core.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Core\\Http\\Controllers\\CoreController@index",
+                "module": "Core"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/cores",
+                "name": "api.core.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Core\\Http\\Controllers\\CoreController@store",
+                "module": "Core"
+            }
+        ],
+        "Employee": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/employees/{employee}",
+                "name": "api.employee.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@destroy",
+                "module": "Employee"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/employees/{employee}",
+                "name": "api.employee.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@show",
+                "module": "Employee"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/employees/{employee}",
+                "name": "api.employee.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@update",
+                "module": "Employee"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/employees",
+                "name": "api.employee.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Employee\\Http\\Controllers\\EmployeeController@store",
+                "module": "Employee"
+            }
+        ],
+        "Finance": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/finances/{finance}",
+                "name": "api.finance.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@destroy",
+                "module": "Finance"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/finances/{finance}",
+                "name": "api.finance.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@show",
+                "module": "Finance"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/finances/{finance}",
+                "name": "api.finance.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@update",
+                "module": "Finance"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/finances",
+                "name": "api.finance.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@index",
+                "module": "Finance"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/finances",
+                "name": "api.finance.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Finance\\Http\\Controllers\\FinanceController@store",
+                "module": "Finance"
+            }
+        ],
+        "Global": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/globals/{global}",
+                "name": "api.global.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Global\\Http\\Controllers\\GlobalController@destroy",
+                "module": "Global"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/globals/{global}",
+                "name": "api.global.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Global\\Http\\Controllers\\GlobalController@show",
+                "module": "Global"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/globals/{global}",
+                "name": "api.global.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Global\\Http\\Controllers\\GlobalController@update",
+                "module": "Global"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/globals",
+                "name": "api.global.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Global\\Http\\Controllers\\GlobalController@index",
+                "module": "Global"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/globals",
+                "name": "api.global.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Global\\Http\\Controllers\\GlobalController@store",
+                "module": "Global"
+            }
+        ],
+        "Inventory": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/inventories/{inventory}",
+                "name": "api.inventory.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@destroy",
+                "module": "Inventory"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/inventories/{inventory}",
+                "name": "api.inventory.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@show",
+                "module": "Inventory"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/inventories/{inventory}",
+                "name": "api.inventory.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@update",
+                "module": "Inventory"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/inventories",
+                "name": "api.inventory.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@index",
+                "module": "Inventory"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/inventories",
+                "name": "api.inventory.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Inventory\\Http\\Controllers\\InventoryController@store",
+                "module": "Inventory"
+            }
+        ],
+        "Library": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/libraries/{library}",
+                "name": "api.library.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Library\\Http\\Controllers\\LibraryController@destroy",
+                "module": "Library"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/libraries/{library}",
+                "name": "api.library.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Library\\Http\\Controllers\\LibraryController@show",
+                "module": "Library"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/libraries/{library}",
+                "name": "api.library.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Library\\Http\\Controllers\\LibraryController@update",
+                "module": "Library"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/libraries",
+                "name": "api.library.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Library\\Http\\Controllers\\LibraryController@index",
+                "module": "Library"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/libraries",
+                "name": "api.library.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Library\\Http\\Controllers\\LibraryController@store",
+                "module": "Library"
+            }
+        ],
+        "Monitoring": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/monitorings/{monitoring}",
+                "name": "api.monitoring.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@destroy",
+                "module": "Monitoring"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/monitorings/{monitoring}",
+                "name": "api.monitoring.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@show",
+                "module": "Monitoring"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/monitorings/{monitoring}",
+                "name": "api.monitoring.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@update",
+                "module": "Monitoring"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/monitorings",
+                "name": "api.monitoring.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@index",
+                "module": "Monitoring"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/monitorings",
+                "name": "api.monitoring.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Monitoring\\Http\\Controllers\\MonitoringController@store",
+                "module": "Monitoring"
+            }
+        ],
+        "Procurement": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/procurements/{procurement}",
+                "name": "api.procurement.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@destroy",
+                "module": "Procurement"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/procurements/{procurement}",
+                "name": "api.procurement.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@show",
+                "module": "Procurement"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/procurements/{procurement}",
+                "name": "api.procurement.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@update",
+                "module": "Procurement"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/procurements",
+                "name": "api.procurement.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@index",
+                "module": "Procurement"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/procurements",
+                "name": "api.procurement.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Procurement\\Http\\Controllers\\ProcurementController@store",
+                "module": "Procurement"
+            }
+        ],
+        "Sales": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/sales/{sale}",
+                "name": "api.sales.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Sales\\Http\\Controllers\\SalesController@destroy",
+                "module": "Sales"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/sales/{sale}",
+                "name": "api.sales.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Sales\\Http\\Controllers\\SalesController@show",
+                "module": "Sales"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/sales/{sale}",
+                "name": "api.sales.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Sales\\Http\\Controllers\\SalesController@update",
+                "module": "Sales"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/sales",
+                "name": "api.sales.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Sales\\Http\\Controllers\\SalesController@index",
+                "module": "Sales"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/sales",
+                "name": "api.sales.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\Sales\\Http\\Controllers\\SalesController@store",
+                "module": "Sales"
+            }
+        ],
+        "School": [
+            {
+                "methods": [
+                    "DELETE"
+                ],
+                "uri": "api/v1/schools/{school}",
+                "name": "api.school.destroy",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\School\\Http\\Controllers\\SchoolController@destroy",
+                "module": "School"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/schools/{school}",
+                "name": "api.school.show",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\School\\Http\\Controllers\\SchoolController@show",
+                "module": "School"
+            },
+            {
+                "methods": [
+                    "PUT",
+                    "PATCH"
+                ],
+                "uri": "api/v1/schools/{school}",
+                "name": "api.school.update",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\School\\Http\\Controllers\\SchoolController@update",
+                "module": "School"
+            },
+            {
+                "methods": [
+                    "GET",
+                    "HEAD"
+                ],
+                "uri": "api/v1/schools",
+                "name": "api.school.index",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\School\\Http\\Controllers\\SchoolController@index",
+                "module": "School"
+            },
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/v1/schools",
+                "name": "api.school.store",
+                "middleware": [
+                    "api",
+                    "auth:sanctum"
+                ],
+                "action": "Modules\\School\\Http\\Controllers\\SchoolController@store",
+                "module": "School"
+            }
+        ],
+        "Messaging": [
+            {
+                "methods": [
+                    "POST"
+                ],
+                "uri": "api/webhooks/whatsapp/{provider}",
+                "name": "webhooks.whatsapp",
+                "middleware": [
+                    "api"
+                ],
+                "action": "Modules\\Messaging\\Http\\Controllers\\WhatsAppWebhookController@handle",
+                "module": "Messaging"
+            }
+        ]
+    }
+}
