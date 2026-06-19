@@ -567,3 +567,25 @@ Key config options in `config/activitylog.php`:
 - `actions.clean_log`: Action class for cleaning old activities
 
 </laravel-boost-guidelines>
+
+## Cursor Cloud specific instructions
+
+Stack: Laravel 13 + Filament v5 + Livewire v4 on PHP 8.4, default DB is **SQLite** (`database/database.sqlite`); sessions/cache/queue all default to the `database` driver, so no external DB/Redis is needed in dev. The startup update script already runs `composer install`, `npm install`, and `npm run build`.
+
+### Running the app
+- Full dev stack: `composer run dev` (runs `php artisan serve`, `php artisan queue:listen`, `php artisan pail`, and `npm run dev` via `concurrently`). `pail` needs a TTY, so in headless/background contexts start the processes individually instead: `php artisan serve --host=0.0.0.0 --port=8000`, `php artisan queue:listen`, `npm run dev`.
+- Admin panel is at `/admin` (e.g. `http://localhost:8000/admin`); it redirects to `/admin/login`. UI defaults to Indonesian (`APP_LOCALE=id`).
+
+### Vite manifest is required even for tests
+- Many Filament/Livewire view tests (e.g. `WorkflowDesigner*`) render Blade that calls `@vite`, so they throw `Vite manifest not found` unless `public/build/manifest.json` exists. Run `npm run build` once after a fresh checkout/dependency refresh (the update script does this). Without it ~18 tests fail purely due to the missing manifest.
+
+### Demo data / login
+- Seed with `php artisan migrate` then `php artisan db:seed`. Login: `admin@admin.com` / `password`.
+- Known pre-existing bug: `MvpDemoSeeder` → `TenantAdminProvisioner::assignShieldSuperAdmin()` inserts a literal `team_id` column while the Spatie roles table uses `tenant_id` (config `permission.team_foreign_key=tenant_id`), so `db:seed` aborts with `table roles has no column named team_id`. This happens AFTER the admin user, tenant, org, and the user's tenant-owner role are created, so the `admin@admin.com` login already works and has full panel access (global super admins bypass all gates via `Gate::before` in `AppServiceProvider`). The seeder crash only skips the Shield role assignment, tenant module enablement, and the Exam demo seeder.
+
+### Tests
+- Run with `php artisan test --compact` (full suite ~5 min, in-memory SQLite). As of setup, 838 pass and 17 fail; the 17 are pre-existing app/test failures unrelated to environment (e.g. `members.user_id` NOT NULL constraint, Filament CRUD `TypeError`, bilingual snapshot mismatches, `LibraryFoundationTest` 403, `WorkflowDesignerImportJsonTest` `$importPayload` not on `workflow-canvas`). They are deterministic across runs.
+
+### Lint / static analysis
+- `vendor/bin/pint --test` (lint check; the repo currently has many pre-existing style deviations so this reports failures even with no local changes — use `vendor/bin/pint --dirty` to format only your own changes).
+- `composer analyse` (PHPStan/Larastan), `composer lint:translations`, `composer lint:tenant-fields`.
