@@ -2,7 +2,7 @@
 
 **Master technical reference** consolidating verified repository discovery. This document cites code, routes, migrations, and configuration; items without direct evidence are marked **belum terverifikasi**.
 
-**Verification date:** 2026-06-19  
+**Verification date:** 2026-06-19 (ERD hub + route counts re-verified) (ERD hub + route counts re-verified against repo)  
 **Branch evidence:** `cursor/use-case-model-0a94`  
 **Companion artifacts:** `USE_CASES.md`, `SEQUENCE_DIAGRAMS.md`, `ACTIVITY_DIAGRAMS.md`, `STATE_DIAGRAMS.md`, `ARCHITECTURE.md`, `EVENTS.md`
 
