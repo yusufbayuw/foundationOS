@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Consulting\Database\Factories\ConsultingClientFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
@@ -14,9 +15,9 @@ class ConsultingClient extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Consulting\Database\Factories\ConsultingClientFactory
+    protected static function newFactory(): ConsultingClientFactory
     {
-        return \Modules\Consulting\Database\Factories\ConsultingClientFactory::new();
+        return ConsultingClientFactory::new();
     }
 
     protected $table = 'consulting_clients';

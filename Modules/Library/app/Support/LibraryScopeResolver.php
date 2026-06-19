@@ -35,7 +35,7 @@ class LibraryScopeResolver
             return $query->whereRaw('1 = 0');
         }
 
-        $query->where($query->getModel()->getTable() . '.tenant_id', $tenantId);
+        $query->where($query->getModel()->getTable().'.tenant_id', $tenantId);
 
         if (! $this->hasOrganizationColumn($query) || $user === null || $user->isGlobalSuperAdmin()) {
             return $query;
@@ -55,8 +55,8 @@ class LibraryScopeResolver
         }
 
         return $query->where(function (Builder $builder) use ($organizationIds): void {
-            $builder->whereNull($builder->getModel()->getTable() . '.organization_id')
-                ->orWhereIn($builder->getModel()->getTable() . '.organization_id', $organizationIds);
+            $builder->whereNull($builder->getModel()->getTable().'.organization_id')
+                ->orWhereIn($builder->getModel()->getTable().'.organization_id', $organizationIds);
         });
     }
 

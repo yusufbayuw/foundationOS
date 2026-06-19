@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Procurement\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Procurement\Models\VendorBillItem;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class VendorBillItemPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:VendorBillItem');
@@ -71,5 +71,4 @@ class VendorBillItemPolicy
     {
         return $authUser->can('Reorder:VendorBillItem');
     }
-
 }

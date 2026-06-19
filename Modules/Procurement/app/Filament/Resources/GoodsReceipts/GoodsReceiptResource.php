@@ -2,9 +2,9 @@
 
 namespace Modules\Procurement\Filament\Resources\GoodsReceipts;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\GoodsReceipts\Pages\CreateGoodsReceipt;
 use Modules\Procurement\Filament\Resources\GoodsReceipts\Pages\EditGoodsReceipt;
 use Modules\Procurement\Filament\Resources\GoodsReceipts\Pages\ListGoodsReceipts;

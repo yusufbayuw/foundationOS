@@ -2,13 +2,12 @@
 
 namespace Modules\Workflow\Services;
 
-use Throwable;
-use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Workflow\Enums\WorkflowAutomationActionType;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Notifications\InternalWorkflowNotification;
+use Throwable;
 
 class WorkflowAutomatedActionRunner
 {

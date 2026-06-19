@@ -24,6 +24,7 @@ class MoodleDrainOutboxCommand extends Command
 
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync tidak aktif (MOODLE_SYNC_ENABLED=false).');
+
             return self::SUCCESS;
         }
 
@@ -49,4 +50,3 @@ class MoodleDrainOutboxCommand extends Command
         return self::SUCCESS;
     }
 }
-

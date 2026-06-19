@@ -48,4 +48,3 @@ class MoodleRetryFailedCommand extends Command
         return self::SUCCESS;
     }
 }
-

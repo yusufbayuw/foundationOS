@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Monitoring\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Monitoring\Models\FileUpload;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class FileUploadPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:FileUpload');
@@ -71,5 +71,4 @@ class FileUploadPolicy
     {
         return $authUser->can('Reorder:FileUpload');
     }
-
 }

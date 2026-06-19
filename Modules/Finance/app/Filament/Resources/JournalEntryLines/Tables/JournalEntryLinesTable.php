@@ -2,16 +2,18 @@
 
 namespace Modules\Finance\Filament\Resources\JournalEntryLines\Tables;
 
+use App\Filament\Imports\JournalEntryLineImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class JournalEntryLinesTable
 {
@@ -20,29 +22,29 @@ class JournalEntryLinesTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('journalEntry.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('journalEntry.id'))
+                    ->label(FilamentUi::field('journalEntry.id'))
                     ->searchable(),
                 TextColumn::make('chartOfAccount.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('chartOfAccount.name'))
+                    ->label(FilamentUi::field('chartOfAccount.name'))
                     ->searchable(),
                 TextColumn::make('debit')
-                    ->label(\Modules\Core\Support\FilamentUi::field('debit'))
+                    ->label(FilamentUi::field('debit'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('credit')
-                    ->label(\Modules\Core\Support\FilamentUi::field('credit'))
+                    ->label(FilamentUi::field('credit'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -55,14 +57,14 @@ class JournalEntryLinesTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\JournalEntryLineImporter::class),
+                ...ImportTableActions::make(JournalEntryLineImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

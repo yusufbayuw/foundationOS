@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Cms\Exceptions\DuplicateCmsSiteCodeException;
 use Modules\Cms\Exceptions\DuplicatePageSlugException;
-use Modules\Cms\Models\Page;
 use Modules\Cms\Models\Site;
 use Modules\Cms\Services\CmsSiteRegistrationService;
 use Modules\Cms\Services\PagePublishingService;

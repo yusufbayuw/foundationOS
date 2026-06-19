@@ -4,7 +4,6 @@ namespace Modules\Library\Filament\Resources\BookCopies;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\BookCopies\Pages\CreateBookCopy;
 use Modules\Library\Filament\Resources\BookCopies\Pages\EditBookCopy;
 use Modules\Library\Filament\Resources\BookCopies\Pages\ListBookCopies;
@@ -13,6 +12,7 @@ use Modules\Library\Filament\Resources\BookCopies\RelationManagers\LoansRelation
 use Modules\Library\Filament\Resources\BookCopies\Schemas\BookCopyForm;
 use Modules\Library\Filament\Resources\BookCopies\Schemas\BookCopyInfolist;
 use Modules\Library\Filament\Resources\BookCopies\Tables\BookCopiesTable;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Models\BookCopy;
 
 class BookCopyResource extends LocalizedResource

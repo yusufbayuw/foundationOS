@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Resources\StudyPlanItems;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Campus\Filament\Resources\StudyPlanItems\Pages\CreateStudyPlanItem;
@@ -13,6 +12,7 @@ use Modules\Campus\Filament\Resources\StudyPlanItems\Schemas\StudyPlanItemForm;
 use Modules\Campus\Filament\Resources\StudyPlanItems\Schemas\StudyPlanItemInfolist;
 use Modules\Campus\Filament\Resources\StudyPlanItems\Tables\StudyPlanItemsTable;
 use Modules\Campus\Models\StudyPlanItem;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 
 class StudyPlanItemResource extends LocalizedResource
 {

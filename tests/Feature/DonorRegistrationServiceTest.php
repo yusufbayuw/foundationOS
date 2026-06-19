@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Donation\Exceptions\DuplicateDonorEmailException;
-use Modules\Donation\Models\Donor;
 use Modules\Donation\Services\DonorRegistrationService;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;

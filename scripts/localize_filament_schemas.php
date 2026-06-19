@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 $basePath = dirname(__DIR__);
 
@@ -28,12 +28,12 @@ $componentClasses = [
 ];
 
 $files = array_merge(
-    glob($basePath . '/Modules/*/app/Filament/Resources/*/Schemas/*.php'),
-    glob($basePath . '/Modules/*/app/Filament/Resources/*/Tables/*.php'),
+    glob($basePath.'/Modules/*/app/Filament/Resources/*/Schemas/*.php'),
+    glob($basePath.'/Modules/*/app/Filament/Resources/*/Tables/*.php'),
 );
 
 foreach ($files as $file) {
-    $relativePath = ltrim(str_replace($basePath . '/', '', $file), '/');
+    $relativePath = ltrim(str_replace($basePath.'/', '', $file), '/');
     $code = shell_exec(sprintf('git show HEAD:%s 2>/dev/null', escapeshellarg($relativePath)));
 
     if (! is_string($code) || trim($code) === '') {
@@ -75,7 +75,7 @@ foreach ($files as $file) {
         $code,
     );
 
-    $lines = preg_split("/\\R/", $code) ?: [];
+    $lines = preg_split('/\\R/', $code) ?: [];
     $output = [];
 
     for ($i = 0, $count = count($lines); $i < $count; $i++) {
@@ -83,6 +83,7 @@ foreach ($files as $file) {
 
         if (! preg_match("/^([ \t]*)([A-Za-z\\\\]+::make\\('([^']+)'\\))(.*)$/", $line, $matches)) {
             $output[] = $line;
+
             continue;
         }
 
@@ -91,11 +92,13 @@ foreach ($files as $file) {
 
         if (! in_array($componentBase, $componentClasses, true)) {
             $output[] = $line;
+
             continue;
         }
 
         if (str_contains($line, '->label(')) {
             $output[] = $line;
+
             continue;
         }
 
@@ -114,9 +117,9 @@ foreach ($files as $file) {
         $hasFollowingChain = is_string($nextNonEmpty) && str_starts_with($nextNonEmpty, '->');
         $singleLineItem = $trimmedRest === '' || $trimmedRest === ',';
 
-        $output[] = $indent . $componentCall;
+        $output[] = $indent.$componentCall;
 
-        $labelLine = $indent . '    ->label(\\Modules\\Core\\Support\\FilamentUi::field(\'' . $field . '\'))';
+        $labelLine = $indent.'    ->label(\\Modules\\Core\\Support\\FilamentUi::field(\''.$field.'\'))';
 
         if ($trimmedRest === ',') {
             $labelLine .= ',';

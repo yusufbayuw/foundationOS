@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\UserTenantRoles;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\UserTenantRoles\Pages\CreateUserTenantRole;
@@ -12,6 +11,7 @@ use Modules\Core\Filament\Resources\UserTenantRoles\Pages\ViewUserTenantRole;
 use Modules\Core\Filament\Resources\UserTenantRoles\Schemas\UserTenantRoleForm;
 use Modules\Core\Filament\Resources\UserTenantRoles\Schemas\UserTenantRoleInfolist;
 use Modules\Core\Filament\Resources\UserTenantRoles\Tables\UserTenantRolesTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\UserTenantRole;
 
 class UserTenantRoleResource extends LocalizedResource

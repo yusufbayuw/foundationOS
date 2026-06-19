@@ -22,11 +22,13 @@ class MoodleSyncCalendarCommand extends Command
     {
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync disabled.');
+
             return self::SUCCESS;
         }
 
         if (! config('moodle.calendar_sync_enabled', false)) {
             $this->warn('Calendar sync disabled. Set MOODLE_CALENDAR_SYNC_ENABLED=true.');
+
             return self::SUCCESS;
         }
 
@@ -53,13 +55,14 @@ class MoodleSyncCalendarCommand extends Command
 
             if ($mapping && ! $force) {
                 $skipped++;
+
                 continue;
             }
 
             $moodleCourseId = $syncService->resolveMoodleCourseIdForClass((int) $schedule->tenant_id, (int) $schedule->class_id);
             $startAt = $this->resolveScheduleStart($schedule);
             $duration = (int) ($schedule->duration_minutes ?? 0) * 60;
-            $name = trim(($schedule->subject?->name ?? 'Class Schedule') . ' - ' . ($schedule->schoolClass?->name ?? 'Class'));
+            $name = trim(($schedule->subject?->name ?? 'Class Schedule').' - '.($schedule->schoolClass?->name ?? 'Class'));
 
             $response = $client->call('core_calendar_create_calendar_events', [
                 'events' => [[
@@ -78,6 +81,7 @@ class MoodleSyncCalendarCommand extends Command
 
             if ($moodleEventId <= 0) {
                 $skipped++;
+
                 continue;
             }
 

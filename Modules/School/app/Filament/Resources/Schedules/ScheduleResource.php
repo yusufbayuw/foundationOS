@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Schedules;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Schedules\Pages\CreateSchedule;
 use Modules\School\Filament\Resources\Schedules\Pages\EditSchedule;
 use Modules\School\Filament\Resources\Schedules\Pages\ListSchedules;

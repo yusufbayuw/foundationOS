@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Employee\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Employee\Models\SalarySlip;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class SalarySlipPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:SalarySlip');
@@ -71,5 +71,4 @@ class SalarySlipPolicy
     {
         return $authUser->can('Reorder:SalarySlip');
     }
-
 }

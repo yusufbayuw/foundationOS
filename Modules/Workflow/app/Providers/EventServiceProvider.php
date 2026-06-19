@@ -13,8 +13,8 @@ use Modules\Workflow\Listeners\CreateAssignmentsForCurrentStep;
 use Modules\Workflow\Listeners\NotifyWorkflowAssignees;
 use Modules\Workflow\Listeners\RecordWorkflowMonitoringAudit;
 use Modules\Workflow\Listeners\RunWorkflowAutomatedActions;
-use Modules\Workflow\Listeners\SyncBudgetWorkflowState;
 use Modules\Workflow\Listeners\ScheduleWorkflowSlaCheck;
+use Modules\Workflow\Listeners\SyncBudgetWorkflowState;
 use Modules\Workflow\Listeners\SyncWorkflowSubjectState;
 
 class EventServiceProvider extends ServiceProvider

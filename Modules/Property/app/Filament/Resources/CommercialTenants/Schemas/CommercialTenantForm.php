@@ -3,7 +3,6 @@
 namespace Modules\Property\Filament\Resources\CommercialTenants\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;

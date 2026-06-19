@@ -3,9 +3,9 @@
 namespace Modules\School\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Modules\School\Services\ReportCardService;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportCardController extends Controller
 {
@@ -14,15 +14,16 @@ class ReportCardController extends Controller
         $studentId = $request->query('student');
         $periodId = $request->query('period');
 
-        if (!$studentId || !$periodId) {
+        if (! $studentId || ! $periodId) {
             abort(404);
         }
 
         $data = $service->generate($studentId, $periodId);
 
         $pdf = Pdf::loadView('school::report-card-pdf', ['data' => $data]);
-        
+
         $studentName = $data['student']->user->name ?? 'Student';
-        return $pdf->download('Rapor_' . str_replace(' ', '_', $studentName) . '.pdf');
+
+        return $pdf->download('Rapor_'.str_replace(' ', '_', $studentName).'.pdf');
     }
 }

@@ -4,7 +4,6 @@ namespace Modules\Library\Filament\Resources\BookCategories;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Filament\Resources\BookCategories\Pages\CreateBookCategory;
 use Modules\Library\Filament\Resources\BookCategories\Pages\EditBookCategory;
 use Modules\Library\Filament\Resources\BookCategories\Pages\ListBookCategories;
@@ -13,6 +12,7 @@ use Modules\Library\Filament\Resources\BookCategories\RelationManagers\BooksRela
 use Modules\Library\Filament\Resources\BookCategories\Schemas\BookCategoryForm;
 use Modules\Library\Filament\Resources\BookCategories\Schemas\BookCategoryInfolist;
 use Modules\Library\Filament\Resources\BookCategories\Tables\BookCategoriesTable;
+use Modules\Library\Filament\Resources\LibraryResource as LocalizedResource;
 use Modules\Library\Models\BookCategory;
 
 class BookCategoryResource extends LocalizedResource

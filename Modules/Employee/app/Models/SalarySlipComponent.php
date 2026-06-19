@@ -4,13 +4,13 @@ namespace Modules\Employee\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class SalarySlipComponent extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -40,6 +40,7 @@ class SalarySlipComponent extends Model
             'display_order' => 'integer',
         ];
     }
+
     public function salarySlip(): BelongsTo
     {
         return $this->belongsTo(SalarySlip::class);

@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\SalarySlipComponents;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\SalarySlipComponents\Pages\CreateSalarySlipComponent;
 use Modules\Employee\Filament\Resources\SalarySlipComponents\Pages\EditSalarySlipComponent;
 use Modules\Employee\Filament\Resources\SalarySlipComponents\Pages\ListSalarySlipComponents;

@@ -22,17 +22,20 @@ class MoodlePullAttendanceCommand extends Command
     {
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync disabled.');
+
             return self::SUCCESS;
         }
 
         if (! config('moodle.attendance_pull_enabled', false)) {
             $this->warn('Attendance pull disabled. Set MOODLE_ATTENDANCE_PULL_ENABLED=true.');
+
             return self::SUCCESS;
         }
 
         $attendanceFunction = $this->resolveAttendanceFunction($client);
         if ($attendanceFunction === null) {
             $this->warn('Attendance plugin webservice function not found. Skipping pull.');
+
             return self::SUCCESS;
         }
 
@@ -70,6 +73,7 @@ class MoodlePullAttendanceCommand extends Command
             $moodleUserId = (int) $userMapping->moodle_id;
             if ($moodleUserId <= 0) {
                 $skipped++;
+
                 continue;
             }
 
@@ -80,6 +84,7 @@ class MoodlePullAttendanceCommand extends Command
             } catch (MoodleIntegrationException $exception) {
                 $this->warn("Skip user {$fosMappedUserId}: {$exception->getMessage()}");
                 $skipped++;
+
                 continue;
             }
 

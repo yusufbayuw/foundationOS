@@ -5,7 +5,7 @@ declare(strict_types=1);
 define('CLI_SCRIPT', true);
 
 $moodleConfigPath = '/Users/yusuf/Herd/moodle/config.php';
-$envPath = __DIR__ . '/../.env';
+$envPath = __DIR__.'/../.env';
 
 if (! file_exists($moodleConfigPath)) {
     fwrite(STDERR, "Moodle config not found at {$moodleConfigPath}\n");
@@ -128,6 +128,7 @@ foreach ($requiredFunctions as $functionName) {
 
     if (! $functionRow) {
         fwrite(STDERR, "Function not found in Moodle core: {$functionName}\n");
+
         continue;
     }
 
@@ -235,7 +236,7 @@ if ($restrictedUsers === 1) {
 
         $placeholders = implode(', ', array_fill(0, count($insertColumns), '?'));
         $insertServiceUserSql = "INSERT INTO {$prefix}external_services_users
-            (" . implode(', ', $insertColumns) . ")
+            (".implode(', ', $insertColumns).")
             VALUES ({$placeholders})";
         $insertServiceUserStatement = $prepare($mysqli, $insertServiceUserSql);
 
@@ -258,4 +259,4 @@ echo json_encode([
     'inserted_functions' => $insertedFunctions,
     'restrictedusers' => $restrictedUsers,
     'service_user_linked' => $serviceUserLinked,
-], JSON_PRETTY_PRINT) . PHP_EOL;
+], JSON_PRETTY_PRINT).PHP_EOL;

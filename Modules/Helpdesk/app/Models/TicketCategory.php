@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Helpdesk\Database\Factories\TicketCategoryFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class TicketCategory extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Helpdesk\Database\Factories\TicketCategoryFactory
+    protected static function newFactory(): TicketCategoryFactory
     {
-        return \Modules\Helpdesk\Database\Factories\TicketCategoryFactory::new();
+        return TicketCategoryFactory::new();
     }
 
     protected $table = 'ticket_categories';

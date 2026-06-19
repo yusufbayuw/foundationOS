@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\EmploymentContracts;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\EmploymentContracts\Pages\CreateEmploymentContract;
 use Modules\Employee\Filament\Resources\EmploymentContracts\Pages\EditEmploymentContract;
 use Modules\Employee\Filament\Resources\EmploymentContracts\Pages\ListEmploymentContracts;

@@ -19,11 +19,13 @@ class MoodleSyncCohortsCommand extends Command
     {
         if (! config('moodle.enabled', false)) {
             $this->warn('Moodle sync disabled.');
+
             return self::SUCCESS;
         }
 
         if (! config('moodle.cohort_sync_enabled', true)) {
             $this->warn('Cohort sync disabled. Set MOODLE_COHORT_SYNC_ENABLED=true.');
+
             return self::SUCCESS;
         }
 

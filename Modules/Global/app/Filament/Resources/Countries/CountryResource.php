@@ -2,9 +2,9 @@
 
 namespace Modules\Global\Filament\Resources\Countries;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Global\Filament\Resources\Countries\Pages\CreateCountry;
 use Modules\Global\Filament\Resources\Countries\Pages\EditCountry;
 use Modules\Global\Filament\Resources\Countries\Pages\ListCountries;

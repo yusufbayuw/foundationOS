@@ -60,6 +60,7 @@ class JsonLogicEvaluator
         foreach ($segments as $segment) {
             if (is_array($current) && array_key_exists($segment, $current)) {
                 $current = $current[$segment];
+
                 continue;
             }
 

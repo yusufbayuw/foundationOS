@@ -10,19 +10,19 @@ use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantSetting;
-use Modules\Enrollment\Events\ApplicantAccepted;
 use Modules\Enrollment\Events\ApplicantAcceptanceReverted;
+use Modules\Enrollment\Events\ApplicantAccepted;
+use Modules\Enrollment\Listeners\CompensateApplicantAcceptance;
 use Modules\Enrollment\Models\AdmissionPeriod;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Enrollment\Services\ApplicantPromotionService;
+use Modules\Finance\Listeners\CreateInitialInvoiceFromAcceptedApplicant;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Finance\Services\ApplicantOnboardingInvoiceService;
-use Modules\Library\Models\Member;
-use Modules\Library\Services\LibraryMemberProvisioningService;
-use Modules\School\Models\Student;
-use Modules\School\Listeners\CreateStudentFromAcceptedApplicant;
-use Modules\Finance\Listeners\CreateInitialInvoiceFromAcceptedApplicant;
 use Modules\Library\Listeners\CreateLibraryMemberFromAcceptedApplicant;
+use Modules\Library\Models\Member;
+use Modules\School\Listeners\CreateStudentFromAcceptedApplicant;
+use Modules\School\Models\Student;
 use Tests\TestCase;
 
 class ApplicantAcceptedPipelineTest extends TestCase
@@ -118,7 +118,7 @@ class ApplicantAcceptedPipelineTest extends TestCase
 
         $this->assertNotNull($invoice);
 
-        (new \Modules\Enrollment\Listeners\CompensateApplicantAcceptance)
+        (new CompensateApplicantAcceptance)
             ->handle(new ApplicantAcceptanceReverted($applicant->fresh(), 'accepted', null));
 
         $this->assertSame('void', $invoice->fresh()->status);

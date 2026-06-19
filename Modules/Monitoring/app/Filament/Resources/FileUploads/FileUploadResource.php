@@ -2,9 +2,9 @@
 
 namespace Modules\Monitoring\Filament\Resources\FileUploads;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Monitoring\Filament\Resources\FileUploads\Pages\CreateFileUpload;
 use Modules\Monitoring\Filament\Resources\FileUploads\Pages\EditFileUpload;
 use Modules\Monitoring\Filament\Resources\FileUploads\Pages\ListFileUploads;

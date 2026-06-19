@@ -1,8 +1,8 @@
 <?php
 
 $files = array_merge(
-    glob(__DIR__ . '/../Modules/*/app/Filament/Resources/*/Schemas/*.php'),
-    glob(__DIR__ . '/../Modules/*/app/Filament/Resources/*/Tables/*.php'),
+    glob(__DIR__.'/../Modules/*/app/Filament/Resources/*/Schemas/*.php'),
+    glob(__DIR__.'/../Modules/*/app/Filament/Resources/*/Tables/*.php'),
 );
 
 foreach ($files as $file) {
@@ -33,13 +33,14 @@ foreach ($files as $file) {
         $code,
     );
 
-    $lines = preg_split("/\\R/", $code) ?: [];
+    $lines = preg_split('/\\R/', $code) ?: [];
     $output = [];
     $pendingLabel = null;
 
     foreach ($lines as $line) {
         if (preg_match('/^\s*->label\(/', $line) === 1) {
             $pendingLabel = $line;
+
             continue;
         }
 

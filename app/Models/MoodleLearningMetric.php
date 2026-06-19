@@ -30,4 +30,3 @@ class MoodleLearningMetric extends Model
         ];
     }
 }
-

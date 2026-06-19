@@ -2,9 +2,9 @@
 
 namespace Modules\Procurement\Filament\Resources\RequestForQuotations;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\RequestForQuotations\Pages\CreateRequestForQuotation;
 use Modules\Procurement\Filament\Resources\RequestForQuotations\Pages\EditRequestForQuotation;
 use Modules\Procurement\Filament\Resources\RequestForQuotations\Pages\ListRequestForQuotations;

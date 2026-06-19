@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Marketplace\Exceptions\DuplicateSellerCodeException;
-use Modules\Marketplace\Models\Seller;
 use Modules\Marketplace\Services\SellerRegistrationService;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;

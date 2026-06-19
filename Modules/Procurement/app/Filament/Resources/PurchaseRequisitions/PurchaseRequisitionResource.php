@@ -2,9 +2,10 @@
 
 namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\CreatePurchaseRequisition;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\EditPurchaseRequisition;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\ListPurchaseRequisitions;
@@ -55,7 +56,7 @@ class PurchaseRequisitionResource extends LocalizedResource
         ];
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return $record instanceof PurchaseRequisition
             && ! $record->isLockedForMutation()

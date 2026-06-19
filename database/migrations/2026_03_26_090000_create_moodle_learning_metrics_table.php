@@ -30,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('moodle_learning_metrics');
     }
 };
-

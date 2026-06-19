@@ -2,7 +2,7 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers;
 
-use Filament\Actions\Action;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -10,8 +10,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 use Modules\Core\Support\FilamentUi;
-use Modules\Workflow\Models\WorkflowEvidence;
 
 class EvidencesRelationManager extends RelationManager
 {
@@ -35,7 +35,7 @@ class EvidencesRelationManager extends RelationManager
                     ->placeholder('-'),
                 Tables\Columns\TextColumn::make('file_size')
                     ->label(FilamentUi::text('File Size'))
-                    ->formatStateUsing(fn (?int $state): string => $state ? number_format($state / 1024, 1) . ' KB' : '-'),
+                    ->formatStateUsing(fn (?int $state): string => $state ? number_format($state / 1024, 1).' KB' : '-'),
                 Tables\Columns\TextColumn::make('uploadedBy.name')
                     ->label(FilamentUi::text('Uploaded By'))
                     ->placeholder('-'),
@@ -57,9 +57,9 @@ class EvidencesRelationManager extends RelationManager
                         if (! empty($data['file_path'])) {
                             $path = $data['file_path'];
                             $data['original_filename'] = basename($path);
-                            if (\Illuminate\Support\Facades\Storage::exists($path)) {
-                                $data['file_size'] = \Illuminate\Support\Facades\Storage::size($path);
-                                $data['mime_type'] = \Illuminate\Support\Facades\Storage::mimeType($path) ?: null;
+                            if (Storage::exists($path)) {
+                                $data['file_size'] = Storage::size($path);
+                                $data['mime_type'] = Storage::mimeType($path) ?: null;
                             }
                         }
 
@@ -74,7 +74,7 @@ class EvidencesRelationManager extends RelationManager
     }
 
     /**
-     * @return array<int, \Filament\Forms\Components\Component>
+     * @return array<int, Component>
      */
     protected function evidenceSchema(): array
     {

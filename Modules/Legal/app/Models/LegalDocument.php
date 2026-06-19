@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Legal\Database\Factories\LegalDocumentFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class LegalDocument extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Legal\Database\Factories\LegalDocumentFactory
+    protected static function newFactory(): LegalDocumentFactory
     {
-        return \Modules\Legal\Database\Factories\LegalDocumentFactory::new();
+        return LegalDocumentFactory::new();
     }
 
     protected $table = 'legal_documents';

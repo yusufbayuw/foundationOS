@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Subjects;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Subjects\Pages\CreateSubject;
 use Modules\School\Filament\Resources\Subjects\Pages\EditSubject;
 use Modules\School\Filament\Resources\Subjects\Pages\ListSubjects;

@@ -2,9 +2,11 @@
 
 namespace App\Integrations\Moodle;
 
+use Illuminate\Support\Carbon;
+
 class MoodleSyncRetry
 {
-    public function nextRetryAt(int $attempts): \Illuminate\Support\Carbon
+    public function nextRetryAt(int $attempts): Carbon
     {
         $minutes = config('moodle.backoff_minutes', [1, 2, 5, 10, 20, 30, 60]);
         $index = max(0, min($attempts - 1, count($minutes) - 1));
@@ -13,4 +15,3 @@ class MoodleSyncRetry
         return now()->addMinutes(max(1, $wait));
     }
 }
-

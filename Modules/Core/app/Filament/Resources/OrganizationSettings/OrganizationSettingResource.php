@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Resources\OrganizationSettings;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Resources\OrganizationSettings\Pages\CreateOrganizationSetting;
@@ -12,6 +11,7 @@ use Modules\Core\Filament\Resources\OrganizationSettings\Pages\ViewOrganizationS
 use Modules\Core\Filament\Resources\OrganizationSettings\Schemas\OrganizationSettingForm;
 use Modules\Core\Filament\Resources\OrganizationSettings\Schemas\OrganizationSettingInfolist;
 use Modules\Core\Filament\Resources\OrganizationSettings\Tables\OrganizationSettingsTable;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Core\Models\OrganizationSetting;
 
 class OrganizationSettingResource extends LocalizedResource

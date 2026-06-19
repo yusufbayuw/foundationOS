@@ -2,9 +2,9 @@
 
 namespace Modules\Procurement\Filament\Resources\VendorBills;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\VendorBills\Pages\CreateVendorBill;
 use Modules\Procurement\Filament\Resources\VendorBills\Pages\EditVendorBill;
 use Modules\Procurement\Filament\Resources\VendorBills\Pages\ListVendorBills;

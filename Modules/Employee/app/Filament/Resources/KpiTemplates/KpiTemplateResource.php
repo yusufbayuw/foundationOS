@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\KpiTemplates;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\KpiTemplates\Pages\CreateKpiTemplate;
 use Modules\Employee\Filament\Resources\KpiTemplates\Pages\EditKpiTemplate;
 use Modules\Employee\Filament\Resources\KpiTemplates\Pages\ListKpiTemplates;

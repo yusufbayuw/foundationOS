@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\School\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\School\Models\AssessmentItem;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AssessmentItemPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AssessmentItem');
@@ -71,5 +71,4 @@ class AssessmentItemPolicy
     {
         return $authUser->can('Reorder:AssessmentItem');
     }
-
 }

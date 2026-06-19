@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Enrollment\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Enrollment\Models\AdmissionPeriod;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class AdmissionPeriodPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:AdmissionPeriod');
@@ -71,5 +71,4 @@ class AdmissionPeriodPolicy
     {
         return $authUser->can('Reorder:AdmissionPeriod');
     }
-
 }

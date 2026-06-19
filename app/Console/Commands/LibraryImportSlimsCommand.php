@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
-use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserTenantRole;
 use Modules\Library\Models\Book;
@@ -23,9 +22,13 @@ use Modules\Library\Support\SlimsImportService;
 class LibraryImportSlimsCommand extends Command
 {
     protected string $emailDomain = 'slims.local';
+
     protected string $defaultMemberStatus = 'active';
+
     protected bool $skipExisting = false;
+
     protected ?string $since = null;
+
     protected SlimsImportService $slimsImportService;
 
     protected $signature = 'fos:library:import-slims
@@ -55,17 +58,20 @@ class LibraryImportSlimsCommand extends Command
 
         if (! in_array($entity, ['catalog', 'members', 'loans', 'all'], true)) {
             $this->error('Entity harus salah satu dari: catalog, members, loans, all.');
+
             return self::FAILURE;
         }
 
         if ($tenantId <= 0) {
             $this->error('Opsi --tenant wajib diisi dengan ID numerik valid.');
+
             return self::FAILURE;
         }
 
         $tenant = Tenant::query()->find($tenantId);
         if (! $tenant) {
             $this->error('Tenant tidak ditemukan.');
+
             return self::FAILURE;
         }
 
@@ -73,6 +79,7 @@ class LibraryImportSlimsCommand extends Command
             $organization = Organization::query()->where('tenant_id', $tenantId)->find($organizationId);
             if (! $organization) {
                 $this->error('Organization tidak ditemukan atau bukan milik tenant tersebut.');
+
                 return self::FAILURE;
             }
         }
@@ -80,6 +87,7 @@ class LibraryImportSlimsCommand extends Command
         $memberRole = $this->resolveMemberRole($tenantId, $tenantRoleId);
         if (! $memberRole) {
             $this->error('Tenant role untuk member tidak ditemukan. Berikan --tenant-role-id yang valid.');
+
             return self::FAILURE;
         }
 
@@ -88,6 +96,7 @@ class LibraryImportSlimsCommand extends Command
             $this->error($organizationId !== null
                 ? 'Konfigurasi SLiMS organization tidak lengkap atau belum diaktifkan di organization_settings. Fallback tenant dipakai hanya untuk mode tenant-wide.'
                 : 'Konfigurasi SLiMS tenant tidak lengkap atau belum diaktifkan di tenant_settings.');
+
             return self::FAILURE;
         }
 
@@ -95,11 +104,13 @@ class LibraryImportSlimsCommand extends Command
             $connection = $this->slimsConnection($tenantSlimsConfig['connection']);
         } catch (\RuntimeException $exception) {
             $this->error($exception->getMessage());
+
             return self::FAILURE;
         }
 
         if (! $this->validateSlimsSchema($connection)) {
             $this->error('Koneksi SLiMS validasi gagal. Pastikan DB SLiMS terisi dan tabel inti tersedia.');
+
             return self::FAILURE;
         }
 
@@ -162,12 +173,14 @@ class LibraryImportSlimsCommand extends Command
             $slimsId = (string) $row->biblio_id;
             if ($this->shouldSkipEntity('book', $tenantId, $slimsId)) {
                 $summary['skipped']++;
+
                 continue;
             }
             $book = $this->findOrMakeMappedModel('book', $tenantId, $slimsId, Book::class);
 
             if (! $book) {
                 $summary['skipped']++;
+
                 continue;
             }
 
@@ -227,18 +240,21 @@ class LibraryImportSlimsCommand extends Command
         foreach ($copyRows as $row) {
             if ($this->shouldSkipEntity('copy', $tenantId, (string) $row->item_id)) {
                 $summary['skipped']++;
+
                 continue;
             }
 
             $bookMapping = $this->findMapping('book', $tenantId, (string) $row->biblio_id);
             if (! $bookMapping) {
                 $summary['skipped']++;
+
                 continue;
             }
 
             $copy = $this->findOrMakeMappedModel('copy', $tenantId, (string) $row->item_id, BookCopy::class);
             if (! $copy) {
                 $summary['skipped']++;
+
                 continue;
             }
 
@@ -296,17 +312,20 @@ class LibraryImportSlimsCommand extends Command
             $memberCode = (string) $row->member_id;
             if ($memberCode === '') {
                 $summary['skipped']++;
+
                 continue;
             }
 
             if ($this->shouldSkipEntity('member', $tenantId, $memberCode)) {
                 $summary['skipped']++;
+
                 continue;
             }
 
             [$user, $createdUser] = $this->resolveOrCreateUserForMember($tenantId, $row, $dryRun);
             if (! $user) {
                 $summary['skipped']++;
+
                 continue;
             }
 
@@ -317,6 +336,7 @@ class LibraryImportSlimsCommand extends Command
             $member = $this->findOrMakeMappedModel('member', $tenantId, $memberCode, Member::class);
             if (! $member) {
                 $summary['skipped']++;
+
                 continue;
             }
 
@@ -392,6 +412,7 @@ class LibraryImportSlimsCommand extends Command
         foreach ($rows as $row) {
             if ($this->shouldSkipEntity('loan', $tenantId, (string) $row->loan_id)) {
                 $summary['skipped']++;
+
                 continue;
             }
 
@@ -402,12 +423,14 @@ class LibraryImportSlimsCommand extends Command
 
             if (! $memberMapping || ! $copyMapping) {
                 $summary['skipped']++;
+
                 continue;
             }
 
             $loan = $this->findOrMakeMappedModel('loan', $tenantId, (string) $row->loan_id, Loan::class);
             if (! $loan) {
                 $summary['skipped']++;
+
                 continue;
             }
 
@@ -497,13 +520,13 @@ class LibraryImportSlimsCommand extends Command
         $created = false;
         if (! $user) {
             $created = true;
-            $user = new User();
+            $user = new User;
             $user->fill([
                 'name' => $name,
                 'username' => $username,
                 'email' => $email,
                 'phone' => $memberRow->member_phone ?: null,
-                'password' => Hash::make(Str::random(18) . 'Aa1!'),
+                'password' => Hash::make(Str::random(18).'Aa1!'),
                 'timezone' => config('app.timezone', 'UTC'),
                 'locale' => config('app.locale', 'en'),
                 'status' => $this->defaultMemberStatus,
@@ -587,12 +610,12 @@ class LibraryImportSlimsCommand extends Command
     {
         $mapping = $this->findMapping($entityType, $tenantId, $slimsId);
         if (! $mapping) {
-            return new $modelClass();
+            return new $modelClass;
         }
 
         $model = $modelClass::withTrashed()->find((int) $mapping->fos_id);
         if (! $model) {
-            return new $modelClass();
+            return new $modelClass;
         }
 
         if (method_exists($model, 'trashed') && $model->trashed()) {

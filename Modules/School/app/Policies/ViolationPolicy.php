@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\School\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\School\Models\Violation;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ViolationPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Violation');
@@ -71,5 +71,4 @@ class ViolationPolicy
     {
         return $authUser->can('Reorder:Violation');
     }
-
 }

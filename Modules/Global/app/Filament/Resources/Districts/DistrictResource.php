@@ -2,9 +2,9 @@
 
 namespace Modules\Global\Filament\Resources\Districts;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Global\Filament\Resources\Districts\Pages\CreateDistrict;
 use Modules\Global\Filament\Resources\Districts\Pages\EditDistrict;
 use Modules\Global\Filament\Resources\Districts\Pages\ListDistricts;

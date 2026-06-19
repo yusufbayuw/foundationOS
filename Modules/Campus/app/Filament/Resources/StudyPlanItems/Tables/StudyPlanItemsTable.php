@@ -2,16 +2,18 @@
 
 namespace Modules\Campus\Filament\Resources\StudyPlanItems\Tables;
 
+use App\Filament\Imports\StudyPlanItemImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class StudyPlanItemsTable
 {
@@ -20,38 +22,38 @@ class StudyPlanItemsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('studyPlan.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('studyPlan.id'))
+                    ->label(FilamentUi::field('studyPlan.id'))
                     ->searchable(),
                 TextColumn::make('courseOffering.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('courseOffering.id'))
+                    ->label(FilamentUi::field('courseOffering.id'))
                     ->searchable(),
                 TextColumn::make('course.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('course.name'))
+                    ->label(FilamentUi::field('course.name'))
                     ->searchable(),
                 TextColumn::make('credits')
-                    ->label(\Modules\Core\Support\FilamentUi::field('credits'))
+                    ->label(FilamentUi::field('credits'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
-                    ->label(\Modules\Core\Support\FilamentUi::field('status'))
+                    ->label(FilamentUi::field('status'))
                     ->searchable(),
                 TextColumn::make('grade_letter')
-                    ->label(\Modules\Core\Support\FilamentUi::field('grade_letter'))
+                    ->label(FilamentUi::field('grade_letter'))
                     ->searchable(),
                 TextColumn::make('grade_point')
-                    ->label(\Modules\Core\Support\FilamentUi::field('grade_point'))
+                    ->label(FilamentUi::field('grade_point'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -64,14 +66,14 @@ class StudyPlanItemsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\StudyPlanItemImporter::class),
+                ...ImportTableActions::make(StudyPlanItemImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

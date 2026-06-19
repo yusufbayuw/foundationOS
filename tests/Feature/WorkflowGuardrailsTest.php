@@ -17,6 +17,7 @@ use Modules\Workflow\Contracts\WorkflowDynamicAssigneeResolver;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Models\Workflow;
+use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
 use Tests\TestCase;
 
@@ -225,7 +226,7 @@ class WorkflowGuardrailsTest extends TestCase
 
 class TestWorkflowDynamicResolver implements WorkflowDynamicAssigneeResolver
 {
-    public function resolve(\Modules\Workflow\Models\WorkflowInstance $instance, \Modules\Workflow\Models\WorkflowStep $step): Collection
+    public function resolve(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
         $userId = (int) data_get($step->assignee_config, 'user_id');
         $user = User::query()->find($userId);

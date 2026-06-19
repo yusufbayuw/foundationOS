@@ -2,9 +2,9 @@
 
 namespace Modules\Enrollment\Filament\Resources\ExamSchedules;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Enrollment\Filament\Resources\ExamSchedules\Pages\CreateExamSchedule;
 use Modules\Enrollment\Filament\Resources\ExamSchedules\Pages\EditExamSchedule;
 use Modules\Enrollment\Filament\Resources\ExamSchedules\Pages\ListExamSchedules;

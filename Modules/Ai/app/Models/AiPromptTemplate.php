@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Ai\Database\Factories\AiPromptTemplateFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
@@ -14,9 +15,9 @@ class AiPromptTemplate extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Ai\Database\Factories\AiPromptTemplateFactory
+    protected static function newFactory(): AiPromptTemplateFactory
     {
-        return \Modules\Ai\Database\Factories\AiPromptTemplateFactory::new();
+        return AiPromptTemplateFactory::new();
     }
 
     protected $table = 'ai_prompt_templates';

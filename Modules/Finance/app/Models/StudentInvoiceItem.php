@@ -4,13 +4,13 @@ namespace Modules\Finance\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class StudentInvoiceItem extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -34,6 +34,7 @@ class StudentInvoiceItem extends Model
             'subtotal' => 'decimal:2',
         ];
     }
+
     public function studentInvoice(): BelongsTo
     {
         return $this->belongsTo(StudentInvoice::class);

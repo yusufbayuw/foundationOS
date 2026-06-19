@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\School\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\School\Models\Schedule;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class SchedulePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Schedule');
@@ -71,5 +71,4 @@ class SchedulePolicy
     {
         return $authUser->can('Reorder:Schedule');
     }
-
 }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Finance\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Finance\Models\ChartOfAccount;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ChartOfAccountPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:ChartOfAccount');
@@ -71,5 +71,4 @@ class ChartOfAccountPolicy
     {
         return $authUser->can('Reorder:ChartOfAccount');
     }
-
 }

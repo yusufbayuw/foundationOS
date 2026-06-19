@@ -4,16 +4,16 @@ namespace Modules\Procurement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\ChartOfAccount;
-use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class PurchaseRequisitionItem extends Model
 {
-    use HasFactory, SoftDeletes, BelongsToTenant;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -50,12 +50,35 @@ class PurchaseRequisitionItem extends Model
         ];
     }
 
-    public function tenant(): BelongsTo { return $this->belongsTo(Tenant::class); }
-    public function requisition(): BelongsTo { return $this->belongsTo(PurchaseRequisition::class, 'purchase_requisition_id'); }
-    public function procurementItem(): BelongsTo { return $this->belongsTo(ProcurementItem::class); }
-    public function preferredVendor(): BelongsTo { return $this->belongsTo(Vendor::class, 'preferred_vendor_id'); }
-    public function department(): BelongsTo { return $this->belongsTo(Department::class); }
-    public function purchaseOrder(): BelongsTo { return $this->belongsTo(PurchaseOrder::class); }
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function requisition(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseRequisition::class, 'purchase_requisition_id');
+    }
+
+    public function procurementItem(): BelongsTo
+    {
+        return $this->belongsTo(ProcurementItem::class);
+    }
+
+    public function preferredVendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class, 'preferred_vendor_id');
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function purchaseOrder(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class);
+    }
 
     public function budgetAccount(): BelongsTo
     {

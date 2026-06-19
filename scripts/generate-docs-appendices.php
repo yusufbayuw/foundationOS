@@ -85,7 +85,7 @@ foreach ($auth['custom_permissions'] as $custom) {
     $authMd .= "| `{$custom['name']}` | {$custom['label']} |\n";
 }
 
-$authMd .= <<<MD
+$authMd .= <<<'MD'
 
 Evidence: `config/filament-shield.php` `custom_permissions`.
 
@@ -106,7 +106,7 @@ foreach ($modules as $module => $data) {
     $authMd .= "| {$module} | {$data['resource_count']} | `{$first}` |\n";
 }
 
-$authMd .= <<<MD
+$authMd .= <<<'MD'
 
 ---
 
@@ -122,7 +122,7 @@ foreach (array_slice($auth['resources_by_module']['School']['resources'] ?? [], 
     $authMd .= "| `{$resource['resource_class']}` | `{$resource['model_class']}` | `{$perms}` |\n";
 }
 
-$authMd .= <<<MD
+$authMd .= <<<'MD'
 
 ---
 
@@ -162,7 +162,7 @@ foreach ($byModule as $module => $routes) {
     $apiMd .= '| '.$module.' | '.count($routes)." |\n";
 }
 
-$apiMd .= <<<MD
+$apiMd .= <<<'MD'
 
 ---
 
@@ -196,7 +196,7 @@ foreach ($api['routes'] as $route) {
     $apiMd .= "| {$methods} | `{$route['uri']}` | {$name} | {$route['module']} | {$middleware} | `{$action}` |\n";
 }
 
-$apiMd .= <<<MD
+$apiMd .= <<<'MD'
 
 ---
 

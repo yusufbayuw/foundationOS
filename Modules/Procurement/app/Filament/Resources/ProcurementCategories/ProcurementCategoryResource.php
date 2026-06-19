@@ -2,9 +2,9 @@
 
 namespace Modules\Procurement\Filament\Resources\ProcurementCategories;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\ProcurementCategories\Pages\CreateProcurementCategory;
 use Modules\Procurement\Filament\Resources\ProcurementCategories\Pages\EditProcurementCategory;
 use Modules\Procurement\Filament\Resources\ProcurementCategories\Pages\ListProcurementCategories;

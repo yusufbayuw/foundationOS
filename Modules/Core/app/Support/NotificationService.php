@@ -4,6 +4,12 @@ namespace Modules\Core\Support;
 
 use Filament\Notifications\Notification;
 use Modules\Core\Models\User;
+use Modules\Employee\Models\LeaveRequest;
+use Modules\Finance\Models\Budget;
+use Modules\Finance\Models\Payment;
+use Modules\Finance\Models\StudentInvoice;
+use Modules\Library\Models\Loan;
+use Modules\Workflow\Models\WorkflowInstance;
 
 /**
  * Centralized service to dispatch Filament database notifications
@@ -19,7 +25,7 @@ class NotificationService
      * Notify relevant users when a payment is verified.
      */
     public static function paymentVerified(
-        \Modules\Finance\Models\Payment $payment,
+        Payment $payment,
         User $verifier,
     ): void {
         $invoice = $payment->studentInvoice;
@@ -38,7 +44,7 @@ class NotificationService
      * Notify relevant users when a payment is rejected.
      */
     public static function paymentRejected(
-        \Modules\Finance\Models\Payment $payment,
+        Payment $payment,
         User $rejector,
     ): void {
         $amount = number_format((float) $payment->amount, 0, ',', '.');
@@ -55,10 +61,10 @@ class NotificationService
      * Notify assignees when a workflow step is assigned to them.
      */
     public static function workflowStepAssigned(
-        \Modules\Workflow\Models\WorkflowInstance $instance,
+        WorkflowInstance $instance,
         User $assignee,
     ): void {
-        $label = $instance->subject_label ?: 'Workflow #' . $instance->getKey();
+        $label = $instance->subject_label ?: 'Workflow #'.$instance->getKey();
 
         Notification::make()
             ->title('Tugas Workflow Baru')
@@ -72,10 +78,10 @@ class NotificationService
      * Notify requester when workflow is completed.
      */
     public static function workflowCompleted(
-        \Modules\Workflow\Models\WorkflowInstance $instance,
+        WorkflowInstance $instance,
         User $requester,
     ): void {
-        $label = $instance->subject_label ?: 'Workflow #' . $instance->getKey();
+        $label = $instance->subject_label ?: 'Workflow #'.$instance->getKey();
 
         Notification::make()
             ->title('Workflow Selesai')
@@ -89,11 +95,11 @@ class NotificationService
      * Notify requester when workflow is rejected.
      */
     public static function workflowRejected(
-        \Modules\Workflow\Models\WorkflowInstance $instance,
+        WorkflowInstance $instance,
         User $requester,
         ?string $reason = null,
     ): void {
-        $label = $instance->subject_label ?: 'Workflow #' . $instance->getKey();
+        $label = $instance->subject_label ?: 'Workflow #'.$instance->getKey();
         $body = "Workflow untuk \"{$label}\" ditolak.";
         if ($reason) {
             $body .= " Alasan: {$reason}";
@@ -111,7 +117,7 @@ class NotificationService
      * Notify a library member about an overdue loan.
      */
     public static function loanOverdue(
-        \Modules\Library\Models\Loan $loan,
+        Loan $loan,
         User $borrower,
     ): void {
         $bookTitle = $loan->bookCopy?->book?->title ?? 'Buku';
@@ -129,7 +135,7 @@ class NotificationService
      * Notify employee when leave request status changes.
      */
     public static function leaveRequestStatusChanged(
-        \Modules\Employee\Models\LeaveRequest $request,
+        LeaveRequest $request,
         User $employee,
         string $newStatus,
     ): void {
@@ -164,7 +170,7 @@ class NotificationService
      * Notify a budget owner when budget status changes.
      */
     public static function budgetApproved(
-        \Modules\Finance\Models\Budget $budget,
+        Budget $budget,
         User $recipient,
     ): void {
         Notification::make()
@@ -179,7 +185,7 @@ class NotificationService
      * Notify staff when an applicant registration invoice is fully paid.
      */
     public static function registrationPaymentConfirmed(
-        \Modules\Finance\Models\StudentInvoice $invoice,
+        StudentInvoice $invoice,
         User $recipient,
     ): void {
         Notification::make()

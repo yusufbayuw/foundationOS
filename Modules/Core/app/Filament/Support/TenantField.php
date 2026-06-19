@@ -7,6 +7,7 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Services\ContextDefaults;
+use Modules\Core\Support\FilamentUi;
 
 class TenantField
 {
@@ -29,7 +30,7 @@ class TenantField
     public static function organizationSelect(): Select
     {
         return Select::make('organization_id')
-            ->label(\Modules\Core\Support\FilamentUi::field('organization_id'))
+            ->label(FilamentUi::field('organization_id'))
             ->relationship(
                 'organization',
                 'name',
@@ -73,7 +74,7 @@ class TenantField
     public static function academicPeriodSelect(): Select
     {
         return Select::make('academic_period_id')
-            ->label(\Modules\Core\Support\FilamentUi::field('academic_period_id'))
+            ->label(FilamentUi::field('academic_period_id'))
             ->options(fn () => AcademicPeriod::query()
                 ->where('tenant_id', Filament::getTenant()?->getKey())
                 ->orderByDesc('is_active')

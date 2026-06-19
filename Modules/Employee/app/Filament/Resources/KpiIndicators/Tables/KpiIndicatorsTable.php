@@ -2,17 +2,19 @@
 
 namespace Modules\Employee\Filament\Resources\KpiIndicators\Tables;
 
+use App\Filament\Imports\KpiIndicatorImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class KpiIndicatorsTable
 {
@@ -21,58 +23,58 @@ class KpiIndicatorsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization.name'))
+                    ->label(FilamentUi::field('organization.name'))
                     ->searchable(),
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('category')
-                    ->label(\Modules\Core\Support\FilamentUi::field('category'))
+                    ->label(FilamentUi::field('category'))
                     ->searchable(),
                 TextColumn::make('measurement_unit')
-                    ->label(\Modules\Core\Support\FilamentUi::field('measurement_unit'))
+                    ->label(FilamentUi::field('measurement_unit'))
                     ->searchable(),
                 TextColumn::make('target_type')
-                    ->label(\Modules\Core\Support\FilamentUi::field('target_type'))
+                    ->label(FilamentUi::field('target_type'))
                     ->searchable(),
                 TextColumn::make('target_value')
-                    ->label(\Modules\Core\Support\FilamentUi::field('target_value'))
+                    ->label(FilamentUi::field('target_value'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('target_minimum')
-                    ->label(\Modules\Core\Support\FilamentUi::field('target_minimum'))
+                    ->label(FilamentUi::field('target_minimum'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('target_maximum')
-                    ->label(\Modules\Core\Support\FilamentUi::field('target_maximum'))
+                    ->label(FilamentUi::field('target_maximum'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('weight_percentage')
-                    ->label(\Modules\Core\Support\FilamentUi::field('weight_percentage'))
+                    ->label(FilamentUi::field('weight_percentage'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('scoring_method')
-                    ->label(\Modules\Core\Support\FilamentUi::field('scoring_method'))
+                    ->label(FilamentUi::field('scoring_method'))
                     ->searchable(),
                 TextColumn::make('data_source')
-                    ->label(\Modules\Core\Support\FilamentUi::field('data_source'))
+                    ->label(FilamentUi::field('data_source'))
                     ->searchable(),
                 IconColumn::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->label(FilamentUi::field('is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -85,14 +87,14 @@ class KpiIndicatorsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\KpiIndicatorImporter::class),
+                ...ImportTableActions::make(KpiIndicatorImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

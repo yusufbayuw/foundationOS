@@ -2,9 +2,9 @@
 
 namespace Modules\Enrollment\Filament\Resources\Registrations;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Enrollment\Filament\Resources\Registrations\Pages\CreateRegistration;
 use Modules\Enrollment\Filament\Resources\Registrations\Pages\EditRegistration;
 use Modules\Enrollment\Filament\Resources\Registrations\Pages\ListRegistrations;

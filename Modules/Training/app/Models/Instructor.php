@@ -9,14 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
+use Modules\Training\Database\Factories\InstructorFactory;
 
 class Instructor extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Training\Database\Factories\InstructorFactory
+    protected static function newFactory(): InstructorFactory
     {
-        return \Modules\Training\Database\Factories\InstructorFactory::new();
+        return InstructorFactory::new();
     }
 
     protected $table = 'instructors';

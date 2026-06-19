@@ -9,14 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
+use Modules\PhysicalSecurity\Database\Factories\GuardFactory;
 
 class Guard extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\PhysicalSecurity\Database\Factories\GuardFactory
+    protected static function newFactory(): GuardFactory
     {
-        return \Modules\PhysicalSecurity\Database\Factories\GuardFactory::new();
+        return GuardFactory::new();
     }
 
     protected $table = 'guards';

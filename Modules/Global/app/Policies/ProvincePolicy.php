@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Global\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Global\Models\Province;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProvincePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Province');
@@ -71,5 +71,4 @@ class ProvincePolicy
     {
         return $authUser->can('Reorder:Province');
     }
-
 }

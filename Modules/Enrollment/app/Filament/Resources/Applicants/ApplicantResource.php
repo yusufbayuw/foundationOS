@@ -2,9 +2,9 @@
 
 namespace Modules\Enrollment\Filament\Resources\Applicants;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Enrollment\Filament\Resources\Applicants\Pages\CreateApplicant;
 use Modules\Enrollment\Filament\Resources\Applicants\Pages\EditApplicant;
 use Modules\Enrollment\Filament\Resources\Applicants\Pages\ListApplicants;

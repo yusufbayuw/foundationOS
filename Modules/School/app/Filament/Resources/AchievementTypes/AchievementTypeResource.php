@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\AchievementTypes;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\AchievementTypes\Pages\CreateAchievementType;
 use Modules\School\Filament\Resources\AchievementTypes\Pages\EditAchievementType;
 use Modules\School\Filament\Resources\AchievementTypes\Pages\ListAchievementTypes;

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Library\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Library\Models\LibraryCollectionType;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class LibraryCollectionTypePolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:LibraryCollectionType');
@@ -71,5 +71,4 @@ class LibraryCollectionTypePolicy
     {
         return $authUser->can('Reorder:LibraryCollectionType');
     }
-
 }

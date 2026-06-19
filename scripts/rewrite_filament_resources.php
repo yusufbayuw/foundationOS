@@ -1,6 +1,6 @@
 <?php
 
-$files = glob(__DIR__ . '/../Modules/*/app/Filament/Resources/*/*Resource.php');
+$files = glob(__DIR__.'/../Modules/*/app/Filament/Resources/*/*Resource.php');
 
 foreach ($files as $file) {
     $code = file_get_contents($file);

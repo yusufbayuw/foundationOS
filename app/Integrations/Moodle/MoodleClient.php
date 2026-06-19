@@ -22,7 +22,7 @@ class MoodleClient
             throw new MoodleIntegrationException('Moodle configuration is incomplete. Set MOODLE_BASE_URL and MOODLE_WS_TOKEN.');
         }
 
-        $endpoint = rtrim($baseUrl, '/') . '/webservice/rest/server.php';
+        $endpoint = rtrim($baseUrl, '/').'/webservice/rest/server.php';
         $payload = array_merge($params, [
             'wstoken' => $token,
             'wsfunction' => $function,
@@ -37,11 +37,11 @@ class MoodleClient
                 ->asForm()
                 ->post($endpoint, $payload);
         } catch (ConnectionException $exception) {
-            throw new MoodleIntegrationException('Unable to connect to Moodle: ' . $exception->getMessage(), 0, $exception);
+            throw new MoodleIntegrationException('Unable to connect to Moodle: '.$exception->getMessage(), 0, $exception);
         }
 
         if ($response->failed()) {
-            throw new MoodleIntegrationException('Moodle HTTP request failed with status ' . $response->status() . '.');
+            throw new MoodleIntegrationException('Moodle HTTP request failed with status '.$response->status().'.');
         }
 
         $body = trim((string) $response->body());

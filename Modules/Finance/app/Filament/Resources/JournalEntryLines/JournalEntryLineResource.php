@@ -2,9 +2,9 @@
 
 namespace Modules\Finance\Filament\Resources\JournalEntryLines;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\JournalEntryLines\Pages\CreateJournalEntryLine;
 use Modules\Finance\Filament\Resources\JournalEntryLines\Pages\EditJournalEntryLine;
 use Modules\Finance\Filament\Resources\JournalEntryLines\Pages\ListJournalEntryLines;

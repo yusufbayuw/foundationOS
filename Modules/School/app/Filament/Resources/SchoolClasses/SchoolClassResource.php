@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\SchoolClasses;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\SchoolClasses\Pages\CreateSchoolClass;
 use Modules\School\Filament\Resources\SchoolClasses\Pages\EditSchoolClass;
 use Modules\School\Filament\Resources\SchoolClasses\Pages\ListSchoolClasses;

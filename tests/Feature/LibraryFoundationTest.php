@@ -5,16 +5,15 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
+use Modules\Core\Models\OrganizationSetting;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
+use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserTenantRole;
-use Modules\Core\Models\OrganizationSetting;
-use Modules\Core\Models\TenantSetting;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCopy;
-use Modules\Library\Models\BookReservation;
 use Modules\Library\Models\LibraryPolicy;
 use Modules\Library\Models\Loan;
 use Modules\Library\Models\Member;
@@ -188,7 +187,7 @@ class LibraryFoundationTest extends TestCase
             'status' => 'borrowed',
         ]);
 
-        $this->artisan('fos:library:recalc-fines --tenant=' . $tenant->id)
+        $this->artisan('fos:library:recalc-fines --tenant='.$tenant->id)
             ->assertExitCode(0);
 
         $loan->refresh();
@@ -211,7 +210,7 @@ class LibraryFoundationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get('/opac/' . $tenant->code . '?q=Pragmatic');
+        $response = $this->get('/opac/'.$tenant->code.'?q=Pragmatic');
 
         $response->assertOk();
         $response->assertSee('Pragmatic Programmer');
@@ -246,7 +245,7 @@ class LibraryFoundationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get('/opac/' . $tenant->code . '/organizations/' . $organizationA->code);
+        $response = $this->get('/opac/'.$tenant->code.'/organizations/'.$organizationA->code);
 
         $response->assertOk();
         $response->assertSee('Tenant Wide Catalog');
@@ -279,7 +278,7 @@ class LibraryFoundationTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->get('/opac/' . $tenant->code . '?available_only=1');
+        $response = $this->get('/opac/'.$tenant->code.'?available_only=1');
 
         $response->assertOk();
         $response->assertSee('Available Catalog');
@@ -297,7 +296,7 @@ class LibraryFoundationTest extends TestCase
             'is_super_admin' => true,
         ]);
 
-        $response = $this->actingAs($user)->get('/opac/' . $tenant->code . '/circulation');
+        $response = $this->actingAs($user)->get('/opac/'.$tenant->code.'/circulation');
 
         $response->assertOk();
         $response->assertSee('Checkout dan return cepat');
@@ -358,7 +357,7 @@ class LibraryFoundationTest extends TestCase
             'max_extensions' => 3,
         ]);
 
-        $response = $this->actingAs($user)->post('/opac/' . $tenant->code . '/circulation/extend', [
+        $response = $this->actingAs($user)->post('/opac/'.$tenant->code.'/circulation/extend', [
             'loan_id' => $loan->id,
         ]);
 
@@ -412,7 +411,7 @@ class LibraryFoundationTest extends TestCase
             'max_extensions' => 2,
         ]);
 
-        $response = $this->actingAs($user)->post('/opac/' . $tenant->code . '/circulation/issue', [
+        $response = $this->actingAs($user)->post('/opac/'.$tenant->code.'/circulation/issue', [
             'loan_id' => $loan->id,
             'issue_type' => 'lost',
             'notes' => 'Buku tidak kembali setelah audit internal.',

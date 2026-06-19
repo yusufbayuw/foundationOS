@@ -12,11 +12,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Department;
 use Modules\Core\Models\User;
+use Modules\Enrollment\Events\ApplicantAcceptanceReverted;
+use Modules\Enrollment\Events\ApplicantAccepted;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
-use Modules\Enrollment\Events\ApplicantAcceptanceReverted;
-use Modules\Enrollment\Events\ApplicantAccepted;
 use Modules\School\Models\Student;
 
 class Applicant extends Model

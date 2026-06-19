@@ -2,9 +2,9 @@
 
 namespace Modules\School\Filament\Resources\Teachers;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\School\Filament\Resources\Teachers\Pages\CreateTeacher;
 use Modules\School\Filament\Resources\Teachers\Pages\EditTeacher;
 use Modules\School\Filament\Resources\Teachers\Pages\ListTeachers;

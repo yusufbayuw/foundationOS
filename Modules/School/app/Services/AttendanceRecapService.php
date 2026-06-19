@@ -11,12 +11,11 @@ class AttendanceRecapService
     /**
      * Get a recap of student attendance for a specific class, period, and month.
      *
-     * @param int|string $tenantId
-     * @param int|string $academicPeriodId
-     * @param int|string $classId
-     * @param int $month
-     * @param int $year
-     * @return Collection
+     * @param  int|string  $tenantId
+     * @param  int|string  $academicPeriodId
+     * @param  int|string  $classId
+     * @param  int  $month
+     * @param  int  $year
      */
     public function getStudentRecap(
         $tenantId,
@@ -29,7 +28,7 @@ class AttendanceRecapService
         $students = Student::with(['user'])
             ->whereHas('classStudents', function ($query) use ($classId, $academicPeriodId) {
                 $query->where('class_id', $classId)
-                      ->where('academic_period_id', $academicPeriodId);
+                    ->where('academic_period_id', $academicPeriodId);
             })
             ->where('tenant_id', $tenantId)
             ->get();
@@ -43,7 +42,7 @@ class AttendanceRecapService
             ->where('tenant_id', $tenantId)
             ->whereHas('schedule', function ($query) use ($classId, $academicPeriodId) {
                 $query->where('class_id', $classId)
-                      ->where('academic_period_id', $academicPeriodId);
+                    ->where('academic_period_id', $academicPeriodId);
             })
             ->whereMonth('attendance_date', $month)
             ->whereYear('attendance_date', $year)
@@ -53,16 +52,16 @@ class AttendanceRecapService
 
         foreach ($students as $student) {
             $studentAttendances = $attendances->where('student_id', $student->id);
-            
+
             $present = 0;
             $absent = 0;
             $sick = 0;
             $permission = 0;
             $late = 0;
-            
+
             foreach ($studentAttendances as $attendance) {
                 $status = strtolower($attendance->status);
-                
+
                 if (in_array($status, ['present', 'hadir', 'mengikuti'])) {
                     $present++;
                 } elseif (in_array($status, ['absent', 'alpa', 'tidak hadir'])) {
@@ -74,7 +73,7 @@ class AttendanceRecapService
                 } elseif (in_array($status, ['late', 'terlambat'])) {
                     $late++;
                     // We consider late as present for the purposes of percentage usually
-                    $present++; 
+                    $present++;
                 } else {
                     $present++;
                 }
@@ -84,7 +83,7 @@ class AttendanceRecapService
             // Percentage based on present vs total logged days
             $percentage = $totalDays > 0 ? round(($present / $totalDays) * 100) : 0;
 
-            $recap->push((object)[
+            $recap->push((object) [
                 'student_id' => $student->id,
                 'nis' => $student->nis,
                 'student_name' => $student->user ? $student->user->name : ($student->nis ?? 'Unknown'),

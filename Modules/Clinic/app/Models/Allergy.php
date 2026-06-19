@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Clinic\Database\Factories\AllergyFactory;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
@@ -14,9 +15,9 @@ class Allergy extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Clinic\Database\Factories\AllergyFactory
+    protected static function newFactory(): AllergyFactory
     {
-        return \Modules\Clinic\Database\Factories\AllergyFactory::new();
+        return AllergyFactory::new();
     }
 
     protected $table = 'allergies';

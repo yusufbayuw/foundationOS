@@ -2,9 +2,9 @@
 
 namespace Modules\Employee\Filament\Resources\Positions;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\Positions\Pages\CreatePosition;
 use Modules\Employee\Filament\Resources\Positions\Pages\EditPosition;
 use Modules\Employee\Filament\Resources\Positions\Pages\ListPositions;

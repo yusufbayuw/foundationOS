@@ -7,12 +7,13 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
-use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
 use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAutomatedAction;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
+use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
 
 class SetupProcurementWorkflowPilotCommand extends Command
 {
@@ -82,7 +83,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'name' => 'Purchase Requisition Approval',
             'description' => 'Default amount-based approval workflow for procurement purchase requisitions.',
             'module' => 'Procurement',
-            'subject_type' => \Modules\Procurement\Models\PurchaseRequisition::class,
+            'subject_type' => PurchaseRequisition::class,
             'trigger_mode' => 'manual',
             'version' => $version,
             'status' => WorkflowDefinitionStatus::Draft,

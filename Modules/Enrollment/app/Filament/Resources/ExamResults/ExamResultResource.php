@@ -2,9 +2,9 @@
 
 namespace Modules\Enrollment\Filament\Resources\ExamResults;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Enrollment\Filament\Resources\ExamResults\Pages\CreateExamResult;
 use Modules\Enrollment\Filament\Resources\ExamResults\Pages\EditExamResult;
 use Modules\Enrollment\Filament\Resources\ExamResults\Pages\ListExamResults;

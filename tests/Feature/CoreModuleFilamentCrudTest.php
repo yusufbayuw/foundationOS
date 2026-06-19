@@ -6,7 +6,10 @@ use App\Support\CurrentTenant;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Livewire\Livewire;
+use Modules\Core\Models\Organization;
+use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
+use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserTenantRole;
 use Modules\Core\Services\ApplicationModuleCatalog;
@@ -89,7 +92,7 @@ class CoreModuleFilamentCrudTest extends TestCase
 
     /**
      * @param  list<string>  $modules
-     * @return array{tenant: \Modules\Core\Models\Tenant, organization: \Modules\Core\Models\Organization, user: User, role: \Modules\Core\Models\TenantRole}
+     * @return array{tenant: Tenant, organization: Organization, user: User, role: TenantRole}
      */
     protected function bootstrapFilament(array $modules): array
     {

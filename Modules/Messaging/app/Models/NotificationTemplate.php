@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Messaging\Database\Factories\NotificationTemplateFactory;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class NotificationTemplate extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
-    protected static function newFactory(): \Modules\Messaging\Database\Factories\NotificationTemplateFactory
+    protected static function newFactory(): NotificationTemplateFactory
     {
-        return \Modules\Messaging\Database\Factories\NotificationTemplateFactory::new();
+        return NotificationTemplateFactory::new();
     }
 
     protected $table = 'notification_templates';

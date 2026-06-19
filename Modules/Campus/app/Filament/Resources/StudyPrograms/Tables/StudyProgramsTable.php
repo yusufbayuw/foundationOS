@@ -2,17 +2,19 @@
 
 namespace Modules\Campus\Filament\Resources\StudyPrograms\Tables;
 
+use App\Filament\Imports\StudyProgramImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
+use Modules\Core\Support\FilamentUi;
 
 class StudyProgramsTable
 {
@@ -21,43 +23,43 @@ class StudyProgramsTable
         return $table
             ->columns([
                 TextColumn::make('tenant.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('tenant.name'))
+                    ->label(FilamentUi::field('tenant.name'))
                     ->searchable(),
                 TextColumn::make('organization.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('organization.name'))
+                    ->label(FilamentUi::field('organization.name'))
                     ->searchable(),
                 TextColumn::make('faculty.name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('faculty.name'))
+                    ->label(FilamentUi::field('faculty.name'))
                     ->searchable(),
                 TextColumn::make('headOfProgram.id')
-                    ->label(\Modules\Core\Support\FilamentUi::field('headOfProgram.id'))
+                    ->label(FilamentUi::field('headOfProgram.id'))
                     ->searchable(),
                 TextColumn::make('code')
-                    ->label(\Modules\Core\Support\FilamentUi::field('code'))
+                    ->label(FilamentUi::field('code'))
                     ->searchable(),
                 TextColumn::make('name')
-                    ->label(\Modules\Core\Support\FilamentUi::field('name'))
+                    ->label(FilamentUi::field('name'))
                     ->searchable(),
                 TextColumn::make('degree_level')
-                    ->label(\Modules\Core\Support\FilamentUi::field('degree_level'))
+                    ->label(FilamentUi::field('degree_level'))
                     ->searchable(),
                 TextColumn::make('accreditation')
-                    ->label(\Modules\Core\Support\FilamentUi::field('accreditation'))
+                    ->label(FilamentUi::field('accreditation'))
                     ->searchable(),
                 TextColumn::make('total_credits_required')
-                    ->label(\Modules\Core\Support\FilamentUi::field('total_credits_required'))
+                    ->label(FilamentUi::field('total_credits_required'))
                     ->numeric()
                     ->sortable(),
                 IconColumn::make('is_active')
-                    ->label(\Modules\Core\Support\FilamentUi::field('is_active'))
+                    ->label(FilamentUi::field('is_active'))
                     ->boolean(),
                 TextColumn::make('created_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('created_at'))
+                    ->label(FilamentUi::field('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
-                    ->label(\Modules\Core\Support\FilamentUi::field('updated_at'))
+                    ->label(FilamentUi::field('updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -70,14 +72,14 @@ class StudyProgramsTable
                 EditAction::make(),
             ])
             ->headerActions([
-                ...ImportTableActions::make(\App\Filament\Imports\StudyProgramImporter::class),
+                ...ImportTableActions::make(StudyProgramImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                     ForceDeleteBulkAction::make(),
-                                                        ]),
+                ]),
             ]);
     }
 }

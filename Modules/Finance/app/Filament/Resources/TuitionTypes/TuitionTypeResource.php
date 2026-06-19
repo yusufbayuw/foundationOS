@@ -2,9 +2,9 @@
 
 namespace Modules\Finance\Filament\Resources\TuitionTypes;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\TuitionTypes\Pages\CreateTuitionType;
 use Modules\Finance\Filament\Resources\TuitionTypes\Pages\EditTuitionType;
 use Modules\Finance\Filament\Resources\TuitionTypes\Pages\ListTuitionTypes;

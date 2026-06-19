@@ -6,6 +6,7 @@ use App\Concerns\InteractsWithTenant;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Enrollment\Events\ApplicantAccepted;
+use Modules\Enrollment\Services\ApplicantPromotionService;
 use Modules\Library\Services\LibraryMemberProvisioningService;
 use Modules\Monitoring\Services\AutomationRunLogger;
 
@@ -29,7 +30,7 @@ class CreateLibraryMemberFromAcceptedApplicant implements ShouldQueue
                 $student = $applicant->convertedStudent;
 
                 if (! $student) {
-                    $student = app(\Modules\Enrollment\Services\ApplicantPromotionService::class)
+                    $student = app(ApplicantPromotionService::class)
                         ->promote($applicant, $event->actor);
                 }
 

@@ -2,9 +2,10 @@
 
 namespace Modules\Finance\Filament\Resources\Payments;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\Payments\Pages\CreatePayment;
 use Modules\Finance\Filament\Resources\Payments\Pages\EditPayment;
 use Modules\Finance\Filament\Resources\Payments\Pages\ListPayments;
@@ -54,7 +55,7 @@ class PaymentResource extends LocalizedResource
         ];
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return $record instanceof Payment
             && ! $record->isLockedForMutation()

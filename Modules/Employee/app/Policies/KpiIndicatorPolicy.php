@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Employee\Policies;
 
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Employee\Models\KpiIndicator;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class KpiIndicatorPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:KpiIndicator');
@@ -71,5 +71,4 @@ class KpiIndicatorPolicy
     {
         return $authUser->can('Reorder:KpiIndicator');
     }
-
 }

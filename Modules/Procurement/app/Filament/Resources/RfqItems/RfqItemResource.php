@@ -2,9 +2,9 @@
 
 namespace Modules\Procurement\Filament\Resources\RfqItems;
 
-use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\RfqItems\Pages\CreateRfqItem;
 use Modules\Procurement\Filament\Resources\RfqItems\Pages\EditRfqItem;
 use Modules\Procurement\Filament\Resources\RfqItems\Pages\ListRfqItems;
