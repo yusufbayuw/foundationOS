@@ -405,6 +405,19 @@ Setiap resource memiliki:
 
 ## 🛠️ Development
 
+### Arsitektur & Konvensi (Post-Refactor)
+
+Setelah refactor Stages 0–6, modul matang mengikuti pola:
+
+- **Schema/Table split** — form, infolist, dan table di class terpisah (`Schemas/`, `Tables/`)
+- **Action layer** — custom Filament actions di `Filament/Actions/` (bukan closure panjang di Page)
+- **Service layer** — logic domain di `Services/` (contoh: `WorkflowSubjectPageService`)
+- **Shared table components** — `CommonTableColumns`, `StatusSelectFilter`, `StandardSoftDeleteTable` (Core module)
+- **Testing** — Livewire tests dengan `BootstrapsFilamentAdmin`; lihat `tests/Feature/Filament/`
+
+Ringkasan lengkap per stage, risiko, dan follow-up: **[REFACTOR_STAGES.md](./REFACTOR_STAGES.md)**  
+Panduan detail untuk AI/developer: **[CLAUDE.md](./CLAUDE.md)**
+
 ### Artisan Commands
 
 ```bash
@@ -519,6 +532,8 @@ Dokumentasi spesifik untuk fitur & modul tersedia di:
 
 | Dokumen | Topik |
 |---------|-------|
+| [REFACTOR_STAGES.md](./REFACTOR_STAGES.md) | Changelog refactor Stages 0–6, konvensi baru, risiko & follow-up |
+| [CLAUDE.md](./CLAUDE.md) | Panduan lengkap untuk AI assistant & developer |
 | [ROADMAP.md](./ROADMAP.md) | Development roadmap & versioning |
 | [WORKFLOW.md](./WORKFLOW.md) | Workflow V2 engine, setup, testing |
 | [MOODLE.md](./MOODLE.md) | Moodle integration, sync setup |

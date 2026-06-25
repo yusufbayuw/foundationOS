@@ -1,3 +1,28 @@
+# FoundationOS — Agent Conventions (Stages 0–6)
+
+> **Read `CLAUDE.md` first** for the full application guide. This section captures patterns introduced during the 2026 refactor so AI sessions stay aligned.
+
+## Must-follow patterns
+
+1. **Filament resources** extend `ModuleResource`; split `Schemas/*Form`, `Tables/*Table`, thin `Pages/`.
+2. **Custom actions** → `Modules/*/Filament/Actions/*Action.php` with static `make()`; business logic in `Services/`.
+3. **Labels** → `FilamentUi::field()` / `FilamentUi::text()` only (run `composer run lint:translations`).
+4. **Workflow View pages** → reuse `StartSubjectWorkflowAction`, `OpenActiveSubjectWorkflowAction`, `WorkflowSubjectPageService`.
+5. **Table reuse** → `CommonTableColumns`, `StatusSelectFilter`, `StandardSoftDeleteTable` before copying columns.
+6. **Notifications in actions** → `PanelNotification::success()` / `::danger()`.
+7. **Morph map** → register workflow subject models in `AppServiceProvider::enforceMorphMap()`.
+8. **Filament v5 actions** → `Filament\Actions\` namespace (not `Filament\Tables\Actions\`).
+9. **Tests** → PHPUnit + `Livewire::test()`; use `BootstrapsFilamentAdmin` / `bootstrapFilamentTenantMember()`.
+10. **Queue** → external notifications & broadcasts via jobs; ensure `QUEUE_CONNECTION` + worker in production.
+11. **PDF routes** → `throttle:documents` middleware on new document download routes.
+12. **PHPStan** → level 1 + baseline; fix new errors before merging (do not bump to level 2 without baseline reduction).
+
+## Changelog & risks
+
+See **[REFACTOR_STAGES.md](./REFACTOR_STAGES.md)** for per-stage changes, remaining risks, and recommended follow-ups.
+
+---
+
 <laravel-boost-guidelines>
 === foundation rules ===
 

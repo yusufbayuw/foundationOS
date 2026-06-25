@@ -107,9 +107,157 @@ All display labels come from `Modules\Core\Support\FilamentUi`. The app is bilin
 ### Import / Export
 Every resource has an `ImportAction` and CSV template button via `Modules\Core\Filament\Support\ImportTableActions`. The base importer is `app/Filament/Imports/BaseModelImporter`.
 
+Filament **exports are queued by default** (pipeline `PrepareCsvExport` / `ExportCsv`). Do not call non-existent `ExportAction::queue()` — configure queue connection in production.
+
 ---
 
-## Module Details
+## Filament Reusable Components (Post-Refactor)
+
+After Stages 3–4, prefer these shared building blocks instead of duplicating column/filter/action code.
+
+### Table helpers (`Modules/Core/app/Filament/Support/Tables/`)
+
+| Class | Use when |
+|-------|----------|
+| `CommonTableColumns` | Standard columns: `tenantName()`, `userName()`, `statusBadge()`, `createdAt()`, `updatedAt()`, `booleanIcon()` |
+| `StatusSelectFilter` | Status filter with bilingual labels — pass a map from a module `Support/*StatusOptions` class |
+| `StandardSoftDeleteTable` | Default view/edit record actions + delete/restore/force-delete bulk group |
+
+Example (pilot: `PurchaseRequisitionsTable`):
+
+```php
+CommonTableColumns::tenantName(),
+CommonTableColumns::statusBadge(),
+StatusSelectFilter::make(PurchaseRequisitionStatusOptions::filterLabels()),
+StandardSoftDeleteTable::applySoftDeleteDefaults($table),
+```
+
+### Notifications
+
+Use `Modules\Core\Filament\Support\Notifications\PanelNotification` for custom action feedback:
+
+```php
+PanelNotification::success('Approval workflow started.')->send();
+PanelNotification::danger('Unable to start workflow.', $exception->getMessage())->send();
+```
+
+### Custom Action layer
+
+**Do not** embed multi-step business logic in Page classes. Extract to:
+
+1. **`Modules/<Module>/Filament/Actions/<Name>Action.php`** — static `make()` returning `Filament\Actions\Action`
+2. **`Modules/<Module>/Services/`** — domain operations (authorization, persistence, side effects)
+
+Workflow subject pages (ViewRecord):
+
+```php
+// Modules/Workflow/app/Filament/Actions/
+StartSubjectWorkflowAction::make($page, 'Success title', 'Failure title', visibleWhen: fn () => ...);
+OpenActiveSubjectWorkflowAction::make($page);
+
+// Service: Modules/Workflow/app/Services/WorkflowSubjectPageService.php
+// - hasActiveInstance() / findActiveInstance()
+// - startApprovalWorkflow() — enforces tenant scope, Gate::authorize('update'), locked-status guard
+```
+
+Document/PDF actions: return `Action` with `->url(route(...))` — authorization stays on the HTTP controller (`RendersTenantPdf::authorizePrint()`).
+
+**Filament v5:** Actions live in `Filament\Actions\` (including table `recordActions` — never `Filament\Tables\Actions\`).
+
+### Schema / Table split (required)
+
+| File | Responsibility |
+|------|----------------|
+| `Schemas/<Model>Form.php` | Form fields only |
+| `Schemas/<Model>Infolist.php` | View infolist |
+| `Tables/<Models>Table.php` | Columns, filters, actions |
+| `Pages/*.php` | Wire header actions; keep thin (~30 lines target for View pages) |
+| `Support/<Model>StatusOptions.php` | Status label maps for filters/badges (optional) |
+
+### Database layer hooks
+
+- `ModuleResource` uses `FilamentResourceEagerLoads` — list queries auto-load `tenant` + `organization`. Add domain-specific `with()` in resource `getEloquentQuery()` when needed (e.g. `user:id,name`).
+- Workflow relation managers extend `Modules\Workflow\Filament\RelationManagers\WorkflowInstancesRelationManager` (empty subclass per module is fine).
+- Models participating in workflow morph relations **must** be registered in `AppServiceProvider::enforceMorphMap()` (e.g. `'purchase_requisition' => PurchaseRequisition::class`).
+
+---
+
+## Queue, Cache & Rate Limiting
+
+### Queued workloads
+
+| Job | When |
+|-----|------|
+| `Modules\Messaging\Jobs\DeliverNotificationJob` | External notification channels (whatsapp, mail, …) |
+| `Modules\Core\Jobs\SendBroadcastNotificationsJob` | Mass broadcast sends |
+| `App\Jobs\ProcessMoodleSyncOutboxJob` | Moodle sync outbox |
+| `App\Jobs\DeliverWebhookJob` | Webhook delivery |
+
+`database` channel notifications remain synchronous for immediate in-panel UX.
+
+Use `App\Concerns\InteractsWithTenant` on tenant-scoped jobs; dispatch with `->onTenant($tenantId)`.
+
+### Cache conventions
+
+| Key pattern | TTL | Owner |
+|-------------|-----|-------|
+| `workflow.resolve:{tenant}:{org}:{subject}:{code}` | 5 min | `DatabaseWorkflowResolver` |
+| `tenant.{id}.integrations.{channel}.enabled` | 10 min | `NotificationDispatcher` |
+| `library.stats.{tenantId}` | 5 min | `LibraryStatsOverview` widget |
+| `tenant_module_active:{tenantId}:{module}` | 5 min | `ModuleVisibility` |
+
+### Rate limiters (registered in `AppServiceProvider`)
+
+| Name | Applied to | Limit |
+|------|------------|-------|
+| `api` | All API routes | 60/min per token or IP |
+| `api-write` | API POST writes (applicants, payments, leave) | 30/min |
+| `documents` | PDF routes (Procurement, Finance) | 30/min per user or IP |
+
+When adding new PDF download routes, wrap with `middleware(['auth', 'verified', 'throttle:documents'])`.
+
+---
+
+## Filament Testing Conventions
+
+Use PHPUnit + Livewire (not Pest) for panel tests.
+
+### Bootstrap helpers (`tests/Concerns/`)
+
+| Trait / method | Purpose |
+|----------------|---------|
+| `BootstrapsFilamentAdmin` | Panel + tenant context |
+| `bootstrapFilamentAdmin($modules)` | Super-admin actor |
+| `bootstrapFilamentTenantMember($modules)` | User without Shield permissions |
+| `actAsFilamentTenantMember($context)` | Switch actor on existing tenant (auth tests) |
+
+### Test layout
+
+```
+tests/Feature/Filament/           ← Livewire CRUD + action visibility
+tests/Feature/Security/           ← Gate/policy/tenant authorization
+tests/Feature/Performance/        ← Query count / cache proofs
+tests/Feature/Characterization/   ← Pre-refactor behavior snapshots
+```
+
+Example patterns:
+
+```php
+Livewire::test(ListPurchaseRequisitions::class)->assertCanSeeTableRecords($records);
+Livewire::test(CreatePurchaseRequisition::class)->fillForm([...])->call('create')->assertHasNoFormErrors();
+Livewire::test(ListPurchaseRequisitions::class)
+    ->selectTableRecords($records)
+    ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
+Livewire::test(ListPurchaseRequisitions::class)->assertForbidden(); // no permission
+```
+
+Custom actions with redirect (`StartSubjectWorkflowAction`): test **visibility** via Livewire; test **persistence** via service test or seeded state.
+
+Reference: `tests/Feature/Filament/ProcurementPurchaseRequisitionFilamentTest.php`.
+
+Full stage changelog: `REFACTOR_STAGES.md`.
+
+---
 
 | Module | Domain | Key Models |
 |--------|--------|------------|
