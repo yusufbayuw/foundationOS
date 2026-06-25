@@ -8,18 +8,22 @@ use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
 
 class MoodleOutboxAtomicClaimTest extends TestCase
 {
+    use CreatesTenantForTests;
     use LazilyRefreshDatabase;
 
     public function test_try_claim_only_allows_one_worker(): void
     {
+        ['tenant' => $tenant] = $this->makeTenantContext();
+
         $row = MoodleSyncOutbox::query()->create([
             'entity_type' => 'user',
             'entity_id' => 1,
-            'tenant_id' => 1,
+            'tenant_id' => $tenant->id,
             'action' => 'upsert',
             'payload' => ['id' => 1],
             'dedupe_key' => 'claim-test-1',
@@ -36,10 +40,12 @@ class MoodleOutboxAtomicClaimTest extends TestCase
 
     public function test_sweeper_resets_stale_processing_rows(): void
     {
+        ['tenant' => $tenant] = $this->makeTenantContext();
+
         $row = MoodleSyncOutbox::query()->create([
             'entity_type' => 'user',
             'entity_id' => 2,
-            'tenant_id' => 1,
+            'tenant_id' => $tenant->id,
             'action' => 'upsert',
             'payload' => ['id' => 2],
             'dedupe_key' => 'claim-test-2',
@@ -56,13 +62,15 @@ class MoodleOutboxAtomicClaimTest extends TestCase
 
     public function test_job_skips_when_row_already_claimed(): void
     {
+        ['tenant' => $tenant] = $this->makeTenantContext();
+
         config()->set('moodle.enabled', true);
         Queue::fake();
 
         $row = MoodleSyncOutbox::query()->create([
             'entity_type' => 'user',
             'entity_id' => 3,
-            'tenant_id' => 1,
+            'tenant_id' => $tenant->id,
             'action' => 'upsert',
             'payload' => ['id' => 3],
             'dedupe_key' => 'claim-test-3',
