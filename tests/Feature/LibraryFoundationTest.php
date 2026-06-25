@@ -12,6 +12,8 @@ use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserTenantRole;
+use Modules\Library\Enums\BookCopyStatus;
+use Modules\Library\Enums\LoanStatus;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCopy;
 use Modules\Library\Models\LibraryPolicy;
@@ -193,7 +195,7 @@ class LibraryFoundationTest extends TestCase
         $loan->refresh();
         $member->refresh();
 
-        $this->assertSame('overdue', $loan->status);
+        $this->assertSame(LoanStatus::Overdue, $loan->status);
         $this->assertGreaterThan(0, (float) $loan->fine_amount);
         $this->assertGreaterThan(0, (float) $member->unpaid_fines);
     }
@@ -419,10 +421,10 @@ class LibraryFoundationTest extends TestCase
         $loan->refresh();
         $copy->refresh();
 
-        $this->assertSame('lost', $loan->status);
+        $this->assertSame(LoanStatus::Lost, $loan->status);
         $this->assertNotNull($loan->return_date);
         $this->assertSame('lost', $loan->condition_on_return);
-        $this->assertSame('lost', $copy->status);
+        $this->assertSame(BookCopyStatus::Lost, $copy->status);
         $this->assertSame('lost', $copy->condition);
     }
 

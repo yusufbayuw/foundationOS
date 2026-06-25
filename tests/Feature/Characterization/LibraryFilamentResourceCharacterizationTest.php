@@ -9,6 +9,7 @@ use Modules\Core\Filament\Support\ModuleResource;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Library\Enums\MemberStatus;
 use Modules\Library\Filament\Resources\BookCopies\BookCopyResource;
 use Modules\Library\Filament\Resources\Books\BookResource;
 use Modules\Library\Filament\Resources\Loans\LoanResource;
@@ -94,7 +95,7 @@ class LibraryFilamentResourceCharacterizationTest extends TestCase
 
         $member->refresh();
 
-        $this->assertSame('active', $member->status);
+        $this->assertSame(MemberStatus::Active, $member->status);
         $this->assertSame(0.0, (float) $member->unpaid_fines);
         $this->assertSame(3, (int) $member->max_books);
     }
