@@ -53,6 +53,7 @@ use Modules\Monitoring\Listeners\LogSecurityAuthEvents;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\GoodsReceiptItem;
 use Modules\Procurement\Models\PurchaseOrder;
+use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Models\VendorBill;
 use Modules\School\Models\ClassStudent;
@@ -110,6 +111,7 @@ class AppServiceProvider extends ServiceProvider
             'campus_study_program' => StudyProgram::class,
             'library_book' => Book::class,
             'procurement_vendor' => Vendor::class,
+            'purchase_requisition' => PurchaseRequisition::class,
             'purchase_order' => PurchaseOrder::class,
             'goods_receipt' => GoodsReceipt::class,
             'goods_receipt_item' => GoodsReceiptItem::class,
