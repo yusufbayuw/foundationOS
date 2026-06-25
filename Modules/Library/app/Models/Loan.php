@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use Modules\Library\Enums\LoanStatus;
 
 class Loan extends Model
 {
@@ -81,11 +82,11 @@ class Loan extends Model
 
     public function isActive(): bool
     {
-        return in_array($this->status, ['borrowed', 'overdue'], true) && $this->return_date === null;
+        return in_array($this->status, LoanStatus::activeValues(), true) && $this->return_date === null;
     }
 
     public function isPrintable(): bool
     {
-        return in_array((string) $this->status, ['borrowed', 'overdue', 'returned'], true);
+        return in_array((string) $this->status, LoanStatus::printableValues(), true);
     }
 }
