@@ -7,6 +7,26 @@ on:
     branches: [main]
 
 jobs:
+  composer-audit:
+    name: Composer Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run composer audit
+        run: composer audit
+
   pint:
     name: Laravel Pint
     runs-on: ubuntu-latest
