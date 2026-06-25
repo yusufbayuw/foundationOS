@@ -49,10 +49,12 @@ abstract class ModuleResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        $query = parent::getEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);
+
+        return FilamentResourceEagerLoads::apply($query, static::getModel());
     }
 
     public static function canCreate(): bool
