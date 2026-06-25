@@ -4,6 +4,7 @@ namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages\CreatePurchaseRequisition;
@@ -61,5 +62,12 @@ class PurchaseRequisitionResource extends LocalizedResource
         return $record instanceof PurchaseRequisition
             && ! $record->isLockedForMutation()
             && parent::canEdit($record);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with([
+            'user:id,name',
+        ]);
     }
 }
