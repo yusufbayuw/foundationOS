@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Library\Enums\BookCopyStatus;
+use Modules\Library\Models\Concerns\ScopesOrganizationVisibility;
 
 class BookCopy extends Model
 {
-    use BelongsToTenant, HasFactory, SoftDeletes;
+    use BelongsToTenant, HasFactory, ScopesOrganizationVisibility, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -37,6 +39,7 @@ class BookCopy extends Model
         return [
             'acquisition_date' => 'date',
             'price' => 'decimal:2',
+            'status' => BookCopyStatus::class,
         ];
     }
 

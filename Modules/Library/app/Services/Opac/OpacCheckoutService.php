@@ -2,7 +2,6 @@
 
 namespace Modules\Library\Services\Opac;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
@@ -16,7 +15,6 @@ use Modules\Library\Models\Loan;
 use Modules\Library\Models\Member;
 use Modules\Library\Support\CirculationPolicyResolver;
 use Modules\Library\Support\LibraryCirculationService;
-use Modules\Library\Support\Queries\OrganizationVisibilityQuery;
 
 class OpacCheckoutService
 {
@@ -32,22 +30,21 @@ class OpacCheckoutService
         $member = Member::query()
             ->where('tenant_id', $tenant->id)
             ->whereKey($memberId)
-            ->when($organization !== null, function (Builder $query) use ($organization): void {
-                OrganizationVisibilityQuery::applyTenantWideOrOrganization($query, $organization);
-            })
+            ->visibleForOrganization($organization)
             ->firstOrFail();
 
         $copy = BookCopy::query()
             ->with('book')
             ->where('tenant_id', $tenant->id)
             ->whereKey($bookCopyId)
-            ->when($organization !== null, function (Builder $query) use ($organization): void {
-                OrganizationVisibilityQuery::applyTenantWideOrOrganization($query, $organization);
-            })
+            ->visibleForOrganization($organization)
             ->firstOrFail();
 
-        abort_if($member->status !== MemberStatus::Active->value, 422, 'Member tidak aktif untuk transaksi peminjaman.');
-        abort_if($copy->status !== BookCopyStatus::Available->value, 422, 'Copy buku ini tidak tersedia untuk dipinjam.');
+        $memberStatus = $member->status instanceof MemberStatus ? $member->status->value : (string) $member->status;
+        $copyStatus = $copy->status instanceof BookCopyStatus ? $copy->status->value : (string) $copy->status;
+
+        abort_if($memberStatus !== MemberStatus::Active->value, 422, 'Member tidak aktif untuk transaksi peminjaman.');
+        abort_if($copyStatus !== BookCopyStatus::Available->value, 422, 'Copy buku ini tidak tersedia untuk dipinjam.');
         abort_if($copy->book && ! $copy->book->is_active, 422, 'Judul buku ini sedang tidak aktif.');
 
         $policy = $policyResolver->resolveForMember($member);

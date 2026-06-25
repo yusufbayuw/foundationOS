@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -102,5 +103,18 @@ class WorkflowInstance extends Model
     public function evidences(): HasMany
     {
         return $this->hasMany(WorkflowEvidence::class);
+    }
+
+    /**
+     * @param  Builder<WorkflowInstance>  $query
+     * @return Builder<WorkflowInstance>
+     */
+    public function scopeWithTableRelations(Builder $query): Builder
+    {
+        return $query->with([
+            'workflow:id,name',
+            'currentStep:id,name',
+            'requester:id,name',
+        ]);
     }
 }

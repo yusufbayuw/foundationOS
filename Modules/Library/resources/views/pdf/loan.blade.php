@@ -10,7 +10,7 @@
             <td class="meta-label">No. Peminjaman</td>
             <td><strong>#{{ $loan->id }}</strong></td>
             <td class="meta-label">Status</td>
-            <td>{{ strtoupper($loan->status) }}</td>
+            <td>{{ strtoupper($loan->status instanceof \BackedEnum ? $loan->status->value : (string) $loan->status) }}</td>
         </tr>
         <tr>
             <td class="meta-label">Anggota</td>

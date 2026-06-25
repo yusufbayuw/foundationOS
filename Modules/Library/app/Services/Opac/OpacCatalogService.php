@@ -9,7 +9,6 @@ use Modules\Core\Models\Tenant;
 use Modules\Library\Data\OpacCatalogFilter;
 use Modules\Library\Models\Book;
 use Modules\Library\Support\LibraryScopeResolver;
-use Modules\Library\Support\Queries\OrganizationVisibilityQuery;
 
 class OpacCatalogService
 {
@@ -21,9 +20,8 @@ class OpacCatalogService
     {
         $query = Book::query()->with(['category', 'copies', 'publisher']);
         $query = app(LibraryScopeResolver::class)->apply($query, null, (int) $tenant->id)
-            ->where('is_active', true);
-
-        OrganizationVisibilityQuery::applyTenantWideOrOrganization($query, $organization);
+            ->active()
+            ->visibleForOrganization($organization);
 
         $summaryQuery = clone $query;
         $filterQuery = clone $query;

@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use Modules\Library\Enums\MemberStatus;
+use Modules\Library\Models\Concerns\ScopesOrganizationVisibility;
 
 class Member extends Model
 {
-    use BelongsToTenant, HasFactory, SoftDeletes;
+    use BelongsToTenant, HasFactory, ScopesOrganizationVisibility, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -50,6 +52,7 @@ class Member extends Model
             'total_fines' => 'decimal:2',
             'unpaid_fines' => 'decimal:2',
             'suspension_until' => 'date',
+            'status' => MemberStatus::class,
         ];
     }
 

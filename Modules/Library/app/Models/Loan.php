@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,11 +11,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use Modules\Library\Enums\FineStatus;
 use Modules\Library\Enums\LoanStatus;
+use Modules\Library\Models\Concerns\ScopesOrganizationVisibility;
 
 class Loan extends Model
 {
-    use BelongsToTenant, HasFactory, SoftDeletes;
+    use BelongsToTenant, HasFactory, ScopesOrganizationVisibility, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -47,6 +50,8 @@ class Loan extends Model
             'max_extensions' => 'integer',
             'fine_amount' => 'decimal:2',
             'fine_paid' => 'decimal:2',
+            'status' => LoanStatus::class,
+            'fine_status' => FineStatus::class,
         ];
     }
 
@@ -82,11 +87,26 @@ class Loan extends Model
 
     public function isActive(): bool
     {
-        return in_array($this->status, LoanStatus::activeValues(), true) && $this->return_date === null;
+        $status = $this->status instanceof LoanStatus ? $this->status->value : (string) $this->status;
+
+        return in_array($status, LoanStatus::activeValues(), true) && $this->return_date === null;
     }
 
     public function isPrintable(): bool
     {
-        return in_array((string) $this->status, LoanStatus::printableValues(), true);
+        $status = $this->status instanceof LoanStatus ? $this->status->value : (string) $this->status;
+
+        return in_array($status, LoanStatus::printableValues(), true);
+    }
+
+    /**
+     * @param  Builder<Loan>  $query
+     * @return Builder<Loan>
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query
+            ->whereIn('status', LoanStatus::activeValues())
+            ->whereNull('return_date');
     }
 }

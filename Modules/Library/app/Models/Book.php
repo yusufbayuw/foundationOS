@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,12 +12,13 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
+use Modules\Library\Models\Concerns\ScopesOrganizationVisibility;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
 
 class Book extends Model
 {
-    use BelongsToTenant, HasFactory, SoftDeletes;
+    use BelongsToTenant, HasFactory, ScopesOrganizationVisibility, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -129,5 +131,14 @@ class Book extends Model
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');
+    }
+
+    /**
+     * @param  Builder<Book>  $query
+     * @return Builder<Book>
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
     }
 }

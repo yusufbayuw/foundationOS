@@ -4,6 +4,8 @@ namespace Modules\Library\Support;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Modules\Library\Enums\FineStatus;
+use Modules\Library\Enums\LoanStatus;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookReservation;
 use Modules\Library\Models\Fine;
@@ -64,13 +66,15 @@ class LibraryCirculationService
         $amount = round($chargeableDays * (float) $policy['fine_per_day'], 2);
 
         DB::transaction(function () use ($loan, $amount): void {
+            $statusValue = $loan->status instanceof LoanStatus ? $loan->status->value : (string) $loan->status;
+
             $resolvedStatus = $loan->return_date
-                ? (in_array($loan->status, ['lost', 'damaged'], true) ? $loan->status : 'returned')
-                : ($amount > 0 && now()->toDateString() > (string) $loan->due_date ? 'overdue' : $loan->status);
+                ? (in_array($statusValue, [LoanStatus::Lost->value, LoanStatus::Damaged->value], true) ? $statusValue : LoanStatus::Returned->value)
+                : ($amount > 0 && now()->toDateString() > (string) $loan->due_date ? LoanStatus::Overdue->value : $statusValue);
 
             $loan->forceFill([
                 'fine_amount' => $amount,
-                'fine_status' => $amount <= 0 ? 'none' : (($loan->fine_paid ?? 0) >= $amount ? 'paid' : 'unpaid'),
+                'fine_status' => $amount <= 0 ? FineStatus::None->value : (($loan->fine_paid ?? 0) >= $amount ? FineStatus::Paid->value : FineStatus::Unpaid->value),
                 'status' => $resolvedStatus,
             ])->save();
 
