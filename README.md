@@ -541,7 +541,7 @@ Dokumentasi spesifik untuk fitur & modul tersedia di:
 | [PROCUREMENT.md](./PROCUREMENT.md) | Procurement workflows & approval chains |
 | [FINANCE.md](./FINANCE.md) | Financial management & accounting flows |
 | [LIBRARY.md](./LIBRARY.md) | Library module & SLIMS integration |
-| [AGENTS.md](./AGENTS.md) | AI agents & automation |
+| [AGENTS.md](./AGENTS.md) | Konvensi agent AI (Boost + pola refactor) |
 
 ---
 
