@@ -16,7 +16,7 @@ class StudentDashboardController extends ApiController
 
     public function show(Request $request, int $id): JsonResponse
     {
-        $student = Student::findOrFail($id);
+        $student = Student::query()->findOrFail($id);
 
         $cacheKey = "student_dashboard:{$id}:".now()->format('YmdHi');
 

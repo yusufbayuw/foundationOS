@@ -205,6 +205,7 @@ $output = [
 ];
 
 file_put_contents(__DIR__.'/../storage/app/entity-catalog.json', json_encode($output, JSON_PRETTY_PRINT));
+file_put_contents(__DIR__.'/../docs/catalogs/entity-catalog.json', json_encode($output, JSON_PRETTY_PRINT));
 echo 'Tables: '.count($allTables)."\n";
 echo 'Models: '.count($models)."\n";
-echo 'Written to storage/app/entity-catalog.json'."\n";
+echo 'Written to storage/app/entity-catalog.json and docs/catalogs/entity-catalog.json'."\n";

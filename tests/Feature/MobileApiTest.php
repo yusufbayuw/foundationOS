@@ -212,6 +212,40 @@ class MobileApiTest extends TestCase
         $this->assertSame($firstGeneratedAt, $second->json('data.generated_at'));
     }
 
+    public function test_student_dashboard_returns_404_for_student_in_another_tenant(): void
+    {
+        $plan = SubscriptionPlan::create([
+            'code' => 'mobile-plan-b',
+            'name' => 'Mobile Plan B',
+            'included_modules' => ['core', 'school'],
+        ]);
+
+        $otherUser = User::create([
+            'name' => 'Other Tenant User',
+            'email' => 'other-mobile@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $otherTenant = Tenant::create([
+            'uuid' => (string) Str::uuid(),
+            'code' => 'tenant-mobile-b',
+            'name' => 'Other Mobile Tenant',
+            'subscription_plan_id' => $plan->id,
+            'created_by' => $otherUser->id,
+        ]);
+
+        $otherStudent = Student::create([
+            'tenant_id' => $otherTenant->id,
+            'nis' => 'NIS-OTHER-TENANT',
+            'status' => 'active',
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->getJson("/api/v1/students/{$otherStudent->id}/dashboard");
+
+        $response->assertStatus(404);
+    }
+
     public function test_unauthenticated_device_registration_returns_401(): void
     {
         $this->postJson('/api/v1/devices', ['token' => 'x', 'platform' => 'android'])

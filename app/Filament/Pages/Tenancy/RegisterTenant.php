@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Tenancy\RegisterTenant as BaseRegisterTenant;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Services\TenantAdminProvisioner;
@@ -68,22 +69,27 @@ class RegisterTenant extends BaseRegisterTenant
     {
         $user = auth()->user();
 
-        $tenant = Tenant::create([
-            'uuid' => Str::uuid(),
-            'name' => $data['name'],
-            'code' => $data['code'],
-            'timezone' => $data['timezone'] ?? 'Asia/Jakarta',
-            'locale' => $data['locale'] ?? 'id',
-            'currency' => $data['currency'] ?? 'IDR',
-            'status' => 'active',
-            'created_by' => $user->getKey(),
-        ]);
+        return DB::transaction(function () use ($data, $user): Tenant {
+            $tenant = Tenant::create([
+                'uuid' => Str::uuid(),
+                'name' => $data['name'],
+                'code' => $data['code'],
+                'timezone' => $data['timezone'] ?? 'Asia/Jakarta',
+                'locale' => $data['locale'] ?? 'id',
+                'currency' => $data['currency'] ?? 'IDR',
+                'status' => 'active',
+                'created_by' => $user->getKey(),
+            ]);
 
-        $provisioner = app(TenantAdminProvisioner::class);
-        $provisioner->ensureTenantOwnerRole($user, $tenant);
-        $provisioner->assignShieldSuperAdmin($user, $tenant);
-        app(TenantModuleProvisioner::class)->enableForTenant($tenant, ['core', 'global']);
+            $provisioner = app(TenantAdminProvisioner::class);
+            $provisioner->ensureTenantOwnerRole($user, $tenant);
+            $provisioner->assignShieldSuperAdmin($user, $tenant);
+            app(TenantModuleProvisioner::class)->enableForTenant(
+                $tenant,
+                TenantModuleProvisioner::K12_DEFAULT_MODULE_CODES,
+            );
 
-        return $tenant;
+            return $tenant;
+        });
     }
 }

@@ -9,6 +9,26 @@ use Modules\Core\Models\TenantModule;
 
 class TenantModuleProvisioner
 {
+    /**
+     * Default modules enabled for new K-12 school tenants (excludes marketplace, printing, campus, etc.).
+     *
+     * @var list<string>
+     */
+    public const K12_DEFAULT_MODULE_CODES = [
+        'core',
+        'global',
+        'school',
+        'enrollment',
+        'finance',
+        'employee',
+        'library',
+        'monitoring',
+        'workflow',
+        'messaging',
+        'exam',
+        'counseling',
+    ];
+
     public function __construct(
         protected ApplicationModuleCatalog $catalog,
     ) {}

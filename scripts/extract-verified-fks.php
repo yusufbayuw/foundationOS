@@ -96,6 +96,7 @@ function inferTable(string $column): string
 }
 
 file_put_contents(__DIR__.'/../storage/app/verified-fks.json', json_encode($results, JSON_PRETTY_PRINT));
+file_put_contents(__DIR__.'/../docs/catalogs/verified-fks.json', json_encode($results, JSON_PRETTY_PRINT));
 echo 'Verified FKs: '.count($results)."\n";
 
 $hub = array_filter($results, fn ($r) => in_array($r['references'], ['tenants', 'organizations', 'users'], true));
