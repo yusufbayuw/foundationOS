@@ -20,9 +20,12 @@ use App\Support\CurrentTenant;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -100,6 +103,17 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('viewPulse', fn (?User $user = null): bool => $user instanceof User && $user->isGlobalSuperAdmin());
+
+        RateLimiter::for('documents', function (Request $request): Limit {
+            return Limit::perMinute(30)->by($request->user()?->id ?? $request->ip());
+        });
+
+        RateLimiter::for('api-write', function (Request $request): Limit {
+            $token = $request->user()?->currentAccessToken();
+            $key = $token?->id ?? $request->ip();
+
+            return Limit::perMinute(30)->by($key);
+        });
 
         Relation::enforceMorphMap([
             'user' => User::class,

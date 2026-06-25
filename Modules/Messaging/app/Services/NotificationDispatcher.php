@@ -2,15 +2,20 @@
 
 namespace Modules\Messaging\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Notification;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Messaging\Contracts\WhatsAppProvider;
+use Modules\Messaging\Jobs\DeliverNotificationJob;
 use Modules\Messaging\Models\NotificationDelivery;
 use Modules\Messaging\Notifications\GenericDatabaseNotification;
 
 class NotificationDispatcher
 {
+    /** @var list<string> */
+    private const DEFERRED_CHANNELS = ['mail', 'whatsapp', 'sms', 'push', 'telegram'];
+
     public function __construct(
         protected WhatsAppProvider $whatsApp,
     ) {}
@@ -43,6 +48,9 @@ class NotificationDispatcher
             fn (string $channel): bool => $this->channelEnabled($channel, $tenantId),
         ));
 
+        $immediateChannels = array_values(array_diff($channels, self::DEFERRED_CHANNELS));
+        $deferredChannels = array_values(array_intersect($channels, self::DEFERRED_CHANNELS));
+
         $delivery = NotificationDelivery::query()->create([
             'tenant_id' => $tenantId,
             'code' => $category,
@@ -51,11 +59,33 @@ class NotificationDispatcher
             'description' => $body,
             'meta' => [
                 'channels' => $channels,
+                'deferred_channels' => $deferredChannels,
                 'user_id' => $user->getKey(),
             ],
             'idempotency_key' => $idempotencyKey,
         ]);
 
+        if ($immediateChannels !== []) {
+            $this->deliverChannels($user, $subject, $body, $immediateChannels);
+        }
+
+        if ($deferredChannels !== []) {
+            DeliverNotificationJob::dispatch($delivery->id)
+                ->onTenant($tenantId);
+
+            return $delivery;
+        }
+
+        $delivery->update(['status' => 'sent']);
+
+        return $delivery;
+    }
+
+    /**
+     * @param  list<string>  $channels
+     */
+    public function deliverChannels(User $user, string $subject, string $body, array $channels): void
+    {
         foreach ($channels as $channel) {
             match ($channel) {
                 'database' => $this->sendDatabase($user, $subject, $body),
@@ -64,10 +94,6 @@ class NotificationDispatcher
                 default => null,
             };
         }
-
-        $delivery->update(['status' => 'sent']);
-
-        return $delivery;
     }
 
     protected function sendDatabase(User $user, string $subject, string $body): void
@@ -99,11 +125,15 @@ class NotificationDispatcher
             return $configured;
         }
 
-        $tenantOverride = TenantSetting::withoutTenantScope()
-            ->where('tenant_id', $tenantId)
-            ->where('group', 'integrations')
-            ->where('key', "{$channel}.enabled")
-            ->value('value');
+        $tenantOverride = Cache::remember(
+            "tenant.{$tenantId}.integrations.{$channel}.enabled",
+            now()->addMinutes(10),
+            fn () => TenantSetting::withoutTenantScope()
+                ->where('tenant_id', $tenantId)
+                ->where('group', 'integrations')
+                ->where('key', "{$channel}.enabled")
+                ->value('value'),
+        );
 
         return $tenantOverride === null ? $configured : filter_var($tenantOverride, FILTER_VALIDATE_BOOL);
     }

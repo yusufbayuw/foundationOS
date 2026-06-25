@@ -7,7 +7,7 @@ use Modules\Finance\Http\Controllers\FinancialReportController;
 use Modules\Finance\Http\Controllers\PaymentPdfController;
 use Modules\Finance\Http\Controllers\StudentInvoicePdfController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'throttle:documents'])->group(function () {
     Route::resource('finances', FinanceController::class)->names('finance');
 
     Route::get('/finance/student-invoices/{studentInvoice}/pdf', StudentInvoicePdfController::class)

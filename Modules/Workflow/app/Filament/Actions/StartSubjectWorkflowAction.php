@@ -4,6 +4,7 @@ namespace Modules\Workflow\Filament\Actions;
 
 use Closure;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Support\Notifications\PanelNotification;
@@ -29,6 +30,11 @@ class StartSubjectWorkflowAction
             ->label(FilamentUi::text('Start Approval Workflow'))
             ->icon('heroicon-o-play')
             ->color('primary')
+            ->authorize(function () use ($page): bool {
+                $record = $page->getRecord();
+
+                return auth()->user()?->can('update', $record) ?? false;
+            })
             ->visible(function () use ($page, $visibleWhen): bool {
                 $record = $page->getRecord();
                 $service = app(WorkflowSubjectPageService::class);
@@ -41,7 +47,11 @@ class StartSubjectWorkflowAction
                     return false;
                 }
 
-                return true;
+                if (method_exists($record, 'isLockedForMutation') && $record->isLockedForMutation()) {
+                    return false;
+                }
+
+                return auth()->user()?->can('update', $record) ?? false;
             })
             ->action(function () use ($page, $successTitleEnglish, $failureTitleEnglish): void {
                 try {

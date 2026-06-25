@@ -3,6 +3,7 @@
 namespace Modules\Core\Services;
 
 use Illuminate\Support\Collection;
+use Modules\Core\Jobs\SendBroadcastNotificationsJob;
 use Modules\Core\Models\Broadcast;
 use Modules\Core\Models\User;
 use Modules\Messaging\Services\NotificationDispatcher;
@@ -17,6 +18,23 @@ class BroadcastService
      * @param  Collection<int, User>  $users
      */
     public function send(Broadcast $broadcast, Collection $users): void
+    {
+        if ($users->isEmpty()) {
+            return;
+        }
+
+        $broadcast->update(['status' => 'queued']);
+
+        SendBroadcastNotificationsJob::dispatch(
+            (int) $broadcast->getKey(),
+            $users->pluck('id')->all(),
+        )->onTenant($broadcast->tenant_id);
+    }
+
+    /**
+     * @param  Collection<int, User>  $users
+     */
+    public function deliverToUsers(Broadcast $broadcast, Collection $users): void
     {
         $channels = $broadcast->channels ?? ['database'];
 

@@ -3,6 +3,7 @@
 namespace Modules\Workflow\Services;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Modules\Workflow\Contracts\StartsWorkflow;
 use Modules\Workflow\Contracts\WorkflowResolver;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
@@ -16,6 +17,33 @@ class DatabaseWorkflowResolver implements WorkflowResolver
         $resolvedSubjectType = $subjectType ?: ($subject instanceof Model ? $subject::class : null);
         $workflowCode = $subject instanceof StartsWorkflow ? $subject->workflowCode() : null;
 
+        $cacheKey = implode(':', [
+            'workflow.resolve',
+            $tenantId,
+            $organizationId ?? 'tenant-wide',
+            $resolvedSubjectType ?? 'none',
+            $workflowCode ?? 'none',
+        ]);
+
+        $workflowId = Cache::remember(
+            $cacheKey,
+            now()->addMinutes(5),
+            fn (): int => $this->resolveWorkflowId($resolvedSubjectType, $workflowCode, $tenantId, $organizationId),
+        );
+
+        $workflow = Workflow::query()->find($workflowId);
+
+        if ($workflow === null) {
+            Cache::forget($cacheKey);
+
+            throw new WorkflowConfigurationException('No active workflow definition matches the provided subject and scope.');
+        }
+
+        return $workflow;
+    }
+
+    private function resolveWorkflowId(?string $resolvedSubjectType, ?string $workflowCode, int $tenantId, ?int $organizationId): int
+    {
         $workflows = Workflow::query()
             ->where('tenant_id', $tenantId)
             ->where('is_active', true)
@@ -49,6 +77,6 @@ class DatabaseWorkflowResolver implements WorkflowResolver
             throw new WorkflowConfigurationException('No active workflow definition matches the provided subject and scope.');
         }
 
-        return $workflow;
+        return (int) $workflow->getKey();
     }
 }

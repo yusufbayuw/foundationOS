@@ -8,7 +8,7 @@ use Modules\Procurement\Http\Controllers\PurchaseRequisitionPdfController;
 use Modules\Procurement\Http\Controllers\RequestForQuotationPdfController;
 use Modules\Procurement\Http\Controllers\VendorBillPdfController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'throttle:documents'])->group(function () {
     Route::resource('procurements', ProcurementController::class)->names('procurement');
 
     Route::get('/procurement/purchase-requisitions/{purchaseRequisition}/pdf', PurchaseRequisitionPdfController::class)

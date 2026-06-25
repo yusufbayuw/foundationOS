@@ -26,6 +26,7 @@ class ViewPurchaseRequisition extends ViewRecord
                 $this,
                 'Approval workflow started.',
                 'Unable to start approval workflow.',
+                visibleWhen: fn (): bool => $record->status === 'draft',
             ),
             EditAction::make(),
         ];

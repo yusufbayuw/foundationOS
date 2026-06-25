@@ -4,6 +4,9 @@ namespace Tests\Feature\Filament;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Modules\Core\Models\Organization;
+use Modules\Core\Models\Tenant;
+use Modules\Core\Models\User;
 use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Contracts\WorkflowResolver;
@@ -33,7 +36,9 @@ class WorkflowSubjectPageServiceTest extends TestCase
 
         $this->setupProcurementPilot($tenant, $user);
 
-        $instance = app(WorkflowSubjectPageService::class)->startApprovalWorkflow($requisition, $user, $tenant);
+        $superAdmin = User::factory()->superAdmin()->create();
+
+        $instance = app(WorkflowSubjectPageService::class)->startApprovalWorkflow($requisition, $superAdmin, $tenant);
 
         $this->assertInstanceOf(WorkflowInstance::class, $instance);
         $this->assertSame(WorkflowInstanceStatus::Running, $instance->status);
@@ -46,7 +51,7 @@ class WorkflowSubjectPageServiceTest extends TestCase
     }
 
     /**
-     * @return array{0: \Modules\Core\Models\Tenant, 1: \Modules\Core\Models\Organization, 2: \Modules\Core\Models\User, 3: PurchaseRequisition, 4: WorkflowInstance}
+     * @return array{0: Tenant, 1: Organization, 2: User, 3: PurchaseRequisition, 4: WorkflowInstance}
      */
     private function seedRunningWorkflow(): array
     {
@@ -73,7 +78,7 @@ class WorkflowSubjectPageServiceTest extends TestCase
     }
 
     /**
-     * @return array{0: \Modules\Core\Models\Tenant, 1: \Modules\Core\Models\Organization, 2: \Modules\Core\Models\User, 3: PurchaseRequisition}
+     * @return array{0: Tenant, 1: Organization, 2: User, 3: PurchaseRequisition}
      */
     private function seedPurchaseRequisitionWithoutWorkflow(): array
     {
@@ -92,7 +97,7 @@ class WorkflowSubjectPageServiceTest extends TestCase
         return [$context['tenant'], $context['organization'], $context['user'], $requisition];
     }
 
-    private function setupProcurementPilot(\Modules\Core\Models\Tenant $tenant, \Modules\Core\Models\User $user): void
+    private function setupProcurementPilot(Tenant $tenant, User $user): void
     {
         $this->artisan('fos:workflow:setup-procurement-pilot', [
             'tenant' => $tenant->id,

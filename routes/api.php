@@ -65,7 +65,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('employees/{id}', [EmployeeController::class, 'show']);
 
         // Write endpoints (idempotency key supported)
-        Route::middleware(['idempotency'])->group(function () {
+        Route::middleware(['idempotency', 'throttle:api-write'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
@@ -103,7 +103,7 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
         Route::get('employees', [EmployeeController::class, 'index']);
         Route::get('employees/{id}', [EmployeeController::class, 'show']);
 
-        Route::middleware(['idempotency'])->group(function () {
+        Route::middleware(['idempotency', 'throttle:api-write'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
