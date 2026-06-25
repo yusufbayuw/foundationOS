@@ -124,9 +124,10 @@ class FilamentResourceEagerLoadingTest extends TestCase
 
             $this->assertNotNull($requisition);
             $requisition->tenant?->name;
+            $requisition->user?->name;
         });
 
-        $this->assertSame(2, $queryCount);
+        $this->assertSame(3, $queryCount);
     }
 
     public function test_workflow_instance_table_scope_reduces_relation_queries(): void
