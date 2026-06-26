@@ -1,0 +1,10 @@
+{
+    "install": "composer install --no-interaction && npm install && bash scripts/bootstrap-boost.sh",
+    "start": "bash scripts/bootstrap-boost.sh",
+    "terminals": [
+        {
+            "name": "laravel-boost-mcp",
+            "command": "php artisan boost:mcp"
+        }
+    ]
+}
