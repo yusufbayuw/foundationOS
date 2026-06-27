@@ -3,6 +3,7 @@
 namespace App\Integrations\Moodle;
 
 use App\Models\MoodleOfferingMapping;
+use App\Support\TypedValue;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
 use Modules\Campus\Models\CoursePrerequisite;
@@ -38,7 +39,9 @@ class MoodleCampusCatalogSyncService
 
     public function syncCourseTemplate(Course $course): MoodleOfferingMapping
     {
-        $idnumber = self::templateIdnumber((int) $course->tenant_id, (int) $course->getKey());
+        $courseId = TypedValue::int($course->getKey());
+        $tenantId = TypedValue::int($course->tenant_id);
+        $idnumber = self::templateIdnumber($tenantId, $courseId);
 
         $mapping = MoodleOfferingMapping::query()->updateOrCreate(
             ['idnumber' => $idnumber],
@@ -58,8 +61,8 @@ class MoodleCampusCatalogSyncService
 
         $this->outbox->enqueue(
             entityType: MoodleOutboxService::ENTITY_COURSE,
-            entityId: (int) $course->getKey(),
-            tenantId: (int) $course->tenant_id,
+            entityId: $courseId,
+            tenantId: $tenantId,
             action: MoodleOutboxService::ACTION_UPSERT,
             payload: [
                 'kind' => MoodleOfferingMapping::KIND_TEMPLATE,
@@ -78,7 +81,14 @@ class MoodleCampusCatalogSyncService
     public function syncCourseOffering(CourseOffering $offering): MoodleOfferingMapping
     {
         $offering = $offering->fresh(['course']);
-        $idnumber = self::offeringIdnumber((int) $offering->getKey());
+        if ($offering === null) {
+            throw new \RuntimeException('Course offering no longer exists.');
+        }
+
+        $offeringId = TypedValue::int($offering->getKey());
+        $tenantId = TypedValue::int($offering->tenant_id);
+        $courseId = TypedValue::int($offering->course_id);
+        $idnumber = self::offeringIdnumber($offeringId);
 
         $mapping = MoodleOfferingMapping::query()->updateOrCreate(
             ['idnumber' => $idnumber],
@@ -97,19 +107,17 @@ class MoodleCampusCatalogSyncService
             ],
         );
 
-        $restrictions = $this->collectPrerequisites((int) $offering->tenant_id, (int) $offering->course_id);
+        $restrictions = $this->collectPrerequisites($tenantId, $courseId);
 
         $this->outbox->enqueue(
             entityType: MoodleOutboxService::ENTITY_COURSE,
-            entityId: (int) $offering->getKey(),
-            tenantId: (int) $offering->tenant_id,
+            entityId: $offeringId,
+            tenantId: $tenantId,
             action: MoodleOutboxService::ACTION_UPSERT,
             payload: [
                 'kind' => MoodleOfferingMapping::KIND_OFFERING,
                 'idnumber' => $idnumber,
-                'template_idnumber' => self::templateIdnumber(
-                    (int) $offering->tenant_id, (int) $offering->course_id,
-                ),
+                'template_idnumber' => self::templateIdnumber($tenantId, $courseId),
                 'class_code' => $offering->class_code,
                 'academic_period_id' => $offering->academic_period_id,
                 'category_hint' => "fos_semester_{$offering->academic_period_id}",

@@ -7,7 +7,7 @@ use App\Integrations\Moodle\Exceptions\MoodleReadonlySkipException;
 use App\Models\MoodleClassCourseMapping;
 use App\Models\MoodleEntityMapping;
 use App\Models\MoodleSyncOutbox;
-use Illuminate\Support\Arr;
+use App\Support\TypedValue;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -96,17 +96,25 @@ class MoodleSyncService
 
     protected function syncEnrollmentOutbox(MoodleSyncOutbox $outbox): void
     {
+        /** @var array<string, mixed> $payload */
         $payload = is_array($outbox->payload) ? $outbox->payload : [];
-        $classStudentId = (int) $outbox->entity_id;
-        $classStudent = ClassStudent::withTrashed()
-            ->with([
-                'student' => fn ($query) => $query->withTrashed()->with('user'),
-            ])
-            ->find($classStudentId);
+        $classStudentId = TypedValue::int($outbox->entity_id);
+        $classStudent = ClassStudent::withTrashed()->find($classStudentId);
 
-        $classId = (int) ($payload['class_id'] ?? $classStudent?->class_id ?? 0);
-        $tenantId = (int) ($payload['tenant_id'] ?? $classStudent?->tenant_id ?? 0);
-        $studentId = (int) ($payload['student_id'] ?? $classStudent?->student_id ?? 0);
+        $classId = TypedValue::intFromArray($payload, 'class_id');
+        if ($classId <= 0 && $classStudent !== null) {
+            $classId = TypedValue::int($classStudent->class_id);
+        }
+
+        $tenantId = TypedValue::intFromArray($payload, 'tenant_id');
+        if ($tenantId <= 0 && $classStudent !== null) {
+            $tenantId = TypedValue::int($classStudent->tenant_id);
+        }
+
+        $studentId = TypedValue::intFromArray($payload, 'student_id');
+        if ($studentId <= 0 && $classStudent !== null) {
+            $studentId = TypedValue::int($classStudent->student_id);
+        }
 
         if ($classId <= 0 || $tenantId <= 0 || $studentId <= 0) {
             throw new MoodleIntegrationException("Enrollment payload is incomplete for outbox {$outbox->id}.");
@@ -149,7 +157,7 @@ class MoodleSyncService
                 'categories' => [$payload],
             ]);
 
-            $moodleCategoryId = (int) Arr::get($created, '0.id', 0);
+            $moodleCategoryId = TypedValue::intFromArray($created, '0.id');
         } else {
             $this->callMoodle('core_course_update_categories', [
                 'categories' => [[
@@ -185,7 +193,7 @@ class MoodleSyncService
         $existing = $this->findEntityMapping('user', (int) $user->id, $idnumber);
         $moodleUserId = $existing?->moodle_id ?: $this->findMoodleUserIdByIdnumber($idnumber);
         $payload = $this->mapper->mapUser($user);
-        $suspended = $forcedSuspended ?? (int) $payload['suspended'];
+        $suspended = $forcedSuspended ?? TypedValue::int($payload['suspended']);
 
         if (! $moodleUserId) {
             $createPayload = [
@@ -209,14 +217,14 @@ class MoodleSyncService
 
                 $fallbackPayload = $createPayload;
                 $fallbackPayload['username'] = 'fos_'.(int) $user->id;
-                $fallbackPayload['email'] = $this->buildFallbackMoodleEmail((int) $user->id, (string) $payload['email']);
+                $fallbackPayload['email'] = $this->buildFallbackMoodleEmail(TypedValue::int($user->id), TypedValue::string($payload['email']));
 
                 $created = $this->callMoodle('core_user_create_users', [
                     'users' => [$fallbackPayload],
                 ]);
             }
 
-            $moodleUserId = (int) Arr::get($created, '0.id', 0);
+            $moodleUserId = TypedValue::intFromArray($created, '0.id');
 
             if ($moodleUserId > 0 && $suspended === 1) {
                 $this->callMoodle('core_user_update_users', [
@@ -274,7 +282,7 @@ class MoodleSyncService
                 'courses' => [$payload],
             ]);
 
-            $moodleCourseId = (int) Arr::get($created, '0.id', 0);
+            $moodleCourseId = TypedValue::intFromArray($created, '0.id');
         } else {
             $this->callMoodle('core_course_update_courses', [
                 'courses' => [[
@@ -321,20 +329,34 @@ class MoodleSyncService
 
     protected function syncLecturerAssignmentOutbox(MoodleSyncOutbox $outbox): void
     {
+        /** @var array<string, mixed> $payload */
         $payload = is_array($outbox->payload) ? $outbox->payload : [];
-        $assignmentId = (int) $outbox->entity_id;
+        $assignmentId = TypedValue::int($outbox->entity_id);
 
-        $assignment = CourseOfferingLecturer::withoutTenantScope()
-            ->with([
-                'courseOffering' => fn ($q) => $q->withoutTenantScope()->withTrashed(),
-                'lecturer' => fn ($q) => $q->withoutTenantScope()->withTrashed()->with('user'),
-            ])
-            ->find($assignmentId);
+        $assignment = CourseOfferingLecturer::withoutTenantScope()->find($assignmentId);
 
-        $courseOfferingId = (int) ($payload['course_offering_id'] ?? $assignment?->course_offering_id ?? 0);
-        $lecturerId = (int) ($payload['lecturer_id'] ?? $assignment?->lecturer_id ?? 0);
-        $tenantId = (int) ($payload['tenant_id'] ?? $assignment?->tenant_id ?? 0);
-        $role = (string) ($payload['role'] ?? $assignment?->role?->value ?? 'primary');
+        $courseOfferingId = TypedValue::intFromArray($payload, 'course_offering_id');
+        if ($courseOfferingId <= 0 && $assignment !== null) {
+            $courseOfferingId = TypedValue::int($assignment->course_offering_id);
+        }
+
+        $lecturerId = TypedValue::intFromArray($payload, 'lecturer_id');
+        if ($lecturerId <= 0 && $assignment !== null) {
+            $lecturerId = TypedValue::int($assignment->lecturer_id);
+        }
+
+        $tenantId = TypedValue::intFromArray($payload, 'tenant_id');
+        if ($tenantId <= 0 && $assignment !== null) {
+            $tenantId = TypedValue::int($assignment->tenant_id);
+        }
+
+        $role = TypedValue::stringFromArray($payload, 'role');
+        if ($role === '' && $assignment !== null) {
+            $role = TypedValue::string($assignment->role->value);
+        }
+        if ($role === '') {
+            $role = 'primary';
+        }
 
         if ($courseOfferingId <= 0 || $lecturerId <= 0 || $tenantId <= 0) {
             throw new MoodleIntegrationException("Lecturer assignment payload is incomplete for outbox {$outbox->id}.");
@@ -371,7 +393,7 @@ class MoodleSyncService
     {
         $offering = CourseOffering::withoutTenantScope()
             ->withTrashed()
-            ->with(['course' => fn ($q) => $q->withTrashed()->with('tenant'), 'academicPeriod' => fn ($q) => $q->withTrashed()])
+            ->with(['course.tenant', 'academicPeriod'])
             ->find($outbox->entity_id);
 
         if (! $offering) {
@@ -420,7 +442,7 @@ class MoodleSyncService
                 'categories' => [$payload],
             ]);
 
-            $moodleCategoryId = (int) Arr::get($created, '0.id', 0);
+            $moodleCategoryId = TypedValue::intFromArray($created, '0.id');
         } else {
             $this->callMoodle('core_course_update_categories', [
                 'categories' => [[
@@ -453,7 +475,7 @@ class MoodleSyncService
                 'courses' => [$payload],
             ]);
 
-            $moodleCourseId = (int) Arr::get($created, '0.id', 0);
+            $moodleCourseId = TypedValue::intFromArray($created, '0.id');
         } else {
             $this->callMoodle('core_course_update_courses', [
                 'courses' => [[
@@ -540,7 +562,7 @@ class MoodleSyncService
 
         $prerequisites = CoursePrerequisite::withoutTenantScope()
             ->where('course_id', $offering->course_id)
-            ->with(['prerequisiteCourse' => fn ($q) => $q->withTrashed()])
+            ->with('prerequisiteCourse')
             ->get();
 
         if ($prerequisites->isEmpty()) {
@@ -549,7 +571,11 @@ class MoodleSyncService
 
         $lines = $prerequisites->map(function (CoursePrerequisite $p): string {
             $course = $p->prerequisiteCourse;
-            $label = $course ? trim("{$course->code} — {$course->name}") : "course #{$p->prerequisite_course_id}";
+            if ($course instanceof Course) {
+                $label = trim((string) $course->code.' — '.(string) $course->name);
+            } else {
+                $label = 'course #'.TypedValue::int($p->prerequisite_course_id);
+            }
             $extras = [];
             if ($p->min_grade !== null) {
                 $extras[] = "min grade {$p->min_grade}";
@@ -569,20 +595,29 @@ class MoodleSyncService
 
     protected function syncStudyPlanEnrollmentOutbox(MoodleSyncOutbox $outbox): void
     {
+        /** @var array<string, mixed> $payload */
         $payload = is_array($outbox->payload) ? $outbox->payload : [];
-        $itemId = (int) $outbox->entity_id;
+        $itemId = TypedValue::int($outbox->entity_id);
 
         $item = StudyPlanItem::withoutTenantScope()
             ->withTrashed()
-            ->with([
-                'studyPlan' => fn ($q) => $q->withTrashed()->with(['collageStudent' => fn ($qq) => $qq->withTrashed()->with('user')]),
-                'courseOffering' => fn ($q) => $q->withTrashed()->with(['course' => fn ($qq) => $qq->withTrashed()->with('tenant'), 'academicPeriod' => fn ($qq) => $qq->withTrashed()]),
-            ])
+            ->with(['studyPlan.collageStudent.user', 'courseOffering.course.tenant', 'courseOffering.academicPeriod'])
             ->find($itemId);
 
-        $tenantId = (int) ($payload['tenant_id'] ?? $item?->tenant_id ?? 0);
-        $offeringId = (int) ($payload['course_offering_id'] ?? $item?->course_offering_id ?? 0);
-        $userId = (int) ($payload['user_id'] ?? $item?->studyPlan?->collageStudent?->user_id ?? 0);
+        $tenantId = TypedValue::intFromArray($payload, 'tenant_id');
+        if ($tenantId <= 0 && $item !== null) {
+            $tenantId = TypedValue::int($item->tenant_id);
+        }
+
+        $offeringId = TypedValue::intFromArray($payload, 'course_offering_id');
+        if ($offeringId <= 0 && $item !== null) {
+            $offeringId = TypedValue::int($item->course_offering_id);
+        }
+
+        $userId = TypedValue::intFromArray($payload, 'user_id');
+        if ($userId <= 0 && $item !== null && $item->studyPlan?->collageStudent !== null) {
+            $userId = TypedValue::int($item->studyPlan->collageStudent->user_id);
+        }
 
         if ($tenantId <= 0 || $offeringId <= 0 || $userId <= 0) {
             throw new MoodleIntegrationException("StudyPlan enrollment payload incomplete for outbox {$outbox->id}.");
@@ -608,7 +643,7 @@ class MoodleSyncService
             return;
         }
 
-        $roleId = (int) config('moodle.role_map.student', 5);
+        $roleId = TypedValue::int(config('moodle.role_map.student'), 5);
         $this->enrollUser($moodleUserId, $moodleCourseId, $roleId);
     }
 
@@ -657,8 +692,8 @@ class MoodleSyncService
     public function resolveLecturerRoleId(string $role): int
     {
         return match ($role) {
-            'assistant' => (int) config('moodle.role_map.assistant_teacher', 4),
-            default => (int) config('moodle.role_map.teacher', 3),
+            'assistant' => TypedValue::int(config('moodle.role_map.assistant_teacher'), 4),
+            default => TypedValue::int(config('moodle.role_map.teacher'), 3),
         };
     }
 
@@ -743,7 +778,7 @@ class MoodleSyncService
             'values' => [$idnumber],
         ]);
 
-        return (int) Arr::get($response, '0.id', 0);
+        return TypedValue::intFromArray($response, '0.id');
     }
 
     public function findMoodleCourseIdByIdnumber(string $idnumber): int
@@ -753,7 +788,7 @@ class MoodleSyncService
             'value' => $idnumber,
         ]);
 
-        return (int) Arr::get($response, 'courses.0.id', 0);
+        return TypedValue::intFromArray($response, 'courses.0.id');
     }
 
     public function findMoodleCategoryIdByIdnumber(string $idnumber): int
@@ -764,7 +799,7 @@ class MoodleSyncService
             ],
         ]);
 
-        return (int) Arr::get($response, '0.id', 0);
+        return TypedValue::intFromArray($response, '0.id');
     }
 
     protected function deactivateMissingUser(int $userId): void
@@ -850,7 +885,7 @@ class MoodleSyncService
                 ]);
             }
 
-            $cohortId = (int) Arr::get($created, '0.id', 0);
+            $cohortId = TypedValue::intFromArray($created, '0.id');
         }
 
         if ($cohortId <= 0) {
@@ -879,13 +914,18 @@ class MoodleSyncService
             return 0;
         }
 
-        foreach (($searchResult['cohorts'] ?? []) as $cohort) {
+        $cohorts = $searchResult['cohorts'] ?? [];
+        if (! is_array($cohorts)) {
+            return 0;
+        }
+
+        foreach ($cohorts as $cohort) {
             if (! is_array($cohort)) {
                 continue;
             }
 
             if (($cohort['idnumber'] ?? null) === $idnumber) {
-                return (int) ($cohort['id'] ?? 0);
+                return TypedValue::int($cohort['id'] ?? 0);
             }
         }
 
@@ -929,7 +969,7 @@ class MoodleSyncService
 
     public function resolveEnrollmentRoleId(User $user, int $tenantId): int
     {
-        $defaultRole = (int) config('moodle.role_map.student', config('moodle.enrol_role_id', 5));
+        $defaultRole = TypedValue::int(config('moodle.role_map.student'), TypedValue::int(config('moodle.enrol_role_id'), 5));
 
         /** @var UserTenantRole|null $assignment */
         $assignment = UserTenantRole::query()
@@ -957,7 +997,7 @@ class MoodleSyncService
         $identity = trim("{$slug} {$name}");
 
         if (str_contains($identity, 'teacher') || str_contains($identity, 'lecturer') || str_contains($identity, 'dosen')) {
-            return (int) config('moodle.role_map.teacher', 3);
+            return TypedValue::int(config('moodle.role_map.teacher'), 3);
         }
 
         if (
@@ -965,7 +1005,7 @@ class MoodleSyncService
             str_contains($identity, 'manager') ||
             str_contains($identity, 'super')
         ) {
-            return (int) config('moodle.role_map.manager', 1);
+            return TypedValue::int(config('moodle.role_map.manager'), 1);
         }
 
         return $defaultRole;
@@ -982,6 +1022,9 @@ class MoodleSyncService
             ->first();
     }
 
+    /**
+     * @param  array<string, mixed>  $meta
+     */
     protected function upsertEntityMapping(
         string $entityType,
         int $fosEntityId,
@@ -1007,6 +1050,10 @@ class MoodleSyncService
         return $mapping;
     }
 
+    /**
+     * @param  array<string, mixed>  $params
+     * @return array<string, mixed>
+     */
     protected function callMoodle(string $function, array $params): array
     {
         if (config('moodle.readonly', false)) {

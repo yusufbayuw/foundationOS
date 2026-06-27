@@ -24,7 +24,7 @@ class CurrentTenant
     public function set(int|string|Tenant|null $tenant): void
     {
         if ($tenant instanceof Tenant) {
-            $this->tenantId = $tenant->getKey();
+            $this->tenantId = $this->normalizeTenantKey($tenant->getKey());
         } else {
             $this->tenantId = $tenant;
         }
@@ -77,9 +77,18 @@ class CurrentTenant
         }
 
         try {
-            return Filament::getTenant()?->getKey();
+            $tenant = Filament::getTenant();
+
+            return $tenant instanceof Tenant
+                ? $this->normalizeTenantKey($tenant->getKey())
+                : null;
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    protected function normalizeTenantKey(mixed $key): int|string|null
+    {
+        return is_int($key) || is_string($key) ? $key : null;
     }
 }

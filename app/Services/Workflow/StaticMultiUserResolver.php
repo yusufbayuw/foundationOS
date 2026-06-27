@@ -16,12 +16,18 @@ use Modules\Workflow\Models\WorkflowStep;
  */
 class StaticMultiUserResolver implements WorkflowDynamicAssigneeResolver
 {
+    /**
+     * @return Collection<int, User>
+     */
     public function resolve(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
         $userIds = (array) data_get($step->assignee_config, 'user_ids', []);
 
         if (empty($userIds)) {
-            return collect();
+            /** @var Collection<int, User> $empty */
+            $empty = collect();
+
+            return $empty;
         }
 
         return User::query()->whereIn('id', $userIds)->get();

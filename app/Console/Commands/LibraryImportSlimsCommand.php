@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\LibrarySlimsMapping;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -101,7 +103,13 @@ class LibraryImportSlimsCommand extends Command
         }
 
         try {
-            $connection = $this->slimsConnection($tenantSlimsConfig['connection']);
+            $connectionConfig = $tenantSlimsConfig['connection'];
+            if (! is_array($connectionConfig)) {
+                throw new \RuntimeException('SLiMS connection config is invalid.');
+            }
+
+            /** @var array<string, mixed> $connectionConfig */
+            $connection = $this->slimsConnection($connectionConfig);
         } catch (\RuntimeException $exception) {
             $this->error($exception->getMessage());
 
@@ -114,6 +122,7 @@ class LibraryImportSlimsCommand extends Command
             return self::FAILURE;
         }
 
+        /** @var array{books: int, copies: int, members: int, users: int, loans: int, skipped: int} $summary */
         $summary = [
             'books' => 0,
             'copies' => 0,
@@ -138,12 +147,12 @@ class LibraryImportSlimsCommand extends Command
         $this->table(
             ['Metric', 'Value'],
             [
-                ['books', (string) $summary['books']],
-                ['copies', (string) $summary['copies']],
-                ['members', (string) $summary['members']],
-                ['users', (string) $summary['users']],
-                ['loans', (string) $summary['loans']],
-                ['skipped', (string) $summary['skipped']],
+                ['books', TypedValue::string($summary['books'])],
+                ['copies', TypedValue::string($summary['copies'])],
+                ['members', TypedValue::string($summary['members'])],
+                ['users', TypedValue::string($summary['users'])],
+                ['loans', TypedValue::string($summary['loans'])],
+                ['skipped', TypedValue::string($summary['skipped'])],
             ],
         );
 
@@ -154,6 +163,9 @@ class LibraryImportSlimsCommand extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * @param  array{books: int, copies: int, members: int, users: int, loans: int, skipped: int}  $summary
+     */
     protected function importCatalog(
         ConnectionInterface $connection,
         int $tenantId,
@@ -170,7 +182,7 @@ class LibraryImportSlimsCommand extends Command
 
         $bookRows = $bookQuery->get();
         foreach ($bookRows as $row) {
-            $slimsId = (string) $row->biblio_id;
+            $slimsId = TypedValue::string($row->biblio_id ?? null);
             if ($this->shouldSkipEntity('book', $tenantId, $slimsId)) {
                 $summary['skipped']++;
 
@@ -184,22 +196,23 @@ class LibraryImportSlimsCommand extends Command
                 continue;
             }
 
+            $biblioId = TypedValue::string($row->biblio_id ?? null);
             $book->fill([
                 'tenant_id' => $tenantId,
                 'organization_id' => $organizationId,
                 'book_category_id' => null,
                 'isbn' => $row->isbn_issn ?: null,
                 'isbn13' => null,
-                'title' => (string) ($row->title ?: "Untitled {$row->biblio_id}"),
+                'title' => TypedValue::string($row->title ?? null, "Untitled {$biblioId}"),
                 'subtitle' => null,
-                'authors' => $this->parseAuthors((string) ($row->sor ?? '')),
+                'authors' => $this->parseAuthors(TypedValue::string($row->sor ?? null)),
                 'publisher' => null,
                 'publication_year' => $row->publish_year ?: null,
                 'publication_place' => null,
                 'edition' => $row->edition ?: null,
                 'volume' => null,
                 'series' => $row->series_title ?: null,
-                'language' => $this->mapLanguage((string) ($row->language_id ?? 'id')),
+                'language' => $this->mapLanguage(TypedValue::string($row->language_id ?? null, 'id')),
                 'pages' => null,
                 'dimensions' => null,
                 'weight_grams' => null,
@@ -211,8 +224,8 @@ class LibraryImportSlimsCommand extends Command
                 'preview_url' => null,
                 'purchase_price' => null,
                 'source' => 'slims_import',
-                'total_copies' => (int) ($book->total_copies ?? 0),
-                'available_copies' => (int) ($book->available_copies ?? 0),
+                'total_copies' => TypedValue::int($book->total_copies ?? 0),
+                'available_copies' => TypedValue::int($book->available_copies ?? 0),
                 'location_shelf' => null,
                 'is_active' => true,
                 'is_reference_only' => false,
@@ -220,8 +233,8 @@ class LibraryImportSlimsCommand extends Command
 
             if (! $dryRun) {
                 $book->save();
-                $this->upsertMapping('book', $tenantId, $slimsId, (int) $book->id, [
-                    'title' => (string) $book->title,
+                $this->upsertMapping('book', $tenantId, $slimsId, TypedValue::int($book->id), [
+                    'title' => TypedValue::string($book->title),
                 ]);
             }
 
@@ -238,31 +251,32 @@ class LibraryImportSlimsCommand extends Command
         $touchedBookIds = [];
 
         foreach ($copyRows as $row) {
-            if ($this->shouldSkipEntity('copy', $tenantId, (string) $row->item_id)) {
+            $itemId = TypedValue::string($row->item_id ?? null);
+            if ($this->shouldSkipEntity('copy', $tenantId, $itemId)) {
                 $summary['skipped']++;
 
                 continue;
             }
 
-            $bookMapping = $this->findMapping('book', $tenantId, (string) $row->biblio_id);
+            $bookMapping = $this->findMapping('book', $tenantId, TypedValue::string($row->biblio_id ?? null));
             if (! $bookMapping) {
                 $summary['skipped']++;
 
                 continue;
             }
 
-            $copy = $this->findOrMakeMappedModel('copy', $tenantId, (string) $row->item_id, BookCopy::class);
+            $copy = $this->findOrMakeMappedModel('copy', $tenantId, $itemId, BookCopy::class);
             if (! $copy) {
                 $summary['skipped']++;
 
                 continue;
             }
 
-            $copyNumber = (string) ($row->item_code ?: "copy-{$row->item_id}");
+            $copyNumber = TypedValue::string($row->item_code ?? null, "copy-{$itemId}");
             $copy->fill([
                 'tenant_id' => $tenantId,
                 'organization_id' => $organizationId,
-                'book_id' => (int) $bookMapping->fos_id,
+                'book_id' => TypedValue::int($bookMapping->fos_id),
                 'copy_number' => $copyNumber,
                 'barcode' => $row->item_code ?: null,
                 'acquisition_date' => $row->received_date ?: null,
@@ -276,12 +290,12 @@ class LibraryImportSlimsCommand extends Command
 
             if (! $dryRun) {
                 $copy->save();
-                $this->upsertMapping('copy', $tenantId, (string) $row->item_id, (int) $copy->id, [
-                    'item_code' => (string) ($row->item_code ?? ''),
+                $this->upsertMapping('copy', $tenantId, $itemId, TypedValue::int($copy->id), [
+                    'item_code' => TypedValue::string($row->item_code ?? null),
                 ]);
             }
 
-            $touchedBookIds[(int) $bookMapping->fos_id] = true;
+            $touchedBookIds[TypedValue::int($bookMapping->fos_id)] = true;
             $summary['copies']++;
         }
 
@@ -292,6 +306,9 @@ class LibraryImportSlimsCommand extends Command
         }
     }
 
+    /**
+     * @param  array{books: int, copies: int, members: int, users: int, loans: int, skipped: int}  $summary
+     */
     protected function importMembers(
         ConnectionInterface $connection,
         int $tenantId,
@@ -309,7 +326,7 @@ class LibraryImportSlimsCommand extends Command
 
         $rows = $query->get();
         foreach ($rows as $row) {
-            $memberCode = (string) $row->member_id;
+            $memberCode = TypedValue::string($row->member_id ?? null);
             if ($memberCode === '') {
                 $summary['skipped']++;
 
@@ -330,7 +347,7 @@ class LibraryImportSlimsCommand extends Command
             }
 
             if (! $dryRun) {
-                $this->ensureUserTenantRole((int) $user->id, $tenantId, $tenantRoleId);
+                $this->ensureUserTenantRole(TypedValue::int($user->id), $tenantId, $tenantRoleId);
             }
 
             $member = $this->findOrMakeMappedModel('member', $tenantId, $memberCode, Member::class);
@@ -343,9 +360,9 @@ class LibraryImportSlimsCommand extends Command
             $member->fill([
                 'tenant_id' => $tenantId,
                 'organization_id' => $organizationId,
-                'user_id' => (int) $user->id,
+                'user_id' => TypedValue::int($user->id),
                 'member_number' => $memberCode,
-                'member_type' => $row->member_type_id ? "slims_type_{$row->member_type_id}" : null,
+                'member_type' => $row->member_type_id ? 'slims_type_'.TypedValue::string($row->member_type_id) : null,
                 'joined_at' => $row->member_since_date ?: $row->register_date ?: null,
                 'expires_at' => $row->expire_date ?: null,
                 'max_books' => 3,
@@ -355,7 +372,7 @@ class LibraryImportSlimsCommand extends Command
                 'current_loans_count' => 0,
                 'total_fines' => 0,
                 'unpaid_fines' => 0,
-                'status' => ((int) ($row->is_pending ?? 0) === 1)
+                'status' => (TypedValue::int($row->is_pending ?? 0) === 1)
                     ? 'inactive'
                     : $this->defaultMemberStatus,
                 'suspension_reason' => null,
@@ -365,8 +382,8 @@ class LibraryImportSlimsCommand extends Command
 
             if (! $dryRun) {
                 $member->save();
-                $this->upsertMapping('member', $tenantId, $memberCode, (int) $member->id, [
-                    'email' => (string) $user->email,
+                $this->upsertMapping('member', $tenantId, $memberCode, TypedValue::int($member->id), [
+                    'email' => TypedValue::string($user->email),
                 ]);
             }
 
@@ -377,6 +394,9 @@ class LibraryImportSlimsCommand extends Command
         }
     }
 
+    /**
+     * @param  array{books: int, copies: int, members: int, users: int, loans: int, skipped: int}  $summary
+     */
     protected function importLoans(
         ConnectionInterface $connection,
         int $tenantId,
@@ -410,15 +430,16 @@ class LibraryImportSlimsCommand extends Command
         $rows = $query->get();
 
         foreach ($rows as $row) {
-            if ($this->shouldSkipEntity('loan', $tenantId, (string) $row->loan_id)) {
+            $loanId = TypedValue::string($row->loan_id ?? null);
+            if ($this->shouldSkipEntity('loan', $tenantId, $loanId)) {
                 $summary['skipped']++;
 
                 continue;
             }
 
-            $memberMapping = $this->findMapping('member', $tenantId, (string) $row->member_id);
+            $memberMapping = $this->findMapping('member', $tenantId, TypedValue::string($row->member_id ?? null));
             $copyMapping = isset($row->item_id)
-                ? $this->findMapping('copy', $tenantId, (string) $row->item_id)
+                ? $this->findMapping('copy', $tenantId, TypedValue::string($row->item_id))
                 : null;
 
             if (! $memberMapping || ! $copyMapping) {
@@ -427,25 +448,25 @@ class LibraryImportSlimsCommand extends Command
                 continue;
             }
 
-            $loan = $this->findOrMakeMappedModel('loan', $tenantId, (string) $row->loan_id, Loan::class);
+            $loan = $this->findOrMakeMappedModel('loan', $tenantId, $loanId, Loan::class);
             if (! $loan) {
                 $summary['skipped']++;
 
                 continue;
             }
 
-            $isReturned = ((int) ($row->is_return ?? 0) === 1) || ! empty($row->return_date);
+            $isReturned = (TypedValue::int($row->is_return ?? 0) === 1) || ! empty($row->return_date);
             $loan->fill([
                 'tenant_id' => $tenantId,
                 'organization_id' => $organizationId,
-                'book_copy_id' => (int) $copyMapping->fos_id,
-                'member_id' => (int) $memberMapping->fos_id,
+                'book_copy_id' => TypedValue::int($copyMapping->fos_id),
+                'member_id' => TypedValue::int($memberMapping->fos_id),
                 'processed_by' => null,
                 'returned_by' => null,
                 'loan_date' => $row->loan_date ?: now()->toDateString(),
                 'due_date' => $row->due_date ?: now()->toDateString(),
                 'return_date' => $row->return_date ?: null,
-                'extension_count' => (int) ($row->renewed ?? 0),
+                'extension_count' => TypedValue::int($row->renewed ?? 0),
                 'max_extensions' => 2,
                 'status' => $isReturned ? 'returned' : 'borrowed',
                 'fine_amount' => 0,
@@ -458,9 +479,9 @@ class LibraryImportSlimsCommand extends Command
 
             if (! $dryRun) {
                 $loan->save();
-                $this->upsertMapping('loan', $tenantId, (string) $row->loan_id, (int) $loan->id, [
-                    'is_lent' => (int) ($row->is_lent ?? 0),
-                    'is_return' => (int) ($row->is_return ?? 0),
+                $this->upsertMapping('loan', $tenantId, $loanId, TypedValue::int($loan->id), [
+                    'is_lent' => TypedValue::int($row->is_lent ?? 0),
+                    'is_return' => TypedValue::int($row->is_return ?? 0),
                 ]);
             }
 
@@ -500,11 +521,14 @@ class LibraryImportSlimsCommand extends Command
             ->first();
     }
 
+    /**
+     * @return array{0: User, 1: bool}
+     */
     protected function resolveOrCreateUserForMember(int $tenantId, object $memberRow, bool $dryRun): array
     {
-        $memberCode = trim((string) $memberRow->member_id);
-        $name = trim((string) ($memberRow->member_name ?: "SLiMS Member {$memberCode}"));
-        $email = trim((string) ($memberRow->member_email ?? ''));
+        $memberCode = trim(TypedValue::string($memberRow->member_id ?? null));
+        $name = trim(TypedValue::string($memberRow->member_name ?? null, "SLiMS Member {$memberCode}"));
+        $email = trim(TypedValue::string($memberRow->member_email ?? null));
         $emailDomain = $this->emailDomain;
         $username = Str::limit(Str::lower("slims_t{$tenantId}_{$memberCode}"), 120, '');
 
@@ -606,15 +630,21 @@ class LibraryImportSlimsCommand extends Command
         };
     }
 
-    protected function findOrMakeMappedModel(string $entityType, int $tenantId, string $slimsId, string $modelClass): ?object
+    /**
+     * @template TModel of Model
+     *
+     * @param  class-string<TModel>  $modelClass
+     * @return TModel
+     */
+    protected function findOrMakeMappedModel(string $entityType, int $tenantId, string $slimsId, string $modelClass): Model
     {
         $mapping = $this->findMapping($entityType, $tenantId, $slimsId);
         if (! $mapping) {
             return new $modelClass;
         }
 
-        $model = $modelClass::withTrashed()->find((int) $mapping->fos_id);
-        if (! $model) {
+        $model = $modelClass::withTrashed()->find(TypedValue::int($mapping->fos_id));
+        if (! $model instanceof Model) {
             return new $modelClass;
         }
 
@@ -634,6 +664,9 @@ class LibraryImportSlimsCommand extends Command
             ->first();
     }
 
+    /**
+     * @param  array<string, mixed>  $meta
+     */
     protected function upsertMapping(string $entityType, int $tenantId, string $slimsId, int $fosId, array $meta = []): void
     {
         LibrarySlimsMapping::query()->updateOrCreate(
@@ -649,10 +682,13 @@ class LibraryImportSlimsCommand extends Command
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $connectionConfig
+     */
     protected function slimsConnection(array $connectionConfig): ConnectionInterface
     {
-        $database = (string) ($connectionConfig['database'] ?? '');
-        $username = (string) ($connectionConfig['username'] ?? '');
+        $database = TypedValue::string($connectionConfig['database'] ?? null);
+        $username = TypedValue::string($connectionConfig['username'] ?? null);
 
         if ($database === '' || $username === '') {
             throw new \RuntimeException('SLiMS DB config tenant belum lengkap. Isi slims_db_database dan slims_db_username di tenant_settings.');
@@ -664,6 +700,9 @@ class LibraryImportSlimsCommand extends Command
         return DB::connection('slims_import');
     }
 
+    /**
+     * @return array{connection: array<string, mixed>}|null
+     */
     protected function resolveTenantSlimsConfig(int $tenantId, ?int $organizationId = null): ?array
     {
         $config = $this->slimsImportService->resolveConfig($tenantId, $organizationId);
@@ -675,8 +714,13 @@ class LibraryImportSlimsCommand extends Command
         $this->emailDomain = $config['email_domain'];
         $this->defaultMemberStatus = $config['default_member_status'];
 
+        $connection = $config['connection'];
+        if (! is_array($connection)) {
+            return null;
+        }
+
         return [
-            'connection' => $config['connection'],
+            'connection' => $connection,
         ];
     }
 

@@ -3,8 +3,11 @@
 namespace App\Integrations\Moodle;
 
 use App\Models\MoodleEntityMapping;
+use App\Support\TypedValue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Modules\Campus\Models\CourseOffering;
+use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyPlanItem;
 use Modules\Campus\Models\StudyResult;
 use Modules\Campus\Services\CampusGpaCalculator;
@@ -34,12 +37,12 @@ class MoodleDetailedGradePullService
         }
 
         $items = StudyPlanItem::withoutTenantScope()
-            ->whereHas('studyPlan', fn ($q) => $q->where('academic_period_id', $period->id))
+            ->whereHas('studyPlan', static function (Builder $query) use ($period): void {
+                /** @var Builder<StudyPlan> $query */
+                $query->where('academic_period_id', $period->id);
+            })
             ->whereIn('status', ['approved', 'enrolled', 'active', 'completed'])
-            ->with([
-                'courseOffering',
-                'studyPlan' => fn ($q) => $q->with('collageStudent.user'),
-            ])
+            ->with(['courseOffering', 'studyPlan.collageStudent.user'])
             ->get();
 
         $pulled = 0;
@@ -64,10 +67,10 @@ class MoodleDetailedGradePullService
                 continue;
             }
 
-            $this->processGradeItems($item, $gradeItems);
+            $this->processGradeItems($item, $this->normalizeGradeItems($gradeItems));
             $pulled++;
 
-            $studentId = (int) ($item->studyPlan?->collage_student_id ?? 0);
+            $studentId = TypedValue::int($item->studyPlan->collage_student_id);
             if ($studentId > 0) {
                 $studentIds[$studentId] = true;
             }
@@ -90,7 +93,8 @@ class MoodleDetailedGradePullService
      */
     public function processGradeItems(StudyPlanItem $item, array $gradeItems): StudyResult
     {
-        $tenantId = (int) $item->tenant_id;
+        $tenantId = TypedValue::int($item->tenant_id);
+        /** @var array<string, array{weight: float, matchers: array<int, string>}> $components */
         $components = $this->config->componentsFor($tenantId);
 
         $breakdown = $this->buildBreakdown($gradeItems, $components);
@@ -116,11 +120,32 @@ class MoodleDetailedGradePullService
 
         if ($existing) {
             $existing->forceFill($attributes)->save();
+            $fresh = $existing->fresh();
 
-            return $existing->fresh();
+            return $fresh ?? $existing;
         }
 
         return StudyResult::create($attributes);
+    }
+
+    /**
+     * @param  array<mixed>  $gradeItems
+     * @return array<int, array{itemname?: string, graderaw?: float|string|null, grademax?: float|string|null}>
+     */
+    protected function normalizeGradeItems(array $gradeItems): array
+    {
+        $normalized = [];
+
+        foreach ($gradeItems as $gradeItem) {
+            if (! is_array($gradeItem)) {
+                continue;
+            }
+
+            /** @var array{itemname?: string, graderaw?: float|string|null, grademax?: float|string|null} $gradeItem */
+            $normalized[] = $gradeItem;
+        }
+
+        return $normalized;
     }
 
     /**
@@ -133,10 +158,7 @@ class MoodleDetailedGradePullService
         $breakdown = [];
 
         foreach ($gradeItems as $gi) {
-            if (! is_array($gi)) {
-                continue;
-            }
-            $name = strtolower((string) ($gi['itemname'] ?? ''));
+            $name = strtolower(TypedValue::string($gi['itemname'] ?? null));
             if ($name === '') {
                 continue;
             }
@@ -164,8 +186,8 @@ class MoodleDetailedGradePullService
                 $prev = $breakdown[$component];
                 $breakdown[$component] = [
                     'score' => round(($prev['score'] + $score) / 2, 2),
-                    'raw' => ($prev['raw'] ?? 0) + (float) $raw,
-                    'max' => ($prev['max'] ?? 0) + (float) $max,
+                    'raw' => $prev['raw'] + (float) $raw,
+                    'max' => $prev['max'] + (float) $max,
                     'source_item' => $prev['source_item'].' + '.(string) ($gi['itemname'] ?? ''),
                 ];
             }
@@ -174,11 +196,14 @@ class MoodleDetailedGradePullService
         return $breakdown;
     }
 
+    /**
+     * @param  array<string, array{weight: float, matchers: array<int, string>}>  $components
+     */
     protected function matchComponent(string $name, array $components): ?string
     {
         foreach ($components as $componentName => $def) {
-            foreach (($def['matchers'] ?? []) as $matcher) {
-                if (str_contains($name, strtolower((string) $matcher))) {
+            foreach ($def['matchers'] as $matcher) {
+                if (str_contains($name, strtolower($matcher))) {
                     return (string) $componentName;
                 }
             }
@@ -200,7 +225,7 @@ class MoodleDetailedGradePullService
             if (! isset($breakdown[$name])) {
                 continue;
             }
-            $weight = (float) ($def['weight'] ?? 0);
+            $weight = $def['weight'];
             $total += ((float) $breakdown[$name]['score']) * $weight;
             $usedWeight += $weight;
         }
@@ -213,6 +238,9 @@ class MoodleDetailedGradePullService
         return $total / $usedWeight;
     }
 
+    /**
+     * @return array<int, array{itemname?: string, graderaw?: float|string|null, grademax?: float|string|null}>
+     */
     protected function fetchGradeItems(int $moodleUserId, int $moodleCourseId): array
     {
         try {
@@ -226,7 +254,7 @@ class MoodleDetailedGradePullService
 
         $items = Arr::get($response, 'usergrades.0.gradeitems', []);
 
-        return is_array($items) ? $items : [];
+        return $this->normalizeGradeItems(is_array($items) ? $items : []);
     }
 
     protected function safeResolveCourseId(CourseOffering $offering): int

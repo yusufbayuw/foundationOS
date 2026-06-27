@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Models\Tenant;
 use Modules\Employee\Models\SalarySlip;
+use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Models\StudentInvoice;
@@ -75,8 +77,11 @@ class ExecutiveMetricsService
         return (float) VendorBill::query()
             ->where('tenant_id', $tenantId)
             ->whereIn('payment_status', ['unpaid', 'partial'])
-            ->selectRaw('COALESCE(SUM(total_amount - amount_paid), 0) as outstanding')
-            ->value('outstanding');
+            ->get()
+            ->sum(static fn (VendorBill $bill): float => max(
+                0.0,
+                (float) $bill->total_amount - (float) $bill->amount_paid,
+            ));
     }
 
     protected function outstandingAr(int $tenantId): float
@@ -102,10 +107,12 @@ class ExecutiveMetricsService
     {
         return (float) JournalEntryLine::query()
             ->where('tenant_id', $tenantId)
-            ->whereHas('journalEntry', fn ($q) => $q
-                ->where('is_posted', true)
-                ->whereYear('date', now()->year)
-                ->whereMonth('date', now()->month))
+            ->whereHas('journalEntry', static function (Builder $query): void {
+                /** @var Builder<JournalEntry> $query */
+                $query->where('is_posted', true)
+                    ->whereYear('date', now()->year)
+                    ->whereMonth('date', now()->month);
+            })
             ->where('credit', '>', 0)
             ->sum('credit');
     }

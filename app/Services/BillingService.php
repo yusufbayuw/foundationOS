@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Services\Billing\MidtransWebhookVerifier;
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Midtrans\Config as MidtransConfig;
@@ -10,6 +11,7 @@ use Midtrans\Snap;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
+use Modules\Core\Models\User;
 
 class BillingService
 {
@@ -21,6 +23,16 @@ class BillingService
         MidtransConfig::$is3ds = config('midtrans.is_3ds');
     }
 
+    /**
+     * @return array{
+     *     base: float,
+     *     seats: float,
+     *     modules: float,
+     *     total: float,
+     *     active_seats: int,
+     *     active_modules: int
+     * }
+     */
     public function calculateMonthlyAmount(Tenant $tenant): array
     {
         $plan = $tenant->subscriptionPlan;
@@ -60,16 +72,17 @@ class BillingService
 
     public function createSnapPayment(Tenant $tenant, SubscriptionLog $invoice): string
     {
+        /** @var User|null $adminUser */
         $adminUser = $tenant->users()->first();
 
         $params = [
             'transaction_details' => [
                 'order_id' => $invoice->invoice_number,
-                'gross_amount' => (int) round($invoice->amount),
+                'gross_amount' => (int) round((float) $invoice->amount),
             ],
             'customer_details' => [
                 'first_name' => $tenant->name,
-                'email' => $adminUser?->email ?? 'noreply@foundationos.app',
+                'email' => $adminUser !== null ? $adminUser->email : 'noreply@foundationos.app',
             ],
             'item_details' => $this->buildItemDetails($tenant, $invoice),
             'callbacks' => [
@@ -114,6 +127,9 @@ class BillingService
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $notification
+     */
     public function handleWebhookNotification(array $notification): void
     {
         $this->webhookVerifier->verifySignature($notification);
@@ -133,10 +149,18 @@ class BillingService
                 return;
             }
 
-            $metadata = $this->appendRawWebhookPayload($invoice->metadata ?? [], $notification);
+            $metadata = $this->appendRawWebhookPayload($this->normalizeMetadata($invoice->metadata), $notification);
             $webhookKey = $this->webhookKey($notification);
 
-            if (in_array($webhookKey, $metadata['processed_midtrans_webhook_keys'] ?? [], true)) {
+            /** @var list<string> $existingWebhookKeys */
+            $existingWebhookKeys = is_array($metadata['processed_midtrans_webhook_keys'] ?? null)
+                ? array_values(array_filter(
+                    $metadata['processed_midtrans_webhook_keys'],
+                    static fn (mixed $key): bool => is_string($key) && $key !== '',
+                ))
+                : [];
+
+            if (in_array($webhookKey, $existingWebhookKeys, true)) {
                 return;
             }
 
@@ -160,8 +184,8 @@ class BillingService
                 return;
             }
 
-            $transactionStatus = (string) ($notification['transaction_status'] ?? '');
-            $fraudStatus = (string) ($notification['fraud_status'] ?? '');
+            $transactionStatus = TypedValue::string($notification['transaction_status'] ?? null);
+            $fraudStatus = TypedValue::string($notification['fraud_status'] ?? null);
 
             $paymentStatus = match (true) {
                 $transactionStatus === 'capture' && $fraudStatus === 'accept' => 'paid',
@@ -173,7 +197,7 @@ class BillingService
 
             $wasPaid = $invoice->payment_status === 'paid';
             $processedWebhookKeys = array_values(array_unique([
-                ...($metadata['processed_midtrans_webhook_keys'] ?? []),
+                ...$existingWebhookKeys,
                 $webhookKey,
             ]));
 
@@ -189,7 +213,10 @@ class BillingService
             ]);
 
             if ($paymentStatus === 'paid' && ! $wasPaid) {
-                $this->activateTenantSubscription($invoice->tenant, $invoice);
+                $tenant = $invoice->tenant;
+                if ($tenant instanceof Tenant) {
+                    $this->activateTenantSubscription($tenant, $invoice);
+                }
             }
         });
     }
@@ -204,42 +231,57 @@ class BillingService
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $notification
+     */
     private function amountMatchesInvoice(SubscriptionLog $invoice, array $notification): bool
     {
         if (! array_key_exists('gross_amount', $notification)) {
             return false;
         }
 
-        return abs(round((float) $invoice->amount, 2) - round((float) $notification['gross_amount'], 2)) < 0.01;
+        return abs(round((float) $invoice->amount, 2) - round(TypedValue::float($notification['gross_amount']), 2)) < 0.01;
     }
 
+    /**
+     * @param  array<string, mixed>  $notification
+     */
     private function currencyMatchesInvoice(SubscriptionLog $invoice, array $notification): bool
     {
         if (blank($notification['currency'] ?? null)) {
             return true;
         }
 
-        return strtoupper((string) $invoice->currency) === strtoupper((string) $notification['currency']);
+        return strtoupper((string) $invoice->currency) === strtoupper(TypedValue::string($notification['currency']));
     }
 
+    /**
+     * @param  array<string, mixed>  $notification
+     */
     private function webhookKey(array $notification): string
     {
         return hash('sha256', implode('|', [
-            $notification['transaction_id'] ?? '',
-            $notification['order_id'] ?? '',
-            $notification['transaction_status'] ?? '',
-            $notification['status_code'] ?? '',
-            $notification['gross_amount'] ?? '',
+            TypedValue::string($notification['transaction_id'] ?? null),
+            TypedValue::string($notification['order_id'] ?? null),
+            TypedValue::string($notification['transaction_status'] ?? null),
+            TypedValue::string($notification['status_code'] ?? null),
+            TypedValue::string($notification['gross_amount'] ?? null),
         ]));
     }
 
+    /**
+     * @param  array<string, mixed>  $metadata
+     * @param  array<string, mixed>  $notification
+     * @return array<string, mixed>
+     */
     private function appendRawWebhookPayload(array $metadata, array $notification): array
     {
-        $webhooks = $metadata['midtrans_webhooks'] ?? [];
+        /** @var list<array{key: string, received_at: string, payload: array<string, mixed>}> $webhooks */
+        $webhooks = is_array($metadata['midtrans_webhooks'] ?? null) ? $metadata['midtrans_webhooks'] : [];
         $webhookKey = $this->webhookKey($notification);
 
         foreach ($webhooks as $webhook) {
-            if (($webhook['key'] ?? null) === $webhookKey) {
+            if ($webhook['key'] === $webhookKey) {
                 return $metadata;
             }
         }
@@ -255,47 +297,69 @@ class BillingService
         return $metadata;
     }
 
+    /**
+     * @return list<array{id: string, price: int, quantity: int, name: string}>
+     */
     private function buildItemDetails(Tenant $tenant, SubscriptionLog $invoice): array
     {
-        $meta = $invoice->metadata ?? [];
+        $meta = $this->normalizeMetadata($invoice->metadata);
         $items = [];
 
-        if (($meta['base_amount'] ?? 0) > 0) {
+        $baseAmount = TypedValue::float($meta['base_amount'] ?? 0);
+        if ($baseAmount > 0) {
             $items[] = [
                 'id' => 'base',
-                'price' => (int) round($meta['base_amount']),
+                'price' => (int) round($baseAmount),
                 'quantity' => 1,
-                'name' => 'Base Plan: '.($tenant->subscriptionPlan?->name ?? 'Plan'),
+                'name' => 'Base Plan: '.($tenant->subscriptionPlan !== null ? $tenant->subscriptionPlan->name : 'Plan'),
             ];
         }
 
-        if (($meta['seat_amount'] ?? 0) > 0) {
+        $seatAmount = TypedValue::float($meta['seat_amount'] ?? 0);
+        if ($seatAmount > 0) {
+            $activeSeats = TypedValue::int($meta['active_seats'] ?? 0);
             $items[] = [
                 'id' => 'seats',
-                'price' => (int) round($meta['seat_amount']),
+                'price' => (int) round($seatAmount),
                 'quantity' => 1,
-                'name' => "User Seats ({$meta['active_seats']} users)",
+                'name' => "User Seats ({$activeSeats} users)",
             ];
         }
 
-        if (($meta['module_amount'] ?? 0) > 0) {
+        $moduleAmount = TypedValue::float($meta['module_amount'] ?? 0);
+        if ($moduleAmount > 0) {
+            $activeModules = TypedValue::int($meta['active_modules'] ?? 0);
             $items[] = [
                 'id' => 'modules',
-                'price' => (int) round($meta['module_amount']),
+                'price' => (int) round($moduleAmount),
                 'quantity' => 1,
-                'name' => "Active Modules ({$meta['active_modules']} modules)",
+                'name' => "Active Modules ({$activeModules} modules)",
             ];
         }
 
-        if (empty($items)) {
+        if ($items === []) {
             $items[] = [
                 'id' => 'subscription',
-                'price' => (int) round($invoice->amount),
+                'price' => (int) round((float) $invoice->amount),
                 'quantity' => 1,
                 'name' => 'Monthly Subscription',
             ];
         }
 
         return $items;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizeMetadata(mixed $metadata): array
+    {
+        if (! is_array($metadata)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $metadata */
+
+        return $metadata;
     }
 }

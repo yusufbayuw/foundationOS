@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Moodle;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -46,6 +47,9 @@ class MoodleMapper
         return "fos_cohort_tenant_{$tenantId}";
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapTenantCategory(Tenant $tenant): array
     {
         return [
@@ -55,6 +59,9 @@ class MoodleMapper
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapUser(User $user): array
     {
         [$firstName, $lastName] = $this->splitName((string) $user->name);
@@ -69,6 +76,9 @@ class MoodleMapper
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapCourse(Course $course, int $categoryId): array
     {
         $tenantCode = $course->tenant?->code ?: "tenant{$course->tenant_id}";
@@ -84,6 +94,9 @@ class MoodleMapper
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapTemplateCategory(Tenant $tenant, int $parentCategoryId): array
     {
         return [
@@ -93,6 +106,9 @@ class MoodleMapper
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapSemesterCategory(Tenant $tenant, AcademicPeriod $period, int $parentCategoryId): array
     {
         $periodLabel = $period->code ?: $period->name ?: "period{$period->id}";
@@ -104,6 +120,9 @@ class MoodleMapper
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapCourseOffering(CourseOffering $offering, int $categoryId, string $prerequisiteHint = ''): array
     {
         $course = $offering->course;
@@ -129,15 +148,21 @@ class MoodleMapper
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function mapEnrollment(int $moodleUserId, int $moodleCourseId, ?int $roleId = null): array
     {
         return [
-            'roleid' => $roleId ?? (int) config('moodle.enrol_role_id', 5),
+            'roleid' => $roleId ?? TypedValue::int(config('moodle.enrol_role_id'), 5),
             'userid' => $moodleUserId,
             'courseid' => $moodleCourseId,
         ];
     }
 
+    /**
+     * @return array{0: string, 1: string}
+     */
     protected function splitName(string $name): array
     {
         $clean = trim(preg_replace('/\s+/', ' ', $name) ?? '');

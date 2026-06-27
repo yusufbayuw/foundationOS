@@ -4,6 +4,8 @@ namespace App\Integrations\Moodle;
 
 use App\Models\MoodleClassCourseMapping;
 use App\Models\MoodleEnrollmentDrift;
+use App\Support\TypedValue;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Modules\School\Models\ClassStudent;
 use Modules\School\Models\Student;
@@ -46,15 +48,20 @@ class MoodleEnrollmentReconciler
             ->whereIn('id', $fosUserIds)
             ->pluck('user_id', 'id')
             ->filter()
-            ->mapWithKeys(fn ($userId, $studentId) => [
-                self::FOS_USER_PREFIX.(int) $userId => (int) $userId,
-            ]);
+            ->mapWithKeys(static function (mixed $userId, mixed $studentId): array {
+                $normalizedUserId = TypedValue::int($userId);
+
+                return [
+                    self::FOS_USER_PREFIX.$normalizedUserId => $normalizedUserId,
+                ];
+            });
 
         // Moodle side: keyed by idnumber.
         $moodleByIdnumber = collect($moodleEnrollment)
             ->filter(fn (array $u) => ! empty($u['idnumber']))
             ->keyBy('idnumber');
 
+        /** @var Collection<int, MoodleEnrollmentDrift> $drifts */
         $drifts = collect();
         $now = now();
 
@@ -109,11 +116,11 @@ class MoodleEnrollmentReconciler
     /**
      * @param  array<string, mixed>  $payload
      */
-    protected function record(MoodleClassCourseMapping $mapping, $now, array $payload, bool $dryRun): MoodleEnrollmentDrift
+    protected function record(MoodleClassCourseMapping $mapping, Carbon $now, array $payload, bool $dryRun): MoodleEnrollmentDrift
     {
         $row = array_merge([
-            'tenant_id' => (int) $mapping->tenant_id,
-            'class_id' => (int) $mapping->class_id,
+            'tenant_id' => TypedValue::int($mapping->tenant_id),
+            'class_id' => TypedValue::int($mapping->class_id),
             'course_moodle_id' => $mapping->moodle_course_id,
             'course_moodle_idnumber' => $mapping->moodle_course_idnumber,
             'detected_at' => $now,
@@ -123,7 +130,11 @@ class MoodleEnrollmentReconciler
             return new MoodleEnrollmentDrift($row);
         }
 
-        return MoodleEnrollmentDrift::query()->create($row);
+        $drift = new MoodleEnrollmentDrift;
+        $drift->forceFill($row);
+        $drift->save();
+
+        return $drift;
     }
 
     /**
@@ -134,6 +145,6 @@ class MoodleEnrollmentReconciler
         $roles = $payload['roles'] ?? [];
         $first = $roles[0] ?? null;
 
-        return is_array($first) ? ($first['shortname'] ?? null) : null;
+        return is_array($first) ? $first['shortname'] : null;
     }
 }

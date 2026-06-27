@@ -2,6 +2,8 @@
 
 namespace App\Services\Billing;
 
+use App\Support\TypedValue;
+
 class MidtransWebhookVerifier
 {
     /**
@@ -16,18 +18,18 @@ class MidtransWebhookVerifier
         }
 
         $expectedSignature = $this->signature(
-            (string) $payload['order_id'],
-            (string) $payload['status_code'],
-            (string) $payload['gross_amount'],
+            TypedValue::string($payload['order_id']),
+            TypedValue::string($payload['status_code']),
+            TypedValue::string($payload['gross_amount']),
         );
 
-        if (! hash_equals($expectedSignature, (string) $payload['signature_key'])) {
+        if (! hash_equals($expectedSignature, TypedValue::string($payload['signature_key']))) {
             throw MidtransWebhookException::invalidSignature();
         }
     }
 
     public function signature(string $orderId, string $statusCode, string $grossAmount): string
     {
-        return hash('sha512', $orderId.$statusCode.$grossAmount.(string) config('midtrans.server_key'));
+        return hash('sha512', $orderId.$statusCode.$grossAmount.TypedValue::string(config('midtrans.server_key')));
     }
 }

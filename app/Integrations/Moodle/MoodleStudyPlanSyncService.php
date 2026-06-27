@@ -2,6 +2,7 @@
 
 namespace App\Integrations\Moodle;
 
+use App\Support\TypedValue;
 use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyPlanItem;
 
@@ -19,8 +20,13 @@ class MoodleStudyPlanSyncService
 
     public function enrollAllForPlan(StudyPlan $plan): int
     {
+        $plan = $plan->fresh(['items.courseOffering']);
+        if ($plan === null) {
+            return 0;
+        }
+
         $count = 0;
-        foreach ($plan->fresh(['items.courseOffering'])->items as $item) {
+        foreach ($plan->items as $item) {
             if ($this->enrollItem($item)) {
                 $count++;
             }
@@ -31,8 +37,13 @@ class MoodleStudyPlanSyncService
 
     public function unenrollAllForPlan(StudyPlan $plan): int
     {
+        $plan = $plan->fresh(['items']);
+        if ($plan === null) {
+            return 0;
+        }
+
         $count = 0;
-        foreach ($plan->fresh(['items'])->items as $item) {
+        foreach ($plan->items as $item) {
             if ($this->unenrollItem($item)) {
                 $count++;
             }
@@ -49,8 +60,8 @@ class MoodleStudyPlanSyncService
 
         $this->outbox->enqueue(
             entityType: MoodleOutboxService::ENTITY_ENROLLMENT,
-            entityId: (int) $item->getKey(),
-            tenantId: (int) $item->tenant_id,
+            entityId: TypedValue::int($item->getKey()),
+            tenantId: TypedValue::int($item->tenant_id),
             action: MoodleOutboxService::ACTION_ENROLL,
             payload: [
                 'study_plan_id' => $item->study_plan_id,
@@ -73,8 +84,8 @@ class MoodleStudyPlanSyncService
 
         $this->outbox->enqueue(
             entityType: MoodleOutboxService::ENTITY_ENROLLMENT,
-            entityId: (int) $item->getKey(),
-            tenantId: (int) $item->tenant_id,
+            entityId: TypedValue::int($item->getKey()),
+            tenantId: TypedValue::int($item->tenant_id),
             action: MoodleOutboxService::ACTION_UNENROLL,
             payload: [
                 'study_plan_id' => $item->study_plan_id,

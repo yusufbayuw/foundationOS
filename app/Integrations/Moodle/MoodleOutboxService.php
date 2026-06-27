@@ -4,6 +4,7 @@ namespace App\Integrations\Moodle;
 
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
+use App\Support\TypedValue;
 use Illuminate\Database\QueryException;
 
 class MoodleOutboxService
@@ -32,6 +33,9 @@ class MoodleOutboxService
 
     public const ACTION_UNASSIGN = 'unassign';
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function enqueue(
         string $entityType,
         int $entityId,
@@ -57,8 +61,8 @@ class MoodleOutboxService
                 'next_retry_at' => null,
             ]);
 
-            ProcessMoodleSyncOutboxJob::dispatch((int) $outbox->id)
-                ->onQueue((string) config('moodle.queue', 'moodle-sync'))
+            ProcessMoodleSyncOutboxJob::dispatch(TypedValue::int($outbox->id))
+                ->onQueue(TypedValue::string(config('moodle.queue'), 'moodle-sync'))
                 ->afterCommit();
 
             return $outbox;

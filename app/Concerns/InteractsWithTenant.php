@@ -4,6 +4,7 @@ namespace App\Concerns;
 
 use App\Queue\Middleware\WithTenantContext;
 use App\Support\CurrentTenant;
+use App\Support\TypedValue;
 use Modules\Core\Models\Tenant;
 
 /**
@@ -37,13 +38,18 @@ trait InteractsWithTenant
     public function captureCurrentTenant(): void
     {
         if (app()->bound(CurrentTenant::class)) {
-            $this->tenantId = app(CurrentTenant::class)->id();
+            $tenantId = app(CurrentTenant::class)->id();
+            $this->tenantId = TypedValue::tenantKey($tenantId);
         }
     }
 
     public function onTenant(int|string|Tenant|null $tenant): static
     {
-        $this->tenantId = $tenant instanceof Tenant ? $tenant->getKey() : $tenant;
+        if ($tenant instanceof Tenant) {
+            $this->tenantId = TypedValue::tenantKey($tenant->getKey());
+        } else {
+            $this->tenantId = $tenant;
+        }
 
         return $this;
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
+use Modules\Campus\Models\CollageStudent;
 use Modules\Employee\Models\SalarySlip;
 use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\Payment;
@@ -48,41 +49,56 @@ class CrossModuleReportService
      */
     public function profitabilityByStudyProgram(int $tenantId, CarbonInterface $from, CarbonInterface $to): array
     {
-        return Cache::remember(
+        /** @var array<int, array{study_program_id: int|null, study_program_name: string, paid_amount: float, invoice_count: int}> $result */
+        $result = Cache::remember(
             "report:profitability_sp:{$tenantId}:{$from->toDateString()}:{$to->toDateString()}",
             now()->addMinutes(5),
-            function () use ($tenantId, $from, $to): array {
-                $rows = StudentInvoice::query()
-                    ->where('tenant_id', $tenantId)
-                    ->where('status', 'paid')
-                    ->whereBetween('issue_date', [$from->toDateString(), $to->toDateString()])
-                    ->where('invoiceable_type', 'campus_collage_student')
-                    ->with(['invoiceable.studyProgram'])
-                    ->get();
-
-                $grouped = [];
-                foreach ($rows as $invoice) {
-                    $student = $invoice->invoiceable;
-                    $programId = $student?->study_program_id;
-                    $programName = $student?->studyProgram?->name ?? 'Unassigned';
-                    $key = (string) ($programId ?? 'none');
-
-                    if (! isset($grouped[$key])) {
-                        $grouped[$key] = [
-                            'study_program_id' => $programId,
-                            'study_program_name' => $programName,
-                            'paid_amount' => 0.0,
-                            'invoice_count' => 0,
-                        ];
-                    }
-
-                    $grouped[$key]['paid_amount'] += (float) $invoice->paid_amount;
-                    $grouped[$key]['invoice_count']++;
-                }
-
-                return array_values($grouped);
-            },
+            fn (): array => $this->buildProfitabilityByStudyProgram($tenantId, $from, $to),
         );
+
+        return $result;
+    }
+
+    /**
+     * @return array<int, array{study_program_id: int|null, study_program_name: string, paid_amount: float, invoice_count: int}>
+     */
+    protected function buildProfitabilityByStudyProgram(int $tenantId, CarbonInterface $from, CarbonInterface $to): array
+    {
+        $rows = StudentInvoice::query()
+            ->where('tenant_id', $tenantId)
+            ->where('status', 'paid')
+            ->whereBetween('issue_date', [$from->toDateString(), $to->toDateString()])
+            ->where('invoiceable_type', 'campus_collage_student')
+            ->with(['invoiceable.studyProgram'])
+            ->get();
+
+        /** @var array<string, array{study_program_id: int|null, study_program_name: string, paid_amount: float, invoice_count: int}> $grouped */
+        $grouped = [];
+
+        foreach ($rows as $invoice) {
+            $student = $invoice->invoiceable;
+            if (! $student instanceof CollageStudent) {
+                continue;
+            }
+
+            $programId = $student->study_program_id !== null ? (int) $student->study_program_id : null;
+            $programName = $student->studyProgram !== null ? (string) $student->studyProgram->name : 'Unassigned';
+            $key = (string) ($programId ?? 'none');
+
+            if (! isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'study_program_id' => $programId,
+                    'study_program_name' => $programName,
+                    'paid_amount' => 0.0,
+                    'invoice_count' => 0,
+                ];
+            }
+
+            $grouped[$key]['paid_amount'] += (float) $invoice->paid_amount;
+            $grouped[$key]['invoice_count']++;
+        }
+
+        return array_values($grouped);
     }
 
     /**

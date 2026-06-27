@@ -27,8 +27,14 @@ class TenantMigrationService
                 $query->where($tenantColumn, $tenantId);
             }
 
+            /** @var list<array<string, mixed>> $rows */
             $rows = $query->get()
-                ->map(fn (object $row): array => (array) $row)
+                ->map(static function (object $row): array {
+                    /** @var array<string, mixed> $data */
+                    $data = (array) $row;
+
+                    return $data;
+                })
                 ->values()
                 ->all();
 
