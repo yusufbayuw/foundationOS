@@ -2,6 +2,7 @@
 
 namespace Modules\Printing\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ class PrintableDocumentService
         string $filename,
         ?User $user = null,
     ): Response {
-        $template = $this->templateResolver->resolve($templateCode, (int) $subject->getAttribute('tenant_id'));
+        $template = $this->templateResolver->resolve($templateCode, TypedValue::int($subject->getAttribute('tenant_id')));
 
         $sanitizedFilename = $this->renderer->sanitizeFilename($filename);
 

@@ -100,12 +100,12 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
         }
 
         if (! $userId) {
-            return collect();
+            return $this->emptyUsers();
         }
 
         $user = User::query()->find(TypedValue::int($userId));
 
-        return $user instanceof User ? collect([$user]) : collect();
+        return $user instanceof User ? collect([$user]) : $this->emptyUsers();
     }
 
     /**
@@ -166,5 +166,13 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
         }
 
         return $resolver->resolve($instance, $step);
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    private function emptyUsers(): Collection
+    {
+        return new Collection;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\TenantSetting;
 use Modules\Enrollment\Models\Applicant;
@@ -28,14 +29,14 @@ class LibraryMemberProvisioningService
             return null;
         }
 
-        $applicant = $applicant->fresh(['admissionPeriod', 'convertedStudent']);
+        $applicant = TypedValue::model($applicant->fresh(['admissionPeriod', 'convertedStudent']));
         $student ??= $applicant->convertedStudent;
 
         if (! $student?->user_id) {
             return null;
         }
 
-        $memberNumber = (string) ($applicant->registration_number ?: 'ADM-'.$applicant->getKey());
+        $memberNumber = (string) ($applicant->registration_number ?: 'ADM-'.TypedValue::string($applicant->getKey()));
 
         return DB::transaction(function () use ($applicant, $student, $memberNumber): Member {
             $existing = Member::query()
@@ -58,7 +59,7 @@ class LibraryMemberProvisioningService
                 'loan_period_days' => 14,
                 'fine_per_day' => 1000,
                 'status' => 'active',
-                'notes' => sprintf('Auto-provisioned from applicant #%s', $applicant->getKey()),
+                'notes' => sprintf('Auto-provisioned from applicant #%s', TypedValue::string($applicant->getKey())),
             ]);
         });
     }

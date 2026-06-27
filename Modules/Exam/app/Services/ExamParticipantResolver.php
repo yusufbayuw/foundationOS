@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\StudyPlanItem;
@@ -174,7 +175,7 @@ class ExamParticipantResolver
         $errors = [];
 
         foreach ($rows as $index => $row) {
-            $name = trim((string) ($row['student_name'] ?? ''));
+            $name = trim(TypedValue::string($row['student_name'] ?? ''));
 
             if ($name === '') {
                 $errors[] = 'Row '.($index + 1).': student_name is required.';
@@ -182,7 +183,7 @@ class ExamParticipantResolver
                 continue;
             }
 
-            $identifier = trim((string) ($row['student_identifier'] ?? '')) ?: null;
+            $identifier = trim(TypedValue::string($row['student_identifier'] ?? '')) ?: null;
 
             if ($identifier !== null && $this->identifierExists($exam, $identifier)) {
                 $skipped++;

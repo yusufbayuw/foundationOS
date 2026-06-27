@@ -2,6 +2,7 @@
 
 namespace Modules\Cms\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Modules\Cms\Models\Article;
 use Modules\Cms\Models\Page;
@@ -24,7 +25,7 @@ class CmsPublishService
             'published_at' => now(),
         ])->save();
 
-        return $page->fresh();
+        return TypedValue::model($page->fresh());
     }
 
     public function publishArticle(Article $article): Article
@@ -42,6 +43,6 @@ class CmsPublishService
             'published_at' => now(),
         ])->save();
 
-        return $article->fresh();
+        return TypedValue::model($article->fresh());
     }
 }

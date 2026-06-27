@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Services;
 
+use App\Support\TypedValue;
 use Modules\Inventory\Models\StockMove;
 use Modules\Inventory\Models\Warehouse;
 use Modules\Procurement\Models\GoodsReceipt;
@@ -20,7 +21,7 @@ class GoodsReceiptStockService
      */
     public function receiveFromGoodsReceipt(GoodsReceipt $receipt): array
     {
-        $receipt = $receipt->fresh(['items.purchaseOrderItem.procurementItem', 'purchaseOrder']);
+        $receipt = TypedValue::model($receipt->fresh(['items.purchaseOrderItem.procurementItem', 'purchaseOrder']));
         $warehouse = $this->warehouseResolver->defaultForTenant(
             (int) $receipt->tenant_id,
             null,

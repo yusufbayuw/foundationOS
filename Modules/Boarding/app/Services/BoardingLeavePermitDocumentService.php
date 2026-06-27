@@ -2,6 +2,7 @@
 
 namespace Modules\Boarding\Services;
 
+use App\Support\TypedValue;
 use Modules\Boarding\Models\BoardingLeavePermit;
 
 class BoardingLeavePermitDocumentService
@@ -22,6 +23,6 @@ class BoardingLeavePermitDocumentService
 
     public function filename(BoardingLeavePermit $permit): string
     {
-        return sprintf('BoardingLeavePermit_%s.pdf', str_replace(' ', '_', $permit->code ?? (string) $permit->getKey()));
+        return sprintf('BoardingLeavePermit_%s.pdf', str_replace(' ', '_', $permit->code ?? TypedValue::string($permit->getKey())));
     }
 }

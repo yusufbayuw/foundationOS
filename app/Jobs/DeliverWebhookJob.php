@@ -55,7 +55,7 @@ class DeliverWebhookJob implements ShouldQueue
                     'X-Webhook-Event' => $delivery->event,
                     'X-Delivery-Id' => (string) $delivery->id,
                 ])
-                ->post($subscription->url, $delivery->payload);
+                ->post($subscription->url, $this->normalizePayload($delivery->payload));
 
             $delivery->update([
                 'status' => $response->successful() ? 'delivered' : 'failed',
@@ -94,5 +94,23 @@ class DeliverWebhookJob implements ShouldQueue
             $delivery->update(['next_retry_at' => now()->addSeconds($seconds)]);
             $this->release($seconds);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizePayload(mixed $payload): array
+    {
+        if (! is_array($payload)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($payload as $key => $value) {
+            $normalized[(string) $key] = $value;
+        }
+
+        return $normalized;
     }
 }

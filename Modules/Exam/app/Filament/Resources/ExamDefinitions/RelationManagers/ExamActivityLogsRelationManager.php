@@ -6,6 +6,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Support\FilamentUi;
 
@@ -28,7 +29,7 @@ class ExamActivityLogsRelationManager extends RelationManager
         return $table
             ->heading(FilamentUi::text('Exam activity logs'))
             ->description(FilamentUi::text('Proctoring and session events from the runtime.'))
-            ->modifyQueryUsing(fn ($query) => $query->with(['examParticipant', 'examAttempt'])->latest('occurred_at'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['examParticipant', 'examAttempt'])->orderByDesc('occurred_at'))
             ->columns([
                 TextColumn::make('id')
                     ->label(FilamentUi::field('activity_id'))

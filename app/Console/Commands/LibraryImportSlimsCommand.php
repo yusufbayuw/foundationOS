@@ -621,8 +621,10 @@ class LibraryImportSlimsCommand extends Command
             return new $modelClass;
         }
 
-        if (method_exists($modelClass, 'withTrashed')) {
-            $trashedModel = $modelClass::withTrashed()->find(TypedValue::int($mapping->fos_id));
+        if (is_subclass_of($modelClass, Model::class)) {
+            $trashedModel = $modelClass::query()
+                ->withoutGlobalScopes()
+                ->find(TypedValue::int($mapping->fos_id));
 
             if ($trashedModel instanceof Model) {
                 $model = $trashedModel;
@@ -708,7 +710,7 @@ class LibraryImportSlimsCommand extends Command
             return $value;
         }
 
-        $normalized = strtolower(trim((string) $value));
+        $normalized = strtolower(trim(TypedValue::string($value)));
 
         return in_array($normalized, ['1', 'true', 'yes', 'on'], true);
     }

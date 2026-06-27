@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -72,6 +73,6 @@ class CheckGracePeriodCommand extends Command
 
     private function clearTenantCache(Tenant $tenant): void
     {
-        Cache::forget("tenant_module_active:{$tenant->getKey()}:*");
+        Cache::forget('tenant_module_active:'.TypedValue::string($tenant->getKey()).':*');
     }
 }

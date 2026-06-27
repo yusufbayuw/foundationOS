@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Services;
 
+use App\Support\TypedValue;
 use Modules\Campus\Models\StudyPlan;
 
 class StudyPlanDocumentService
@@ -30,6 +31,6 @@ class StudyPlanDocumentService
 
     public function filename(StudyPlan $studyPlan): string
     {
-        return sprintf('KRS_%s.pdf', str_replace(' ', '_', $studyPlan->plan_number ?? (string) $studyPlan->getKey()));
+        return sprintf('KRS_%s.pdf', str_replace(' ', '_', $studyPlan->plan_number ?? TypedValue::string($studyPlan->getKey())));
     }
 }

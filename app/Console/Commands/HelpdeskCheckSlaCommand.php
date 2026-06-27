@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Modules\Helpdesk\Models\Ticket;
 
@@ -18,7 +19,10 @@ class HelpdeskCheckSlaCommand extends Command
             ->whereNotNull('meta')
             ->each(function (Ticket $ticket): void {
                 $slaDue = data_get($ticket->meta, 'sla_due_at');
-                if ($slaDue && now()->greaterThan($slaDue)) {
+                $slaDueAt = is_string($slaDue) || is_int($slaDue) || is_float($slaDue)
+                    ? Carbon::parse($slaDue)
+                    : null;
+                if ($slaDueAt !== null && now()->greaterThan($slaDueAt)) {
                     $ticket->update([
                         'status' => 'escalated',
                         'meta' => array_merge($ticket->meta ?? [], ['escalated_at' => now()->toIso8601String()]),

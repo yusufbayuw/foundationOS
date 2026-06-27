@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -117,7 +118,7 @@ class Budget extends Model implements ProvidesWorkflowContext, StartsWorkflow
 
     public function workflowSubjectLabel(): string
     {
-        return (string) ($this->code ?: 'Budget #'.$this->getKey());
+        return (string) ($this->code ?: 'Budget #'.TypedValue::string($this->getKey()));
     }
 
     public function workflowSubjectType(): string

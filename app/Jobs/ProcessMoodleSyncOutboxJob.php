@@ -7,6 +7,7 @@ use App\Integrations\Moodle\Exceptions\MoodleReadonlySkipException;
 use App\Integrations\Moodle\MoodleSyncRetry;
 use App\Integrations\Moodle\MoodleSyncService;
 use App\Models\MoodleSyncOutbox;
+use App\Support\TypedValue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
@@ -19,8 +20,8 @@ class ProcessMoodleSyncOutboxJob implements ShouldQueue
 
     public function __construct(public int $outboxId)
     {
-        $this->onQueue((string) config('moodle.queue', 'moodle-sync'));
-        $this->tries = max(1, (int) config('moodle.max_attempts', 7));
+        $this->onQueue(TypedValue::string(config('moodle.queue'), 'moodle-sync'));
+        $this->tries = max(1, TypedValue::int(config('moodle.max_attempts'), 7));
         $this->captureCurrentTenant();
     }
 
@@ -54,7 +55,7 @@ class ProcessMoodleSyncOutboxJob implements ShouldQueue
             ])->save();
         } catch (Throwable $exception) {
             $attempts = (int) $outbox->attempts + 1;
-            $maxAttempts = max(1, (int) config('moodle.max_attempts', 7));
+            $maxAttempts = max(1, TypedValue::int(config('moodle.max_attempts'), 7));
             $isTerminal = $attempts >= $maxAttempts;
 
             $outbox->forceFill([

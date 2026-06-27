@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Exam\Contracts\GradeBridgeInterface;
@@ -35,7 +36,9 @@ class ExamRuntimeSyncService
                     'sync_status' => $payload['sync_status'] ?? 'received',
                     'score' => $payload['score'] ?? null,
                     'result_json' => $payload['result_json'] ?? $payload,
-                    'submitted_at' => isset($payload['submitted_at']) ? Carbon::parse($payload['submitted_at']) : now(),
+                    'submitted_at' => isset($payload['submitted_at'])
+                        ? Carbon::parse(TypedValue::string($payload['submitted_at']))
+                        : now(),
                 ],
             );
 

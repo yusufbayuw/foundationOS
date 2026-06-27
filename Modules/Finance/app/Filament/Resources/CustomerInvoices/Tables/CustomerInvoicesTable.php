@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\CustomerInvoices\Tables;
 
+use App\Support\TypedValue;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -58,10 +59,10 @@ class CustomerInvoicesTable
             ->filters([
                 SelectFilter::make('status')
                     ->label(FilamentUi::field('status'))
-                    ->options(CustomerInvoice::statusOptions()),
+                    ->options(self::normalizeOptions(CustomerInvoice::statusOptions())),
                 SelectFilter::make('invoice_type')
                     ->label(FilamentUi::field('invoice_type'))
-                    ->options(CustomerInvoice::invoiceTypeOptions()),
+                    ->options(self::normalizeOptions(CustomerInvoice::invoiceTypeOptions())),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -69,5 +70,20 @@ class CustomerInvoicesTable
                 DeleteAction::make(),
             ])
             ->defaultSort('issue_date', 'desc');
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $options
+     * @return array<string, string>
+     */
+    private static function normalizeOptions(array $options): array
+    {
+        $normalized = [];
+
+        foreach ($options as $key => $value) {
+            $normalized[TypedValue::string($key)] = TypedValue::string($value);
+        }
+
+        return $normalized;
     }
 }

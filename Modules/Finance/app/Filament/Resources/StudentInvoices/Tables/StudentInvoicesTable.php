@@ -14,6 +14,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
 
@@ -22,7 +23,7 @@ class StudentInvoicesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['tenant', 'tuitionType']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['tenant', 'tuitionType']))
             ->columns([
                 TextColumn::make('tenant.name')
                     ->label(FilamentUi::field('tenant.name'))

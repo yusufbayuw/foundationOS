@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -68,7 +69,9 @@ class ExamQuestion extends ExamModel
     protected function olympiadSubject(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => $this->metadata_json['olympiad_subject'] ?? null,
+            get: fn (): ?string => isset($this->metadataArray()['olympiad_subject'])
+                ? TypedValue::string($this->metadataArray()['olympiad_subject'])
+                : null,
             set: function (?string $value): array {
                 return ['metadata_json' => array_merge($this->metadata_json ?? [], [
                     'olympiad_subject' => $value,
@@ -83,7 +86,9 @@ class ExamQuestion extends ExamModel
     protected function olympiadLevel(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?string => $this->metadata_json['olympiad_level'] ?? null,
+            get: fn (): ?string => isset($this->metadataArray()['olympiad_level'])
+                ? TypedValue::string($this->metadataArray()['olympiad_level'])
+                : null,
             set: function (?string $value): array {
                 return ['metadata_json' => array_merge($this->metadata_json ?? [], [
                     'olympiad_level' => $value,
@@ -98,7 +103,20 @@ class ExamQuestion extends ExamModel
     protected function skillCodes(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?array => $this->metadata_json['skill_codes'] ?? null,
+            get: function (): ?array {
+                $skillCodes = $this->metadataArray()['skill_codes'] ?? null;
+                if (! is_array($skillCodes)) {
+                    return null;
+                }
+
+                /** @var array<int, string> $normalized */
+                $normalized = array_values(array_filter(
+                    array_map(static fn (mixed $code): string => TypedValue::string($code), $skillCodes),
+                    static fn (string $code): bool => $code !== ''
+                ));
+
+                return $normalized;
+            },
             set: function (?array $value): array {
                 return ['metadata_json' => array_merge($this->metadata_json ?? [], [
                     'skill_codes' => $value,
@@ -113,8 +131,8 @@ class ExamQuestion extends ExamModel
     protected function estimatedTimeSeconds(): Attribute
     {
         return Attribute::make(
-            get: fn (): ?int => isset($this->metadata_json['estimated_time_seconds'])
-                ? (int) $this->metadata_json['estimated_time_seconds']
+            get: fn (): ?int => isset($this->metadataArray()['estimated_time_seconds'])
+                ? TypedValue::int($this->metadataArray()['estimated_time_seconds'])
                 : null,
             set: function (?int $value): array {
                 return ['metadata_json' => array_merge($this->metadata_json ?? [], [
@@ -122,5 +140,20 @@ class ExamQuestion extends ExamModel
                 ])];
             },
         );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function metadataArray(): array
+    {
+        if (! is_array($this->metadata_json)) {
+            return [];
+        }
+
+        /** @var array<string, mixed> $metadata */
+        $metadata = $this->metadata_json;
+
+        return $metadata;
     }
 }

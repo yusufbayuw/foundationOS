@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Support;
 
+use App\Support\TypedValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Modules\Core\Support\FilamentUi;
@@ -33,7 +34,7 @@ class ExamQuestionFormSupport
             $field = 'mi_'.$key;
 
             if (array_key_exists($field, $data) && $data[$field] !== null && $data[$field] !== '') {
-                $miMapping[$key] = (float) $data[$field];
+                $miMapping[$key] = TypedValue::float($data[$field]);
             }
 
             unset($data[$field]);

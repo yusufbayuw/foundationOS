@@ -2,6 +2,8 @@
 
 namespace Modules\Employee\Services;
 
+use App\Support\TypedValue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
 use Modules\Employee\Models\SalarySlip;
@@ -27,14 +29,16 @@ class PayrollJournalService
     public function postForSlip(SalarySlip $slip): JournalEntry
     {
         if ($slip->journal_entry_id) {
-            return $slip->journalEntry;
+            return TypedValue::model($slip->journalEntry);
         }
 
         return DB::transaction(function () use ($slip): JournalEntry {
             $slip->load(['employee', 'components.payrollComponent']);
+            $employee = TypedValue::model($slip->employee, 'Salary slip must have an employee.');
+            $tenantId = TypedValue::int($slip->tenant_id);
 
             $organizationId = Organization::withoutTenantScope()
-                ->where('tenant_id', $slip->tenant_id)
+                ->where('tenant_id', $tenantId)
                 ->value('id');
 
             $entryNumber = 'JE-PAYROLL-'
@@ -50,7 +54,7 @@ class PayrollJournalService
                 'description' => sprintf(
                     'Payroll %s — %s',
                     $slip->period_label,
-                    $slip->employee->full_name,
+                    $employee->full_name,
                 ),
                 'total_debit' => $slip->total_earnings,
                 'total_credit' => $slip->total_earnings,
@@ -60,7 +64,7 @@ class PayrollJournalService
 
             // Debit: Salary Expense = total_earnings
             $salaryExpenseCoa = $this->findRequiredCoa(
-                $slip->tenant_id,
+                $tenantId,
                 'expense',
                 ['beban gaji', 'salary expense', 'beban upah'],
                 'Payroll journal requires an active salary expense account.',
@@ -70,7 +74,7 @@ class PayrollJournalService
                 'tenant_id' => $slip->tenant_id,
                 'journal_entry_id' => $journal->id,
                 'chart_of_account_id' => $salaryExpenseCoa->id,
-                'description' => 'Beban Gaji — '.$slip->employee->full_name,
+                'description' => 'Beban Gaji — '.$employee->full_name,
                 'debit' => $slip->total_earnings,
                 'credit' => 0,
             ]);
@@ -82,11 +86,13 @@ class PayrollJournalService
                 ->filter(fn (SalarySlipComponent $c) => $c->payrollComponent?->chart_of_account_id !== null);
 
             foreach ($deductions as $component) {
+                $payrollComponent = TypedValue::model($component->payrollComponent);
+
                 JournalEntryLine::query()->create([
                     'tenant_id' => $slip->tenant_id,
                     'journal_entry_id' => $journal->id,
-                    'chart_of_account_id' => $component->payrollComponent->chart_of_account_id,
-                    'description' => $component->component_name.' — '.$slip->employee->full_name,
+                    'chart_of_account_id' => $payrollComponent->chart_of_account_id,
+                    'description' => $component->component_name.' — '.$employee->full_name,
                     'debit' => 0,
                     'credit' => $component->amount,
                 ]);
@@ -95,7 +101,7 @@ class PayrollJournalService
 
             // Credit: remaining net salary → Cash/Bank
             $cashCoa = $this->findRequiredCoa(
-                $slip->tenant_id,
+                $tenantId,
                 'asset',
                 ['kas', 'bank', 'cash'],
                 'Payroll journal requires an active cash or bank account.',
@@ -105,7 +111,7 @@ class PayrollJournalService
                 'tenant_id' => $slip->tenant_id,
                 'journal_entry_id' => $journal->id,
                 'chart_of_account_id' => $cashCoa->id,
-                'description' => 'Kas/Bank Pembayaran Gaji — '.$slip->employee->full_name,
+                'description' => 'Kas/Bank Pembayaran Gaji — '.$employee->full_name,
                 'debit' => 0,
                 'credit' => max(0, $netCredit),
             ]);
@@ -125,7 +131,7 @@ class PayrollJournalService
             ->where('tenant_id', $tenantId)
             ->where('type', $type)
             ->where('is_active', true)
-            ->where(function ($query) use ($keywords): void {
+            ->where(function (Builder $query) use ($keywords): void {
                 foreach ($keywords as $keyword) {
                     $query->orWhereRaw('LOWER(name) LIKE ?', ['%'.strtolower($keyword).'%']);
                 }

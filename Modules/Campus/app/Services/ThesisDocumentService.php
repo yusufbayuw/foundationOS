@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Services;
 
+use App\Support\TypedValue;
 use Modules\Campus\Models\Thesis;
 
 class ThesisDocumentService
@@ -29,7 +30,7 @@ class ThesisDocumentService
 
     public function filename(Thesis $thesis): string
     {
-        $npm = $thesis->collageStudent->student_number ?? (string) $thesis->getKey();
+        $npm = $thesis->collageStudent->student_number ?? TypedValue::string($thesis->getKey());
 
         return sprintf('ThesisLetter_%s.pdf', str_replace(' ', '_', $npm));
     }

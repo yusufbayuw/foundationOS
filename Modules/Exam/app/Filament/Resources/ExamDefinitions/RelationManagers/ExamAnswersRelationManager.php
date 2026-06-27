@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\RelationManagers;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\KeyValue;
@@ -14,6 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
@@ -43,7 +45,7 @@ class ExamAnswersRelationManager extends RelationManager
         return $table
             ->heading(FilamentUi::text('Exam answers'))
             ->description(FilamentUi::text('Review synced answers and grade essay responses manually.'))
-            ->modifyQueryUsing(fn ($query) => $query->with(['examQuestion', 'examAttempt.examParticipant', 'grader']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['examQuestion', 'examAttempt.examParticipant', 'grader']))
             ->columns([
                 TextColumn::make('id')
                     ->label(FilamentUi::field('answer_id'))
@@ -85,18 +87,20 @@ class ExamAnswersRelationManager extends RelationManager
                         'yes' => FilamentUi::text('Yes'),
                         'no' => FilamentUi::text('No'),
                     ])
-                    ->query(function ($query, array $data) {
+                    ->query(function (Builder $query, array $data): Builder {
                         if (($data['value'] ?? null) === 'yes') {
-                            $query->whereHas('examQuestion', fn ($q) => $q->where($q->qualifyColumn('type'), QuestionType::Essay))
+                            $query->whereHas('examQuestion', fn (Builder $q): Builder => $q->whereRaw('type = ?', [QuestionType::Essay->value]))
                                 ->whereNull('manual_score');
                         }
 
                         if (($data['value'] ?? null) === 'no') {
-                            $query->where(function ($q): void {
-                                $q->whereDoesntHave('examQuestion', fn ($inner) => $inner->where($inner->qualifyColumn('type'), QuestionType::Essay))
+                            $query->where(function (Builder $q): void {
+                                $q->whereDoesntHave('examQuestion', fn (Builder $inner): Builder => $inner->whereRaw('type = ?', [QuestionType::Essay->value]))
                                     ->orWhereNotNull('manual_score');
                             });
                         }
+
+                        return $query;
                     }),
             ])
             ->recordActions([
@@ -141,12 +145,18 @@ class ExamAnswersRelationManager extends RelationManager
                             return;
                         }
 
+                        $rubric = isset($data['rubric_json']) && is_array($data['rubric_json'])
+                            ? collect($data['rubric_json'])
+                                ->mapWithKeys(fn (mixed $value, mixed $key): array => [TypedValue::string($key) => $value])
+                                ->all()
+                            : null;
+
                         app(ExamManualGradingService::class)->gradeEssay(
                             $record,
                             $user,
-                            (float) $data['manual_score'],
-                            $data['feedback'] ?? null,
-                            $data['rubric_json'] ?? null,
+                            TypedValue::float($data['manual_score']),
+                            TypedValue::string($data['feedback'] ?? '') ?: null,
+                            $rubric,
                         );
 
                         Notification::make()
@@ -177,7 +187,7 @@ class ExamAnswersRelationManager extends RelationManager
                 $label = $attachment['name'] ?? $url ?? FilamentUi::text('Attachment');
 
                 if (is_string($url) && $url !== '') {
-                    $links[] = '<a href="'.e($url).'" target="_blank" rel="noopener">'.e((string) $label).'</a>';
+                    $links[] = '<a href="'.e($url).'" target="_blank" rel="noopener">'.e(TypedValue::string($label)).'</a>';
                 }
             }
         }

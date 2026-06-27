@@ -2,6 +2,7 @@
 
 namespace Modules\Cms\Http\Controllers;
 
+use App\Support\TypedValue;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -52,6 +53,7 @@ class PublicSiteController extends Controller
     {
         $site = Site::query()->where('code', $siteCode)->where('is_active', true)->firstOrFail();
 
+        /** @var array{full_name: string, email?: string|null, phone?: string|null, message?: string|null} $validated */
         $validated = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email'],
@@ -61,9 +63,9 @@ class PublicSiteController extends Controller
 
         $lead = $this->leadInquiryService->createFromInquiry(
             tenantId: (int) $site->tenant_id,
-            fullName: $validated['full_name'],
-            email: $validated['email'] ?? null,
-            phone: $validated['phone'] ?? null,
+            fullName: TypedValue::string($validated['full_name']),
+            email: TypedValue::string($validated['email'] ?? '') ?: null,
+            phone: TypedValue::string($validated['phone'] ?? '') ?: null,
             sourceCode: 'cms_contact',
             sourceDetail: 'site:'.$siteCode,
         );

@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -33,7 +34,9 @@ class AssignmentsRelationManager extends RelationManager
                     ->badge(),
                 TextColumn::make('assigned_to_id')
                     ->label(FilamentUi::text('Assigned user'))
-                    ->formatStateUsing(fn (WorkflowAssignment $record): string => (string) data_get($record->meta, 'user_name', $record->assigned_to_id))
+                    ->formatStateUsing(fn (WorkflowAssignment $record): string => TypedValue::string(
+                        data_get($record->meta, 'user_name', $record->assigned_to_id)
+                    ))
                     ->searchable(),
                 TextColumn::make('assignment_role')
                     ->label(FilamentUi::text('Assignment role'))
@@ -69,7 +72,9 @@ class AssignmentsRelationManager extends RelationManager
                             ->label(FilamentUi::text('Target user'))
                             ->options(function (): array {
                                 $instance = $this->getOwnerRecord();
-                                assert($instance instanceof WorkflowInstance);
+                                if (! $instance instanceof WorkflowInstance) {
+                                    return [];
+                                }
 
                                 return User::query()
                                     ->whereHas('userTenantRoles', function ($query) use ($instance): void {
@@ -100,12 +105,13 @@ class AssignmentsRelationManager extends RelationManager
                         if (! $targetUser instanceof User) {
                             return;
                         }
+                        $reason = TypedValue::string($data['reason'] ?? '');
 
                         app(WorkflowEngine::class)->reassign(
                             $record,
                             $actor,
                             $targetUser,
-                            $data['reason'] ?? null,
+                            $reason !== '' ? $reason : null,
                         );
 
                         Notification::make()

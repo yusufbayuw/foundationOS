@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Str;
 use Modules\Exam\Enums\ExamAuditAction;
 use Modules\Exam\Enums\ExamRuntimeSyncAction;
@@ -178,7 +179,7 @@ class ExamPublishService
     ): ExamRuntimeSyncLog {
         try {
             $response = $callback();
-            $runtimeId = (string) ($response['runtime_id'] ?? $definition->runtime_exam_id ?? '');
+            $runtimeId = TypedValue::string($response['runtime_id'] ?? $definition->runtime_exam_id ?? '');
 
             $log = $this->writeSyncLog(
                 $definition,
@@ -220,7 +221,7 @@ class ExamPublishService
      */
     protected function createSnapshot(ExamDefinition $definition, array $payload): ExamPublishSnapshot
     {
-        $version = (int) $definition->examPublishSnapshots()->max('version') + 1;
+        $version = TypedValue::int($definition->examPublishSnapshots()->max('version')) + 1;
 
         return ExamPublishSnapshot::query()->create([
             'tenant_id' => $definition->tenant_id,
@@ -266,8 +267,11 @@ class ExamPublishService
             return null;
         }
 
+        $data = $response['data'] ?? null;
+        $nestedRuntimeId = is_array($data) ? ($data['runtime_id'] ?? null) : null;
+
         return [
-            'runtime_id' => $response['runtime_id'] ?? $response['data']['runtime_id'] ?? null,
+            'runtime_id' => $response['runtime_id'] ?? $nestedRuntimeId,
             'external_id' => $response['external_id'] ?? $response['foundation_id'] ?? null,
             'status' => $response['status'] ?? null,
             'message' => $response['message'] ?? null,

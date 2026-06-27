@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\ColorPicker;
@@ -54,8 +55,9 @@ class BrandingSettingsPage extends Page
             ->whereIn('key', ['brand_logo', 'primary_color'])
             ->pluck('value', 'key');
 
-        $this->brand_logo = $settings->get('brand_logo');
-        $this->primary_color = $settings->get('primary_color') ?? '#6366f1';
+        $brandLogo = TypedValue::string($settings->get('brand_logo'));
+        $this->brand_logo = $brandLogo !== '' ? $brandLogo : null;
+        $this->primary_color = TypedValue::string($settings->get('primary_color'), '#6366f1');
     }
 
     public function form(Schema $schema): Schema

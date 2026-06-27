@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -75,9 +76,9 @@ class TenancyAuditLeaksCommand extends Command
             foreach ($rows as $row) {
                 $this->line(sprintf(
                     '    id=%s tenant_id=%s references organization.tenant_id=%s',
-                    $row->id,
-                    $row->row_tenant_id,
-                    $row->org_tenant_id,
+                    TypedValue::string($row->id),
+                    TypedValue::string($row->row_tenant_id),
+                    TypedValue::string($row->org_tenant_id),
                 ));
             }
         }
@@ -95,7 +96,10 @@ class TenancyAuditLeaksCommand extends Command
         $tenantTables = [];
 
         foreach ($allTables as $row) {
-            $table = $row->$key;
+            $table = TypedValue::string($row->$key ?? null);
+            if ($table === '') {
+                continue;
+            }
 
             if (in_array($table, $this->globalTablesWhitelist, true)) {
                 continue;

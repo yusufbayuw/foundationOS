@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Services;
 
+use App\Support\TypedValue;
 use Modules\Campus\Models\StudyResult;
 
 class StudyResultDocumentService
@@ -36,6 +37,6 @@ class StudyResultDocumentService
     {
         $courseCode = $studyResult->studyPlanItem->course->code ?? 'course';
 
-        return sprintf('StudyResult_%s_%s.pdf', $courseCode, $studyResult->getKey());
+        return sprintf('StudyResult_%s_%s.pdf', $courseCode, TypedValue::string($studyResult->getKey()));
     }
 }

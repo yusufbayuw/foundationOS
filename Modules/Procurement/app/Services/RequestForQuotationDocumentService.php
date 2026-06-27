@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Modules\Procurement\Models\RequestForQuotation;
 
 class RequestForQuotationDocumentService
@@ -27,6 +28,6 @@ class RequestForQuotationDocumentService
 
     public function filename(RequestForQuotation $rfq): string
     {
-        return sprintf('RequestForQuotation_%s.pdf', str_replace(' ', '_', $rfq->rfq_number ?? (string) $rfq->getKey()));
+        return sprintf('RequestForQuotation_%s.pdf', str_replace(' ', '_', $rfq->rfq_number ?? TypedValue::string($rfq->getKey())));
     }
 }

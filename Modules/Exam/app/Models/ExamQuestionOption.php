@@ -10,10 +10,14 @@ class ExamQuestionOption extends ExamModel
     {
         static::creating(function (ExamQuestionOption $option): void {
             if (empty($option->tenant_id) && $option->exam_question_id) {
-                $option->tenant_id = ExamQuestion::query()
+                $tenantId = ExamQuestion::query()
                     ->withoutGlobalScopes()
                     ->whereKey($option->exam_question_id)
                     ->value('tenant_id');
+
+                if ($tenantId === null || is_int($tenantId)) {
+                    $option->tenant_id = $tenantId;
+                }
             }
         });
     }

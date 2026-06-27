@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
@@ -122,7 +123,7 @@ class ViewExamDefinition extends ViewRecord
                         return;
                     }
 
-                    $url = rtrim((string) config('exam.control_room.base_url'), '/').'/admin/exams/'.$runtimeExamId.'/control';
+                    $url = rtrim(TypedValue::string(config('exam.control_room.base_url')), '/').'/admin/exams/'.$runtimeExamId.'/control';
                     $this->js('window.open('.json_encode($url).', "_blank")');
                 }),
             Action::make('duplicateExam')
@@ -197,7 +198,7 @@ class ViewExamDefinition extends ViewRecord
 
                         $this->notifyRuntimeSuccess(
                             FilamentUi::text('Participants synced to runtime.'),
-                            FilamentUi::text('Participant count').': '.($log->request_summary['participant_count'] ?? 0),
+                            FilamentUi::text('Participant count').': '.TypedValue::string($log->request_summary['participant_count'] ?? 0),
                         );
                     } catch (\Throwable $exception) {
                         $this->notifyRuntimeError($exception);
@@ -215,7 +216,7 @@ class ViewExamDefinition extends ViewRecord
 
                         $this->notifyRuntimeSuccess(
                             FilamentUi::text('Admin access synced to runtime.'),
-                            FilamentUi::text('Admin access count').': '.($log->request_summary['admin_access_count'] ?? 0),
+                            FilamentUi::text('Admin access count').': '.TypedValue::string($log->request_summary['admin_access_count'] ?? 0),
                         );
                     } catch (\Throwable $exception) {
                         $this->notifyRuntimeError($exception);

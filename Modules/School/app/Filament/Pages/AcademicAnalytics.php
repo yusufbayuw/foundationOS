@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Pages;
 
+use App\Support\TypedValue;
 use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
@@ -39,6 +40,6 @@ class AcademicAnalytics extends Page
             return [];
         }
 
-        return app(AcademicAnalyticsService::class)->summaryForTenant((int) $tenant->getKey());
+        return app(AcademicAnalyticsService::class)->summaryForTenant(TypedValue::int($tenant->getKey()));
     }
 }

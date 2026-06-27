@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Integrations\Moodle\MoodleClient;
 use App\Models\MoodleEntityMapping;
 use App\Models\MoodleLearningMetric;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 
 class MoodlePullGradesCommand extends Command
@@ -63,7 +64,7 @@ class MoodlePullGradesCommand extends Command
                     continue;
                 }
 
-                $moodleCourseId = (int) ($grade['courseid'] ?? 0);
+                $moodleCourseId = TypedValue::int($grade['courseid'] ?? 0);
                 if ($moodleCourseId <= 0) {
                     continue;
                 }

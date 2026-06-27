@@ -4,6 +4,7 @@ namespace App\Filament\Widgets\Charts;
 
 use App\Filament\Widgets\Charts\Concerns\CachesChartData;
 use App\Services\ExecutiveMetricsService;
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Modules\Core\Support\FilamentUi;
@@ -34,7 +35,7 @@ class OutstandingArApChart extends ChartWidget
         }
 
         return $this->rememberChart('ar_ap', function () use ($tenantId): array {
-            $metrics = app(ExecutiveMetricsService::class)->forTenant((int) $tenantId);
+            $metrics = app(ExecutiveMetricsService::class)->forTenant(TypedValue::int($tenantId));
 
             return [
                 'datasets' => [

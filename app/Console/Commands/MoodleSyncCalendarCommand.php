@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Integrations\Moodle\MoodleClient;
 use App\Integrations\Moodle\MoodleSyncService;
 use App\Models\MoodleEntityMapping;
+use App\Support\TypedValue;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Modules\School\Models\Schedule;
@@ -77,7 +78,9 @@ class MoodleSyncCalendarCommand extends Command
                 ]],
             ]);
 
-            $moodleEventId = (int) ($response['events'][0]['id'] ?? 0);
+            $events = is_array($response['events'] ?? null) ? $response['events'] : [];
+            $firstEvent = is_array($events[0] ?? null) ? $events[0] : [];
+            $moodleEventId = TypedValue::int($firstEvent['id'] ?? 0);
 
             if ($moodleEventId <= 0) {
                 $skipped++;
@@ -117,6 +120,6 @@ class MoodleSyncCalendarCommand extends Command
 
         $time = Carbon::parse($schedule->start_time)->format('H:i:s');
 
-        return Carbon::parse("{$date} {$time}", config('app.timezone', 'Asia/Jakarta'));
+        return Carbon::parse("{$date} {$time}", TypedValue::string(config('app.timezone', 'Asia/Jakarta'), 'Asia/Jakarta'));
     }
 }

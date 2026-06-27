@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use App\Support\TypedValue;
 use Modules\Campus\Models\CourseOffering;
 use Modules\Core\Models\AcademicPeriod;
 
@@ -27,7 +28,7 @@ class AcademicPeriodObserver
             ->select('id', 'tenant_id', 'course_id', 'academic_period_id', 'class_code', 'status', 'updated_at', 'deleted_at')
             ->cursor()
             ->each(function (CourseOffering $offering) use ($period): void {
-                $version = optional($offering->updated_at)->timestamp ?? now()->timestamp;
+                $version = TypedValue::int(data_get($offering, 'updated_at.timestamp'), TypedValue::int(now()->timestamp));
                 $dedupe = "academic_period:{$period->id}:offering:{$offering->id}:upsert:{$version}";
 
                 $this->outbox->enqueue(

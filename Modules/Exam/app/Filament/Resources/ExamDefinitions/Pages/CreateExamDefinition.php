@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\Pages;
 
+use App\Support\TypedValue;
 use Filament\Resources\Pages\CreateRecord;
 use Modules\Exam\Enums\ExamStatus;
 use Modules\Exam\Enums\ExamType;
@@ -20,7 +21,7 @@ class CreateExamDefinition extends CreateRecord
         $data['status'] = ExamStatus::Draft->value;
 
         if (isset($data['exam_type']) && ! isset($data['exam_purpose'])) {
-            $examType = ExamType::from($data['exam_type']);
+            $examType = ExamType::from(TypedValue::string($data['exam_type']));
             $data['exam_purpose'] = $examType->toExamPurpose()->value;
         }
 

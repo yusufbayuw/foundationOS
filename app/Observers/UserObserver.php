@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Modules\Core\Models\User;
 
@@ -60,7 +61,7 @@ class UserObserver
             return;
         }
 
-        $version = optional($user->updated_at)->timestamp ?? now()->timestamp;
+        $version = TypedValue::int(data_get($user, 'updated_at.timestamp'), TypedValue::int(now()->timestamp));
         $dedupe = "user:{$user->id}:{$action}:{$version}";
 
         $this->outbox->enqueue(

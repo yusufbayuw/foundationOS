@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Pages;
 
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -57,7 +58,7 @@ class BalanceSheetPage extends Page
 
         $service = app(FinancialReportService::class);
         $this->reportData = $service->balanceSheet(
-            $tenant->getKey(),
+            TypedValue::int($tenant->getKey()),
             Carbon::parse($this->asOf),
             $this->organizationId,
         );
@@ -85,8 +86,8 @@ class BalanceSheetPage extends Page
                         ->nullable(),
                 ])
                 ->action(function (array $data): void {
-                    $this->asOf = $data['as_of'];
-                    $this->organizationId = $data['organization_id'] ? (int) $data['organization_id'] : null;
+                    $this->asOf = TypedValue::string($data['as_of']);
+                    $this->organizationId = $data['organization_id'] ? TypedValue::int($data['organization_id']) : null;
                     $this->generateReport();
                 }),
 

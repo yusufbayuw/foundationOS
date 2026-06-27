@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Campus\Models\CollageStudent;
@@ -23,7 +24,7 @@ class TranscriptDocumentService
 
         $gpa = $student->gpa_cached;
         if ($gpa === null && $rows->isNotEmpty()) {
-            $gpa = $this->gpaCalculator->recalculateForStudent($student->getKey());
+            $gpa = $this->gpaCalculator->recalculateForStudent(TypedValue::int($student->getKey()));
             $student->refresh();
             $gpa = $student->gpa_cached ?? $gpa;
         }
@@ -40,7 +41,7 @@ class TranscriptDocumentService
 
     public function filename(CollageStudent $student): string
     {
-        return sprintf('Transcript_%s.pdf', str_replace(' ', '_', $student->student_number ?? (string) $student->getKey()));
+        return sprintf('Transcript_%s.pdf', str_replace(' ', '_', $student->student_number ?? TypedValue::string($student->getKey())));
     }
 
     /**

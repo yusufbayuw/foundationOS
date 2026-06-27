@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\CustomerInvoices\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -81,7 +82,7 @@ class CustomerInvoiceInfolist
                     TextEntry::make('remaining_amount')
                         ->label(FilamentUi::field('remaining_amount'))
                         ->money('IDR')
-                        ->color(fn ($state): string => (float) $state > 0 ? 'danger' : 'success'),
+                        ->color(fn ($state): string => TypedValue::float($state) > 0 ? 'danger' : 'success'),
                 ]),
 
             Section::make(FilamentUi::text('Notes'))

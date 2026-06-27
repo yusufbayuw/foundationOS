@@ -2,6 +2,7 @@
 
 namespace Modules\Monitoring\Listeners;
 
+use App\Support\TypedValue;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
@@ -19,7 +20,7 @@ class LogSecurityAuthEvents
     {
         $this->logger->log(
             action: 'security.login_failed',
-            description: 'Failed login attempt for '.($event->credentials['email'] ?? 'unknown'),
+            description: 'Failed login attempt for '.TypedValue::string($event->credentials['email'] ?? 'unknown', 'unknown'),
             status: 'failed',
             userId: null,
             ipAddress: $this->request()->ip(),
@@ -55,7 +56,7 @@ class LogSecurityAuthEvents
             action: 'security.login',
             description: 'User logged in',
             status: 'success',
-            userId: (int) $user->getAuthIdentifier(),
+            userId: TypedValue::int($user->getAuthIdentifier()),
             ipAddress: $this->request()->ip(),
             userAgent: $this->request()->userAgent(),
             newValues: [

@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Support;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Exam\Models\ExamModel;
 
@@ -23,8 +24,8 @@ class ExamRuntimeEntityRef
 
         if ($model instanceof ExamModel) {
             return [
-                'id' => (string) $model->getKey(),
-                'foundation_id' => (string) $model->getKey(),
+                'id' => TypedValue::string($model->getKey()),
+                'foundation_id' => TypedValue::string($model->getKey()),
                 'reference_type' => null,
                 'reference_id' => null,
             ];
@@ -34,7 +35,7 @@ class ExamRuntimeEntityRef
             'id' => null,
             'foundation_id' => null,
             'reference_type' => $model::class,
-            'reference_id' => (int) $model->getKey(),
+            'reference_id' => TypedValue::int($model->getKey()),
         ];
     }
 
@@ -47,11 +48,15 @@ class ExamRuntimeEntityRef
             return ['id' => null, 'uuid' => null, 'code' => null, 'name' => null];
         }
 
+        $uuid = TypedValue::string(data_get($tenant, 'uuid'));
+        $code = TypedValue::string(data_get($tenant, 'code'));
+        $name = TypedValue::string(data_get($tenant, 'name'));
+
         return [
-            'id' => (int) $tenant->getKey(),
-            'uuid' => $tenant->uuid ?? null,
-            'code' => $tenant->code ?? null,
-            'name' => $tenant->name ?? null,
+            'id' => TypedValue::int($tenant->getKey()),
+            'uuid' => $uuid !== '' ? $uuid : null,
+            'code' => $code !== '' ? $code : null,
+            'name' => $name !== '' ? $name : null,
         ];
     }
 }

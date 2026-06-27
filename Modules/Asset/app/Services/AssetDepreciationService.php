@@ -2,6 +2,7 @@
 
 namespace Modules\Asset\Services;
 
+use App\Support\TypedValue;
 use Modules\Asset\Models\Asset;
 use Modules\Asset\Models\AssetDepreciation;
 use Modules\Core\Models\Organization;
@@ -25,7 +26,7 @@ class AssetDepreciationService
             ],
             [
                 'organization_id' => $asset->organization_id,
-                'code' => sprintf('DEP-%s-%s', $asset->code ?? $asset->getKey(), $periodDate->format('Ym')),
+                'code' => sprintf('DEP-%s-%s', TypedValue::string($asset->code ?? $asset->getKey()), $periodDate->format('Ym')),
                 'name' => sprintf('Depreciation %s', $asset->name),
                 'status' => 'posted',
                 'amount' => $amount,
@@ -57,11 +58,11 @@ class AssetDepreciationService
 
     protected function resolveOrganizationId(Asset $asset): ?int
     {
-        return $asset->organization_id
-            ?? Organization::withoutTenantScope()
+        return TypedValue::nullableInt($asset->organization_id)
+            ?? TypedValue::nullableInt(Organization::withoutTenantScope()
                 ->where('tenant_id', $asset->tenant_id)
                 ->orderBy('id')
-                ->value('id');
+                ->value('id'));
     }
 
     protected function postDraftJournal(Asset $asset, AssetDepreciation $depreciation, float $amount): JournalEntry
@@ -71,7 +72,7 @@ class AssetDepreciationService
         return JournalEntry::query()->create([
             'tenant_id' => $asset->tenant_id,
             'organization_id' => $organizationId,
-            'entry_number' => 'JE-DEP-'.$depreciation->getKey(),
+            'entry_number' => 'JE-DEP-'.TypedValue::string($depreciation->getKey()),
             'date' => $depreciation->period_date ?? now(),
             'description' => sprintf('Auto-journal asset depreciation %s', $asset->name),
             'total_debit' => $amount,

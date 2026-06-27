@@ -2,6 +2,7 @@
 
 namespace Modules\Legal\Services\Esign;
 
+use App\Support\TypedValue;
 use InvalidArgumentException;
 use Modules\Legal\Contracts\EsignProvider;
 
@@ -17,7 +18,7 @@ class EsignManager
 
     public function driver(?string $name = null): EsignProvider
     {
-        $name ??= config('legal.esign.default', 'manual');
+        $name = $name ?? TypedValue::string(config('legal.esign.default', 'manual'), 'manual');
 
         if (! isset($this->providers[$name])) {
             throw new InvalidArgumentException("E-sign provider [{$name}] is not registered.");

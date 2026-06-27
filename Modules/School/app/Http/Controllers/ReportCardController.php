@@ -24,7 +24,7 @@ class ReportCardController extends Controller
 
         $pdf = Pdf::loadView('school::report-card-pdf', ['data' => $data]);
 
-        $studentName = $data['student']->user->name ?? 'Student';
+        $studentName = TypedValue::string(data_get($data, 'student.user.name'), 'Student');
 
         return $pdf->download('Rapor_'.str_replace(' ', '_', $studentName).'.pdf');
     }

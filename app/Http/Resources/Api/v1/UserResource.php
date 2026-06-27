@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\v1;
 
+use DateTimeInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Core\Models\User;
@@ -15,12 +16,13 @@ class UserResource extends JsonResource
     {
         /** @var User $user */
         $user = $this->resource;
+        $createdAt = $user->getAttribute('created_at');
 
         return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'created_at' => $user->created_at?->toIso8601String(),
+            'id' => $user->getKey(),
+            'name' => $user->getAttribute('name'),
+            'email' => $user->getAttribute('email'),
+            'created_at' => $createdAt instanceof DateTimeInterface ? $createdAt->format(DateTimeInterface::ATOM) : null,
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Inventory\Models\StockAdjustment;
 use RuntimeException;
@@ -19,7 +20,7 @@ class StockAdjustmentService
         }
 
         return DB::transaction(function () use ($adjustment): StockAdjustment {
-            $adjustment = $adjustment->fresh(['lines.stockItem', 'warehouse']);
+            $adjustment = TypedValue::model($adjustment->fresh(['lines.stockItem', 'warehouse']));
 
             if ($adjustment->lines->isEmpty()) {
                 throw new RuntimeException('Stock adjustment has no lines.');
@@ -34,11 +35,13 @@ class StockAdjustmentService
                 }
 
                 $unitCost = (float) $line->unit_cost;
+                $warehouse = TypedValue::model($adjustment->warehouse, 'Stock adjustment warehouse is required.');
+                $stockItem = TypedValue::model($line->stockItem, 'Stock adjustment line stock item is required.');
 
                 if ($delta > 0) {
                     $move = $this->stockMoveService->commitInbound(
-                        warehouse: $adjustment->warehouse,
-                        stockItem: $line->stockItem,
+                        warehouse: $warehouse,
+                        stockItem: $stockItem,
                         quantity: $delta,
                         unitCost: $unitCost,
                         reference: $line,
@@ -46,8 +49,8 @@ class StockAdjustmentService
                     );
                 } else {
                     $move = $this->stockMoveService->commitOutbound(
-                        warehouse: $adjustment->warehouse,
-                        stockItem: $line->stockItem,
+                        warehouse: $warehouse,
+                        stockItem: $stockItem,
                         quantity: abs($delta),
                         reference: $line,
                         notes: 'Stock adjustment '.$adjustment->adjustment_number,
@@ -64,7 +67,7 @@ class StockAdjustmentService
                 'approved_at' => now(),
             ])->save();
 
-            return $adjustment->fresh(['lines']);
+            return TypedValue::model($adjustment->fresh(['lines']));
         });
     }
 

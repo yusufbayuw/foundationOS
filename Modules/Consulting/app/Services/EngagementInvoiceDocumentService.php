@@ -2,6 +2,7 @@
 
 namespace Modules\Consulting\Services;
 
+use App\Support\TypedValue;
 use Modules\Consulting\Models\EngagementInvoice;
 
 class EngagementInvoiceDocumentService
@@ -22,6 +23,6 @@ class EngagementInvoiceDocumentService
 
     public function filename(EngagementInvoice $invoice): string
     {
-        return sprintf('EngagementInvoice_%s.pdf', str_replace(' ', '_', $invoice->code ?? (string) $invoice->getKey()));
+        return sprintf('EngagementInvoice_%s.pdf', str_replace(' ', '_', $invoice->code ?? TypedValue::string($invoice->getKey())));
     }
 }

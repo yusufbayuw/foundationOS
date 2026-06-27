@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Procurement\Events\PurchaseRequisitionApproved;
 use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
@@ -15,7 +16,7 @@ class SyncWorkflowSubjectState
 {
     public function handle(WorkflowStarted|WorkflowReturned|WorkflowCancelled|WorkflowAdvanced $event): void
     {
-        $instance = $event->instance->fresh(['subject']);
+        $instance = TypedValue::model($event->instance->fresh(['subject']));
         $subject = $instance->subject;
 
         if (! $subject instanceof PurchaseRequisition) {
@@ -48,11 +49,12 @@ class SyncWorkflowSubjectState
             $subject->forceFill([
                 'status' => 'approved',
                 'ready_for_sourcing' => true,
-                'approved_by' => $event->actor->getKey(),
+                'approved_by' => TypedValue::nullableInt($event->actor->getKey()),
                 'approved_at' => now(),
             ])->save();
 
-            PurchaseRequisitionApproved::dispatch($subject->fresh(), $event->actor);
+            $freshSubject = TypedValue::model($subject->fresh());
+            PurchaseRequisitionApproved::dispatch($freshSubject, $event->actor);
 
             return;
         }

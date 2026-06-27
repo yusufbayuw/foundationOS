@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Campus\Models\Course;
 use Modules\Core\Models\User;
@@ -35,46 +36,46 @@ class ExamDefinitionQuestionQuery
         }
 
         if (filled($filters['type'] ?? null)) {
-            $query->where('type', $filters['type']);
+            $query->where('type', TypedValue::string($filters['type']));
         }
 
         if (filled($filters['difficulty'] ?? null)) {
-            $query->where('difficulty', $filters['difficulty']);
+            $query->where('difficulty', TypedValue::string($filters['difficulty']));
         }
 
         if (filled($filters['topic'] ?? null)) {
-            $query->where('topic', 'like', '%'.$filters['topic'].'%');
+            $query->where('topic', 'like', '%'.TypedValue::string($filters['topic']).'%');
         }
 
         if (filled($filters['subtopic'] ?? null)) {
-            $query->where('subtopic', 'like', '%'.$filters['subtopic'].'%');
+            $query->where('subtopic', 'like', '%'.TypedValue::string($filters['subtopic']).'%');
         }
 
         if (filled($filters['olympiad_level'] ?? null)) {
             $query->whereRaw(
                 'JSON_UNQUOTE(JSON_EXTRACT(metadata_json, ?)) = ?',
-                ['$.olympiad_level', (string) $filters['olympiad_level']],
+                ['$.olympiad_level', TypedValue::string($filters['olympiad_level'])],
             );
         }
 
         if ($definition->exam_academic_context === ExamAcademicContext::School && filled($filters['subject'] ?? null)) {
             $query->whereHas('examQuestionBank.schoolSubject', function (Builder $subjectQuery) use ($filters): void {
                 /** @var Builder<Subject> $subjectQuery */
-                $subjectQuery->where('name', 'like', '%'.$filters['subject'].'%');
+                $subjectQuery->where('name', 'like', '%'.TypedValue::string($filters['subject']).'%');
             });
         }
 
         if ($definition->exam_academic_context === ExamAcademicContext::Campus && filled($filters['course'] ?? null)) {
             $query->whereHas('examQuestionBank.campusCourse', function (Builder $courseQuery) use ($filters): void {
                 /** @var Builder<Course> $courseQuery */
-                $courseQuery->where('name', 'like', '%'.$filters['course'].'%');
+                $courseQuery->where('name', 'like', '%'.TypedValue::string($filters['course']).'%');
             });
         }
 
         if ($definition->exam_academic_context === ExamAcademicContext::Standalone && filled($filters['subject'] ?? null)) {
             $query->whereHas('examQuestionBank', function (Builder $bankQuery) use ($filters): void {
                 /** @var Builder<ExamQuestionBank> $bankQuery */
-                $bankQuery->where('standalone_subject', 'like', '%'.$filters['subject'].'%');
+                $bankQuery->where('standalone_subject', 'like', '%'.TypedValue::string($filters['subject']).'%');
             });
         }
 

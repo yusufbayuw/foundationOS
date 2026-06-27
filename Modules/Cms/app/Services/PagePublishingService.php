@@ -2,6 +2,7 @@
 
 namespace Modules\Cms\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Str;
 use Modules\Cms\Exceptions\DuplicatePageSlugException;
 use Modules\Cms\Models\Page;
@@ -47,6 +48,6 @@ class PagePublishingService
             'published_at' => $publishedAt ?? now(),
         ])->save();
 
-        return $page->fresh();
+        return TypedValue::model($page->fresh());
     }
 }

@@ -8,6 +8,7 @@ use App\Filament\Pages\TabbedDashboard;
 use App\Filament\Pages\Tenancy\RegisterTenant;
 use App\Http\Middleware\BindTenantToContainer;
 use App\Http\Middleware\EnsureTenantSubscriptionActive;
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use Coolsam\Modules\ModulesPlugin;
@@ -62,8 +63,9 @@ class AdminPanelProvider extends PanelProvider
                         ->where('group', 'branding')
                         ->where('key', 'primary_color')
                         ->value('value');
+                    $primaryColor = TypedValue::string($primaryColor);
 
-                    if ($primaryColor) {
+                    if ($primaryColor !== '') {
                         return ['primary' => Color::hex($primaryColor)];
                     }
                 }
@@ -78,8 +80,9 @@ class AdminPanelProvider extends PanelProvider
                         ->where('group', 'branding')
                         ->where('key', 'brand_logo')
                         ->value('value');
+                    $logo = TypedValue::string($logo);
 
-                    if ($logo) {
+                    if ($logo !== '') {
                         return asset('storage/'.$logo);
                     }
                 }
@@ -87,7 +90,8 @@ class AdminPanelProvider extends PanelProvider
                 return null;
             })
             ->navigationGroups(collect(Module::allEnabled())
-                ->map(fn ($module) => NavigationGroup::make()->label(FilamentUi::module($module->getName())))
+                ->filter(fn (mixed $module): bool => is_object($module) && method_exists($module, 'getName'))
+                ->map(fn (object $module) => NavigationGroup::make()->label(FilamentUi::module(TypedValue::string($module->getName()))))
                 ->values()
                 ->all())
             ->tenant(Tenant::class)
@@ -143,18 +147,22 @@ class AdminPanelProvider extends PanelProvider
             );
 
         foreach (Module::allEnabled() as $module) {
+            if (! is_object($module) || ! method_exists($module, 'appPath') || ! method_exists($module, 'appNamespace')) {
+                continue;
+            }
+
             $panel
                 ->discoverResources(
-                    in: $module->appPath('Filament/Resources'),
-                    for: $module->appNamespace('Filament\\Resources'),
+                    in: TypedValue::string($module->appPath('Filament/Resources')),
+                    for: TypedValue::string($module->appNamespace('Filament\\Resources')),
                 )
                 ->discoverPages(
-                    in: $module->appPath('Filament/Pages'),
-                    for: $module->appNamespace('Filament\\Pages'),
+                    in: TypedValue::string($module->appPath('Filament/Pages')),
+                    for: TypedValue::string($module->appNamespace('Filament\\Pages')),
                 )
                 ->discoverWidgets(
-                    in: $module->appPath('Filament/Widgets'),
-                    for: $module->appNamespace('Filament\\Widgets'),
+                    in: TypedValue::string($module->appPath('Filament/Widgets')),
+                    for: TypedValue::string($module->appNamespace('Filament\\Widgets')),
                 );
         }
 

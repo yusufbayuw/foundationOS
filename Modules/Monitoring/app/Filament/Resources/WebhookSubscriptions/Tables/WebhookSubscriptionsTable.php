@@ -2,6 +2,7 @@
 
 namespace Modules\Monitoring\Filament\Resources\WebhookSubscriptions\Tables;
 
+use App\Support\TypedValue;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -23,7 +24,9 @@ class WebhookSubscriptionsTable
                     ->limit(60),
                 TextColumn::make('events')
                     ->label(FilamentUi::field('events'))
-                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : $state)
+                    ->formatStateUsing(fn ($state): string => is_array($state)
+                        ? implode(', ', array_map(fn (mixed $event): string => TypedValue::string($event), $state))
+                        : TypedValue::string($state))
                     ->wrap(),
                 IconColumn::make('is_active')
                     ->label(FilamentUi::field('is_active'))

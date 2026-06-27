@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Services;
 
+use App\Support\TypedValue;
 use Modules\Enrollment\Models\Applicant;
 
 class ApplicantAcceptanceDocumentService
@@ -29,7 +30,7 @@ class ApplicantAcceptanceDocumentService
 
     public function filename(Applicant $applicant): string
     {
-        $number = str_replace(' ', '_', $applicant->registration_number ?? (string) $applicant->getKey());
+        $number = str_replace(' ', '_', $applicant->registration_number ?? TypedValue::string($applicant->getKey()));
 
         return sprintf('Surat_Penerimaan_%s.pdf', $number);
     }

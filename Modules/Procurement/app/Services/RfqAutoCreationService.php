@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\TenantSetting;
 use Modules\Procurement\Models\PurchaseRequisition;
@@ -87,7 +88,7 @@ class RfqAutoCreationService
 
     protected function generateRfqNumber(PurchaseRequisition $requisition): string
     {
-        $base = 'RFQ-'.($requisition->request_number ?: $requisition->getKey());
+        $base = 'RFQ-'.TypedValue::string($requisition->request_number ?: $requisition->getKey());
         $candidate = $base;
         $seq = 1;
 

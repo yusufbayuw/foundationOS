@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -67,12 +68,15 @@ class ViewWorkflowInstance extends ViewRecord
                     /** @var User $actor */
                     $actor = auth()->user();
 
+                    $formData = $this->normalizeFormData(Arr::except($data, ['target_step_id', 'workflow_note']));
+                    $note = TypedValue::string(Arr::get($data, 'workflow_note', '')) ?: null;
+
                     app(WorkflowEngine::class)->returnToStep(
                         $record,
-                        (int) $data['target_step_id'],
-                        Arr::except($data, ['target_step_id', 'workflow_note']),
+                        TypedValue::int($data['target_step_id']),
+                        $formData,
                         $actor,
-                        Arr::get($data, 'workflow_note'),
+                        $note,
                     );
 
                     $this->record = $record->fresh();
@@ -94,11 +98,13 @@ class ViewWorkflowInstance extends ViewRecord
                     /** @var User $actor */
                     $actor = auth()->user();
                     $engine = app(WorkflowEngine::class);
+                    $formData = $this->normalizeFormData($data);
+                    $note = TypedValue::string(Arr::get($data, 'workflow_note', '')) ?: null;
 
                     if ($actionName === 'cancel') {
-                        $engine->cancel($record, $actor, Arr::get($data, 'workflow_note'));
+                        $engine->cancel($record, $actor, $note);
                     } else {
-                        $engine->advance($record, $actionName, $data, $actor, Arr::get($data, 'workflow_note'));
+                        $engine->advance($record, $actionName, $formData, $actor, $note);
                     }
 
                     $this->record = $record->fresh();
@@ -118,6 +124,14 @@ class ViewWorkflowInstance extends ViewRecord
      */
     protected function buildDynamicFormSchema(WorkflowInstance $record): array
     {
+        if ($record->currentStep === null) {
+            return [
+                Textarea::make('workflow_note')
+                    ->label(FilamentUi::text('Workflow Note'))
+                    ->placeholder(FilamentUi::text('Note for this action (optional).')),
+            ];
+        }
+
         /** @var RuleEngine $ruleEngine */
         $ruleEngine = app(RuleEngine::class);
         /** @var list<array<string, mixed>> $formSchema */
@@ -130,42 +144,51 @@ class ViewWorkflowInstance extends ViewRecord
         $schema = [];
 
         foreach ($evaluatedSchema as $field) {
-            $name = (string) ($field['name'] ?? '');
+            $name = TypedValue::string($field['name'] ?? '');
 
             if ($name === '' || ! ($field['_visible'] ?? true)) {
                 continue;
             }
 
-            $component = match ((string) ($field['type'] ?? 'text')) {
+            $component = match (TypedValue::string($field['type'] ?? 'text')) {
                 'textarea' => Textarea::make($name),
                 'number' => TextInput::make($name)->numeric(),
                 'date' => DatePicker::make($name),
-                'select', 'radio' => Select::make($name)->options($field['options'] ?? [])->searchable(),
-                'file' => FileUpload::make($name)->disk(config('workflow.default_file_disk')),
+                'select', 'radio' => Select::make($name)->options(
+                    $this->normalizeSelectOptions(is_array($field['options'] ?? null) ? $field['options'] : []),
+                )->searchable(),
+                'file' => FileUpload::make($name)->disk(TypedValue::string(config('workflow.default_file_disk'))),
                 default => TextInput::make($name),
             };
 
             if ($component instanceof FileUpload) {
                 if (! empty($field['accepted_types']) && is_array($field['accepted_types'])) {
                     $component->acceptedFileTypes(array_map(
-                        fn (string $type): string => str_contains($type, '/') ? $type : '.'.ltrim($type, '.'),
+                        fn (mixed $type): string => str_contains(TypedValue::string($type), '/')
+                            ? TypedValue::string($type)
+                            : '.'.ltrim(TypedValue::string($type), '.'),
                         $field['accepted_types'],
                     ));
                 }
 
                 if (! empty($field['max_size_kb'])) {
-                    $component->maxSize((int) $field['max_size_kb']);
+                    $component->maxSize(TypedValue::int($field['max_size_kb']));
                 }
             }
 
+            $labelRaw = $field['label'] ?? $name;
+            $labelText = is_string($labelRaw) && $labelRaw !== ''
+                ? (string) str($labelRaw)->headline()
+                : (string) str($name)->headline();
+
             $schema[] = $component
-                ->label((string) ($field['label'] ?? str($name)->headline()))
-                ->placeholder((string) ($field['placeholder'] ?? ''))
-                ->helperText($field['help_text'] ?? null)
+                ->label($labelText)
+                ->placeholder(TypedValue::string($field['placeholder'] ?? ''))
+                ->helperText(TypedValue::string($field['help_text'] ?? '') ?: null)
                 ->default($field['default_value'] ?? null)
                 ->disabled((bool) ($field['_disabled'] ?? false))
                 ->required((bool) ($field['_required'] ?? false))
-                ->columnSpan((string) ($field['column_span'] ?? 'full'));
+                ->columnSpan(TypedValue::string($field['column_span'] ?? 'full'));
         }
 
         $schema[] = Textarea::make('workflow_note')
@@ -200,7 +223,7 @@ class ViewWorkflowInstance extends ViewRecord
             ->filter()
             ->unique()
             ->values()
-            ->map(fn (mixed $name): string => (string) $name)
+            ->map(fn (mixed $name): string => TypedValue::string($name))
             ->all();
 
         return $names;
@@ -211,7 +234,9 @@ class ViewWorkflowInstance extends ViewRecord
         $configured = collect($record->currentStep->action_schema ?? [])
             ->firstWhere('name', $actionName);
 
-        $style = collect((array) ($configured['style'] ?? []));
+        $style = is_array($configured)
+            ? collect((array) ($configured['style'] ?? []))
+            : collect();
 
         if ($style->contains('danger') || in_array($actionName, ['reject', 'cancel'], true)) {
             return 'danger';
@@ -259,7 +284,7 @@ class ViewWorkflowInstance extends ViewRecord
         return collect($steps)
             ->filter(fn (array $step): bool => ($step['id'] ?? null) !== $record->current_step_id && ! ($step['is_terminal'] ?? false))
             ->sortBy('sort_order')
-            ->mapWithKeys(fn (array $step): array => [(string) $step['id'] => (string) ($step['name'] ?? $step['code'] ?? $step['id'])])
+            ->mapWithKeys(fn (array $step): array => [TypedValue::string($step['id']) => TypedValue::string($step['name'] ?? $step['code'] ?? $step['id'])])
             ->all();
     }
 
@@ -274,5 +299,35 @@ class ViewWorkflowInstance extends ViewRecord
             Budget::class => BudgetResource::getUrl('view', ['record' => $record->subject]),
             default => null,
         };
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function normalizeFormData(array $data): array
+    {
+        return collect($data)
+            ->mapWithKeys(fn (mixed $value, mixed $key): array => [TypedValue::string($key) => $value])
+            ->all();
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $options
+     * @return array<string, string>
+     */
+    protected function normalizeSelectOptions(array $options): array
+    {
+        return collect($options)
+            ->mapWithKeys(function (mixed $value, mixed $key): array {
+                if (is_array($value)) {
+                    $label = TypedValue::string($value['label'] ?? $value['value'] ?? $key);
+
+                    return [TypedValue::string($key) => $label];
+                }
+
+                return [TypedValue::string($key) => TypedValue::string($value)];
+            })
+            ->all();
     }
 }

@@ -71,7 +71,13 @@ class AutomationRunLogger
         }
 
         if (is_array($result)) {
-            return $result;
+            $normalized = [];
+
+            foreach ($result as $key => $value) {
+                $normalized[(string) $key] = $value;
+            }
+
+            return $normalized;
         }
 
         if ($result instanceof Model) {

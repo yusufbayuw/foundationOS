@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
@@ -106,7 +107,7 @@ class StockMoveService
                 'organization_id' => $organizationId,
                 'warehouse_id' => $warehouse->getKey(),
                 'stock_item_id' => $stockItem->getKey(),
-                'move_number' => $this->generateMoveNumber($stockItem->tenant_id, $moveType),
+                'move_number' => $this->generateMoveNumber(TypedValue::int($stockItem->tenant_id), $moveType),
                 'move_type' => $moveType,
                 'status' => StockMoveStatus::Committed,
                 'quantity' => $quantity,
@@ -129,7 +130,7 @@ class StockMoveService
                     (int) $stockItem->tenant_id,
                     $warehouse,
                     $stockItem,
-                    (int) $move->getKey(),
+                    TypedValue::int($move->getKey()),
                     $quantity,
                     $unitCost,
                 );
@@ -139,7 +140,8 @@ class StockMoveService
                 ])->save();
             }
 
-            event(new StockMoveCommitted($move->fresh(['stockItem', 'warehouse'])));
+            $freshMove = TypedValue::model($move->fresh(['stockItem', 'warehouse']));
+            event(new StockMoveCommitted($freshMove));
 
             return $move;
         });

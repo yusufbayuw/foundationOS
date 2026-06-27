@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
@@ -32,9 +33,9 @@ class SetupApprovalLimitsCommand extends Command
     {
         $tenant = Tenant::query()->findOrFail((int) $this->argument('tenant'));
 
-        $manager = $this->resolveUserOption('manager', required: true);
-        $direktur = $this->resolveUserOption('direktur', required: true);
-        $komisaris = $this->resolveUserOption('komisaris', required: true);
+        $manager = TypedValue::model($this->resolveUserOption('manager', required: true));
+        $direktur = TypedValue::model($this->resolveUserOption('direktur', required: true));
+        $komisaris = TypedValue::model($this->resolveUserOption('komisaris', required: true));
 
         $actorId = $manager->id;
 
@@ -218,7 +219,7 @@ class SetupApprovalLimitsCommand extends Command
             'step_type' => $attributes['step_type'] ?? 'approval',
             'assignee_type' => $attributes['assignee_type'] ?? 'user',
             'assignee_value' => isset($attributes['assignee_user_id'])
-                ? (string) $attributes['assignee_user_id']
+                ? TypedValue::string($attributes['assignee_user_id'])
                 : ($attributes['assignee_value'] ?? null),
             'assignee_config' => null,
             'form_schema' => $attributes['form_schema'] ?? [],

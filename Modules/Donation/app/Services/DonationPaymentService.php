@@ -2,6 +2,7 @@
 
 namespace Modules\Donation\Services;
 
+use App\Support\TypedValue;
 use Modules\Donation\Models\Donation;
 
 class DonationPaymentService
@@ -17,8 +18,8 @@ class DonationPaymentService
      */
     public function handleWebhook(array $payload): Donation
     {
-        $orderId = (string) ($payload['order_id'] ?? '');
-        $status = (string) ($payload['transaction_status'] ?? $payload['status'] ?? '');
+        $orderId = TypedValue::string($payload['order_id'] ?? '');
+        $status = TypedValue::string($payload['transaction_status'] ?? $payload['status'] ?? '');
 
         $donation = Donation::query()
             ->where('donation_number', $orderId)
@@ -36,11 +37,12 @@ class DonationPaymentService
                 'payment_reference' => $payload['transaction_id'] ?? $orderId,
             ])->save();
 
-            $this->journalService->postForPaidDonation($donation->fresh());
+            $freshDonation = TypedValue::model($donation->fresh());
+            $this->journalService->postForPaidDonation($freshDonation);
         } elseif (in_array($status, ['deny', 'cancel', 'expire', 'failure', 'failed'], true)) {
             $donation->forceFill(['payment_status' => 'failed'])->save();
         }
 
-        return $donation->fresh();
+        return TypedValue::model($donation->fresh());
     }
 }

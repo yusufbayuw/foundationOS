@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -85,7 +86,7 @@ abstract class ApiController extends Controller
             if (in_array($field, $booleanFields, true)) {
                 $query->where($field, filter_var($value, FILTER_VALIDATE_BOOLEAN) ? 1 : 0);
             } elseif (in_array($field, $searchFields, true)) {
-                $query->where($field, 'like', "%{$value}%");
+                $query->where($field, 'like', '%'.TypedValue::string($value).'%');
             } elseif (in_array($field, $exactFields, true)) {
                 $query->where($field, $value);
             }

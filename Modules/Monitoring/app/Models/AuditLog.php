@@ -2,6 +2,7 @@
 
 namespace Modules\Monitoring\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -83,8 +84,9 @@ class AuditLog extends Model
                 ->latest('id')
                 ->value('current_hash');
 
-            $auditLog->prev_hash = $previousHash;
-            $auditLog->current_hash = self::calculateHash($previousHash, $auditLog->hashPayload());
+            $normalizedPreviousHash = TypedValue::string($previousHash);
+            $auditLog->prev_hash = $normalizedPreviousHash !== '' ? $normalizedPreviousHash : null;
+            $auditLog->current_hash = self::calculateHash($auditLog->prev_hash, $auditLog->hashPayload());
         });
     }
 

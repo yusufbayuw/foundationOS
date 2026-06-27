@@ -6,6 +6,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Support\FilamentUi;
 
@@ -28,7 +29,7 @@ class ExamAttemptsRelationManager extends RelationManager
         return $table
             ->heading(FilamentUi::text('Exam attempts'))
             ->description(FilamentUi::text('Scores synced from Cloudflare runtime.'))
-            ->modifyQueryUsing(fn ($query) => $query->with(['examParticipant', 'examResult'])->latest('submitted_at'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['examParticipant', 'examResult'])->orderByDesc('submitted_at'))
             ->columns([
                 TextColumn::make('examParticipant.student_name')
                     ->label(FilamentUi::field('student_name'))

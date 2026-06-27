@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Pages;
 
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
@@ -50,7 +51,7 @@ class WorkflowInboxPage extends Page
                 ->distinct()
                 ->orderBy('workflows.module')
                 ->pluck('workflows.module')
-                ->map(fn (mixed $module): string => (string) $module)
+                ->map(fn (mixed $module): string => TypedValue::string($module))
                 ->all()),
             'workflows' => $workflowQuery
                 ->join('workflow_instances', 'workflow_instances.id', '=', 'workflow_assignments.workflow_instance_id')
@@ -58,7 +59,7 @@ class WorkflowInboxPage extends Page
                 ->distinct()
                 ->orderBy('workflows.name')
                 ->pluck('workflows.name', 'workflows.id')
-                ->mapWithKeys(fn (mixed $name, mixed $id): array => [(int) $id => (string) $name])
+                ->mapWithKeys(fn (mixed $name, mixed $id): array => [TypedValue::int($id) => TypedValue::string($name)])
                 ->all(),
         ];
     }
@@ -134,16 +135,18 @@ class WorkflowInboxPage extends Page
     {
         $user = auth()->user();
         $tenant = Filament::getTenant();
+        $userId = $user?->getAuthIdentifier();
+        $tenantId = TypedValue::tenantKey($tenant?->getKey());
 
         return WorkflowAssignment::query()
             ->with(['instance.workflow', 'instance.currentStep', 'instance.requester'])
             ->where('assigned_to_type', 'user')
-            ->when($user, fn (Builder $query) => $query->where('assigned_to_id', $user->getAuthIdentifier()))
-            ->when(! $user, fn (Builder $query) => $query->whereRaw('1 = 0'))
-            ->when($tenant, function (Builder $query) use ($tenant): void {
-                $query->whereHas('instance', function (Builder $inner) use ($tenant): void {
+            ->when($userId !== null, fn (Builder $query) => $query->where('assigned_to_id', $userId))
+            ->when($userId === null, fn (Builder $query) => $query->whereRaw('1 = 0'))
+            ->when($tenantId !== null, function (Builder $query) use ($tenantId): void {
+                $query->whereHas('instance', function (Builder $inner) use ($tenantId): void {
                     /** @var Builder<WorkflowInstance> $inner */
-                    $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenant->getKey());
+                    $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenantId);
                 });
             });
     }
@@ -189,13 +192,14 @@ class WorkflowInboxPage extends Page
     public function summarizeAssignment(WorkflowAssignment $assignment): array
     {
         $dueAt = $assignment->due_at;
+        $instance = $assignment->instance;
 
         return [
-            'workflow' => $assignment->instance->workflow->name ?? 'Workflow',
-            'module' => $assignment->instance->workflow->module ?? '-',
-            'step' => $assignment->instance->currentStep->name ?? '-',
-            'subject' => $assignment->instance->subject_label ?: '-',
-            'requester' => $assignment->instance->requester->name ?? '-',
+            'workflow' => TypedValue::string(data_get($instance, 'workflow.name'), 'Workflow'),
+            'module' => TypedValue::string(data_get($instance, 'workflow.module'), '-'),
+            'step' => TypedValue::string(data_get($instance, 'currentStep.name'), '-'),
+            'subject' => TypedValue::string(data_get($instance, 'subject_label'), '-'),
+            'requester' => TypedValue::string(data_get($instance, 'requester.name'), '-'),
             'assigned_at' => $assignment->assigned_at->format('Y-m-d H:i'),
             'due_at' => $dueAt?->format('Y-m-d H:i') ?? '-',
             'sla_status' => match (true) {

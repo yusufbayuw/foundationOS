@@ -85,6 +85,6 @@ class LinesRelationManager extends RelationManager
 
     public function isReadOnly(): bool
     {
-        return $this->getOwnerRecord()->is_posted ?? false;
+        return (bool) ($this->getOwnerRecord()->is_posted ?? false);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Sales\Services;
 
+use App\Support\TypedValue;
 use Modules\Sales\Exceptions\DuplicateCustomerCodeException;
 use Modules\Sales\Models\Customer;
 
@@ -48,7 +49,7 @@ class CustomerRegistrationService
     {
         $customer->forceFill(['is_active' => false])->save();
 
-        return $customer->fresh();
+        return TypedValue::model($customer->fresh());
     }
 
     protected function codeExists(int $tenantId, ?int $organizationId, string $code): bool

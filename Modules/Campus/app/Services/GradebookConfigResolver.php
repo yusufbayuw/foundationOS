@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Services;
 
+use App\Support\TypedValue;
 use Modules\Core\Models\TenantSetting;
 
 /**
@@ -60,7 +61,7 @@ class GradebookConfigResolver
     {
         $override = $this->setting($tenantId, self::SETTING_KEY_COMPONENTS);
         if (is_array($override) && $override !== []) {
-            return $override;
+            return $this->normalizeComponents($override);
         }
 
         return $this->defaultComponents();
@@ -73,7 +74,7 @@ class GradebookConfigResolver
     {
         $override = $this->setting($tenantId, self::SETTING_KEY_SCALE);
         if (is_array($override) && $override !== []) {
-            return $override;
+            return $this->normalizeScale($override);
         }
 
         return $this->defaultScale();
@@ -126,5 +127,59 @@ class GradebookConfigResolver
             'bool' => (bool) $value,
             default => $value,
         };
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $components
+     * @return array<string, array{weight: float, matchers: array<int, string>}>
+     */
+    private function normalizeComponents(array $components): array
+    {
+        $normalized = [];
+
+        foreach ($components as $name => $component) {
+            if (! is_array($component)) {
+                continue;
+            }
+
+            $matchers = [];
+
+            $rawMatchers = $component['matchers'] ?? [];
+            if (is_array($rawMatchers)) {
+                foreach ($rawMatchers as $matcher) {
+                    $matchers[] = TypedValue::string($matcher);
+                }
+            }
+
+            $normalized[TypedValue::string($name)] = [
+                'weight' => TypedValue::float($component['weight'] ?? 0.0),
+                'matchers' => $matchers,
+            ];
+        }
+
+        return $normalized === [] ? $this->defaultComponents() : $normalized;
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $scale
+     * @return array<int, array{min: float, letter: string, point: float}>
+     */
+    private function normalizeScale(array $scale): array
+    {
+        $normalized = [];
+
+        foreach ($scale as $tier) {
+            if (! is_array($tier)) {
+                continue;
+            }
+
+            $normalized[] = [
+                'min' => TypedValue::float($tier['min'] ?? 0.0),
+                'letter' => TypedValue::string($tier['letter'] ?? ''),
+                'point' => TypedValue::float($tier['point'] ?? 0.0),
+            ];
+        }
+
+        return $normalized === [] ? $this->defaultScale() : $normalized;
     }
 }

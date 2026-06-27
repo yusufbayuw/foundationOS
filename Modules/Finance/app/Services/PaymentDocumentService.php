@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Support\TypedValue;
 use Modules\Finance\Models\Payment;
 
 class PaymentDocumentService
@@ -23,6 +24,6 @@ class PaymentDocumentService
 
     public function filename(Payment $payment): string
     {
-        return sprintf('PaymentReceipt_%s.pdf', str_replace(' ', '_', $payment->payment_number ?? (string) $payment->getKey()));
+        return sprintf('PaymentReceipt_%s.pdf', str_replace(' ', '_', $payment->payment_number ?? TypedValue::string($payment->getKey())));
     }
 }

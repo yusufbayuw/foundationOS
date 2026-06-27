@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Modules\Cafeteria\Models\CafeteriaTenant;
@@ -24,7 +25,7 @@ class CafeteriaSettleTenantsCommand extends Command
         foreach ($tenants as $tenant) {
             $total = CafeteriaTransaction::query()
                 ->where('tenant_id', $tenant->tenant_id)
-                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.cafeteria_tenant_id')) = ?", [(string) $tenant->getKey()])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(meta, '$.cafeteria_tenant_id')) = ?", [TypedValue::string($tenant->getKey())])
                 ->where('created_at', '>=', $since)
                 ->sum(DB::raw("CAST(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.amount')) AS DECIMAL(15,2))"));
 

@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Resources\Schedules\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -35,13 +36,13 @@ class ScheduleForm
                             ->label(FilamentUi::field('academic_period_id'))
                             ->relationship('academicPeriod', 'name')
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, CreateRecord|EditRecord $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TextInput::make('class_id')
                             ->label(FilamentUi::field('class_id'))
                             ->required()
                             ->numeric()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, CreateRecord|EditRecord $livewire) => self::checkConflicts($get, $state, $livewire)),
                         Select::make('subject_id')
                             ->label(FilamentUi::field('subject_id'))
                             ->relationship('subject', 'name')
@@ -50,7 +51,7 @@ class ScheduleForm
                             ->label(FilamentUi::field('teacher_id'))
                             ->relationship('teacher', 'id')
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, CreateRecord|EditRecord $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TextInput::make('schedule_type')
                             ->label(FilamentUi::field('schedule_type')),
                         TextInput::make('semester')
@@ -64,7 +65,7 @@ class ScheduleForm
                             ->label(FilamentUi::field('day_of_week'))
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, CreateRecord|EditRecord $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TextInput::make('duration_minutes')
                             ->label(FilamentUi::field('duration_minutes'))
                             ->numeric(),
@@ -72,12 +73,12 @@ class ScheduleForm
                             ->label(FilamentUi::field('start_time'))
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, CreateRecord|EditRecord $livewire) => self::checkConflicts($get, $state, $livewire)),
                         TimePicker::make('end_time')
                             ->label(FilamentUi::field('end_time'))
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Get $get, ?string $state, $livewire) => self::checkConflicts($get, $state, $livewire)),
+                            ->afterStateUpdated(fn (Get $get, ?string $state, CreateRecord|EditRecord $livewire) => self::checkConflicts($get, $state, $livewire)),
                     ]),
 
                 Section::make(FilamentUi::text('Recurrence & Notes'))
@@ -122,7 +123,9 @@ class ScheduleForm
             return;
         }
 
-        $excludeId = $livewire instanceof EditRecord ? $livewire->getRecord()->getKey() : null;
+        $excludeId = $livewire instanceof EditRecord
+            ? TypedValue::nullableInt($livewire->getRecord()->getKey())
+            : null;
 
         $checker = new ScheduleConflictChecker;
         $conflicts = $checker->checkConflicts($data, $excludeId);

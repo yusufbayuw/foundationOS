@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamQuestions\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -40,7 +41,11 @@ class ExamQuestionForm
                             ->searchable()
                             ->preload()
                             ->live()
-                            ->helperText(fn (Get $get): ?string => self::bankContextSummary($get('exam_question_bank_id'))),
+                            ->helperText(function (Get $get): ?string {
+                                $bankId = TypedValue::string($get('exam_question_bank_id'));
+
+                                return self::bankContextSummary($bankId !== '' ? $bankId : null);
+                            }),
                         Select::make('type')
                             ->label(FilamentUi::field('type'))
                             ->options(collect(QuestionType::cases())->mapWithKeys(

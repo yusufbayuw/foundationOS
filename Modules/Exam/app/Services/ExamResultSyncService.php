@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -131,8 +132,8 @@ class ExamResultSyncService
                     [
                         'tenant_id' => $definition->tenant_id,
                         'exam_participant_id' => $participant->id,
-                        'attempt_number' => (int) ($row['attempt_number'] ?? 1),
-                        'status' => (string) ($row['status'] ?? 'submitted'),
+                        'attempt_number' => TypedValue::int($row['attempt_number'] ?? 1),
+                        'status' => TypedValue::string($row['status'] ?? 'submitted'),
                         'score' => $row['score'] ?? null,
                         'started_at' => $this->parseTimestamp($row['started_at'] ?? null),
                         'submitted_at' => $this->parseTimestamp($row['submitted_at'] ?? null),
@@ -236,7 +237,7 @@ class ExamResultSyncService
                         'max_score' => $row['max_score'] ?? $definition->max_score,
                         'is_passed' => isset($row['passed']) ? (bool) $row['passed'] : (isset($row['is_passed']) ? (bool) $row['is_passed'] : null),
                         'grade_letter' => $row['grade_letter'] ?? $row['grade'] ?? null,
-                        'status' => (string) ($row['status'] ?? 'final'),
+                        'status' => TypedValue::string($row['status'] ?? 'final'),
                         'submitted_at' => $this->parseTimestamp($row['submitted_at'] ?? null) ?? $attempt?->submitted_at,
                         'analytics_json' => $row['analytics'] ?? $row['analytics_json'] ?? null,
                     ],
@@ -286,7 +287,7 @@ class ExamResultSyncService
                         'tenant_id' => $definition->tenant_id,
                         'exam_definition_id' => $definition->id,
                         'exam_participant_id' => $attempt->exam_participant_id,
-                        'event_type' => (string) ($row['event_type'] ?? $row['event'] ?? $row['type'] ?? 'activity'),
+                        'event_type' => TypedValue::string($row['event_type'] ?? $row['event'] ?? $row['type'] ?? 'activity'),
                         'occurred_at' => $this->parseTimestamp($row['occurred_at'] ?? $row['created_at'] ?? null),
                         'payload_json' => $row['payload'] ?? $row['payload_json'] ?? $row,
                     ],
@@ -394,7 +395,7 @@ class ExamResultSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<mixed, mixed>  $row
      */
     protected function resolveParticipant(ExamDefinition $definition, array $row): ?ExamParticipant
     {
@@ -428,7 +429,7 @@ class ExamResultSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<mixed, mixed>  $row
      * @param  array<string, ExamAttempt>  $attemptMap
      */
     protected function resolveAttempt(ExamDefinition $definition, array $row, array $attemptMap): ?ExamAttempt
@@ -452,7 +453,7 @@ class ExamResultSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<mixed, mixed>  $row
      */
     protected function resolveQuestionId(ExamDefinition $definition, array $row): ?string
     {
@@ -491,7 +492,7 @@ class ExamResultSyncService
 
     /**
      * @param  array<string, ExamAttempt>  $attemptMap
-     * @param  array<string, mixed>  $analytics
+     * @param  array<mixed, mixed>  $analytics
      */
     protected function storeExamAnalyticsSummary(ExamDefinition $definition, array $analytics, array $attemptMap): void
     {
@@ -499,7 +500,7 @@ class ExamResultSyncService
         $metadata['runtime_analytics_summary'] = $analytics;
         $definition->forceFill(['metadata_json' => $metadata])->save();
 
-        foreach ($analytics['by_attempt'] ?? [] as $row) {
+        foreach ($this->normalizeList($analytics['by_attempt'] ?? []) as $row) {
             if (! is_array($row)) {
                 continue;
             }
@@ -538,10 +539,10 @@ class ExamResultSyncService
             'runtime_id' => $runtimeId,
             'request_summary' => [
                 'runtime_exam_id' => $runtimeId,
-                'attempt_count' => count($payload['attempts'] ?? []),
-                'answer_count' => count($payload['answers'] ?? []),
-                'result_count' => count($payload['results'] ?? []),
-                'activity_log_count' => count($payload['activity_logs'] ?? $payload['activityLogs'] ?? []),
+                'attempt_count' => count($this->normalizeList($payload['attempts'] ?? [])),
+                'answer_count' => count($this->normalizeList($payload['answers'] ?? [])),
+                'result_count' => count($this->normalizeList($payload['results'] ?? [])),
+                'activity_log_count' => count($this->normalizeList($payload['activity_logs'] ?? $payload['activityLogs'] ?? [])),
             ],
             'response_summary' => $summary,
             'error_message' => $errorMessage,
@@ -566,6 +567,10 @@ class ExamResultSyncService
             return null;
         }
 
+        if (! is_string($value) && ! is_int($value) && ! is_float($value) && ! $value instanceof \DateTimeInterface) {
+            return null;
+        }
+
         try {
             return Carbon::parse($value);
         } catch (\Throwable) {
@@ -574,7 +579,7 @@ class ExamResultSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $row
+     * @param  array<mixed, mixed>  $row
      */
     protected function stringifyAnswerValue(array $row): ?string
     {
@@ -584,7 +589,7 @@ class ExamResultSyncService
             return json_encode($value, JSON_THROW_ON_ERROR);
         }
 
-        return $value !== null ? (string) $value : null;
+        return $value !== null ? TypedValue::string($value) : null;
     }
 
     protected function requireRuntimeUuid(mixed $value, string $label): ?string

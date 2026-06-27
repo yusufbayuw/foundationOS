@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\TypedValue;
 use Closure;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
@@ -15,11 +16,11 @@ class EnsureTenantSubscriptionActive
         $tenant = Filament::getTenant();
 
         if (! $tenant instanceof Tenant) {
-            return $next($request);
+            return TypedValue::response($next($request));
         }
 
         if ($tenant->isLocked()) {
-            $billingPath = '/admin/'.$tenant->getRouteKey().'/billing';
+            $billingPath = '/admin/'.TypedValue::string($tenant->getRouteKey()).'/billing';
 
             if (! $request->is('*billing*')) {
                 return redirect($billingPath)
@@ -27,6 +28,6 @@ class EnsureTenantSubscriptionActive
             }
         }
 
-        return $next($request);
+        return TypedValue::response($next($request));
     }
 }

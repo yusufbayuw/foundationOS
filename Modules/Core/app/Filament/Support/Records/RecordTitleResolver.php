@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Support\Records;
 
+use App\Support\TypedValue;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,18 +24,19 @@ class RecordTitleResolver
         foreach ($candidates as $attr) {
             $value = $record->getAttribute($attr);
             if ($value !== null && $value !== '') {
-                return (string) $value;
+                return TypedValue::string($value);
             }
         }
 
         if ($record->isRelation('user')) {
             $user = $record->getRelationValue('user');
+            $userName = data_get($user, 'name');
 
-            if ($user !== null && isset($user->name) && $user->name !== '') {
-                return (string) $user->name;
+            if (is_string($userName) && $userName !== '') {
+                return $userName;
             }
         }
 
-        return (string) $record->getKey();
+        return TypedValue::string($record->getKey());
     }
 }

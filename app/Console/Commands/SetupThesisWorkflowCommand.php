@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\Workflow\StaticMultiUserResolver;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\Thesis;
@@ -36,9 +37,9 @@ class SetupThesisWorkflowCommand extends Command
             ? Organization::query()->where('tenant_id', $tenant->id)->findOrFail($organizationId)
             : null;
 
-        $advisor = $this->resolveUserOption('advisor', required: true);
-        $supervisor2 = $this->resolveUserOption('supervisor2', required: true);
-        $examiner = $this->resolveUserOption('examiner', required: true);
+        $advisor = TypedValue::model($this->resolveUserOption('advisor', required: true));
+        $supervisor2 = TypedValue::model($this->resolveUserOption('supervisor2', required: true));
+        $examiner = TypedValue::model($this->resolveUserOption('examiner', required: true));
 
         $actorId = $advisor->id;
 
@@ -49,7 +50,7 @@ class SetupThesisWorkflowCommand extends Command
         $existing = Workflow::query()
             ->where('tenant_id', $tenant->id)
             ->where('code', 'thesis-lifecycle')
-            ->when($organization, fn ($q) => $q->where($q->getModel()->qualifyColumn('organization_id'), $organization->id), fn ($q) => $q->whereNull('organization_id'))
+            ->when($organization, fn ($q) => $q->where($q->getModel()->qualifyColumn('organization_id'), TypedValue::int($organization?->id)), fn ($q) => $q->whereNull('organization_id'))
             ->latest('version')
             ->first();
 
@@ -289,14 +290,14 @@ class SetupThesisWorkflowCommand extends Command
             ->where('tenant_id', $tenant->id)
             ->when($organization, function ($query) use ($organization): void {
                 $query->where(function ($inner) use ($organization): void {
-                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), $organization->id)
+                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), TypedValue::int($organization?->id))
                         ->orWhereNull('organization_id');
                 });
             })
             ->exists();
 
         if (! $isValid) {
-            $scope = $organization->name ?? 'tenant-wide scope';
+            $scope = $organization instanceof Organization ? $organization->name : 'tenant-wide scope';
             $this->fail("User [{$user->email}] is not a member of tenant [{$tenant->name}] for scope [{$scope}].");
         }
     }

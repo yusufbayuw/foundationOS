@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\CourseOffering;
@@ -77,7 +78,7 @@ class ExamContextResolver
             $model instanceof SchoolClass => $model->name ?? (string) $id,
             $model instanceof Subject => $model->name ?? (string) $id,
             $model instanceof CourseOffering => trim(($model->class_code ?? '').' '.($model->course->name ?? '')),
-            default => (string) ($model->getAttribute('name') ?? $id),
+            default => TypedValue::string(($model->getAttribute('name')) ?? $id),
         };
     }
 

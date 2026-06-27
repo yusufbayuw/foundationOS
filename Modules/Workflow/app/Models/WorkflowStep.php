@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -69,12 +70,12 @@ class WorkflowStep extends Model
     public function requiresEvidence(): bool
     {
         return isset($this->required_evidence['file_count'])
-            && (int) $this->required_evidence['file_count'] > 0;
+            && TypedValue::int($this->required_evidence['file_count']) > 0;
     }
 
     public function requiredEvidenceCount(): int
     {
-        return (int) ($this->required_evidence['file_count'] ?? 0);
+        return TypedValue::int($this->required_evidence['file_count'] ?? 0);
     }
 
     /**

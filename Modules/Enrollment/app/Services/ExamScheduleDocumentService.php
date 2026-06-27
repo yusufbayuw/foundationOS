@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Services;
 
+use App\Support\TypedValue;
 use Modules\Enrollment\Models\ExamSchedule;
 
 class ExamScheduleDocumentService
@@ -25,7 +26,7 @@ class ExamScheduleDocumentService
 
     public function filename(ExamSchedule $examSchedule): string
     {
-        $name = str_replace(' ', '_', $examSchedule->name ?? (string) $examSchedule->getKey());
+        $name = str_replace(' ', '_', $examSchedule->name ?? TypedValue::string($examSchedule->getKey()));
 
         return sprintf('Kartu_Jadwal_Ujian_%s.pdf', $name);
     }

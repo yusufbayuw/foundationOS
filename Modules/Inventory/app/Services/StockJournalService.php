@@ -2,6 +2,8 @@
 
 namespace Modules\Inventory\Services;
 
+use App\Support\TypedValue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
 use Modules\Finance\Models\ChartOfAccount;
@@ -16,12 +18,13 @@ class StockJournalService
     public function postForMove(StockMove $move): JournalEntry
     {
         if ($move->journal_entry_id) {
-            return $move->journalEntry;
+            return TypedValue::model($move->journalEntry);
         }
 
         return DB::transaction(function () use ($move): JournalEntry {
             $move->load(['stockItem', 'warehouse']);
-            $stockItem = $move->stockItem;
+            $stockItem = TypedValue::model($move->stockItem, 'Stock item must exist before posting stock journal.');
+            $tenantId = TypedValue::int($move->tenant_id);
             $amount = (float) $move->total_cost;
 
             if ($amount <= 0) {
@@ -30,12 +33,12 @@ class StockJournalService
 
             $organizationId = $move->organization_id
                 ?? Organization::withoutTenantScope()
-                    ->where('tenant_id', $move->tenant_id)
+                    ->where('tenant_id', $tenantId)
                     ->orderBy('id')
                     ->value('id');
 
             $inventoryCoa = $this->resolveCoa(
-                $move->tenant_id,
+                $tenantId,
                 $stockItem->inventory_coa_id,
                 'asset',
                 ['persediaan', 'inventory'],
@@ -44,14 +47,14 @@ class StockJournalService
 
             $offsetCoa = $move->move_type === StockMoveType::In
                 ? $this->resolveCoa(
-                    $move->tenant_id,
+                    $tenantId,
                     null,
                     'liability',
                     ['gr', 'goods received', 'hutang'],
                     'Stock-in journal requires a GR/IR liability account.',
                 )
                 : $this->resolveCoa(
-                    $move->tenant_id,
+                    $tenantId,
                     $stockItem->cogs_coa_id,
                     'expense',
                     ['hpp', 'cogs', 'beban pokok'],
@@ -144,7 +147,7 @@ class StockJournalService
             ->where('tenant_id', $tenantId)
             ->where('type', $type)
             ->where('is_active', true)
-            ->where(function ($query) use ($keywords): void {
+            ->where(function (Builder $query) use ($keywords): void {
                 foreach ($keywords as $keyword) {
                     $query->orWhereRaw('LOWER(name) LIKE ?', ['%'.strtolower($keyword).'%']);
                 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\TenantSetting;
@@ -29,7 +30,7 @@ class ApplicantPromotionService
             return null;
         }
 
-        $applicant = $applicant->fresh(['admissionPeriod']);
+        $applicant = TypedValue::model($applicant->fresh(['admissionPeriod']));
 
         if ($applicant->converted_to_student_id) {
             return $applicant->convertedStudent;
@@ -72,7 +73,7 @@ class ApplicantPromotionService
 
     protected function generateNis(Applicant $applicant): string
     {
-        $base = 'ADM-'.($applicant->registration_number ?: $applicant->getKey());
+        $base = 'ADM-'.TypedValue::string($applicant->registration_number ?: $applicant->getKey());
         $candidate = $base;
         $seq = 1;
 

@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
 use Modules\Finance\Models\JournalEntry;
@@ -28,7 +29,7 @@ class VendorBillAutoCreationService
     public function createFromGoodsReceipt(GoodsReceipt $receipt, ?array $billLines = null, ?int $processedBy = null): VendorBill
     {
         return DB::transaction(function () use ($receipt, $billLines, $processedBy): VendorBill {
-            $receipt = $receipt->fresh(['items', 'purchaseOrder.items']);
+            $receipt = TypedValue::model($receipt->fresh(['items', 'purchaseOrder.items']));
             $po = $receipt->purchaseOrder;
 
             if (! $po) {
@@ -86,7 +87,7 @@ class VendorBillAutoCreationService
             $journal = $this->postDraftJournal($bill);
             $bill->forceFill(['journal_entry_id' => $journal->id])->save();
 
-            return $bill->fresh(['items', 'journalEntry']);
+            return TypedValue::model($bill->fresh(['items', 'journalEntry']));
         });
     }
 
@@ -139,7 +140,7 @@ class VendorBillAutoCreationService
 
     protected function generateBillNumber(GoodsReceipt $receipt): string
     {
-        $base = 'BILL-'.($receipt->receipt_number ?: $receipt->getKey());
+        $base = 'BILL-'.TypedValue::string($receipt->receipt_number ?: $receipt->getKey());
         $candidate = $base;
         $seq = 1;
 

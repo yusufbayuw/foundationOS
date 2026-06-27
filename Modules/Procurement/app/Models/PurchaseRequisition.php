@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -131,7 +132,7 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
 
     public function workflowSubjectLabel(): string
     {
-        return (string) ($this->request_number ?: 'Purchase Requisition #'.$this->getKey());
+        return (string) ($this->request_number ?: 'Purchase Requisition #'.TypedValue::string($this->getKey()));
     }
 
     public function workflowSubjectType(): string

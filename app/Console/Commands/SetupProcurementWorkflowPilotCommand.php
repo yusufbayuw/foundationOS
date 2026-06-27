@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -35,8 +36,8 @@ class SetupProcurementWorkflowPilotCommand extends Command
         $organizationId = $this->option('organization') !== null ? (int) $this->option('organization') : null;
         $organization = $organizationId ? Organization::query()->where('tenant_id', $tenant->id)->findOrFail($organizationId) : null;
 
-        $manager = $this->resolveUserOption('manager', required: true);
-        $finance = $this->resolveUserOption('finance', required: true);
+        $manager = TypedValue::model($this->resolveUserOption('manager', required: true));
+        $finance = TypedValue::model($this->resolveUserOption('finance', required: true));
         $executive = $this->resolveUserOption('executive', required: false);
 
         $financeThreshold = (float) $this->option('finance-threshold');
@@ -59,7 +60,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
         $existing = Workflow::query()
             ->where('tenant_id', $tenant->id)
             ->where('code', 'purchase-requisition-approval')
-            ->when($organization, fn ($query) => $query->where($query->getModel()->qualifyColumn('organization_id'), $organization->id), fn ($query) => $query->whereNull('organization_id'))
+            ->when($organization, fn ($query) => $query->where($query->getModel()->qualifyColumn('organization_id'), TypedValue::int($organization?->id)), fn ($query) => $query->whereNull('organization_id'))
             ->latest('version')
             ->first();
 
@@ -193,11 +194,11 @@ class SetupProcurementWorkflowPilotCommand extends Command
             [[
                 $workflow->id,
                 $tenant->name,
-                $organization->name ?? 'Tenant-wide',
+                $organization instanceof Organization ? $organization->name : 'Tenant-wide',
                 $workflow->version,
                 $manager->name,
                 $finance->name,
-                $executive->name ?? '-',
+                $executive instanceof User ? $executive->name : '-',
             ]]
         );
 
@@ -225,14 +226,14 @@ class SetupProcurementWorkflowPilotCommand extends Command
             ->where('tenant_id', $tenant->id)
             ->when($organization, function ($query) use ($organization): void {
                 $query->where(function ($inner) use ($organization): void {
-                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), $organization->id)
+                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), TypedValue::int($organization?->id))
                         ->orWhereNull('organization_id');
                 });
             })
             ->exists();
 
         if (! $isValid) {
-            $scope = $organization->name ?? 'tenant-wide scope';
+            $scope = $organization instanceof Organization ? $organization->name : 'tenant-wide scope';
             $this->fail("User [{$user->email}] is not a member of tenant [{$tenant->name}] for scope [{$scope}].");
         }
     }
@@ -250,7 +251,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
             'description' => $attributes['description'] ?? null,
             'step_type' => $attributes['step_type'] ?? 'approval',
             'assignee_type' => $attributes['assignee_type'] ?? 'user',
-            'assignee_value' => isset($attributes['assignee_user_id']) ? (string) $attributes['assignee_user_id'] : ($attributes['assignee_value'] ?? null),
+            'assignee_value' => isset($attributes['assignee_user_id']) ? TypedValue::string($attributes['assignee_user_id']) : ($attributes['assignee_value'] ?? null),
             'assignee_config' => $attributes['assignee_config'] ?? null,
             'form_schema' => $attributes['form_schema'] ?? [[
                 'name' => 'approval_note',

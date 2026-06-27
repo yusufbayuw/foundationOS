@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Services;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Modules\Core\Models\AcademicPeriod;
@@ -20,16 +21,18 @@ class ContextDefaults
     public function forCreate(?Authenticatable $user = null): array
     {
         $user = $user ?? auth()->user();
-        $tenantId = Filament::getTenant()?->getKey();
+        $tenantId = TypedValue::tenantKey(Filament::getTenant()?->getKey());
+        $createdBy = TypedValue::tenantKey($user?->getAuthIdentifier());
 
         $defaults = array_filter([
             'tenant_id' => $tenantId,
             'organization_id' => $this->resolveOrganizationId($user, $tenantId),
             'academic_period_id' => $this->resolveAcademicPeriodId($tenantId),
             'academic_year_id' => $this->resolveAcademicYearId($tenantId),
-            'created_by' => $user?->getAuthIdentifier(),
+            'created_by' => $createdBy,
         ], fn ($value) => $value !== null);
 
+        /** @var array<string, int|string|null> $defaults */
         return $defaults;
     }
 
@@ -61,7 +64,7 @@ class ContextDefaults
             ->orderByDesc('start_date')
             ->value('id');
 
-        return $periodId ? (int) $periodId : null;
+        return $periodId ? TypedValue::int($periodId) : null;
     }
 
     public function resolveAcademicYearId(int|string|null $tenantId): ?int
@@ -76,6 +79,6 @@ class ContextDefaults
             ->orderByDesc('start_date')
             ->value('id');
 
-        return $yearId ? (int) $yearId : null;
+        return $yearId ? TypedValue::int($yearId) : null;
     }
 }

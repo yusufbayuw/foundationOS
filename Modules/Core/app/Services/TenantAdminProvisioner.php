@@ -3,6 +3,7 @@
 namespace Modules\Core\Services;
 
 use App\Models\Role;
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\Support\Utils as ShieldUtils;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
@@ -14,14 +15,14 @@ class TenantAdminProvisioner
 {
     public function assignShieldSuperAdmin(User $user, Tenant $tenant): void
     {
-        setPermissionsTeamId($tenant->getKey());
+        setPermissionsTeamId(TypedValue::tenantKey($tenant->getKey()));
 
         $superAdminRoleName = ShieldUtils::getSuperAdminName();
 
         $role = Role::firstOrCreate([
             'name' => $superAdminRoleName,
             'guard_name' => 'web',
-            'team_id' => (int) $tenant->getKey(),
+            'team_id' => TypedValue::int($tenant->getKey()),
         ]);
 
         $user->roles()->syncWithoutDetaching([

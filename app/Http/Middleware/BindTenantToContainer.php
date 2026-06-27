@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Events\TenantSwitched;
 use App\Support\CurrentTenant;
+use App\Support\TypedValue;
 use Closure;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
@@ -26,7 +27,10 @@ class BindTenantToContainer
 
                 if ($tenant !== null) {
                     $previousTenantId = $this->currentTenant->id();
-                    $newTenantId = $tenant->getKey();
+                    $newTenantId = TypedValue::tenantKey($tenant->getKey());
+                    if ($newTenantId === null) {
+                        return TypedValue::response($next($request));
+                    }
 
                     $this->currentTenant->set($tenant);
 
@@ -43,6 +47,6 @@ class BindTenantToContainer
             }
         }
 
-        return $next($request);
+        return TypedValue::response($next($request));
     }
 }

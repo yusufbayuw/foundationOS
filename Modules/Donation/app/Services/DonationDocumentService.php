@@ -2,6 +2,7 @@
 
 namespace Modules\Donation\Services;
 
+use App\Support\TypedValue;
 use Modules\Donation\Models\Donation;
 
 class DonationDocumentService
@@ -22,6 +23,6 @@ class DonationDocumentService
 
     public function filename(Donation $donation): string
     {
-        return sprintf('DonationReceipt_%s.pdf', str_replace(' ', '_', $donation->donation_number ?? (string) $donation->getKey()));
+        return sprintf('DonationReceipt_%s.pdf', str_replace(' ', '_', $donation->donation_number ?? TypedValue::string($donation->getKey())));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Modules\Procurement\Models\PurchaseRequisition;
 
 class PurchaseRequisitionDocumentService
@@ -27,6 +28,6 @@ class PurchaseRequisitionDocumentService
 
     public function filename(PurchaseRequisition $requisition): string
     {
-        return sprintf('PurchaseRequisition_%s.pdf', str_replace(' ', '_', $requisition->request_number ?? (string) $requisition->getKey()));
+        return sprintf('PurchaseRequisition_%s.pdf', str_replace(' ', '_', $requisition->request_number ?? TypedValue::string($requisition->getKey())));
     }
 }

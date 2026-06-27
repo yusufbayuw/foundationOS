@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -109,7 +110,7 @@ class StockAdjustment extends Model implements ProvidesWorkflowContext, StartsWo
 
     public function workflowSubjectLabel(): string
     {
-        return (string) ($this->adjustment_number ?: 'Adjustment #'.$this->getKey());
+        return (string) ($this->adjustment_number ?: 'Adjustment #'.TypedValue::string($this->getKey()));
     }
 
     public function workflowSubjectType(): string

@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\CustomerInvoices\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -28,12 +29,12 @@ class CustomerInvoiceForm
                         ->default(fn () => 'INV-'.now()->format('Ymd').'-'.str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT)),
                     Select::make('invoice_type')
                         ->label(FilamentUi::field('invoice_type'))
-                        ->options(CustomerInvoice::invoiceTypeOptions())
+                        ->options(self::normalizeOptions(CustomerInvoice::invoiceTypeOptions()))
                         ->required()
                         ->default('general'),
                     Select::make('status')
                         ->label(FilamentUi::field('status'))
-                        ->options(CustomerInvoice::statusOptions())
+                        ->options(self::normalizeOptions(CustomerInvoice::statusOptions()))
                         ->required()
                         ->default('draft'),
                     DatePicker::make('issue_date')
@@ -106,5 +107,20 @@ class CustomerInvoiceForm
                         ->columnSpanFull(),
                 ]),
         ]);
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $options
+     * @return array<string, string>
+     */
+    private static function normalizeOptions(array $options): array
+    {
+        $normalized = [];
+
+        foreach ($options as $key => $value) {
+            $normalized[TypedValue::string($key)] = TypedValue::string($value);
+        }
+
+        return $normalized;
     }
 }

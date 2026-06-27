@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Modules\School\Models\ClassStudent;
 
@@ -64,7 +65,7 @@ class ClassStudentObserver
             return;
         }
 
-        $version = optional($classStudent->updated_at)->timestamp ?? now()->timestamp;
+        $version = TypedValue::int(data_get($classStudent, 'updated_at.timestamp'), TypedValue::int(now()->timestamp));
         $dedupe = "enrollment:{$classStudent->id}:{$action}:{$version}";
 
         $this->outbox->enqueue(

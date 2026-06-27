@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use App\Support\TypedValue;
 use Modules\Campus\Models\CourseOfferingLecturer;
 
 class CourseOfferingLecturerObserver
@@ -46,7 +47,7 @@ class CourseOfferingLecturerObserver
             return;
         }
 
-        $version = optional($assignment->updated_at)->timestamp ?? now()->timestamp;
+        $version = TypedValue::int(data_get($assignment, 'updated_at.timestamp'), TypedValue::int(now()->timestamp));
         $dedupe = "lecturer_assignment:{$assignment->id}:{$action}:{$version}";
 
         $this->outbox->enqueue(

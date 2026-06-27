@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Tenancy;
 
+use App\Support\TypedValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Tenancy\RegisterTenant as BaseRegisterTenant;
@@ -30,9 +31,9 @@ class RegisterTenant extends BaseRegisterTenant
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set(
+                    ->afterStateUpdated(fn (mixed $state, callable $set) => $set(
                         'code',
-                        Str::slug($state ?? '', '_')
+                        Str::slug(TypedValue::string($state), '_')
                     )),
 
                 TextInput::make('code')
@@ -45,7 +46,7 @@ class RegisterTenant extends BaseRegisterTenant
                 Select::make('timezone')
                     ->label(FilamentUi::field('timezone'))
                     ->options(
-                        collect(\DateTimeZone::listIdentifiers())->mapWithKeys(fn ($tz) => [$tz => $tz])
+                        collect(\DateTimeZone::listIdentifiers())->mapWithKeys(fn (string $timezone): array => [$timezone => $timezone])
                     )
                     ->searchable()
                     ->default(config('app.timezone', 'Asia/Jakarta')),
@@ -67,7 +68,7 @@ class RegisterTenant extends BaseRegisterTenant
 
     protected function handleRegistration(array $data): Tenant
     {
-        $user = auth()->user();
+        $user = TypedValue::model(auth()->user());
 
         return DB::transaction(function () use ($data, $user): Tenant {
             $tenant = Tenant::create([
@@ -78,7 +79,7 @@ class RegisterTenant extends BaseRegisterTenant
                 'locale' => $data['locale'] ?? 'id',
                 'currency' => $data['currency'] ?? 'IDR',
                 'status' => 'active',
-                'created_by' => $user->getKey(),
+                'created_by' => TypedValue::int($user->getKey()),
             ]);
 
             $provisioner = app(TenantAdminProvisioner::class);

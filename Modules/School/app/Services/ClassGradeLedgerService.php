@@ -2,6 +2,7 @@
 
 namespace Modules\School\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\AcademicPeriod;
@@ -48,12 +49,15 @@ class ClassGradeLedgerService
 
         $rows = $students->map(function (Student $student) use ($assessments, $gradesByStudent): array {
             /** @var Collection<int, StudentGrade> $studentGrades */
-            $studentGrades = $gradesByStudent->get($student->getKey(), collect());
+            $studentGrades = $gradesByStudent->get(TypedValue::tenantKey($student->getKey()), collect());
             $scores = [];
 
             foreach ($assessments as $assessment) {
                 $grade = $studentGrades->firstWhere('assessment_id', $assessment->getKey());
-                $scores[$assessment->getKey()] = $grade->score ?? $grade->final_score;
+                $assessmentKey = TypedValue::string($assessment->getKey());
+                $scores[$assessmentKey] = $grade instanceof StudentGrade
+                    ? ($grade->score ?? $grade->final_score)
+                    : null;
             }
 
             return [

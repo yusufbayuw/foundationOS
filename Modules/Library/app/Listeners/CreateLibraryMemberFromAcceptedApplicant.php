@@ -3,6 +3,7 @@
 namespace Modules\Library\Listeners;
 
 use App\Concerns\InteractsWithTenant;
+use App\Support\TypedValue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Enrollment\Events\ApplicantAccepted;
@@ -21,7 +22,7 @@ class CreateLibraryMemberFromAcceptedApplicant implements ShouldQueue
 
     public function handle(ApplicantAccepted $event): void
     {
-        $applicant = $event->applicant->fresh(['convertedStudent', 'admissionPeriod']);
+        $applicant = TypedValue::model($event->applicant->fresh(['convertedStudent', 'admissionPeriod']));
 
         app(AutomationRunLogger::class)->run(
             ApplicantAccepted::class,

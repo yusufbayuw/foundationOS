@@ -12,7 +12,7 @@ class WorkflowContextData
      */
     public static function fromInstance(WorkflowInstance $instance, array $incoming = []): array
     {
-        return array_replace_recursive(
+        $merged = array_replace_recursive(
             $instance->context_data ?? [],
             $instance->form_data ?? [],
             $instance->computed_data ?? [],
@@ -34,5 +34,13 @@ class WorkflowContextData
                 ],
             ],
         );
+
+        $normalized = [];
+
+        foreach ($merged as $key => $value) {
+            $normalized[(string) $key] = $value;
+        }
+
+        return $normalized;
     }
 }

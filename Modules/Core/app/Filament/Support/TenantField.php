@@ -2,9 +2,11 @@
 
 namespace Modules\Core\Filament\Support;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Services\ContextDefaults;
 use Modules\Core\Support\FilamentUi;
@@ -34,7 +36,10 @@ class TenantField
             ->relationship(
                 'organization',
                 'name',
-                fn ($query) => $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()?->getKey()),
+                fn (Builder $query): Builder => $query->where(
+                    $query->getModel()->qualifyColumn('tenant_id'),
+                    TypedValue::tenantKey(Filament::getTenant()?->getKey()),
+                ),
             );
     }
 
@@ -46,11 +51,11 @@ class TenantField
         return Hidden::make('organization_id')
             ->default(fn () => app(ContextDefaults::class)->resolveOrganizationId(
                 auth()->user(),
-                Filament::getTenant()?->getKey(),
+                TypedValue::tenantKey(Filament::getTenant()?->getKey()),
             ))
             ->dehydrateStateUsing(fn ($state) => $state ?: app(ContextDefaults::class)->resolveOrganizationId(
                 auth()->user(),
-                Filament::getTenant()?->getKey(),
+                TypedValue::tenantKey(Filament::getTenant()?->getKey()),
             ));
     }
 
@@ -61,10 +66,10 @@ class TenantField
     {
         return Hidden::make('academic_period_id')
             ->default(fn () => app(ContextDefaults::class)->resolveAcademicPeriodId(
-                Filament::getTenant()?->getKey(),
+                TypedValue::tenantKey(Filament::getTenant()?->getKey()),
             ))
             ->dehydrateStateUsing(fn ($state) => $state ?: app(ContextDefaults::class)->resolveAcademicPeriodId(
-                Filament::getTenant()?->getKey(),
+                TypedValue::tenantKey(Filament::getTenant()?->getKey()),
             ));
     }
 

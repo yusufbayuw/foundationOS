@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Services\WorkflowAutomatedActionRunner;
@@ -21,7 +22,7 @@ class WorkflowRetryAutomationCommand extends Command
 
         $runner->run($instance, $trigger, [
             'trigger_event' => $trigger,
-            'actor_id' => optional(auth()->user())->getKey(),
+            'actor_id' => TypedValue::tenantKey(auth()->id()),
             'manual_retry' => true,
         ]);
 

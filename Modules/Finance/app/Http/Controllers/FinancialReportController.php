@@ -3,6 +3,7 @@
 namespace Modules\Finance\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Support\TypedValue;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,7 +17,8 @@ class FinancialReportController extends Controller
 
     public function profitLossPdf(Request $request): Response
     {
-        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
+        $defaultTenantId = TypedValue::int(filament()->getTenant()?->getKey());
+        $tenantId = TypedValue::int($request->query('tenant_id'), $defaultTenantId);
         $tenant = Tenant::findOrFail($tenantId);
         $from = Carbon::parse($request->query('from', now()->startOfYear()->toDateString()));
         $to = Carbon::parse($request->query('to', now()->toDateString()));
@@ -27,12 +29,17 @@ class FinancialReportController extends Controller
         $pdf = Pdf::loadView('finance::pdf.profit-loss', ['data' => $data, 'tenant' => $tenant])
             ->setPaper('a4', 'portrait');
 
-        return $pdf->download("Laba_Rugi_{$data['period_from']}_{$data['period_to']}.pdf");
+        return $pdf->download(sprintf(
+            'Laba_Rugi_%s_%s.pdf',
+            TypedValue::string($data['period_from'] ?? ''),
+            TypedValue::string($data['period_to'] ?? ''),
+        ));
     }
 
     public function balanceSheetPdf(Request $request): Response
     {
-        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
+        $defaultTenantId = TypedValue::int(filament()->getTenant()?->getKey());
+        $tenantId = TypedValue::int($request->query('tenant_id'), $defaultTenantId);
         $tenant = Tenant::findOrFail($tenantId);
         $asOf = Carbon::parse($request->query('as_of', now()->toDateString()));
         $organizationId = $request->query('organization_id') ? (int) $request->query('organization_id') : null;
@@ -42,12 +49,13 @@ class FinancialReportController extends Controller
         $pdf = Pdf::loadView('finance::pdf.balance-sheet', ['data' => $data, 'tenant' => $tenant])
             ->setPaper('a4', 'portrait');
 
-        return $pdf->download("Neraca_{$data['as_of']}.pdf");
+        return $pdf->download('Neraca_'.TypedValue::string($data['as_of'] ?? '').'.pdf');
     }
 
     public function cashFlowPdf(Request $request): Response
     {
-        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
+        $defaultTenantId = TypedValue::int(filament()->getTenant()?->getKey());
+        $tenantId = TypedValue::int($request->query('tenant_id'), $defaultTenantId);
         $tenant = Tenant::findOrFail($tenantId);
         $from = Carbon::parse($request->query('from', now()->startOfYear()->toDateString()));
         $to = Carbon::parse($request->query('to', now()->toDateString()));
@@ -58,6 +66,10 @@ class FinancialReportController extends Controller
         $pdf = Pdf::loadView('finance::pdf.cash-flow', ['data' => $data, 'tenant' => $tenant])
             ->setPaper('a4', 'portrait');
 
-        return $pdf->download("Arus_Kas_{$data['period_from']}_{$data['period_to']}.pdf");
+        return $pdf->download(sprintf(
+            'Arus_Kas_%s_%s.pdf',
+            TypedValue::string($data['period_from'] ?? ''),
+            TypedValue::string($data['period_to'] ?? ''),
+        ));
     }
 }

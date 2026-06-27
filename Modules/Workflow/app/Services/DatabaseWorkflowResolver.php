@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Workflow\Contracts\StartsWorkflow;
 use Modules\Workflow\Contracts\WorkflowResolver;
@@ -39,7 +40,7 @@ class DatabaseWorkflowResolver implements WorkflowResolver
                 $workflow->organization_id === $organizationId ? 1 : 0,
                 $workflow->subject_type === $resolvedSubjectType ? 1 : 0,
                 $workflow->version,
-                optional($workflow->published_at)->timestamp ?? 0,
+                TypedValue::int(data_get($workflow, 'published_at.timestamp'), 0),
             ])
             ->values();
 

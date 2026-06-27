@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Support\TypedValue;
 use Modules\Finance\Models\StudentInvoice;
 
 class StudentInvoiceDocumentService
@@ -23,7 +24,7 @@ class StudentInvoiceDocumentService
 
     public function filename(StudentInvoice $invoice): string
     {
-        return sprintf('StudentInvoice_%s.pdf', str_replace(' ', '_', $invoice->invoice_number ?? (string) $invoice->getKey()));
+        return sprintf('StudentInvoice_%s.pdf', str_replace(' ', '_', $invoice->invoice_number ?? TypedValue::string($invoice->getKey())));
     }
 
     protected function resolveRecipientName(StudentInvoice $invoice): string

@@ -31,7 +31,7 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
             $fromSnapshot = $this->resolveFromSnapshot(
                 $instance,
                 $snapshotTransitions,
-                $step->getKey(),
+                TypedValue::tenantKey($step->getKey()) ?? 0,
                 $actionName,
                 $incomingData,
             );
@@ -80,7 +80,7 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
                 return $this->materializeTransition($instance, $snapshot);
             }
 
-            if (is_array($rules) && $this->ruleEngine->matches($rules, $incomingData)) {
+            if (is_array($rules) && $this->ruleEngine->matches($this->normalizeRuleArray($rules), $incomingData)) {
                 return $this->materializeTransition($instance, $snapshot);
             }
         }
@@ -134,11 +134,27 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
                 return $transition;
             }
 
-            if ($this->ruleEngine->matches($transition->condition_rules ?? [], $incomingData)) {
+            $rules = $transition->condition_rules;
+            if ($this->ruleEngine->matches($this->normalizeRuleArray($rules), $incomingData)) {
                 return $transition;
             }
         }
 
         throw new NoValidWorkflowTransitionException("No valid workflow transition found for action [{$actionName}] on step [{$step->code}].");
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $rule
+     * @return array<string, mixed>
+     */
+    private function normalizeRuleArray(array $rule): array
+    {
+        $normalized = [];
+
+        foreach ($rule as $key => $value) {
+            $normalized[(string) $key] = $value;
+        }
+
+        return $normalized;
     }
 }

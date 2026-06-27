@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -13,6 +14,7 @@ use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Support\FilamentUi;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Services\AttendanceRecapService;
+use Modules\School\Support\AttendanceRecapRow;
 
 class AttendanceRecapPage extends Page implements HasForms
 {
@@ -89,27 +91,31 @@ class AttendanceRecapPage extends Page implements HasForms
             ->columns(4);
     }
 
-    /** @return Collection<int, mixed> */
+    /**
+     * @return Collection<int, AttendanceRecapRow>
+     */
     public function getRecapData(): Collection
     {
-        if (! $this->academic_period_id || ! $this->class_id || ! $this->month || ! $this->year) {
-            return collect();
+        $rows = [];
+
+        if ($this->academic_period_id && $this->class_id && $this->month && $this->year) {
+            $tenantId = TypedValue::tenantKey(
+                filament()->getTenant()?->getKey()
+                    ?? SchoolClass::query()->find($this->class_id)?->tenant_id
+            );
+
+            if ($tenantId) {
+                $rows = app(AttendanceRecapService::class)->getStudentRecap(
+                    $tenantId,
+                    $this->academic_period_id,
+                    $this->class_id,
+                    $this->month,
+                    $this->year,
+                )->all();
+            }
         }
 
-        $tenantId = filament()->getTenant()?->getKey()
-            ?? SchoolClass::query()->find($this->class_id)?->tenant_id;
-
-        if (! $tenantId) {
-            return collect();
-        }
-
-        return app(AttendanceRecapService::class)->getStudentRecap(
-            $tenantId,
-            $this->academic_period_id,
-            $this->class_id,
-            $this->month,
-            $this->year,
-        );
+        return (new Collection($rows))->values();
     }
 
     protected function getHeaderActions(): array

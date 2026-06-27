@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Services;
 
+use App\Support\TypedValue;
 use Modules\Employee\Models\EmploymentContract;
 
 class EmploymentContractDocumentService
@@ -22,6 +23,6 @@ class EmploymentContractDocumentService
 
     public function filename(EmploymentContract $contract): string
     {
-        return sprintf('EmploymentContract_%s.pdf', str_replace(' ', '_', $contract->contract_number ?? (string) $contract->getKey()));
+        return sprintf('EmploymentContract_%s.pdf', str_replace(' ', '_', $contract->contract_number ?? TypedValue::string($contract->getKey())));
     }
 }

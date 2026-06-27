@@ -7,6 +7,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Support\FilamentUi;
@@ -34,7 +35,7 @@ class ExamResultsRelationManager extends RelationManager
         return $table
             ->heading(FilamentUi::text('Exam results'))
             ->description(FilamentUi::text('Final scores synced from Cloudflare runtime.'))
-            ->modifyQueryUsing(fn ($query) => $query->with('examParticipant')->latest('submitted_at'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('examParticipant')->orderByDesc('submitted_at'))
             ->columns([
                 TextColumn::make('id')
                     ->label(FilamentUi::field('result_id'))

@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Filament\Resources\Books;
 
+use App\Support\TypedValue;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -43,7 +44,9 @@ class BookResource extends LocalizedResource
      */
     protected static function globalSearchResultDetails(Model $record): array
     {
-        return static::detailStatus($record->status ?? null);
+        $status = $record->getAttribute('status');
+
+        return static::detailStatus($status === null ? null : TypedValue::string($status));
     }
 
     public static function form(Schema $schema): Schema

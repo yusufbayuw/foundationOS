@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -86,7 +87,7 @@ class ExamQuestionBulkImportService
      */
     public function validateRow(array $row, int $tenantId): array
     {
-        $bankUuid = trim((string) ($row['question_bank_uuid'] ?? ''));
+        $bankUuid = trim(TypedValue::string($row['question_bank_uuid'] ?? ''));
 
         if ($bankUuid === '' || ! Str::isUuid($bankUuid)) {
             throw new RowImportFailedException('question_bank_uuid must be a valid UUID.');
@@ -101,7 +102,7 @@ class ExamQuestionBulkImportService
             throw new RowImportFailedException('Question bank not found for this tenant.');
         }
 
-        $contextValue = strtolower(trim((string) ($row['academic_context_type'] ?? '')));
+        $contextValue = strtolower(trim(TypedValue::string($row['academic_context_type'] ?? '')));
 
         try {
             $context = ExamAcademicContext::from($contextValue);
@@ -115,13 +116,13 @@ class ExamQuestionBulkImportService
 
         $this->validateContextFields($row, $bank, $context);
 
-        $questionText = trim(strip_tags((string) ($row['question_text'] ?? '')));
+        $questionText = trim(strip_tags(TypedValue::string($row['question_text'] ?? '')));
 
         if ($questionText === '') {
             throw new RowImportFailedException('question_text is required.');
         }
 
-        $typeValue = strtolower(trim((string) ($row['type'] ?? '')));
+        $typeValue = strtolower(trim(TypedValue::string($row['type'] ?? '')));
 
         try {
             $type = QuestionType::from($typeValue);
@@ -138,7 +139,7 @@ class ExamQuestionBulkImportService
         $score = ($scoreRaw === null || $scoreRaw === '') ? 1.0 : (float) $scoreRaw;
 
         $difficulty = null;
-        $difficultyValue = strtolower(trim((string) ($row['difficulty'] ?? '')));
+        $difficultyValue = strtolower(trim(TypedValue::string($row['difficulty'] ?? '')));
 
         if ($difficultyValue !== '') {
             try {
@@ -153,9 +154,9 @@ class ExamQuestionBulkImportService
         $options = $this->buildOptions($row, $type);
         $correctAnswer = $this->resolveCorrectAnswer($row, $type, $options);
 
-        $questionNumber = (int) ExamQuestion::withoutTenantScope()
+        $questionNumber = TypedValue::int(ExamQuestion::withoutTenantScope()
             ->where('exam_question_bank_id', $bank->id)
-            ->max('question_number');
+            ->max('question_number'));
 
         return [
             'bank_id' => $bank->id,
@@ -164,7 +165,7 @@ class ExamQuestionBulkImportService
             'topic' => $this->nullableString($row['topic'] ?? null),
             'subtopic' => $this->nullableString($row['subtopic'] ?? null),
             'difficulty' => $difficulty,
-            'question_text' => (string) ($row['question_text'] ?? $questionText),
+            'question_text' => TypedValue::string($row['question_text'] ?? $questionText),
             'correct_answer' => $correctAnswer,
             'explanation' => $this->nullableString($row['explanation'] ?? null),
             'answer_key' => $type->supportsOptions() ? null : $correctAnswer,
@@ -268,7 +269,7 @@ class ExamQuestionBulkImportService
             }
         }
 
-        $skillCodes = trim((string) ($row['skill_codes'] ?? ''));
+        $skillCodes = trim(TypedValue::string($row['skill_codes'] ?? ''));
 
         if ($skillCodes !== '') {
             $metadata['skill_codes'] = array_values(array_filter(array_map(
@@ -333,7 +334,7 @@ class ExamQuestionBulkImportService
      */
     protected function resolveCorrectAnswer(array $row, QuestionType $type, array &$options): ?string
     {
-        $rawCorrect = trim((string) ($row['correct_answer'] ?? ''));
+        $rawCorrect = trim(TypedValue::string($row['correct_answer'] ?? ''));
 
         if (! $type->supportsOptions()) {
             if ($rawCorrect === '') {
@@ -446,7 +447,7 @@ class ExamQuestionBulkImportService
             return null;
         }
 
-        $string = trim((string) $value);
+        $string = trim(TypedValue::string($value));
 
         return $string === '' ? null : $string;
     }

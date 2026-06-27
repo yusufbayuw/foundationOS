@@ -11,6 +11,11 @@ class DeviceController extends ApiController
 {
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user();
+        if ($user === null) {
+            return $this->error('unauthenticated', 'Unauthenticated.', 401);
+        }
+
         $validator = Validator::make($request->all(), [
             'token' => ['required', 'string', 'max:500'],
             'platform' => ['required', 'in:android,ios,web'],
@@ -21,7 +26,7 @@ class DeviceController extends ApiController
         }
 
         $device = Device::updateOrCreate(
-            ['user_id' => $request->user()->getKey(), 'token' => $validator->validated()['token']],
+            ['user_id' => $user->getKey(), 'token' => $validator->validated()['token']],
             [
                 'platform' => $validator->validated()['platform'],
                 'is_active' => true,
@@ -39,7 +44,12 @@ class DeviceController extends ApiController
 
     public function destroy(Request $request, string $token): JsonResponse
     {
-        Device::where('user_id', $request->user()->getKey())
+        $user = $request->user();
+        if ($user === null) {
+            return $this->error('unauthenticated', 'Unauthenticated.', 401);
+        }
+
+        Device::where('user_id', $user->getKey())
             ->where('token', $token)
             ->update(['is_active' => false]);
 

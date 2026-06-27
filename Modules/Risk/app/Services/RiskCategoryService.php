@@ -2,6 +2,7 @@
 
 namespace Modules\Risk\Services;
 
+use App\Support\TypedValue;
 use Modules\Risk\Exceptions\DuplicateRiskCategoryCodeException;
 use Modules\Risk\Models\RiskCategory;
 
@@ -45,14 +46,14 @@ class RiskCategoryService
     {
         $category->forceFill(['status' => 'inactive'])->save();
 
-        return $category->fresh();
+        return TypedValue::model($category->fresh());
     }
 
     public function reactivate(RiskCategory $category): RiskCategory
     {
         $category->forceFill(['status' => 'active'])->save();
 
-        return $category->fresh();
+        return TypedValue::model($category->fresh());
     }
 
     protected function codeExists(int $tenantId, ?int $organizationId, string $code): bool

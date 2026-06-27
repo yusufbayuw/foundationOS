@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\Payments\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
@@ -11,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Filament\Support\TenantField;
 use Modules\Core\Support\FilamentUi;
 
@@ -26,17 +28,17 @@ class PaymentForm
                         TenantField::make(),
                         Select::make('student_invoice_id')
                             ->label(FilamentUi::field('student_invoice_id'))
-                            ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function ($query): void {
+                            ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function (Builder $query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), TypedValue::tenantKey(Filament::getTenant()->getKey()));
                                 }
                             })
                             ->required(),
                         Select::make('chart_of_account_id')
                             ->label(FilamentUi::field('chart_of_account_id'))
-                            ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
+                            ->relationship('chartOfAccount', 'name', modifyQueryUsing: function (Builder $query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), TypedValue::tenantKey(Filament::getTenant()->getKey()));
                                 }
                             })
                             ->required(),

@@ -6,6 +6,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Support\FilamentUi;
+use Modules\Monitoring\Models\AuditLog;
 
 class AuditLogInfolist
 {
@@ -51,7 +52,7 @@ class AuditLogInfolist
                     ->schema([
                         TextEntry::make('diff')
                             ->label(FilamentUi::text('Value diff'))
-                            ->state(fn ($record) => view('components.audit-diff', [
+                            ->state(fn (AuditLog $record): string => view('components.audit-diff', [
                                 'old' => $record->old_values ?? [],
                                 'new' => $record->new_values ?? [],
                             ])->render())

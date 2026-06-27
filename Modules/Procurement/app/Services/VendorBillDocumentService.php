@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Modules\Procurement\Models\VendorBill;
 
 class VendorBillDocumentService
@@ -28,6 +29,6 @@ class VendorBillDocumentService
 
     public function filename(VendorBill $bill): string
     {
-        return sprintf('VendorBill_%s.pdf', str_replace(' ', '_', $bill->bill_number ?? (string) $bill->getKey()));
+        return sprintf('VendorBill_%s.pdf', str_replace(' ', '_', $bill->bill_number ?? TypedValue::string($bill->getKey())));
     }
 }

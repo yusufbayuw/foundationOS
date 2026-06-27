@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Pages;
 
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -60,7 +61,7 @@ class CashFlowPage extends Page
 
         $service = app(FinancialReportService::class);
         $this->reportData = $service->cashFlow(
-            $tenant->getKey(),
+            TypedValue::int($tenant->getKey()),
             Carbon::parse($this->dateFrom),
             Carbon::parse($this->dateTo),
             $this->organizationId,
@@ -93,9 +94,9 @@ class CashFlowPage extends Page
                         ->nullable(),
                 ])
                 ->action(function (array $data): void {
-                    $this->dateFrom = $data['date_from'];
-                    $this->dateTo = $data['date_to'];
-                    $this->organizationId = $data['organization_id'] ? (int) $data['organization_id'] : null;
+                    $this->dateFrom = TypedValue::string($data['date_from']);
+                    $this->dateTo = TypedValue::string($data['date_to']);
+                    $this->organizationId = $data['organization_id'] ? TypedValue::int($data['organization_id']) : null;
                     $this->generateReport();
                 }),
 

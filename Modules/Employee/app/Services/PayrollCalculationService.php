@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Services;
 
+use App\Support\TypedValue;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Employee\Models\AttendanceLog;
@@ -124,7 +125,8 @@ class PayrollCalculationService
      */
     private function resolveSlip(Employee $employee, int $month, int $year, array $stats, bool $dryRun): SalarySlip
     {
-        $periodLabel = Carbon::create($year, $month, 1)->format('F Y');
+        $periodDate = Carbon::create($year, $month, 1);
+        $periodLabel = ($periodDate ?? now())->format('F Y');
         $basicSalary = (float) $employee->basic_salary;
 
         if ($dryRun) {
@@ -189,8 +191,8 @@ class PayrollCalculationService
             'working_days' => $logs->whereIn('status', ['present', 'late'])->count(),
             'absent_days' => $logs->where('status', 'absent')->count(),
             'leave_days' => $logs->where('status', 'leave')->count(),
-            'overtime_hours' => (float) $logs->sum('overtime_hours'),
-            'work_hours' => (float) $logs->sum('work_hours'),
+            'overtime_hours' => TypedValue::float($logs->sum('overtime_hours')),
+            'work_hours' => TypedValue::float($logs->sum('work_hours')),
         ];
     }
 
@@ -201,7 +203,7 @@ class PayrollCalculationService
     {
         return match ($component->calculation_type) {
             'fixed' => (float) $component->amount,
-            'percentage' => round((float) $component->percentage / 100 * $vars['basic_salary'], 2),
+            'percentage' => round((float) $component->percentage / 100 * TypedValue::float($vars['basic_salary']), 2),
             'formula' => $this->evaluateFormula((string) $component->formula, $vars),
             default => (float) $component->amount,
         };
@@ -215,9 +217,12 @@ class PayrollCalculationService
         // Replace {variable} placeholders with their numeric values
         $expression = preg_replace_callback(
             '/\{(\w+)\}/',
-            fn (array $m) => isset($vars[$m[1]]) ? (string) $vars[$m[1]] : '0',
+            fn (array $m) => isset($vars[$m[1]]) ? TypedValue::string($vars[$m[1]]) : '0',
             $formula,
         );
+        if ($expression === null) {
+            return 0.0;
+        }
 
         // Allow only safe characters: digits, operators, whitespace, parens, dot
         if (! preg_match('/^[\d\s\+\-\*\/\(\)\.]+$/', $expression)) {
@@ -225,7 +230,7 @@ class PayrollCalculationService
         }
 
         try {
-            return (float) eval("return ($expression);");
+            return TypedValue::float(eval("return ($expression);"));
         } catch (\Throwable) {
             return 0.0;
         }

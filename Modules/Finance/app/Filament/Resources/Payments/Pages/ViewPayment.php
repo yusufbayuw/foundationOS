@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\Payments\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
@@ -43,7 +44,8 @@ class ViewPayment extends ViewRecord
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->verifyPayment($record, $user, $data['notes'] ?? null);
+                        $notes = TypedValue::string($data['notes'] ?? '');
+                        app(FinanceControlService::class)->verifyPayment($record, $user, $notes !== '' ? $notes : null);
                         Notification::make()->title('Payment verified and journal posted.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {
@@ -63,7 +65,8 @@ class ViewPayment extends ViewRecord
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->rejectPayment($record, $user, $data['notes'] ?? null);
+                        $notes = TypedValue::string($data['notes'] ?? '');
+                        app(FinanceControlService::class)->rejectPayment($record, $user, $notes !== '' ? $notes : null);
                         Notification::make()->title('Payment rejected.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {

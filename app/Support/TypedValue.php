@@ -2,7 +2,10 @@
 
 namespace App\Support;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Safe narrowing helpers for PHPStan level 10 mixed values.
@@ -100,6 +103,30 @@ final class TypedValue
         }
 
         return null;
+    }
+
+    /**
+     * @template TModel of Model
+     *
+     * @param  TModel|null  $model
+     * @return TModel
+     */
+    public static function model(?Model $model, string $message = 'Expected model instance.'): Model
+    {
+        if ($model === null) {
+            throw new RuntimeException($message);
+        }
+
+        return $model;
+    }
+
+    public static function response(mixed $response, string $message = 'Expected HTTP response instance.'): Response
+    {
+        if (! $response instanceof Response) {
+            throw new RuntimeException($message);
+        }
+
+        return $response;
     }
 
     /**

@@ -111,8 +111,13 @@ class RfqVendorsTable
                             ->rows(3),
                     ])
                     ->action(function (RfqVendor $record, array $data): void {
+                        $awardReason = TypedValue::string($data['award_reason'] ?? '');
                         $po = app(PurchaseOrderAutoCreationService::class)
-                            ->awardToVendor($record, TypedValue::nullableInt(auth()->id()), $data['award_reason'] ?? null);
+                            ->awardToVendor(
+                                $record,
+                                TypedValue::nullableInt(auth()->id()),
+                                $awardReason !== '' ? $awardReason : null,
+                            );
 
                         Notification::make()
                             ->title('PO draft dibuat')

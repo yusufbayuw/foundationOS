@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\RelationManagers;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\CreateAction;
@@ -16,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -78,7 +80,7 @@ class ExamParticipantsRelationManager extends RelationManager
     {
         return $table
             ->heading(FilamentUi::text('Exam participants'))
-            ->modifyQueryUsing(fn ($query) => $query->with('activeToken'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('activeToken'))
             ->columns([
                 TextColumn::make('student_name')
                     ->label(FilamentUi::field('student_name'))
@@ -233,9 +235,9 @@ class ExamParticipantsRelationManager extends RelationManager
                         return;
                     }
 
-                    $path = $data['csv_file'] ?? null;
+                    $path = TypedValue::string($data['csv_file'] ?? null);
 
-                    if ($path === null) {
+                    if ($path === '') {
                         return;
                     }
 
@@ -275,7 +277,7 @@ class ExamParticipantsRelationManager extends RelationManager
             ->action(fn () => $this->exportTokensCsv(
                 $definition instanceof ExamDefinition
                     ? $definition->examParticipants()->with('activeToken')->get()
-                    : collect(),
+                    : ExamParticipant::query()->whereRaw('1 = 0')->get(),
             ));
 
         if ($definition instanceof ExamDefinition) {

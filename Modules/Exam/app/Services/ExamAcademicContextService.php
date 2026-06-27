@@ -59,7 +59,7 @@ class ExamAcademicContextService
                 'subject_reference' => ExamRuntimeEntityRef::forModel($definition->schoolSubject),
                 'subject_label' => $definition->schoolSubject?->name,
                 'teacher_reference' => ExamRuntimeEntityRef::forModel($teacher),
-                'teacher_name' => $teacher->user->name ?? $teacher->nip,
+                'teacher_name' => $teacher?->user->name ?? $teacher?->nip,
             ],
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace Modules\Facility\Services;
 
+use App\Support\TypedValue;
 use Modules\Core\Services\RevenueJournalHelper;
 use Modules\Facility\Models\FacilityRental;
 use Modules\Finance\Models\JournalEntry;
@@ -20,22 +21,24 @@ class FacilityRentalJournalService
         }
 
         $amount = (float) $rental->total_amount;
+        $tenantId = TypedValue::int($rental->tenant_id);
+        $rentalId = TypedValue::string($rental->getKey());
 
         if ($amount <= 0) {
             throw new RuntimeException('Rental amount must be positive.');
         }
 
-        $cash = $this->journalHelper->findCoa($rental->tenant_id, 'asset', ['kas', 'bank']);
-        $revenue = $this->journalHelper->findCoa($rental->tenant_id, 'revenue', ['sewa', 'rental', 'pendapatan jasa']);
+        $cash = $this->journalHelper->findCoa($tenantId, 'asset', ['kas', 'bank']);
+        $revenue = $this->journalHelper->findCoa($tenantId, 'revenue', ['sewa', 'rental', 'pendapatan jasa']);
 
         if (! $cash || ! $revenue) {
             throw new RuntimeException('COA for facility rental journal not configured.');
         }
 
         $entry = $this->journalHelper->postIfMissing(
-            tenantId: $rental->tenant_id,
-            entryNumber: 'RENT-'.$rental->getKey(),
-            description: 'Facility rental #'.$rental->getKey(),
+            tenantId: $tenantId,
+            entryNumber: 'RENT-'.$rentalId,
+            description: 'Facility rental #'.$rentalId,
             lines: [
                 ['chart_of_account_id' => $cash->id, 'debit' => $amount, 'credit' => 0],
                 ['chart_of_account_id' => $revenue->id, 'debit' => 0, 'credit' => $amount],

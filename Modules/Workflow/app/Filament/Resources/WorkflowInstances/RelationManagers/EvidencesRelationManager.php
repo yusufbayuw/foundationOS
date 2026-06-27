@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers;
 
+use App\Support\TypedValue;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\FileUpload;
@@ -57,9 +58,9 @@ class EvidencesRelationManager extends RelationManager
 
                         // Resolve file metadata from the uploaded path
                         if (! empty($data['file_path'])) {
-                            $path = $data['file_path'];
+                            $path = TypedValue::string($data['file_path']);
                             $data['original_filename'] = basename($path);
-                            if (Storage::exists($path)) {
+                            if ($path !== '' && Storage::exists($path)) {
                                 $data['file_size'] = Storage::size($path);
                                 $data['mime_type'] = Storage::mimeType($path) ?: null;
                             }
@@ -85,7 +86,9 @@ class EvidencesRelationManager extends RelationManager
                 ->label(FilamentUi::text('Step'))
                 ->options(function (): array {
                     $instance = $this->getOwnerRecord();
-                    assert($instance instanceof WorkflowInstance);
+                    if (! $instance instanceof WorkflowInstance) {
+                        return [];
+                    }
 
                     return $instance->workflow?->steps()
                         ->orderBy('sort_order')

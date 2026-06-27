@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Support;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,7 @@ class LibraryScopeResolver
         $tenant = Filament::getTenant();
 
         if ($tenant instanceof Tenant) {
-            return (int) $tenant->getKey();
+            return TypedValue::int($tenant->getKey());
         }
 
         return null;
@@ -66,7 +67,7 @@ class LibraryScopeResolver
 
     public function isVisibleToUser(object $record, ?User $user = null): bool
     {
-        if (! isset($record->tenant_id) || (int) $record->tenant_id <= 0) {
+        if (! isset($record->tenant_id) || TypedValue::int($record->tenant_id) <= 0) {
             return false;
         }
 
@@ -78,7 +79,7 @@ class LibraryScopeResolver
             return true;
         }
 
-        $assignmentQuery = $user->userTenantRoles()->where('tenant_id', (int) $record->tenant_id);
+        $assignmentQuery = $user->userTenantRoles()->where('tenant_id', TypedValue::int($record->tenant_id));
 
         if (! isset($record->organization_id)) {
             return $assignmentQuery->exists();
@@ -87,7 +88,7 @@ class LibraryScopeResolver
         return $assignmentQuery
             ->where(function (Builder $builder) use ($record): void {
                 $builder->whereNull('organization_id')
-                    ->orWhere('organization_id', (int) $record->organization_id);
+                    ->orWhere('organization_id', TypedValue::int($record->organization_id));
             })
             ->exists();
     }

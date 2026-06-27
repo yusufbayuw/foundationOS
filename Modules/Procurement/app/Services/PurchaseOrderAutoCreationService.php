@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Procurement\Exceptions\RfqAwardException;
 use Modules\Procurement\Models\PurchaseOrder;
@@ -25,7 +26,7 @@ class PurchaseOrderAutoCreationService
     public function awardToVendor(RfqVendor $rfqVendor, ?int $createdBy = null, ?string $awardReason = null): PurchaseOrder
     {
         return DB::transaction(function () use ($rfqVendor, $awardReason): PurchaseOrder {
-            $rfqVendor = $rfqVendor->fresh(['requestForQuotation.items', 'vendor']);
+            $rfqVendor = TypedValue::model($rfqVendor->fresh(['requestForQuotation.items', 'vendor']));
             $rfq = $rfqVendor->requestForQuotation;
 
             if (! $rfq) {
@@ -90,7 +91,7 @@ class PurchaseOrderAutoCreationService
 
             $this->lockRfq($rfqVendor, $awardReason);
 
-            return $po->fresh(['items']);
+            return TypedValue::model($po->fresh(['items']));
         });
     }
 
@@ -114,7 +115,7 @@ class PurchaseOrderAutoCreationService
 
     protected function generatePoNumber(RequestForQuotation $rfq): string
     {
-        $base = 'PO-'.($rfq->rfq_number ?: $rfq->getKey());
+        $base = 'PO-'.TypedValue::string($rfq->rfq_number ?: $rfq->getKey());
         $candidate = $base;
         $seq = 1;
 

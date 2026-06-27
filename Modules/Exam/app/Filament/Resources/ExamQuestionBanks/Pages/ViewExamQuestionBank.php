@@ -3,6 +3,7 @@
 namespace Modules\Exam\Filament\Resources\ExamQuestionBanks\Pages;
 
 use App\Filament\Imports\ExamQuestionBulkImporter;
+use App\Support\TypedValue;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Exam\Filament\Resources\ExamQuestionBanks\ExamQuestionBankResource;
 use Modules\Exam\Filament\Support\ExamQuestionImportTableActions;
@@ -15,7 +16,7 @@ class ViewExamQuestionBank extends ViewRecord
     {
         return ExamQuestionImportTableActions::make(
             ExamQuestionBulkImporter::class,
-            (string) $this->getRecord()->getKey(),
+            TypedValue::string($this->getRecord()->getKey()),
         );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\RelationManagers;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -136,7 +137,7 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                     ->query(fn (Builder $query, array $data): Builder => filled($data['topic'] ?? null)
                         ? $query->whereHas('examQuestion', function (Builder $q) use ($data): void {
                             /** @var Builder<ExamQuestion> $q */
-                            $q->where('topic', 'like', '%'.$data['topic'].'%');
+                            $q->where('topic', 'like', '%'.TypedValue::string($data['topic']).'%');
                         })
                         : $query),
             ])
@@ -208,7 +209,7 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                             return 1;
                         }
 
-                        return (int) $owner->examDefinitionQuestions()->max('sort_order') + 1;
+                        return TypedValue::int($owner->examDefinitionQuestions()->max('sort_order')) + 1;
                     }),
                 TextInput::make('score_override')
                     ->label(FilamentUi::field('score_override'))
@@ -242,7 +243,7 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                     'tenant_id' => $definition->tenant_id,
                     'exam_definition_id' => $definition->id,
                     'exam_question_id' => $question->id,
-                    'sort_order' => (int) ($data['sort_order'] ?? 0),
+                    'sort_order' => TypedValue::int($data['sort_order'] ?? 0),
                     'score_override' => $data['score_override'] ?? null,
                 ]);
             });

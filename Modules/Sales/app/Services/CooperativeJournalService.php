@@ -2,6 +2,7 @@
 
 namespace Modules\Sales\Services;
 
+use App\Support\TypedValue;
 use Modules\Core\Services\RevenueJournalHelper;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Sales\Models\CooperativeSaving;
@@ -20,16 +21,18 @@ class CooperativeJournalService
         }
 
         $amount = (float) $saving->amount;
-        $cash = $this->journalHelper->findCoa($saving->tenant_id, 'asset', ['kas', 'bank']);
-        $equity = $this->journalHelper->findCoa($saving->tenant_id, 'equity', ['simpanan', 'koperasi', 'modal']);
+        $tenantId = TypedValue::int($saving->tenant_id);
+        $savingId = TypedValue::string($saving->getKey());
+        $cash = $this->journalHelper->findCoa($tenantId, 'asset', ['kas', 'bank']);
+        $equity = $this->journalHelper->findCoa($tenantId, 'equity', ['simpanan', 'koperasi', 'modal']);
 
         if (! $cash || ! $equity) {
             throw new RuntimeException('COA for cooperative savings journal not configured.');
         }
 
         $entry = $this->journalHelper->postIfMissing(
-            tenantId: $saving->tenant_id,
-            entryNumber: 'COOP-SAV-'.$saving->getKey(),
+            tenantId: $tenantId,
+            entryNumber: 'COOP-SAV-'.$savingId,
             description: 'Cooperative savings '.$saving->savings_type,
             lines: [
                 ['chart_of_account_id' => $cash->id, 'debit' => $amount, 'credit' => 0],

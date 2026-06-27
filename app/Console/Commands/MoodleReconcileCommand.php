@@ -7,6 +7,7 @@ use App\Integrations\Moodle\MoodleClient;
 use App\Integrations\Moodle\MoodleMapper;
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncService;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Modules\Campus\Models\Course;
@@ -153,7 +154,7 @@ class MoodleReconcileCommand extends Command
                 continue;
             }
 
-            $suspended = (int) ($firstUser['suspended'] ?? 0);
+            $suspended = TypedValue::int($firstUser['suspended'] ?? 0);
             $mismatch = $shouldDeactivate ? $suspended !== 1 : $suspended !== 0;
             if (! $mismatch) {
                 continue;
@@ -203,7 +204,8 @@ class MoodleReconcileCommand extends Command
                 continue;
             }
 
-            $moodleCourse = $response['courses'][0] ?? null;
+            $courses = is_array($response['courses'] ?? null) ? $response['courses'] : [];
+            $moodleCourse = is_array($courses[0] ?? null) ? $courses[0] : null;
             if (! is_array($moodleCourse)) {
                 if (! $shouldDeactivate) {
                     $summary['drift_missing_in_moodle']++;
@@ -220,7 +222,7 @@ class MoodleReconcileCommand extends Command
                 continue;
             }
 
-            $visible = (int) ($moodleCourse['visible'] ?? 1);
+            $visible = TypedValue::int($moodleCourse['visible'] ?? 1);
             $mismatch = $shouldDeactivate ? $visible !== 0 : $visible !== 1;
             if (! $mismatch) {
                 continue;

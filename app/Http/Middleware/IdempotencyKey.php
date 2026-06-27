@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\TypedValue;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +17,9 @@ class IdempotencyKey
         $key = $request->header('Idempotency-Key');
 
         if (! $key || ! in_array($request->method(), ['POST', 'PUT', 'PATCH'], true)) {
-            return $next($request);
+            $response = $next($request);
+
+            return $response instanceof SymfonyResponse ? $response : response('');
         }
 
         $cacheKey = $this->cacheKey($request, $key);
@@ -24,8 +27,10 @@ class IdempotencyKey
 
         $cached = Cache::get($cacheKey);
 
-        if ($cached !== null) {
-            if ($cached['body_hash'] !== $bodyHash) {
+        if (is_array($cached)) {
+            $cachedBodyHash = TypedValue::string($cached['body_hash'] ?? '');
+
+            if ($cachedBodyHash !== $bodyHash) {
                 return response()->json([
                     'error' => [
                         'code' => 'idempotency_conflict',
@@ -34,12 +39,19 @@ class IdempotencyKey
                 ], 409);
             }
 
-            return response($cached['body'], $cached['status'])
+            return response(
+                TypedValue::string($cached['body'] ?? ''),
+                TypedValue::int($cached['status'] ?? 200),
+            )
                 ->header('Content-Type', 'application/json')
                 ->header('X-Idempotency-Replayed', 'true');
         }
 
         $response = $next($request);
+
+        if (! $response instanceof SymfonyResponse) {
+            return response('');
+        }
 
         if ($response->getStatusCode() < 500) {
             Cache::put($cacheKey, [
@@ -54,7 +66,7 @@ class IdempotencyKey
 
     private function cacheKey(Request $request, string $key): string
     {
-        $userId = $request->user()?->getKey() ?? 'anon';
+        $userId = TypedValue::string($request->user()?->getKey() ?? 'anon');
         $route = $request->path();
 
         return "idempotency:{$userId}:{$route}:".hash('sha256', $key);

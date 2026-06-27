@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamQuestions\Tables;
 
+use App\Support\TypedValue;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -112,7 +113,7 @@ class ExamQuestionsTable
                         /** @var Builder<ExamQuestion> $query */
                         return $query->whereRaw(
                             'JSON_UNQUOTE(JSON_EXTRACT(metadata_json, ?)) = ?',
-                            ['$.olympiad_level', (string) $data['value']],
+                            ['$.olympiad_level', TypedValue::string($data['value'])],
                         );
                     }),
             ])

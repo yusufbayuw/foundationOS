@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Carbon\CarbonInterface;
 use Modules\Core\Models\User;
 use Modules\Workflow\Enums\WorkflowAssignmentStatus;
@@ -89,7 +90,7 @@ class WorkflowEscalationService
                         'Workflow task overdue',
                         sprintf(
                             'Task for %s is past its due date (due %s).',
-                            $instance->subject_label ?: 'workflow instance #'.$instance->getKey(),
+                            $instance->subject_label ?: 'workflow instance #'.TypedValue::string($instance->getKey()),
                             $assignment->due_at?->toDateTimeString() ?? $now->toDateTimeString(),
                         ),
                     ));

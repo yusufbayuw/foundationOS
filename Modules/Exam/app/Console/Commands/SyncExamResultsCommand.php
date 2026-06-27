@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Modules\Exam\Enums\ExamStatus;
@@ -108,10 +109,10 @@ class SyncExamResultsCommand extends Command
             $summary = $report['summary'] ?? [];
             $this->info(sprintf(
                 '%s — attempts: %d, answers: %d, results: %d',
-                $report['exam_definition_id'],
-                $summary['attempts_synced'] ?? 0,
-                $summary['answers_synced'] ?? 0,
-                $summary['results_synced'] ?? 0,
+                TypedValue::string($report['exam_definition_id']),
+                TypedValue::int($summary['attempts_synced'] ?? 0),
+                TypedValue::int($summary['answers_synced'] ?? 0),
+                TypedValue::int($summary['results_synced'] ?? 0),
             ));
         }
 

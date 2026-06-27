@@ -2,6 +2,7 @@
 
 namespace Modules\Training\Services;
 
+use App\Support\TypedValue;
 use Modules\Training\Models\TrainingCertificate;
 
 class TrainingCertificateDocumentService
@@ -28,6 +29,6 @@ class TrainingCertificateDocumentService
 
     public function filename(TrainingCertificate $certificate): string
     {
-        return sprintf('TrainingCertificate_%s.pdf', str_replace(' ', '_', $certificate->certificate_number ?? (string) $certificate->getKey()));
+        return sprintf('TrainingCertificate_%s.pdf', str_replace(' ', '_', $certificate->certificate_number ?? TypedValue::string($certificate->getKey())));
     }
 }

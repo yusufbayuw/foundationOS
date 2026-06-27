@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Modules\Core\Models\Tenant;
 use Modules\Counseling\Services\CounselingRiskScanner;
@@ -21,9 +22,9 @@ class CounselingScanRiskCommand extends Command
 
         $total = 0;
         foreach ($tenants as $tenantId) {
-            $created = $scanner->scanTenant((int) $tenantId);
+            $created = $scanner->scanTenant(TypedValue::int($tenantId));
             $total += $created;
-            $this->line("Tenant {$tenantId}: {$created} case(s) created.");
+            $this->line('Tenant '.TypedValue::string($tenantId).": {$created} case(s) created.");
         }
 
         $this->info("Total new counseling cases: {$total}");

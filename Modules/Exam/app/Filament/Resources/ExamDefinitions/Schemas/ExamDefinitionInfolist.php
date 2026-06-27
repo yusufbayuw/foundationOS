@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -21,13 +22,19 @@ class ExamDefinitionInfolist
                     ->label(FilamentUi::field('code')),
                 TextEntry::make('exam_type')
                     ->label(FilamentUi::field('exam_type'))
-                    ->formatStateUsing(fn ($state) => $state ? FilamentUi::text($state->label()) : '-'),
+                    ->formatStateUsing(fn (mixed $state): string => is_object($state) && method_exists($state, 'label')
+                        ? FilamentUi::text(TypedValue::string($state->label()))
+                        : '-'),
                 TextEntry::make('exam_academic_context')
                     ->label(FilamentUi::field('exam_academic_context'))
-                    ->formatStateUsing(fn ($state) => $state ? FilamentUi::text($state->label()) : '-'),
+                    ->formatStateUsing(fn (mixed $state): string => is_object($state) && method_exists($state, 'label')
+                        ? FilamentUi::text(TypedValue::string($state->label()))
+                        : '-'),
                 TextEntry::make('status')
                     ->label(FilamentUi::field('status'))
-                    ->formatStateUsing(fn ($state) => $state ? FilamentUi::text($state->label()) : '-')
+                    ->formatStateUsing(fn (mixed $state): string => is_object($state) && method_exists($state, 'label')
+                        ? FilamentUi::text(TypedValue::string($state->label()))
+                        : '-')
                     ->badge(),
                 TextEntry::make('question_summary')
                     ->label(FilamentUi::text('Total questions'))

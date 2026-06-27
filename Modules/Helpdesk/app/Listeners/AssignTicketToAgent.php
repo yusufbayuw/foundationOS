@@ -2,6 +2,7 @@
 
 namespace Modules\Helpdesk\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Helpdesk\Events\TicketCreated;
 use Modules\Helpdesk\Models\Ticket;
 use Modules\Helpdesk\Models\TicketCategory;
@@ -21,7 +22,10 @@ class AssignTicketToAgent
             : null;
 
         $assigneeId = $category->default_assignee_user_id
-            ?? $this->leastLoadedAgentId($ticket->tenant_id, $category?->getKey());
+            ?? $this->leastLoadedAgentId(
+                TypedValue::int($ticket->tenant_id),
+                TypedValue::nullableInt($category?->getKey()),
+            );
 
         if (! $assigneeId) {
             return;
@@ -54,6 +58,6 @@ class AssignTicketToAgent
             ->orderBy('open_count')
             ->first();
 
-        return $row?->assigned_to_user_id;
+        return TypedValue::nullableInt($row?->assigned_to_user_id);
     }
 }

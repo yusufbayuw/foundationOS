@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\MoodleLearningMetric;
 use App\Models\MoodleSyncOutbox;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 
 class MoodleOpsReportCommand extends Command
@@ -31,7 +32,7 @@ class MoodleOpsReportCommand extends Command
             ->groupBy('entity_type')
             ->get()
             ->mapWithKeys(fn (MoodleSyncOutbox $row): array => [
-                (string) $row->entity_type => (int) ($row->getAttribute('total') ?? 0),
+                (string) $row->entity_type => TypedValue::int(($row->getAttribute('total')) ?? 0),
             ])
             ->all();
 
@@ -45,7 +46,7 @@ class MoodleOpsReportCommand extends Command
             ->groupBy('metric_type')
             ->get()
             ->mapWithKeys(fn (MoodleLearningMetric $row): array => [
-                (string) $row->metric_type => (int) ($row->getAttribute('total') ?? 0),
+                (string) $row->metric_type => TypedValue::int(($row->getAttribute('total')) ?? 0),
             ])
             ->all();
 
@@ -56,7 +57,7 @@ class MoodleOpsReportCommand extends Command
                 'synced' => $synced,
                 'failed' => $failed,
                 'skipped' => $skipped,
-                'oldest_pending_at' => $oldestPending ? (string) $oldestPending : null,
+                'oldest_pending_at' => $oldestPending ? TypedValue::string($oldestPending) : null,
                 'failed_by_entity' => $failedByEntity,
             ],
             'learning_pull' => [
@@ -80,7 +81,7 @@ class MoodleOpsReportCommand extends Command
                 ['outbox.synced', (string) $synced],
                 ['outbox.failed', (string) $failed],
                 ['outbox.skipped', (string) $skipped],
-                ['outbox.oldest_pending_at', $oldestPending ? (string) $oldestPending : '-'],
+                ['outbox.oldest_pending_at', $oldestPending ? TypedValue::string($oldestPending) : '-'],
                 ['learning_pull.snapshots_last_24h', (string) $pullLast24h],
             ],
         );

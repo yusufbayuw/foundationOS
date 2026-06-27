@@ -2,6 +2,7 @@
 
 namespace Modules\Property\Services;
 
+use App\Support\TypedValue;
 use Modules\Property\Models\LeaseInvoice;
 
 class LeaseInvoiceDocumentService
@@ -22,6 +23,6 @@ class LeaseInvoiceDocumentService
 
     public function filename(LeaseInvoice $invoice): string
     {
-        return sprintf('LeaseInvoice_%s.pdf', str_replace(' ', '_', $invoice->code ?? (string) $invoice->getKey()));
+        return sprintf('LeaseInvoice_%s.pdf', str_replace(' ', '_', $invoice->code ?? TypedValue::string($invoice->getKey())));
     }
 }

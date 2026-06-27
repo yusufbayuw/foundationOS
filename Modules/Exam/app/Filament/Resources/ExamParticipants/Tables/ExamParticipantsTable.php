@@ -8,6 +8,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Support\FilamentUi;
 use Modules\Exam\Enums\ParticipantSource;
 use Modules\Exam\Enums\ParticipantStatus;
@@ -17,7 +18,7 @@ class ExamParticipantsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['examDefinition', 'activeToken']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['examDefinition', 'activeToken']))
             ->columns([
                 TextColumn::make('student_name')
                     ->label(FilamentUi::field('student_name'))

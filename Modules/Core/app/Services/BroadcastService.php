@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\Broadcast;
 use Modules\Core\Models\User;
@@ -29,7 +30,7 @@ class BroadcastService
                 subject: $broadcast->subject,
                 body: $broadcast->body,
                 channels: $channelList,
-                idempotencyKey: "broadcast:{$broadcast->getKey()}:user:{$user->getKey()}",
+                idempotencyKey: 'broadcast:'.TypedValue::string($broadcast->getKey()).':user:'.TypedValue::string($user->getKey()),
             );
         }
 

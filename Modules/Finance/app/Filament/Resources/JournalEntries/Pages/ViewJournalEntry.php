@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\JournalEntries\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
@@ -36,7 +37,8 @@ class ViewJournalEntry extends ViewRecord
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->postJournalEntry($record, $user, $data['notes'] ?? null);
+                        $notes = TypedValue::string($data['notes'] ?? '');
+                        app(FinanceControlService::class)->postJournalEntry($record, $user, $notes !== '' ? $notes : null);
                         Notification::make()->title('Journal entry posted.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {
@@ -56,7 +58,7 @@ class ViewJournalEntry extends ViewRecord
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->reverseJournalEntry($record, $user, $data['reason']);
+                        app(FinanceControlService::class)->reverseJournalEntry($record, $user, TypedValue::string($data['reason']));
                         Notification::make()->title('Journal entry reversed.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {

@@ -2,6 +2,7 @@
 
 namespace Modules\Marketplace\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Marketplace\Models\MarketplaceOrder;
 use Modules\Marketplace\Models\Seller;
@@ -18,7 +19,7 @@ class MarketplaceOrderService
 
     public function assertSellerIsolation(Seller $seller, MarketplaceOrder $order): void
     {
-        if ((int) $order->seller_id !== (int) $seller->getKey()) {
+        if (TypedValue::int($order->seller_id) !== TypedValue::int($seller->getKey())) {
             throw new \RuntimeException('Order does not belong to this seller.');
         }
     }

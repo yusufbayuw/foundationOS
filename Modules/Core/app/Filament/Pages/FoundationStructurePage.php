@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -23,9 +24,10 @@ class FoundationStructurePage extends Page
     public function mount(): void
     {
         $tenant = Filament::getTenant();
+        $tenantId = TypedValue::tenantKey($tenant?->getKey());
 
         $this->tree = Organization::query()
-            ->when($tenant, fn ($q) => $q->where($q->getModel()->qualifyColumn('tenant_id'), $tenant->getKey()))
+            ->when($tenantId !== null, fn ($q) => $q->where($q->getModel()->qualifyColumn('tenant_id'), $tenantId))
             ->whereNull('parent_organization_id')
             ->with('childOrganizations')
             ->orderBy('name')

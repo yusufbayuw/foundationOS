@@ -65,9 +65,12 @@ class JsonLogicRuleEngine implements RuleEngine
 
         return $collection
             ->filter(function (mixed $candidate) use ($context): bool {
-                $rule = (array) data_get($candidate, 'condition_rules', []);
+                $rawRule = data_get($candidate, 'condition_rules', []);
+                if (! is_array($rawRule)) {
+                    return true;
+                }
 
-                return $this->matches($rule, $context);
+                return $this->matches($this->normalizeRuleArray($rawRule), $context);
             })
             ->values();
     }
@@ -85,6 +88,21 @@ class JsonLogicRuleEngine implements RuleEngine
             return $default;
         }
 
-        return $this->matches($rule, $context);
+        return $this->matches($this->normalizeRuleArray($rule), $context);
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $rule
+     * @return array<string, mixed>
+     */
+    private function normalizeRuleArray(array $rule): array
+    {
+        $normalized = [];
+
+        foreach ($rule as $key => $value) {
+            $normalized[(string) $key] = $value;
+        }
+
+        return $normalized;
     }
 }

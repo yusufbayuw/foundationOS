@@ -2,6 +2,7 @@
 
 namespace Modules\Messaging\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\Notification;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
@@ -38,13 +39,14 @@ class NotificationDispatcher
 
         $tenantId = $user->tenants()->value('tenants.id')
             ?? $user->userTenantRoles()->value('tenant_id');
+        $resolvedTenantId = TypedValue::tenantKey($tenantId);
         $channels = array_values(array_filter(
             $channels,
-            fn (string $channel): bool => $this->channelEnabled($channel, $tenantId),
+            fn (string $channel): bool => $this->channelEnabled($channel, $resolvedTenantId),
         ));
 
         $delivery = NotificationDelivery::query()->create([
-            'tenant_id' => $tenantId,
+            'tenant_id' => $resolvedTenantId,
             'code' => $category,
             'name' => $subject,
             'status' => 'queued',

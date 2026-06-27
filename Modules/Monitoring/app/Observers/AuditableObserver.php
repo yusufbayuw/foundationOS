@@ -68,7 +68,9 @@ class AuditableObserver
             return true;
         }
 
-        return $model->shouldRecordAuditTrail();
+        $shouldRecord = $model->shouldRecordAuditTrail();
+
+        return is_bool($shouldRecord) ? $shouldRecord : true;
     }
 
     protected function actionName(Model $model, string $event): string

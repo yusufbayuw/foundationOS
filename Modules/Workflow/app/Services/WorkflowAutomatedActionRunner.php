@@ -37,7 +37,7 @@ class WorkflowAutomatedActionRunner
     protected function runAction(WorkflowInstance $instance, array $action, array $context): void
     {
         $type = $action['action_type'] ?? null;
-        $config = (array) ($action['config'] ?? []);
+        $config = $this->normalizeConfig($action['config'] ?? []);
 
         match ($type) {
             WorkflowAutomationActionType::InternalNotification->value,
@@ -101,8 +101,8 @@ class WorkflowAutomatedActionRunner
             ->get()
             ->each(fn (User $user) => $user->notify(new InternalWorkflowNotification(
                 $instance,
-                (string) ($config['title'] ?? 'Workflow update'),
-                (string) ($config['body'] ?? 'A workflow requires your attention.'),
+                TypedValue::string($config['title'] ?? 'Workflow update'),
+                TypedValue::string($config['body'] ?? 'A workflow requires your attention.'),
             )));
     }
 
@@ -118,8 +118,8 @@ class WorkflowAutomatedActionRunner
             'user_id' => data_get($context, 'actor_id'),
             'auditable_type' => $instance->subject_type ?: $instance::class,
             'auditable_id' => $instance->subject_id ?: $instance->getKey(),
-            'action' => (string) ($config['action'] ?? 'workflow_automation_note'),
-            'description' => (string) ($config['description'] ?? 'Workflow automated action executed.'),
+            'action' => TypedValue::string($config['action'] ?? 'workflow_automation_note'),
+            'description' => TypedValue::string($config['description'] ?? 'Workflow automated action executed.'),
             'old_values' => null,
             'new_values' => [
                 'workflow_instance_id' => $instance->getKey(),
@@ -145,6 +145,9 @@ class WorkflowAutomatedActionRunner
         }
 
         $allowedJobs = config('workflow.allowed_automation_jobs', []);
+        if (! is_array($allowedJobs)) {
+            return;
+        }
 
         if (! in_array($jobClass, $allowedJobs, true)) {
             return;
@@ -196,5 +199,23 @@ class WorkflowAutomatedActionRunner
             'status' => 'failed',
             'error_message' => $exception->getMessage(),
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizeConfig(mixed $config): array
+    {
+        if (! is_array($config)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($config as $key => $value) {
+            $normalized[(string) $key] = $value;
+        }
+
+        return $normalized;
     }
 }

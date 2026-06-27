@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Http\Controllers;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -195,7 +196,7 @@ class PublicOpacController extends Controller
         if ($organizationModel) {
             $query->where(function (Builder $builder) use ($organizationModel): void {
                 $builder->whereNull('organization_id')
-                    ->orWhere('organization_id', $organizationModel->id);
+                    ->orWhere('organization_id', TypedValue::int($organizationModel->id));
             });
         }
 
@@ -242,7 +243,7 @@ class PublicOpacController extends Controller
 
             return $featuredRows->map(fn (Book $book): array => [
                 'name' => $book->category->name ?? 'Tanpa Kategori',
-                'total' => (int) ($book->getAttribute('aggregate') ?? 0),
+                'total' => TypedValue::int(($book->getAttribute('aggregate')) ?? 0),
             ]);
         })();
 
@@ -273,7 +274,7 @@ class PublicOpacController extends Controller
                 $names = [];
                 $publisherRelation = $book->getRelationValue('publisher');
 
-                if ($publisherRelation !== null) {
+                if ($publisherRelation instanceof LibraryPublisher) {
                     $names[] = $publisherRelation->name;
                 }
 
@@ -321,7 +322,7 @@ class PublicOpacController extends Controller
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->when($book->book_category_id !== null, fn (Builder $query) => $query->where($query->getModel()->qualifyColumn('book_category_id'), $book->book_category_id))
@@ -335,7 +336,7 @@ class PublicOpacController extends Controller
                 ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                     $query->where(function (Builder $builder) use ($organizationModel): void {
                         $builder->whereNull('organization_id')
-                            ->orWhere('organization_id', $organizationModel->id);
+                            ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                     });
                 })
                 ->where('user_id', auth()->id())
@@ -355,6 +356,7 @@ class PublicOpacController extends Controller
 
     protected function handleReservation(Request $request, Tenant $tenantModel, Book $book, LibraryCirculationService $circulationService, ?Organization $organizationModel = null): RedirectResponse
     {
+        /** @var array{member_id: int|string, notes?: string|null} $validated */
         $validated = $request->validate([
             'member_id' => ['required', 'integer'],
             'notes' => ['nullable', 'string'],
@@ -362,12 +364,12 @@ class PublicOpacController extends Controller
 
         $memberQuery = Member::query()
             ->where('tenant_id', $tenantModel->id)
-            ->whereKey((int) $validated['member_id']);
+            ->whereKey(TypedValue::int($validated['member_id']));
 
         if ($organizationModel !== null) {
             $memberQuery->where(function (Builder $query) use ($organizationModel): void {
                 $query->whereNull('organization_id')
-                    ->orWhere('organization_id', $organizationModel->id);
+                    ->orWhere('organization_id', TypedValue::int($organizationModel->id));
             });
         }
 
@@ -377,7 +379,7 @@ class PublicOpacController extends Controller
 
         $member = $memberQuery->firstOrFail();
 
-        $circulationService->placeReservation($member, $book, $validated['notes'] ?? null);
+        $circulationService->placeReservation($member, $book, TypedValue::string($validated['notes'] ?? '') ?: null);
 
         return redirect()
             ->route(
@@ -428,7 +430,7 @@ class PublicOpacController extends Controller
                 ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                     $query->where(function (Builder $builder) use ($organizationModel): void {
                         $builder->whereNull('organization_id')
-                            ->orWhere('organization_id', $organizationModel->id);
+                            ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                     });
                 })
                 ->where(function (Builder $query) use ($memberQuery): void {
@@ -454,7 +456,7 @@ class PublicOpacController extends Controller
                 ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                     $query->where(function (Builder $builder) use ($organizationModel): void {
                         $builder->whereNull('organization_id')
-                            ->orWhere('organization_id', $organizationModel->id);
+                            ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                     });
                 })
                 ->where(function (Builder $query) use ($itemQuery): void {
@@ -484,7 +486,7 @@ class PublicOpacController extends Controller
                     if ($organizationModel !== null) {
                         $query->where(function (Builder $builder) use ($organizationModel): void {
                             $builder->whereNull('organization_id')
-                                ->orWhere('organization_id', $organizationModel->id);
+                                ->orWhere('organization_id', TypedValue::int($organizationModel->id));
                         });
                     }
                 })
@@ -498,7 +500,7 @@ class PublicOpacController extends Controller
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->latest('updated_at')
@@ -521,6 +523,7 @@ class PublicOpacController extends Controller
 
     protected function handleCheckout(Request $request, Tenant $tenantModel, CirculationPolicyResolver $policyResolver, LibraryCirculationService $circulationService, ?Organization $organizationModel = null): RedirectResponse
     {
+        /** @var array{member_id: int|string, book_copy_id: int|string, notes?: string|null} $validated */
         $validated = $request->validate([
             'member_id' => ['required', 'integer'],
             'book_copy_id' => ['required', 'integer'],
@@ -529,11 +532,11 @@ class PublicOpacController extends Controller
 
         $member = Member::query()
             ->where('tenant_id', $tenantModel->id)
-            ->whereKey((int) $validated['member_id'])
+            ->whereKey(TypedValue::int($validated['member_id']))
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->firstOrFail();
@@ -541,11 +544,11 @@ class PublicOpacController extends Controller
         $copy = BookCopy::query()
             ->with('book')
             ->where('tenant_id', $tenantModel->id)
-            ->whereKey((int) $validated['book_copy_id'])
+            ->whereKey(TypedValue::int($validated['book_copy_id']))
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->firstOrFail();
@@ -565,14 +568,14 @@ class PublicOpacController extends Controller
                 'member_id' => (int) $member->id,
                 'processed_by' => $request->user()?->id,
                 'loan_date' => now()->toDateString(),
-                'due_date' => now()->addDays($policy['loan_period_days'])->toDateString(),
+                'due_date' => now()->addDays(TypedValue::int($policy['loan_period_days']))->toDateString(),
                 'extension_count' => 0,
                 'max_extensions' => $policy['max_extensions'],
                 'status' => 'borrowed',
                 'fine_amount' => 0,
                 'fine_paid' => 0,
                 'fine_status' => 'none',
-                'notes' => $validated['notes'] ?? null,
+                'notes' => TypedValue::string($validated['notes'] ?? '') ?: null,
             ]);
 
             $copy->forceFill(['status' => 'borrowed'])->save();
@@ -590,6 +593,7 @@ class PublicOpacController extends Controller
 
     protected function handleQuickReturn(Request $request, Tenant $tenantModel, LibraryCirculationService $circulationService, ?Organization $organizationModel = null): RedirectResponse
     {
+        /** @var array{loan_id: int|string} $validated */
         $validated = $request->validate([
             'loan_id' => ['required', 'integer'],
         ]);
@@ -597,11 +601,11 @@ class PublicOpacController extends Controller
         $loan = Loan::query()
             ->with(['member', 'bookCopy'])
             ->where('tenant_id', $tenantModel->id)
-            ->whereKey((int) $validated['loan_id'])
+            ->whereKey(TypedValue::int($validated['loan_id']))
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->firstOrFail();
@@ -620,7 +624,7 @@ class PublicOpacController extends Controller
             }
         });
 
-        $circulationService->recalculateLoanFine($loan->fresh(['member', 'bookCopy.book']));
+        $circulationService->recalculateLoanFine(TypedValue::model($loan->fresh(['member', 'bookCopy.book'])));
 
         if ($loan->member_id) {
             $circulationService->refreshMemberCounters((int) $loan->member_id);
@@ -634,6 +638,7 @@ class PublicOpacController extends Controller
 
     protected function handleExtendLoan(Request $request, Tenant $tenantModel, CirculationPolicyResolver $policyResolver, ?Organization $organizationModel = null): RedirectResponse
     {
+        /** @var array{loan_id: int|string} $validated */
         $validated = $request->validate([
             'loan_id' => ['required', 'integer'],
         ]);
@@ -641,11 +646,11 @@ class PublicOpacController extends Controller
         $loan = Loan::query()
             ->with(['member', 'bookCopy'])
             ->where('tenant_id', $tenantModel->id)
-            ->whereKey((int) $validated['loan_id'])
+            ->whereKey(TypedValue::int($validated['loan_id']))
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->firstOrFail();
@@ -654,14 +659,14 @@ class PublicOpacController extends Controller
         abort_if(! $loan->member, 422, 'Member untuk loan ini tidak ditemukan.');
 
         $policy = $policyResolver->resolveForMember($loan->member);
-        abort_if((int) $loan->extension_count >= (int) $policy['max_extensions'], 422, 'Batas perpanjangan untuk loan ini sudah tercapai.');
+        abort_if(TypedValue::int($loan->extension_count) >= TypedValue::int($policy['max_extensions']), 422, 'Batas perpanjangan untuk loan ini sudah tercapai.');
 
         $baseDate = $loan->due_date->isFuture()
             ? $loan->due_date->copy()
             : now();
 
         $loan->forceFill([
-            'due_date' => $baseDate->addDays($policy['loan_period_days'])->toDateString(),
+            'due_date' => $baseDate->addDays(TypedValue::int($policy['loan_period_days']))->toDateString(),
             'extension_count' => (int) $loan->extension_count + 1,
             'status' => 'borrowed',
         ])->save();
@@ -671,6 +676,7 @@ class PublicOpacController extends Controller
 
     protected function handleMarkIssue(Request $request, Tenant $tenantModel, LibraryCirculationService $circulationService, ?Organization $organizationModel = null): RedirectResponse
     {
+        /** @var array{loan_id: int|string, issue_type: string, notes?: string|null} $validated */
         $validated = $request->validate([
             'loan_id' => ['required', 'integer'],
             'issue_type' => ['required', 'in:lost,damaged'],
@@ -680,11 +686,11 @@ class PublicOpacController extends Controller
         $loan = Loan::query()
             ->with(['member', 'bookCopy'])
             ->where('tenant_id', $tenantModel->id)
-            ->whereKey((int) $validated['loan_id'])
+            ->whereKey(TypedValue::int($validated['loan_id']))
             ->when($organizationModel !== null, function (Builder $query) use ($organizationModel): void {
                 $query->where(function (Builder $builder) use ($organizationModel): void {
                     $builder->whereNull('organization_id')
-                        ->orWhere('organization_id', $organizationModel->id);
+                        ->orWhere('organization_id', TypedValue::int($organizationModel?->id));
                 });
             })
             ->firstOrFail();
@@ -692,12 +698,13 @@ class PublicOpacController extends Controller
         abort_if(! $loan->isActive(), 422, 'Loan ini tidak lagi aktif untuk ditandai bermasalah.');
         abort_if(! $loan->bookCopy, 422, 'Copy buku untuk loan ini tidak ditemukan.');
 
-        $issueType = $validated['issue_type'];
+        $issueType = TypedValue::string($validated['issue_type']);
         $issueLabel = $issueType === 'lost' ? 'hilang' : 'rusak';
+        $bookCopy = TypedValue::model($loan->bookCopy);
 
-        DB::transaction(function () use ($loan, $validated, $issueType): void {
+        DB::transaction(function () use ($loan, $validated, $issueType, $bookCopy): void {
             $existingNotes = trim((string) $loan->notes);
-            $issueNotes = trim((string) ($validated['notes'] ?? ''));
+            $issueNotes = trim(TypedValue::string($validated['notes'] ?? ''));
 
             $loan->forceFill([
                 'return_date' => now()->toDateString(),
@@ -710,23 +717,23 @@ class PublicOpacController extends Controller
                 ]))),
             ])->save();
 
-            $loan->bookCopy->forceFill([
+            $bookCopy->forceFill([
                 'status' => $issueType,
                 'condition' => $issueType,
                 'notes' => trim(implode("\n", array_filter([
-                    trim((string) $loan->bookCopy->notes),
+                    trim((string) $bookCopy->notes),
                     $issueNotes !== '' ? '['.strtoupper($issueType).'] '.$issueNotes : null,
                 ]))),
             ])->save();
         });
 
-        $circulationService->recalculateLoanFine($loan->fresh(['member', 'bookCopy.book']));
+        $circulationService->recalculateLoanFine(TypedValue::model($loan->fresh(['member', 'bookCopy.book'])));
 
         if ($loan->member_id) {
             $circulationService->refreshMemberCounters((int) $loan->member_id);
         }
-        if ($loan->bookCopy->book_id) {
-            $circulationService->refreshBookAvailability((int) $loan->bookCopy->book_id);
+        if ($bookCopy->book_id) {
+            $circulationService->refreshBookAvailability((int) $bookCopy->book_id);
         }
 
         return redirect()->back()->with('status', "Loan berhasil ditandai {$issueLabel}.");

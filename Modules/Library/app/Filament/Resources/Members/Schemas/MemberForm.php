@@ -28,8 +28,9 @@ class MemberForm
                         Select::make('organization_id')
                             ->label(FilamentUi::field('organization_id'))
                             ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
-                                if (Filament::getTenant()) {
-                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
+                                $tenant = Filament::getTenant();
+                                if ($tenant !== null) {
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenant->getKey());
                                 }
                             })
                             ->nullable()
@@ -37,8 +38,10 @@ class MemberForm
                         Select::make('user_id')
                             ->label(FilamentUi::field('user_id'))
                             ->relationship('user', 'name', modifyQueryUsing: function (Builder $query): void {
-                                if (Filament::getTenant()) {
-                                    $query->whereHas('userTenantRoles', fn (Builder $inner) => $inner->where($inner->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey()));
+                                $tenant = Filament::getTenant();
+                                if ($tenant !== null) {
+                                    $tenantId = $tenant->getKey();
+                                    $query->whereHas('userTenantRoles', fn (Builder $inner) => $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenantId));
                                 }
                             })
                             ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->name.' ('.$record->email.')')

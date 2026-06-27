@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\PersonalAccessToken;
 use App\Support\CurrentTenant;
+use App\Support\TypedValue;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ class ResolveApiTenant
         $token = $request->user()?->currentAccessToken();
 
         if (! $token instanceof PersonalAccessToken) {
-            return $next($request);
+            return TypedValue::response($next($request));
         }
 
         if ($token->tenant_id === null) {
@@ -25,11 +26,11 @@ class ResolveApiTenant
                 abort(403, 'API token must be scoped to a tenant.');
             }
 
-            return $next($request);
+            return TypedValue::response($next($request));
         }
 
         $this->currentTenant->set($token->tenant_id);
 
-        return $next($request);
+        return TypedValue::response($next($request));
     }
 }

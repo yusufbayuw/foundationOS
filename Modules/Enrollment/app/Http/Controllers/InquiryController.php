@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Http\Controllers;
 
+use App\Support\TypedValue;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -16,6 +17,17 @@ class InquiryController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        /** @var array{
+         *     tenant_code: string,
+         *     full_name: string,
+         *     email?: string|null,
+         *     phone?: string|null,
+         *     source_detail?: string|null,
+         *     utm_source?: string|null,
+         *     utm_medium?: string|null,
+         *     utm_campaign?: string|null
+         * } $validated
+         */
         $validated = $request->validate([
             'tenant_code' => ['required', 'string'],
             'full_name' => ['required', 'string', 'max:255'],
@@ -27,7 +39,8 @@ class InquiryController extends Controller
             'utm_campaign' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $tenant = Tenant::query()->where('code', $validated['tenant_code'])->firstOrFail();
+        $tenantCode = TypedValue::string($validated['tenant_code']);
+        $tenant = Tenant::query()->where('code', $tenantCode)->firstOrFail();
 
         $utm = array_filter([
             'utm_source' => $validated['utm_source'] ?? null,
@@ -36,11 +49,11 @@ class InquiryController extends Controller
         ]);
 
         $lead = $this->leadInquiryService->createFromInquiry(
-            tenantId: (int) $tenant->getKey(),
-            fullName: $validated['full_name'],
-            email: $validated['email'] ?? null,
-            phone: $validated['phone'] ?? null,
-            sourceDetail: $validated['source_detail'] ?? null,
+            tenantId: TypedValue::int($tenant->getKey()),
+            fullName: TypedValue::string($validated['full_name']),
+            email: TypedValue::string($validated['email'] ?? '') ?: null,
+            phone: TypedValue::string($validated['phone'] ?? '') ?: null,
+            sourceDetail: TypedValue::string($validated['source_detail'] ?? '') ?: null,
             utm: $utm,
         );
 

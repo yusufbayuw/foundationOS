@@ -34,7 +34,9 @@ class HelpdeskDashboard extends Page
         $closed = (clone $base)->whereNotNull('closed_at')->get(['created_at', 'closed_at']);
         if ($closed->isNotEmpty()) {
             $this->avgResolutionHours = round(
-                $closed->avg(fn (Ticket $t) => $t->created_at->diffInHours($t->closed_at)) ?? 0,
+                $closed->avg(fn (Ticket $t): float => $t->created_at !== null && $t->closed_at !== null
+                    ? (float) $t->created_at->diffInHours($t->closed_at)
+                    : 0.0) ?? 0,
                 1,
             );
         }

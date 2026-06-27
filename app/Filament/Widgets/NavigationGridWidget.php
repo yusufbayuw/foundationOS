@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Widgets\Widget;
 use Modules\Core\Models\User;
@@ -58,14 +59,21 @@ class NavigationGridWidget extends Widget
         $groups = [];
 
         foreach (Filament::getNavigation() as $group) {
-            $label = $group->getLabel() ?? FilamentUi::text('Other');
+            $label = TypedValue::string($group->getLabel(), FilamentUi::text('Other'));
             $items = collect($group->getItems())
-                ->filter(fn ($item): bool => $item->isVisible() && ! $item->isHidden())
-                ->map(fn ($item): array => [
-                    'label' => (string) $item->getLabel(),
-                    'url' => (string) ($item->getUrl() ?? '#'),
-                    'icon' => $this->resolveIcon($item->getIcon()),
-                ])
+                ->filter(static fn (mixed $item): bool => is_object($item) && method_exists($item, 'isVisible') && method_exists($item, 'isHidden'))
+                ->filter(static fn (object $item): bool => $item->isVisible() && ! $item->isHidden())
+                ->map(function (object $item): array {
+                    $url = method_exists($item, 'getUrl') ? TypedValue::string($item->getUrl(), '#') : '#';
+                    $icon = method_exists($item, 'getIcon') ? $item->getIcon() : null;
+                    $itemLabel = method_exists($item, 'getLabel') ? TypedValue::string($item->getLabel()) : FilamentUi::text('Menu');
+
+                    return [
+                        'label' => $itemLabel,
+                        'url' => $url,
+                        'icon' => $this->resolveIcon($icon),
+                    ];
+                })
                 ->values()
                 ->all();
 
@@ -106,8 +114,10 @@ class NavigationGridWidget extends Widget
      */
     public function getPinnedItems(): array
     {
+        $user = TypedValue::model(auth()->user());
+
         /** @var array<int, array{label: string, url: string, icon: string}> $pinned */
-        $pinned = auth()->user()->pinned_menus ?? [];
+        $pinned = $user->pinned_menus ?? [];
 
         return $pinned;
     }

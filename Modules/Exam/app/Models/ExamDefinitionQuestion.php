@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Modules\Exam\Models\Concerns\HasExamUuid;
@@ -36,10 +37,15 @@ class ExamDefinitionQuestion extends Pivot
     {
         static::creating(function (ExamDefinitionQuestion $pivot): void {
             if (empty($pivot->tenant_id) && $pivot->exam_definition_id) {
-                $pivot->tenant_id = ExamDefinition::query()
+                $tenantId = ExamDefinition::query()
                     ->withoutGlobalScopes()
                     ->whereKey($pivot->exam_definition_id)
                     ->value('tenant_id');
+                $resolvedTenantId = TypedValue::int($tenantId);
+
+                if ($resolvedTenantId >= 0) {
+                    $pivot->tenant_id = $resolvedTenantId;
+                }
             }
         });
     }

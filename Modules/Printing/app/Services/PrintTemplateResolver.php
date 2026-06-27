@@ -2,6 +2,7 @@
 
 namespace Modules\Printing\Services;
 
+use App\Support\TypedValue;
 use InvalidArgumentException;
 use Modules\Printing\Data\ResolvedPrintTemplate;
 use Modules\Printing\Models\PrintTemplate;
@@ -122,9 +123,9 @@ class PrintTemplateResolver
 
         return new ResolvedPrintTemplate(
             code: $code,
-            view: (string) ($meta['view'] ?? $defaults['view']),
-            paper: (string) ($meta['paper'] ?? $defaults['paper']),
-            orientation: (string) ($meta['orientation'] ?? $defaults['orientation']),
+            view: TypedValue::string($meta['view'] ?? $defaults['view']),
+            paper: TypedValue::string($meta['paper'] ?? $defaults['paper']),
+            orientation: TypedValue::string($meta['orientation'] ?? $defaults['orientation']),
         );
     }
 

@@ -21,9 +21,15 @@ class LaravelWorkflowFormSchemaValidator implements WorkflowFormSchemaValidator
     public function validate(WorkflowStep $step, array $formData, array $context = []): array
     {
         $rules = [];
+        /** @var list<array<string, mixed>> $rawSchema */
+        $rawSchema = array_values(is_array($step->form_schema ?? null) ? $step->form_schema : []);
+        $schema = array_map(
+            fn (array $field): array => $this->normalizeField($field),
+            $rawSchema,
+        );
         /** @var list<array<string, mixed>> $schema */
         $schema = $this->ruleEngine->evaluateFieldState(
-            array_values(is_array($step->form_schema ?? null) ? $step->form_schema : []),
+            $schema,
             $context,
         );
         $filteredData = $formData;
@@ -133,5 +139,20 @@ class LaravelWorkflowFormSchemaValidator implements WorkflowFormSchemaValidator
                 );
             }
         }
+    }
+
+    /**
+     * @param  array<mixed, mixed>  $field
+     * @return array<string, mixed>
+     */
+    private function normalizeField(array $field): array
+    {
+        $normalized = [];
+
+        foreach ($field as $key => $value) {
+            $normalized[(string) $key] = $value;
+        }
+
+        return $normalized;
     }
 }

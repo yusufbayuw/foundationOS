@@ -15,7 +15,12 @@ class DonationWebhookController extends Controller
 
     public function handle(Request $request): JsonResponse
     {
-        $donation = $this->paymentService->handleWebhook($request->all());
+        $payload = [];
+        foreach ($request->all() as $key => $value) {
+            $payload[(string) $key] = $value;
+        }
+
+        $donation = $this->paymentService->handleWebhook($payload);
 
         return response()->json([
             'donation_id' => $donation->getKey(),

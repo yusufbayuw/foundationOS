@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
 
@@ -21,7 +22,7 @@ class WorkflowSnapshotStepResolver
         /** @var list<array<string, mixed>> $steps */
         $steps = data_get($instance->workflow_snapshot, 'steps', []);
         $snapshotStep = collect($steps)
-            ->first(fn (array $step): bool => (int) ($step['id'] ?? 0) === $stepId);
+            ->first(fn (array $step): bool => TypedValue::int($step['id'] ?? 0) === $stepId);
 
         if (is_array($snapshotStep) && $snapshotStep !== []) {
             return $this->hydrateStep($snapshotStep, $stepId);

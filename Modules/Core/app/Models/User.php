@@ -220,7 +220,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         if ($primaryAssignment !== null) {
             $tenant = $primaryAssignment->getRelationValue('tenant');
 
-            if ($tenant !== null) {
+            if ($tenant instanceof Model) {
                 return $tenant;
             }
         }

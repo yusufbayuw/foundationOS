@@ -6,6 +6,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Support\FilamentUi;
 use Modules\Exam\Enums\GradebookExportStatus;
@@ -29,7 +30,7 @@ class ExamGradebookExportLogsRelationManager extends RelationManager
         return $table
             ->heading(FilamentUi::text('Gradebook export logs'))
             ->description(FilamentUi::text('History of pushes to School or Campus gradebooks.'))
-            ->modifyQueryUsing(fn ($query) => $query->with(['examParticipant', 'pushedBy'])->latest())
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['examParticipant', 'pushedBy'])->latest())
             ->columns([
                 TextColumn::make('id')
                     ->label(FilamentUi::field('id'))

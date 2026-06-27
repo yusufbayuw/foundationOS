@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -22,8 +23,8 @@ class ExamResult extends Model
     protected static function booted(): void
     {
         static::updating(function (self $examResult): void {
-            $examResult->previousExamScheduleId = $examResult->getOriginal('exam_schedule_id');
-            $examResult->previousApplicantId = $examResult->getOriginal('applicant_id');
+            $examResult->previousExamScheduleId = TypedValue::nullableInt($examResult->getOriginal('exam_schedule_id'));
+            $examResult->previousApplicantId = TypedValue::nullableInt($examResult->getOriginal('applicant_id'));
         });
 
         static::saved(function (self $examResult): void {

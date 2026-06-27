@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 
 class MoodleDrainOutboxCommand extends Command
@@ -17,9 +18,9 @@ class MoodleDrainOutboxCommand extends Command
 
     public function handle(): int
     {
-        $limit = (int) ($this->option('limit') ?: config('moodle.batch_limit', 100));
+        $limit = TypedValue::int(($this->option('limit')) ?: config('moodle.batch_limit', 100));
         $limit = max(1, $limit);
-        $queue = (string) ($this->option('queue') ?: config('moodle.queue', 'moodle-sync'));
+        $queue = TypedValue::string(($this->option('queue')) ?: config('moodle.queue', 'moodle-sync'));
         $forceFailed = (bool) $this->option('force-failed');
 
         if (! config('moodle.enabled', false)) {

@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Support;
 
+use App\Support\TypedValue;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -30,10 +31,10 @@ class LibraryCirculationService
             return $existing;
         }
 
-        $nextQueue = (int) BookReservation::query()
+        $nextQueue = TypedValue::int(BookReservation::query()
             ->where('tenant_id', $member->tenant_id)
             ->where('book_id', $book->id)
-            ->max('queue_position') + 1;
+            ->max('queue_position')) + 1;
 
         return BookReservation::query()->create([
             'tenant_id' => (int) $member->tenant_id,
@@ -61,8 +62,8 @@ class LibraryCirculationService
             : ($asOf ?: now());
         $dueDate = Carbon::parse($loan->due_date);
         $lateDays = max(0, $dueDate->diffInDays($comparisonDate, false));
-        $chargeableDays = max(0, $lateDays - (int) $policy['grace_period_days']);
-        $amount = round($chargeableDays * (float) $policy['fine_per_day'], 2);
+        $chargeableDays = max(0, $lateDays - TypedValue::int($policy['grace_period_days']));
+        $amount = round($chargeableDays * TypedValue::float($policy['fine_per_day']), 2);
 
         DB::transaction(function () use ($loan, $amount): void {
             $resolvedStatus = $loan->return_date

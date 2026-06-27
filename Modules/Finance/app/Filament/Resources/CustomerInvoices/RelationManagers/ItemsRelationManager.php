@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\CustomerInvoices\RelationManagers;
 
+use App\Support\TypedValue;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -53,12 +54,12 @@ class ItemsRelationManager extends RelationManager
             Select::make('chart_of_account_id')
                 ->label(FilamentUi::field('chart_of_account_id'))
                 ->options(fn () => ChartOfAccount::withoutTenantScope()
-                    ->where('tenant_id', filament()->getTenant()?->getKey())
+                    ->where('tenant_id', TypedValue::tenantKey(filament()->getTenant()?->getKey()))
                     ->where('is_active', true)
                     ->whereIn('type', ['revenue', 'asset'])
                     ->orderBy('code')
                     ->get()
-                    ->mapWithKeys(fn ($coa) => [$coa->id => "{$coa->code} — {$coa->name}"])
+                    ->mapWithKeys(fn (ChartOfAccount $coa): array => [TypedValue::string($coa->id) => "{$coa->code} — {$coa->name}"])
                     ->toArray()
                 )
                 ->searchable()
@@ -90,17 +91,29 @@ class ItemsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['tenant_id'] = filament()->getTenant()?->getKey();
+                        $data['tenant_id'] = TypedValue::tenantKey(filament()->getTenant()?->getKey());
 
                         return $data;
                     })
-                    ->after(fn (CustomerInvoiceItem $record) => $record->customerInvoice->recalculate()),
+                    ->after(function (CustomerInvoiceItem $record): void {
+                        if ($record->customerInvoice !== null) {
+                            $record->customerInvoice->recalculate();
+                        }
+                    }),
             ])
             ->recordActions([
                 EditAction::make()
-                    ->after(fn (CustomerInvoiceItem $record) => $record->customerInvoice->recalculate()),
+                    ->after(function (CustomerInvoiceItem $record): void {
+                        if ($record->customerInvoice !== null) {
+                            $record->customerInvoice->recalculate();
+                        }
+                    }),
                 DeleteAction::make()
-                    ->after(fn (CustomerInvoiceItem $record) => $record->customerInvoice->recalculate()),
+                    ->after(function (CustomerInvoiceItem $record): void {
+                        if ($record->customerInvoice !== null) {
+                            $record->customerInvoice->recalculate();
+                        }
+                    }),
             ])
             ->defaultSort('sort_order');
     }

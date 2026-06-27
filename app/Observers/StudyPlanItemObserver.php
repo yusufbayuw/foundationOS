@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Modules\Campus\Models\StudyPlanItem;
 
@@ -69,7 +70,7 @@ class StudyPlanItemObserver
             return;
         }
 
-        $version = optional($item->updated_at)->timestamp ?? now()->timestamp;
+        $version = TypedValue::int(data_get($item, 'updated_at.timestamp'), TypedValue::int(now()->timestamp));
         $dedupe = "study_plan_enrollment:{$item->id}:{$action}:{$version}";
 
         $userId = (int) ($item->studyPlan->collageStudent->user_id ?? 0);

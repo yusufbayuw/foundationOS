@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Workflow\Events\WorkflowAdvanced;
 use Modules\Workflow\Events\WorkflowCancelled;
@@ -19,7 +20,7 @@ class RecordWorkflowMonitoringAudit
         AuditLog::query()->create([
             'tenant_id' => $instance->tenant_id,
             'organization_id' => $instance->organization_id,
-            'user_id' => $actor?->getKey(),
+            'user_id' => TypedValue::nullableInt(data_get($actor, 'id')),
             'auditable_type' => $instance->getMorphClass(),
             'auditable_id' => $instance->getKey(),
             'action' => match ($event::class) {

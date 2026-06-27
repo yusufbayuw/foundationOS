@@ -2,6 +2,7 @@
 
 namespace Modules\Messaging\Http\Controllers;
 
+use App\Support\TypedValue;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -10,7 +11,7 @@ class WhatsAppWebhookController extends Controller
 {
     public function handle(Request $request, string $provider): JsonResponse
     {
-        $secret = (string) config('messaging.webhooks.whatsapp_secret', '');
+        $secret = TypedValue::string(config('messaging.webhooks.whatsapp_secret'), '');
 
         if ($secret !== '') {
             $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $secret);

@@ -16,7 +16,12 @@ class BillingController extends Controller
     public function webhook(Request $request): JsonResponse
     {
         try {
-            $this->billingService->handleWebhookNotification($request->all());
+            $payload = [];
+            foreach ($request->all() as $key => $value) {
+                $payload[(string) $key] = $value;
+            }
+
+            $this->billingService->handleWebhookNotification($payload);
         } catch (MidtransWebhookException $e) {
             report($e);
 

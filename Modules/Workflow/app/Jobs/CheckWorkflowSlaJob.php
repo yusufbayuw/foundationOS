@@ -3,6 +3,7 @@
 namespace Modules\Workflow\Jobs;
 
 use App\Concerns\InteractsWithTenant;
+use App\Support\TypedValue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Workflow\Contracts\WorkflowSlaService;
@@ -14,7 +15,7 @@ class CheckWorkflowSlaJob implements ShouldQueue
 
     public function __construct(public int $instanceId)
     {
-        $this->onQueue((string) config('workflow.sla_queue', 'workflow-sla'));
+        $this->onQueue(TypedValue::string(config('workflow.sla_queue'), 'workflow-sla'));
         $this->captureCurrentTenant();
     }
 

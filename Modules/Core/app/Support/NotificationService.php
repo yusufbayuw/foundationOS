@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Support;
 
+use App\Support\TypedValue;
 use Filament\Notifications\Notification;
 use Modules\Core\Models\User;
 use Modules\Employee\Models\LeaveRequest;
@@ -64,7 +65,7 @@ class NotificationService
         WorkflowInstance $instance,
         User $assignee,
     ): void {
-        $label = $instance->subject_label ?: 'Workflow #'.$instance->getKey();
+        $label = $instance->subject_label ?: 'Workflow #'.TypedValue::string($instance->getKey());
 
         Notification::make()
             ->title('Tugas Workflow Baru')
@@ -81,7 +82,7 @@ class NotificationService
         WorkflowInstance $instance,
         User $requester,
     ): void {
-        $label = $instance->subject_label ?: 'Workflow #'.$instance->getKey();
+        $label = $instance->subject_label ?: 'Workflow #'.TypedValue::string($instance->getKey());
 
         Notification::make()
             ->title('Workflow Selesai')
@@ -99,7 +100,7 @@ class NotificationService
         User $requester,
         ?string $reason = null,
     ): void {
-        $label = $instance->subject_label ?: 'Workflow #'.$instance->getKey();
+        $label = $instance->subject_label ?: 'Workflow #'.TypedValue::string($instance->getKey());
         $body = "Workflow untuk \"{$label}\" ditolak.";
         if ($reason) {
             $body .= " Alasan: {$reason}";
@@ -158,11 +159,13 @@ class NotificationService
             default => 'info',
         };
 
-        Notification::make()
-            ->title("Permohonan Cuti {$statusLabel}")
-            ->body("Permohonan cuti Anda telah {$statusLabel}.")
-            ->icon($icon)
-            ->{$color}()
+        self::applyColor(
+            Notification::make()
+                ->title("Permohonan Cuti {$statusLabel}")
+                ->body("Permohonan cuti Anda telah {$statusLabel}.")
+                ->icon($icon),
+            $color
+        )
             ->sendToDatabase($employee);
     }
 
@@ -206,11 +209,23 @@ class NotificationService
         string $icon = 'heroicon-o-bell',
         string $color = 'info',
     ): void {
-        Notification::make()
-            ->title($title)
-            ->body($body)
-            ->icon($icon)
-            ->{$color}()
+        self::applyColor(
+            Notification::make()
+                ->title($title)
+                ->body($body)
+                ->icon($icon),
+            $color
+        )
             ->sendToDatabase($recipient);
+    }
+
+    private static function applyColor(Notification $notification, string $color): Notification
+    {
+        return match ($color) {
+            'success' => $notification->success(),
+            'danger' => $notification->danger(),
+            'warning' => $notification->warning(),
+            default => $notification->info(),
+        };
     }
 }

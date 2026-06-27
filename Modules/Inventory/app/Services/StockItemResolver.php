@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Services;
 
+use App\Support\TypedValue;
 use Modules\Inventory\Enums\ValuationMethod;
 use Modules\Inventory\Models\StockItem;
 use Modules\Procurement\Models\ProcurementItem;
@@ -24,7 +25,7 @@ class StockItemResolver
             'organization_id' => null,
             'procurement_item_id' => $procurementItem->getKey(),
             'inventory_coa_id' => $procurementItem->chart_of_account_id,
-            'code' => $procurementItem->code ?: 'ITEM-'.$procurementItem->getKey(),
+            'code' => $procurementItem->code ?: 'ITEM-'.TypedValue::string($procurementItem->getKey()),
             'name' => $procurementItem->name,
             'unit_of_measure' => $procurementItem->unit_of_measure,
             'valuation_method' => ValuationMethod::Avg,

@@ -2,6 +2,7 @@
 
 namespace Modules\School\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\Cache;
 use Modules\School\Models\StudentGrade;
 
@@ -43,7 +44,7 @@ class AcademicAnalyticsService
             ];
         }
 
-        $scores = $grades->pluck('score')->filter()->map(fn ($s) => (float) $s);
+        $scores = $grades->pluck('score')->filter()->map(fn ($s) => TypedValue::float($s));
         $average = $scores->avg();
         $stdDev = $this->standardDeviation(array_values($scores->all()));
         $outliers = $scores->filter(fn (float $s): bool => abs($s - $average) > max(10, $stdDev * 2))->count();

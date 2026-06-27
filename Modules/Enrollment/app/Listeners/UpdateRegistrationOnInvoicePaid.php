@@ -3,6 +3,7 @@
 namespace Modules\Enrollment\Listeners;
 
 use App\Concerns\InteractsWithTenant;
+use App\Support\TypedValue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Core\Support\NotificationService;
@@ -22,7 +23,7 @@ class UpdateRegistrationOnInvoicePaid implements ShouldQueue
 
     public function handle(StudentInvoicePaid $event): void
     {
-        $invoice = $event->invoice->fresh(['invoiceable']);
+        $invoice = TypedValue::model($event->invoice->fresh(['invoiceable']));
 
         if (! $invoice->invoiceable instanceof Applicant) {
             return;
@@ -50,7 +51,7 @@ class UpdateRegistrationOnInvoicePaid implements ShouldQueue
         }
 
         if ($registration->payment_status === 'paid') {
-            return ['registration_id' => $registration->getKey()];
+            return ['registration_id' => TypedValue::int($registration->getKey())];
         }
 
         $registration->forceFill([
@@ -62,7 +63,7 @@ class UpdateRegistrationOnInvoicePaid implements ShouldQueue
 
         $this->notifyActor($event);
 
-        return ['registration_id' => $registration->getKey()];
+        return ['registration_id' => TypedValue::int($registration->getKey())];
     }
 
     protected function notifyActor(StudentInvoicePaid $event): void

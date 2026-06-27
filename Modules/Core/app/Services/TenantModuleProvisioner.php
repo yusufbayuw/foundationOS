@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Models\Module;
 use Modules\Core\Models\Tenant;
@@ -63,7 +64,7 @@ class TenantModuleProvisioner
                 ],
             );
 
-            Cache::forget("tenant_module_active:{$tenant->getKey()}:".str($module->code)->studly());
+            Cache::forget('tenant_module_active:'.TypedValue::string($tenant->getKey()).':'.str($module->code)->studly());
         }
     }
 }

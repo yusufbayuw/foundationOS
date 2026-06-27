@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
@@ -74,8 +75,8 @@ class ViewPurchaseRequisition extends ViewRecord
                         $workflow = app(WorkflowResolver::class)->resolveForSubject(
                             $this->record->workflowSubjectType(),
                             $this->record,
-                            (int) ($tenant?->getKey() ?? $this->record->tenant_id),
-                            data_get($this->record, 'organization_id'),
+                            TypedValue::int(($tenant?->getKey()) ?? $this->record->tenant_id),
+                            TypedValue::nullableInt(data_get($this->record, 'organization_id')),
                         );
 
                         $instance = app(WorkflowInstanceStarter::class)->start(

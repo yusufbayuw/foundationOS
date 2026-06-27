@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Support;
 
+use App\Support\TypedValue;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +27,6 @@ class UserPasswordPolicy
 
     public static function mustChangeAfterDays(): int
     {
-        return (int) config('auth.password_change_days', 90);
+        return TypedValue::int(config('auth.password_change_days'), 90);
     }
 }

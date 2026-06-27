@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Pages;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Support\FilamentUi;
@@ -26,9 +27,10 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
     protected function baseAssignmentsQuery(): Builder
     {
         $tenant = Filament::getTenant();
+        $tenantId = TypedValue::tenantKey($tenant?->getKey());
         $user = auth()->user();
         $organizationIds = $user?->userTenantRoles()
-            ->when($tenant, fn (Builder $query) => $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenant->getKey()))
+            ->when($tenantId !== null, fn (Builder $query) => $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId))
             ->pluck('organization_id')
             ->filter()
             ->unique()
@@ -38,9 +40,9 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
         return WorkflowAssignment::query()
             ->with(['instance.workflow', 'instance.currentStep', 'instance.requester'])
             ->where('assigned_to_type', 'user')
-            ->when($tenant, function (Builder $query) use ($tenant, $organizationIds, $user): void {
-                $query->whereHas('instance', function (Builder $inner) use ($tenant, $organizationIds, $user): void {
-                    $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenant->getKey());
+            ->when($tenantId !== null, function (Builder $query) use ($tenantId, $organizationIds, $user): void {
+                $query->whereHas('instance', function (Builder $inner) use ($tenantId, $organizationIds, $user): void {
+                    $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenantId);
 
                     if (! $user?->isGlobalSuperAdmin() && $organizationIds !== []) {
                         $inner->where(function (Builder $scoped) use ($organizationIds): void {
@@ -50,6 +52,6 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
                     }
                 });
             })
-            ->when(! $tenant, fn (Builder $query) => $query->whereRaw('1 = 0'));
+            ->when($tenantId === null, fn (Builder $query) => $query->whereRaw('1 = 0'));
     }
 }

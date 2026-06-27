@@ -3,6 +3,7 @@
 namespace Modules\Exam\Services;
 
 use App\Models\Role;
+use App\Support\TypedValue;
 use Modules\Core\Models\Tenant;
 use Modules\Exam\Enums\ExamPermission;
 use Modules\Exam\Enums\ExamRole;
@@ -13,7 +14,7 @@ class ExamShieldProvisioner
 {
     protected function guardName(): string
     {
-        return (string) config('auth.defaults.guard', 'web');
+        return TypedValue::string(config('auth.defaults.guard'), 'web');
     }
 
     /**
@@ -66,7 +67,7 @@ class ExamShieldProvisioner
 
     public function provisionForTenant(Tenant $tenant): void
     {
-        setPermissionsTeamId($tenant->getKey());
+        setPermissionsTeamId(TypedValue::tenantKey($tenant->getKey()));
 
         $allPermissions = array_merge(ExamPermission::values(), $this->resourcePermissions);
 
@@ -93,7 +94,7 @@ class ExamShieldProvisioner
         $role = Role::firstOrCreate([
             'name' => $roleName,
             'guard_name' => $this->guardName(),
-            'team_id' => (int) $tenant->getKey(),
+            'team_id' => TypedValue::int($tenant->getKey()),
         ]);
 
         $role->syncPermissions($permissions);

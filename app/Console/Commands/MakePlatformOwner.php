@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -26,7 +27,7 @@ class MakePlatformOwner extends Command
             : User::where('email', $identifier)->first();
 
         if (! $user) {
-            $this->error("User not found: {$identifier}");
+            $this->error('User not found: '.TypedValue::string($identifier));
 
             return self::FAILURE;
         }

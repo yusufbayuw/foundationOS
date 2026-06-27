@@ -6,6 +6,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Support\FilamentUi;
+use Modules\Finance\Models\Budget;
 
 class BudgetInfolist
 {
@@ -32,7 +33,7 @@ class BudgetInfolist
                             ->label(FilamentUi::field('status')),
                         TextEntry::make('workflowInstances_count')
                             ->label(FilamentUi::text('Workflow Instances'))
-                            ->state(fn ($record): int => $record->workflowInstances()->count()),
+                            ->state(fn (Budget $record): int => $record->workflowInstances()->count()),
                         TextEntry::make('description')
                             ->label(FilamentUi::field('description'))
                             ->placeholder('-')

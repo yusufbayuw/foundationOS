@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\TenantSetting;
@@ -22,7 +23,7 @@ class FinanceControlService
     public function markInvoiceIssued(StudentInvoice $invoice, User $actor, ?string $notes = null): StudentInvoice
     {
         return DB::transaction(function () use ($invoice, $actor, $notes): StudentInvoice {
-            $invoice = $invoice->fresh();
+            $invoice = TypedValue::model($invoice->fresh());
 
             if ($invoice->isLockedForMutation()) {
                 throw new RuntimeException('Issued invoice cannot be edited because it is already locked.');
@@ -37,14 +38,14 @@ class FinanceControlService
                 'status' => $invoice->status,
             ]);
 
-            return $invoice->fresh();
+            return TypedValue::model($invoice->fresh());
         });
     }
 
     public function verifyPayment(Payment $payment, User $actor, ?string $notes = null): Payment
     {
         return DB::transaction(function () use ($payment, $actor, $notes): Payment {
-            $payment = $payment->fresh(['studentInvoice', 'chartOfAccount']);
+            $payment = TypedValue::model($payment->fresh(['studentInvoice', 'chartOfAccount']));
 
             if ($payment->isLockedForMutation()) {
                 throw new RuntimeException('Payment is already finalized and cannot be verified again.');
@@ -57,8 +58,14 @@ class FinanceControlService
                 'verification_notes' => $this->appendNotes($payment->verification_notes, $notes),
             ])->save();
 
-            $invoice = $this->recalculateInvoice($payment->studentInvoice->fresh(), $actor);
-            $journal = $this->createPaymentJournalEntry($payment->fresh(['studentInvoice', 'chartOfAccount']), $actor);
+            $invoice = $this->recalculateInvoice(
+                TypedValue::model(TypedValue::model($payment->studentInvoice)->fresh()),
+                $actor,
+            );
+            $journal = $this->createPaymentJournalEntry(
+                TypedValue::model($payment->fresh(['studentInvoice', 'chartOfAccount'])),
+                $actor,
+            );
 
             $this->audit($payment, $actor, 'finance_payment_verified', [
                 'invoice_id' => $invoice->getKey(),
@@ -66,16 +73,16 @@ class FinanceControlService
                 'status' => $payment->status,
             ]);
 
-            NotificationService::paymentVerified($payment->fresh(['studentInvoice']), $actor);
+            NotificationService::paymentVerified(TypedValue::model($payment->fresh(['studentInvoice'])), $actor);
 
-            return $payment->fresh(['studentInvoice', 'chartOfAccount']);
+            return TypedValue::model($payment->fresh(['studentInvoice', 'chartOfAccount']));
         });
     }
 
     public function rejectPayment(Payment $payment, User $actor, ?string $notes = null): Payment
     {
         return DB::transaction(function () use ($payment, $actor, $notes): Payment {
-            $payment = $payment->fresh(['studentInvoice']);
+            $payment = TypedValue::model($payment->fresh(['studentInvoice']));
 
             if ($payment->isLockedForMutation()) {
                 throw new RuntimeException('Payment is already finalized and cannot be rejected.');
@@ -88,7 +95,10 @@ class FinanceControlService
                 'verification_notes' => $this->appendNotes($payment->verification_notes, $notes),
             ])->save();
 
-            $this->recalculateInvoice($payment->studentInvoice->fresh(), $actor);
+            $this->recalculateInvoice(
+                TypedValue::model(TypedValue::model($payment->studentInvoice)->fresh()),
+                $actor,
+            );
 
             $this->audit($payment, $actor, 'finance_payment_rejected', [
                 'status' => $payment->status,
@@ -96,14 +106,14 @@ class FinanceControlService
 
             NotificationService::paymentRejected($payment, $actor);
 
-            return $payment->fresh(['studentInvoice']);
+            return TypedValue::model($payment->fresh(['studentInvoice']));
         });
     }
 
     public function approveBudget(Budget $budget, User $actor, ?string $notes = null): Budget
     {
         return DB::transaction(function () use ($budget, $actor, $notes): Budget {
-            $budget = $budget->fresh();
+            $budget = TypedValue::model($budget->fresh());
 
             if ($budget->isLockedForMutation()) {
                 throw new RuntimeException('Budget is already finalized and cannot be approved again.');
@@ -122,14 +132,14 @@ class FinanceControlService
 
             NotificationService::budgetApproved($budget, $actor);
 
-            return $budget->fresh();
+            return TypedValue::model($budget->fresh());
         });
     }
 
     public function postJournalEntry(JournalEntry $entry, User $actor, ?string $notes = null): JournalEntry
     {
         return DB::transaction(function () use ($entry, $actor, $notes): JournalEntry {
-            $entry = $entry->fresh(['lines']);
+            $entry = TypedValue::model($entry->fresh(['lines']));
 
             if ($entry->isLockedForMutation()) {
                 throw new RuntimeException('Journal entry is already posted or reversed.');
@@ -137,7 +147,7 @@ class FinanceControlService
 
             $totals = $this->calculateJournalTotals($entry);
 
-            if (round((float) $totals['debit'], 2) !== round((float) $totals['credit'], 2)) {
+            if (round(TypedValue::float($totals['debit']), 2) !== round(TypedValue::float($totals['credit']), 2)) {
                 throw new RuntimeException('Journal entry is not balanced.');
             }
 
@@ -157,14 +167,14 @@ class FinanceControlService
                 'total_credit' => $entry->total_credit,
             ]);
 
-            return $entry->fresh(['lines']);
+            return TypedValue::model($entry->fresh(['lines']));
         });
     }
 
     public function reverseJournalEntry(JournalEntry $entry, User $actor, string $reason): JournalEntry
     {
         return DB::transaction(function () use ($entry, $actor, $reason): JournalEntry {
-            $entry = $entry->fresh();
+            $entry = TypedValue::model($entry->fresh());
 
             if (! $entry->is_posted || $entry->is_reversed) {
                 throw new RuntimeException('Only posted and unreversed journal entries can be reversed.');
@@ -180,7 +190,7 @@ class FinanceControlService
                 'reason' => $reason,
             ]);
 
-            return $entry->fresh();
+            return TypedValue::model($entry->fresh());
         });
     }
 
@@ -207,7 +217,7 @@ class FinanceControlService
             'status' => $status,
         ])->save();
 
-        $invoice = $invoice->fresh();
+        $invoice = TypedValue::model($invoice->fresh());
 
         if ($invoice->status === 'paid' && $previousStatus !== 'paid') {
             StudentInvoicePaid::dispatch($invoice, $actor);
@@ -218,8 +228,8 @@ class FinanceControlService
 
     protected function createPaymentJournalEntry(Payment $payment, User $actor): JournalEntry
     {
-        $invoice = $payment->studentInvoice;
-        $cashAccount = $payment->chartOfAccount;
+        $invoice = TypedValue::model($payment->studentInvoice, 'Student invoice is required for payment journal entry.');
+        $cashAccount = TypedValue::model($payment->chartOfAccount, 'Cash account is required for payment journal entry.');
         $receivableAccount = $this->resolveReceivableAccount($payment);
 
         $existing = JournalEntry::query()
@@ -268,7 +278,7 @@ class FinanceControlService
             'credit' => $payment->amount,
         ]);
 
-        return $entry->fresh(['lines']);
+        return TypedValue::model($entry->fresh(['lines']));
     }
 
     protected function resolveReceivableAccount(Payment $payment): ChartOfAccount

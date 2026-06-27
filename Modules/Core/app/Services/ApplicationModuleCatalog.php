@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Module;
 use Modules\Core\Support\FilamentUi;
@@ -61,7 +62,16 @@ class ApplicationModuleCatalog
         $sortOrder = 0;
 
         foreach (NwidartModule::allEnabled() as $nwidartModule) {
-            $name = $nwidartModule->getName();
+            if (
+                ! is_object($nwidartModule) ||
+                ! method_exists($nwidartModule, 'getName') ||
+                ! method_exists($nwidartModule, 'getLowerName') ||
+                ! method_exists($nwidartModule, 'getDescription')
+            ) {
+                continue;
+            }
+
+            $name = TypedValue::string($nwidartModule->getName());
             $code = strtolower($name);
             $defaults = self::MODULE_DEFAULTS[$code] ?? ['is_core' => false, 'sort_order' => 100 + $sortOrder];
 
@@ -70,7 +80,7 @@ class ApplicationModuleCatalog
                 [
                     'slug' => $nwidartModule->getLowerName(),
                     'name' => FilamentUi::module($name),
-                    'description' => $nwidartModule->getDescription() ?: null,
+                    'description' => TypedValue::string($nwidartModule->getDescription()) ?: null,
                     'is_core' => $defaults['is_core'],
                     'is_active' => true,
                     'is_premium' => false,
@@ -91,7 +101,7 @@ class ApplicationModuleCatalog
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->pluck('code')
-            ->map(fn (string $code): string => Str::studly($code))
+            ->map(fn (mixed $code): string => Str::studly(TypedValue::string($code)))
             ->all());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\School\Services;
 
+use App\Support\TypedValue;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\School\Models\SchoolClass;
 
@@ -24,7 +25,7 @@ class AttendanceRecapDocumentService
         $recap = $this->recapService->getStudentRecap(
             (int) $schoolClass->tenant_id,
             $academicPeriodId,
-            (int) $schoolClass->getKey(),
+            TypedValue::int($schoolClass->getKey()),
             $month,
             $year,
         );

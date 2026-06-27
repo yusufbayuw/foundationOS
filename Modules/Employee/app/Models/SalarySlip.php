@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -122,7 +123,7 @@ class SalarySlip extends Model implements ProvidesWorkflowContext, StartsWorkflo
 
     public function workflowSubjectLabel(): string
     {
-        return 'Slip Gaji #'.$this->getKey().' — '.($this->period_label ?? '');
+        return 'Slip Gaji #'.TypedValue::string($this->getKey()).' — '.($this->period_label ?? '');
     }
 
     public function workflowSubjectType(): string

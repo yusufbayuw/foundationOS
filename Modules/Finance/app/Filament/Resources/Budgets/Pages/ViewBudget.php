@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\Budgets\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
@@ -67,7 +68,7 @@ class ViewBudget extends ViewRecord
                         $workflow = app(WorkflowResolver::class)->resolveForSubject(
                             $this->record->workflowSubjectType(),
                             $this->record,
-                            (int) ($tenant?->getKey() ?? $this->record->tenant_id),
+                            TypedValue::int(($tenant?->getKey()) ?? $this->record->tenant_id),
                             $this->record->organization_id,
                         );
 

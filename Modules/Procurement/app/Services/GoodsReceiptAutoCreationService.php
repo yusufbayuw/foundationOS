@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Procurement\Events\GoodsReceiptConfirmed;
 use Modules\Procurement\Models\GoodsReceipt;
@@ -27,7 +28,7 @@ class GoodsReceiptAutoCreationService
     public function receive(PurchaseOrder $purchaseOrder, array $quantities = [], ?int $receivedBy = null, ?string $notes = null): GoodsReceipt
     {
         return DB::transaction(function () use ($purchaseOrder, $quantities, $receivedBy, $notes): GoodsReceipt {
-            $purchaseOrder = $purchaseOrder->fresh(['items']);
+            $purchaseOrder = TypedValue::model($purchaseOrder->fresh(['items']));
 
             $receipt = GoodsReceipt::query()->create([
                 'tenant_id' => $purchaseOrder->tenant_id,
@@ -67,7 +68,7 @@ class GoodsReceiptAutoCreationService
 
             $this->recomputePoStatus($purchaseOrder);
 
-            $receipt = $receipt->fresh(['items']);
+            $receipt = TypedValue::model($receipt->fresh(['items']));
 
             GoodsReceiptConfirmed::dispatch($receipt);
 
@@ -82,10 +83,10 @@ class GoodsReceiptAutoCreationService
 
     protected function recomputePoStatus(PurchaseOrder $purchaseOrder): void
     {
-        $purchaseOrder = $purchaseOrder->fresh(['items']);
+        $purchaseOrder = TypedValue::model($purchaseOrder->fresh(['items']));
 
-        $totalOrdered = (int) $purchaseOrder->items->sum('quantity');
-        $totalReceived = (int) $purchaseOrder->items->sum('quantity_received');
+        $totalOrdered = TypedValue::int($purchaseOrder->items->sum('quantity'));
+        $totalReceived = TypedValue::int($purchaseOrder->items->sum('quantity_received'));
 
         $status = match (true) {
             $totalReceived <= 0 => $purchaseOrder->status,
@@ -100,7 +101,7 @@ class GoodsReceiptAutoCreationService
 
     protected function generateReceiptNumber(PurchaseOrder $purchaseOrder): string
     {
-        $base = 'GR-'.($purchaseOrder->po_number ?: $purchaseOrder->getKey());
+        $base = 'GR-'.TypedValue::string($purchaseOrder->po_number ?: $purchaseOrder->getKey());
         $candidate = $base;
         $seq = 1;
 

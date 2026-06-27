@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\TypedValue;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ class AttachApiVersionMeta
 {
     public function handle(Request $request, Closure $next, string $version = 'v2'): Response
     {
-        $response = $next($request);
+        $response = TypedValue::response($next($request));
 
         if (! $response instanceof JsonResponse) {
             return $response;

@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Services;
 
+use App\Support\TypedValue;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Enrollment\Models\Lead;
 use Modules\Enrollment\Models\LeadActivity;
@@ -21,9 +22,11 @@ class LeadInquiryService
         ?string $sourceDetail = null,
         array $utm = [],
     ): Lead {
+        $resolvedSourceCode = TypedValue::string($sourceCode, 'website');
+
         $source = LeadSource::query()->firstOrCreate(
-            ['tenant_id' => $tenantId, 'code' => $sourceCode],
-            ['name' => ucfirst($sourceCode), 'is_active' => true],
+            ['tenant_id' => $tenantId, 'code' => $resolvedSourceCode],
+            ['name' => ucfirst($resolvedSourceCode), 'is_active' => true],
         );
 
         $lead = Lead::query()->create([
@@ -59,6 +62,6 @@ class LeadInquiryService
 
         $applicant->forceFill(['lead_id' => $lead->getKey()])->save();
 
-        return $lead->fresh();
+        return TypedValue::model($lead->fresh());
     }
 }

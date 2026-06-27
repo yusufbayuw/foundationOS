@@ -3,6 +3,7 @@
 namespace Modules\Library\Support;
 
 use App\Models\LibrarySlimsMapping;
+use App\Support\TypedValue;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
@@ -108,8 +109,8 @@ class SlimsImportService
      */
     protected function normalizeSettings(array $settings): ?array
     {
-        $database = (string) ($settings['slims_db_database'] ?? '');
-        $username = (string) ($settings['slims_db_username'] ?? '');
+        $database = TypedValue::string($settings['slims_db_database'] ?? '');
+        $username = TypedValue::string($settings['slims_db_username'] ?? '');
 
         if ($database === '' || $username === '') {
             return null;
@@ -118,18 +119,18 @@ class SlimsImportService
         return [
             'connection' => [
                 'driver' => 'mysql',
-                'host' => (string) ($settings['slims_db_host'] ?? '127.0.0.1'),
+                'host' => TypedValue::string($settings['slims_db_host'] ?? '127.0.0.1'),
                 'port' => is_numeric($settings['slims_db_port'] ?? null) ? (int) $settings['slims_db_port'] : 3306,
                 'database' => $database,
                 'username' => $username,
-                'password' => (string) ($settings['slims_db_password'] ?? ''),
-                'charset' => (string) ($settings['slims_db_charset'] ?? 'utf8mb4'),
-                'collation' => (string) ($settings['slims_db_collation'] ?? 'utf8mb4_unicode_ci'),
-                'prefix' => (string) ($settings['slims_db_prefix'] ?? ''),
+                'password' => TypedValue::string($settings['slims_db_password'] ?? ''),
+                'charset' => TypedValue::string($settings['slims_db_charset'] ?? 'utf8mb4'),
+                'collation' => TypedValue::string($settings['slims_db_collation'] ?? 'utf8mb4_unicode_ci'),
+                'prefix' => TypedValue::string($settings['slims_db_prefix'] ?? ''),
                 'strict' => false,
             ],
-            'email_domain' => (string) ($settings['slims_import_email_domain'] ?? 'slims.local'),
-            'default_member_status' => (string) ($settings['slims_import_member_status'] ?? 'active'),
+            'email_domain' => TypedValue::string($settings['slims_import_email_domain'] ?? 'slims.local'),
+            'default_member_status' => TypedValue::string($settings['slims_import_member_status'] ?? 'active'),
         ];
     }
 

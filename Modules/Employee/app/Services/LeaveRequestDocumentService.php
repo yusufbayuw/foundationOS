@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Services;
 
+use App\Support\TypedValue;
 use Modules\Employee\Models\LeaveRequest;
 
 class LeaveRequestDocumentService
@@ -22,6 +23,6 @@ class LeaveRequestDocumentService
 
     public function filename(LeaveRequest $leaveRequest): string
     {
-        return sprintf('LeaveRequest_%s.pdf', (string) $leaveRequest->getKey());
+        return sprintf('LeaveRequest_%s.pdf', TypedValue::string($leaveRequest->getKey()));
     }
 }

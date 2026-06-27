@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Support\TypedValue;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -32,8 +33,8 @@ class FinancialReportService
         $revenue = collect($this->groupByAccount($lines, 'revenue'));
         $expenses = collect($this->groupByAccount($lines, 'expense'));
 
-        $totalRevenue = (float) $revenue->sum('balance');
-        $totalExpenses = (float) $expenses->sum('balance');
+        $totalRevenue = TypedValue::float($revenue->sum('balance'));
+        $totalExpenses = TypedValue::float($expenses->sum('balance'));
 
         return [
             'period_from' => $from->toDateString(),
@@ -53,15 +54,15 @@ class FinancialReportService
     /** @return array<string, mixed> */
     public function balanceSheet(int $tenantId, Carbon $asOf, ?int $organizationId = null): array
     {
-        $lines = $this->postedLines($tenantId, Carbon::create(1970, 1, 1), $asOf, $organizationId);
+        $lines = $this->postedLines($tenantId, Carbon::parse('1970-01-01'), $asOf, $organizationId);
 
         $assets = collect($this->groupByAccount($lines, 'asset'));
         $liabilities = collect($this->groupByAccount($lines, 'liability'));
         $equity = collect($this->groupByAccount($lines, 'equity'));
 
-        $totalAssets = (float) $assets->sum('balance');
-        $totalLiabilities = (float) $liabilities->sum('balance');
-        $totalEquity = (float) $equity->sum('balance');
+        $totalAssets = TypedValue::float($assets->sum('balance'));
+        $totalLiabilities = TypedValue::float($liabilities->sum('balance'));
+        $totalEquity = TypedValue::float($equity->sum('balance'));
 
         return [
             'as_of' => $asOf->toDateString(),
@@ -152,7 +153,17 @@ class FinancialReportService
             ->filter(fn ($l) => strtolower((string) $l->chartOfAccount?->type) === $type)
             ->groupBy('chart_of_account_id')
             ->map(function (Collection $group) use ($creditNormal): array {
-                $coa = $group->first()->chartOfAccount;
+                $firstLine = $group->first();
+                if (! $firstLine instanceof JournalEntryLine) {
+                    return [
+                        'id' => null,
+                        'code' => '',
+                        'name' => 'Unknown',
+                        'balance' => 0.0,
+                    ];
+                }
+
+                $coa = $firstLine->chartOfAccount;
                 $debit = $group->sum(fn ($l) => (float) $l->debit);
                 $credit = $group->sum(fn ($l) => (float) $l->credit);
                 $balance = $creditNormal ? ($credit - $debit) : ($debit - $credit);
@@ -181,7 +192,17 @@ class FinancialReportService
             ->filter(fn ($l) => strtolower((string) $l->chartOfAccount?->category) === $category)
             ->groupBy('chart_of_account_id')
             ->map(function (Collection $group): array {
-                $coa = $group->first()->chartOfAccount;
+                $firstLine = $group->first();
+                if (! $firstLine instanceof JournalEntryLine) {
+                    return [
+                        'id' => null,
+                        'code' => '',
+                        'name' => 'Unknown',
+                        'balance' => 0.0,
+                    ];
+                }
+
+                $coa = $firstLine->chartOfAccount;
 
                 return [
                     'id' => $coa?->id !== null ? (int) $coa->id : null,

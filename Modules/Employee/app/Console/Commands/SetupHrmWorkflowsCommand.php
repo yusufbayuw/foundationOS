@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
@@ -34,9 +35,9 @@ class SetupHrmWorkflowsCommand extends Command
     {
         $tenant = Tenant::query()->findOrFail((int) $this->argument('tenant'));
 
-        $manager = $this->resolveUserOption('manager', required: true);
-        $hr = $this->resolveUserOption('hr', required: true);
-        $finance = $this->resolveUserOption('finance', required: true);
+        $manager = TypedValue::model($this->resolveUserOption('manager', required: true));
+        $hr = TypedValue::model($this->resolveUserOption('hr', required: true));
+        $finance = TypedValue::model($this->resolveUserOption('finance', required: true));
         $actorId = $hr->id;
 
         $this->assertUserBelongsToTenant($manager, $tenant);
@@ -299,7 +300,7 @@ class SetupHrmWorkflowsCommand extends Command
             'step_type' => $attributes['step_type'] ?? 'approval',
             'assignee_type' => $attributes['assignee_type'] ?? 'user',
             'assignee_value' => isset($attributes['assignee_user_id'])
-                ? (string) $attributes['assignee_user_id']
+                ? TypedValue::string($attributes['assignee_user_id'])
                 : ($attributes['assignee_value'] ?? null),
             'assignee_config' => null,
             'form_schema' => $attributes['form_schema'] ?? [],

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Integrations\Moodle\MoodleOutboxService;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Modules\Campus\Models\Course;
 use Modules\Core\Models\User;
@@ -81,7 +82,10 @@ class MoodleBackfillCommand extends Command
         User::withTrashed()->chunkById(500, function ($users) use (&$count, $dryRun): void {
             foreach ($users as $user) {
                 $action = $this->shouldDeactivateUser($user) ? MoodleOutboxService::ACTION_DEACTIVATE : MoodleOutboxService::ACTION_UPSERT;
-                $version = optional($user->updated_at)->timestamp ?? now()->timestamp;
+                $version = TypedValue::int(
+                    data_get($user, 'updated_at.timestamp'),
+                    TypedValue::int(now()->timestamp),
+                );
                 $dedupe = "user:{$user->id}:{$action}:{$version}";
 
                 if (! $dryRun) {
@@ -114,7 +118,10 @@ class MoodleBackfillCommand extends Command
         $query->chunkById(500, function ($courses) use (&$count, $dryRun): void {
             foreach ($courses as $course) {
                 $action = $this->shouldDeactivateCourse($course) ? MoodleOutboxService::ACTION_DEACTIVATE : MoodleOutboxService::ACTION_UPSERT;
-                $version = optional($course->updated_at)->timestamp ?? now()->timestamp;
+                $version = TypedValue::int(
+                    data_get($course, 'updated_at.timestamp'),
+                    TypedValue::int(now()->timestamp),
+                );
                 $dedupe = "course:{$course->id}:{$action}:{$version}";
 
                 if (! $dryRun) {
@@ -142,7 +149,7 @@ class MoodleBackfillCommand extends Command
     {
         $count = 0;
 
-        $query = ClassStudent::withTrashed()->with(['student' => fn ($student) => $student->withTrashed()]);
+        $query = ClassStudent::withTrashed()->with('student');
         if ($tenantId !== null) {
             $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
@@ -153,7 +160,10 @@ class MoodleBackfillCommand extends Command
                 $action = $this->shouldUnenroll($student, $classStudent)
                     ? MoodleOutboxService::ACTION_UNENROLL
                     : MoodleOutboxService::ACTION_ENROLL;
-                $version = optional($classStudent->updated_at)->timestamp ?? now()->timestamp;
+                $version = TypedValue::int(
+                    data_get($classStudent, 'updated_at.timestamp'),
+                    TypedValue::int(now()->timestamp),
+                );
                 $dedupe = "enrollment:{$classStudent->id}:{$action}:{$version}";
 
                 if (! $dryRun) {

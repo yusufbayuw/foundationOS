@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Integrations\Moodle\Exceptions\MoodleIntegrationException;
 use App\Integrations\Moodle\MoodleClient;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 
 class MoodleHealthCheckCommand extends Command
@@ -66,8 +67,8 @@ class MoodleHealthCheckCommand extends Command
             ],
         ];
 
-        $baseUrl = (string) config('moodle.base_url');
-        $token = (string) config('moodle.token');
+        $baseUrl = TypedValue::string(config('moodle.base_url'));
+        $token = TypedValue::string(config('moodle.token'));
         $enabled = (bool) config('moodle.enabled', false);
 
         $readonly = (bool) config('moodle.readonly', false);
@@ -92,7 +93,7 @@ class MoodleHealthCheckCommand extends Command
         if ($enabled && $baseUrl !== '' && $token !== '') {
             try {
                 $siteInfo = $client->call('core_webservice_get_site_info');
-                $rows[] = ['Webservice connection', 'OK', (string) ($siteInfo['sitename'] ?? 'Connected')];
+                $rows[] = ['Webservice connection', 'OK', TypedValue::string($siteInfo['sitename'] ?? 'Connected')];
             } catch (MoodleIntegrationException $exception) {
                 $siteInfoError = $exception->getMessage();
                 $rows[] = ['Webservice connection', 'FAIL', $siteInfoError];
@@ -103,7 +104,7 @@ class MoodleHealthCheckCommand extends Command
         if (is_array($siteInfo) && isset($siteInfo['functions']) && is_array($siteInfo['functions'])) {
             foreach ($siteInfo['functions'] as $function) {
                 if (is_array($function) && isset($function['name'])) {
-                    $availableFunctions[] = (string) $function['name'];
+                    $availableFunctions[] = TypedValue::string($function['name']);
                 }
             }
         }

@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Carbon\CarbonInterface;
 use Modules\Workflow\Contracts\WorkflowAuditLogger;
 use Modules\Workflow\Contracts\WorkflowSlaService;
@@ -30,7 +31,7 @@ class QueuedWorkflowSlaService implements WorkflowSlaService
             return;
         }
 
-        CheckWorkflowSlaJob::dispatch($instance->getKey())
+        CheckWorkflowSlaJob::dispatch(TypedValue::int($instance->getKey()))
             ->delay($instance->due_at);
 
         $this->auditLogger->log($instance, WorkflowLogType::SlaScheduled->value, [
@@ -40,7 +41,7 @@ class QueuedWorkflowSlaService implements WorkflowSlaService
 
     public function markBreached(WorkflowInstance $instance): void
     {
-        $instance = $instance->fresh();
+        $instance = TypedValue::model($instance->fresh());
 
         if ($instance->logs()->where('log_type', WorkflowLogType::SlaBreached->value)->exists()) {
             return;

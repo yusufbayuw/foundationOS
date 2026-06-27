@@ -2,6 +2,7 @@
 
 namespace Modules\School\Services;
 
+use App\Support\TypedValue;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Modules\Finance\Models\StudentInvoice;
@@ -98,7 +99,8 @@ class MonthlyTuitionInvoiceService
             ->value('invoice_number');
 
         $seq = 1;
-        if ($last && preg_match('/-(\d+)$/', $last, $m)) {
+        $lastInvoiceNumber = TypedValue::string($last);
+        if ($lastInvoiceNumber !== '' && preg_match('/-(\d+)$/', $lastInvoiceNumber, $m)) {
             $seq = ((int) $m[1]) + 1;
         }
 

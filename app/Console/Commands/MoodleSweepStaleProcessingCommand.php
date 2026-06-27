@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\MoodleSyncOutbox;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 
 class MoodleSweepStaleProcessingCommand extends Command
@@ -14,7 +15,7 @@ class MoodleSweepStaleProcessingCommand extends Command
 
     public function handle(): int
     {
-        $minutes = (int) ($this->option('minutes') ?: config('tenancy.moodle_processing_stale_minutes', 30));
+        $minutes = TypedValue::int(($this->option('minutes')) ?: config('tenancy.moodle_processing_stale_minutes', 30));
 
         $reset = MoodleSyncOutbox::query()
             ->staleProcessing($minutes)

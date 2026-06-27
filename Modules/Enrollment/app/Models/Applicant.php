@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -64,7 +65,7 @@ class Applicant extends Model
     protected static function booted(): void
     {
         static::updating(function (self $applicant): void {
-            $applicant->previousAdmissionPeriodId = $applicant->getOriginal('admission_period_id');
+            $applicant->previousAdmissionPeriodId = TypedValue::nullableInt($applicant->getOriginal('admission_period_id'));
         });
 
         static::updated(function (self $applicant): void {
@@ -76,14 +77,14 @@ class Applicant extends Model
             $actor = $user instanceof User ? $user : null;
 
             if ($applicant->status === 'accepted') {
-                ApplicantAccepted::dispatch($applicant->fresh(), $actor);
+                ApplicantAccepted::dispatch(TypedValue::model($applicant->fresh()), $actor);
 
                 return;
             }
 
             if ($applicant->getOriginal('status') === 'accepted') {
                 ApplicantAcceptanceReverted::dispatch(
-                    $applicant->fresh(),
+                    TypedValue::model($applicant->fresh()),
                     'accepted',
                     $actor,
                 );

@@ -2,6 +2,7 @@
 
 namespace Modules\EOffice\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Modules\Core\Support\QrCodeGenerator;
@@ -42,7 +43,7 @@ class LetterDocumentService
 
     public function filename(Letter $letter): string
     {
-        $number = str_replace(['/', ' '], '_', $letter->letter_number ?? $letter->code ?? (string) $letter->getKey());
+        $number = str_replace(['/', ' '], '_', $letter->letter_number ?? $letter->code ?? TypedValue::string($letter->getKey()));
 
         return sprintf('Surat_%s.pdf', $number);
     }

@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use App\Services\CrossModuleReportService;
 use App\Services\ExecutiveMetricsService;
+use App\Support\TypedValue;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Console\Command;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Mail;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantSetting;
@@ -51,7 +53,7 @@ class WeeklySummaryReportCommand extends Command
             foreach ($recipients as $email) {
                 Mail::raw(
                     "Weekly summary for {$tenant->name} ({$from->toDateString()} – {$to->toDateString()})",
-                    function ($message) use ($email, $tenant, $pdf): void {
+                    function (Message $message) use ($email, $tenant, $pdf): void {
                         $message->to($email)
                             ->subject("FoundationOS Weekly Summary — {$tenant->name}")
                             ->attachData($pdf->output(), 'weekly-summary.pdf', ['mime' => 'application/pdf']);
@@ -89,10 +91,12 @@ class WeeklySummaryReportCommand extends Command
             return User::query()
                 ->where('is_super_admin', true)
                 ->pluck('email')
-                ->filter()
+                ->map(static fn (mixed $email): string => TypedValue::string($email))
+                ->filter(static fn (string $email): bool => $email !== '')
+                ->values()
                 ->all();
         }
 
-        return array_values(array_filter(array_map('trim', explode(',', $raw))));
+        return array_values(array_filter(array_map('trim', explode(',', TypedValue::string($raw)))));
     }
 }

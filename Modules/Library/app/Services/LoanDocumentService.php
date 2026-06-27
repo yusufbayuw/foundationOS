@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Services;
 
+use App\Support\TypedValue;
 use Modules\Library\Models\Loan;
 
 class LoanDocumentService
@@ -22,6 +23,6 @@ class LoanDocumentService
 
     public function filename(Loan $loan): string
     {
-        return sprintf('Loan_%s.pdf', (string) $loan->getKey());
+        return sprintf('Loan_%s.pdf', TypedValue::string($loan->getKey()));
     }
 }

@@ -11,7 +11,12 @@ class MonitoringWebhookController extends Controller
 {
     public function __invoke(Request $request, MonitoringWebhookReceiver $receiver): JsonResponse
     {
-        $receiver->receive($request->all());
+        $payload = [];
+        foreach ($request->all() as $key => $value) {
+            $payload[(string) $key] = $value;
+        }
+
+        $receiver->receive($payload);
 
         return response()->json(['accepted' => true]);
     }

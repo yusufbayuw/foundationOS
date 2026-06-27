@@ -2,6 +2,8 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
@@ -19,7 +21,7 @@ class WorkflowDefinitionLifecycleService
     public function publish(Workflow $workflow, ?int $actorId = null): Workflow
     {
         return DB::transaction(function () use ($workflow, $actorId): Workflow {
-            $workflow = $workflow->fresh(['steps', 'transitions']);
+            $workflow = TypedValue::model($workflow->fresh(['steps', 'transitions']));
 
             $this->assertPublishable($workflow);
 
@@ -48,7 +50,7 @@ class WorkflowDefinitionLifecycleService
                 'updated_by' => $actorId,
             ])->save();
 
-            return $workflow->fresh();
+            return TypedValue::model($workflow->fresh());
         });
     }
 
@@ -60,25 +62,27 @@ class WorkflowDefinitionLifecycleService
             'updated_by' => $actorId,
         ])->save();
 
-        return $workflow->fresh();
+        return TypedValue::model($workflow->fresh());
     }
 
     public function duplicateAsNewVersion(Workflow $workflow, ?int $actorId = null): Workflow
     {
         return DB::transaction(function () use ($workflow, $actorId): Workflow {
-            $workflow = $workflow->fresh(['steps', 'transitions', 'automatedActions']);
+            $workflow = TypedValue::model($workflow->fresh(['steps', 'transitions', 'automatedActions']));
 
-            $nextVersion = (int) Workflow::query()
-                ->where('tenant_id', $workflow->tenant_id)
-                ->where('code', $workflow->code)
-                ->where(function ($query) use ($workflow): void {
-                    if ($workflow->organization_id) {
-                        $query->where($query->getModel()->qualifyColumn('organization_id'), $workflow->organization_id);
-                    } else {
-                        $query->whereNull('organization_id');
-                    }
-                })
-                ->max('version') + 1;
+            $nextVersion = TypedValue::int(
+                Workflow::query()
+                    ->where('tenant_id', $workflow->tenant_id)
+                    ->where('code', $workflow->code)
+                    ->where(function (Builder $query) use ($workflow): void {
+                        if ($workflow->organization_id) {
+                            $query->where($query->getModel()->qualifyColumn('organization_id'), $workflow->organization_id);
+                        } else {
+                            $query->whereNull('organization_id');
+                        }
+                    })
+                    ->max('version'),
+            ) + 1;
 
             $clone = Workflow::query()->create([
                 'tenant_id' => $workflow->tenant_id,
@@ -151,7 +155,7 @@ class WorkflowDefinitionLifecycleService
                 ]);
             }
 
-            return $clone->fresh(['steps', 'transitions', 'automatedActions']);
+            return TypedValue::model($clone->fresh(['steps', 'transitions', 'automatedActions']));
         });
     }
 

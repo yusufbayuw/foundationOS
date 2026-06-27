@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\v1;
 
+use DateTimeInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Core\Models\Tenant;
@@ -15,13 +16,14 @@ class TenantResource extends JsonResource
     {
         /** @var Tenant $tenant */
         $tenant = $this->resource;
+        $createdAt = $tenant->getAttribute('created_at');
 
         return [
-            'id' => $tenant->id,
-            'uuid' => $tenant->uuid,
-            'code' => $tenant->code,
-            'name' => $tenant->name,
-            'created_at' => $tenant->created_at?->toIso8601String(),
+            'id' => $tenant->getKey(),
+            'uuid' => $tenant->getAttribute('uuid'),
+            'code' => $tenant->getAttribute('code'),
+            'name' => $tenant->getAttribute('name'),
+            'created_at' => $createdAt instanceof DateTimeInterface ? $createdAt->format(DateTimeInterface::ATOM) : null,
         ];
     }
 }

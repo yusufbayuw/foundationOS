@@ -40,7 +40,7 @@ class EmployeeDocument extends Model
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, string>
      */
     public static function documentTypeOptions(): array
     {

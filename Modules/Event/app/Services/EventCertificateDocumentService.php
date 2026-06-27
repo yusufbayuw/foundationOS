@@ -2,6 +2,7 @@
 
 namespace Modules\Event\Services;
 
+use App\Support\TypedValue;
 use Modules\Event\Models\EventCertificate;
 
 class EventCertificateDocumentService
@@ -22,6 +23,6 @@ class EventCertificateDocumentService
 
     public function filename(EventCertificate $certificate): string
     {
-        return sprintf('EventCertificate_%s.pdf', str_replace(' ', '_', $certificate->code ?? (string) $certificate->getKey()));
+        return sprintf('EventCertificate_%s.pdf', str_replace(' ', '_', $certificate->code ?? TypedValue::string($certificate->getKey())));
     }
 }

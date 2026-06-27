@@ -2,6 +2,7 @@
 
 namespace Modules\School\Services;
 
+use App\Support\TypedValue;
 use Modules\School\Models\Student;
 
 class ReportCardDocumentService
@@ -13,7 +14,7 @@ class ReportCardDocumentService
      */
     public function assemble(Student $student, int $academicPeriodId): array
     {
-        $data = $this->reportCardService->generate($student->getKey(), $academicPeriodId);
+        $data = $this->reportCardService->generate(TypedValue::int($student->getKey()), $academicPeriodId);
 
         return [
             'data' => $data,
@@ -24,8 +25,8 @@ class ReportCardDocumentService
 
     public function filename(Student $student, int $academicPeriodId): string
     {
-        $data = $this->reportCardService->generate($student->getKey(), $academicPeriodId);
-        $studentName = $data['student']->user->name ?? 'Student';
+        $data = $this->reportCardService->generate(TypedValue::int($student->getKey()), $academicPeriodId);
+        $studentName = TypedValue::string(data_get($data, 'student.user.name'), 'Student');
 
         return sprintf('Rapor_%s.pdf', str_replace(' ', '_', $studentName));
     }

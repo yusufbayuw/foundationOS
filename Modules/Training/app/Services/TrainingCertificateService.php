@@ -2,6 +2,7 @@
 
 namespace Modules\Training\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Str;
 use Modules\Core\Support\QrCodeGenerator;
 use Modules\Training\Models\TrainingCertificate;
@@ -23,7 +24,7 @@ class TrainingCertificateService
             return $existing;
         }
 
-        $number = 'TC-'.$enrollment->tenant_id.'-'.str_pad((string) $enrollment->getKey(), 6, '0', STR_PAD_LEFT);
+        $number = 'TC-'.$enrollment->tenant_id.'-'.str_pad(TypedValue::string($enrollment->getKey()), 6, '0', STR_PAD_LEFT);
         $token = Str::uuid()->toString();
 
         return TrainingCertificate::query()->create([

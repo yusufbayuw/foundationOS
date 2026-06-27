@@ -2,6 +2,7 @@
 
 namespace App\Filament\Imports;
 
+use App\Support\TypedValue;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -31,7 +32,7 @@ abstract class BaseModelImporter extends Importer
 
             $column = ImportColumn::make($field);
 
-            $cast = strtolower((string) ($casts[$field] ?? ''));
+            $cast = strtolower(TypedValue::string($casts[$field] ?? ''));
 
             if (in_array($cast, ['bool', 'boolean'], true)) {
                 $column->boolean();

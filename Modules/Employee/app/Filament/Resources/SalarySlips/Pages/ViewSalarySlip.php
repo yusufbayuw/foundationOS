@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Filament\Resources\SalarySlips\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
@@ -95,9 +96,10 @@ class ViewSalarySlip extends ViewRecord
                 ->action(function (): void {
                     /** @var SalarySlip $record */
                     $record = $this->getRecord()->load('employee');
+                    $employee = TypedValue::model($record->employee);
                     $service = app(PayrollCalculationService::class);
                     $service->calculate(
-                        $record->employee,
+                        $employee,
                         (int) $record->period_month,
                         (int) $record->period_year,
                     );

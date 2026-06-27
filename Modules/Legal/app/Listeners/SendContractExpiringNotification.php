@@ -2,6 +2,7 @@
 
 namespace Modules\Legal\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Core\Models\User;
 use Modules\Legal\Events\ContractExpiringSoon;
 use Modules\Messaging\Services\NotificationDispatcher;
@@ -33,7 +34,7 @@ class SendContractExpiringNotification
             subject: 'Contract expiring soon',
             body: sprintf('Contract %s expires on %s.', $contract->name, $contract->expires_at?->toDateString()),
             channels: ['database'],
-            idempotencyKey: 'contract-expiring-'.$contract->getKey().'-'.$contract->expires_at?->toDateString(),
+            idempotencyKey: 'contract-expiring-'.TypedValue::string($contract->getKey()).'-'.$contract->expires_at?->toDateString(),
         );
     }
 }

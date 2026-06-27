@@ -2,8 +2,10 @@
 
 namespace Modules\Exam\Providers;
 
+use Illuminate\Contracts\Foundation\Application;
 use Modules\Exam\Console\Commands\ProvisionExamSecurityCommand;
 use Modules\Exam\Console\Commands\SyncExamResultsCommand;
+use Modules\Exam\Contracts\GradeBridgeInterface;
 use Modules\Exam\Services\CampusGradeBridgeService;
 use Modules\Exam\Services\ExamAcademicContextService;
 use Modules\Exam\Services\ExamAnalyticsService;
@@ -71,11 +73,24 @@ class ExamServiceProvider extends ModuleServiceProvider
         $this->app->singleton(ExamAuditLogger::class);
         $this->app->singleton(ExamShieldProvisioner::class);
 
-        $this->app->singleton(ExamRuntimeSyncService::class, function ($app): ExamRuntimeSyncService {
+        $this->app->singleton(ExamRuntimeSyncService::class, function (Application $app): ExamRuntimeSyncService {
             return new ExamRuntimeSyncService([
-                $app->make(SchoolGradeBridgeService::class),
-                $app->make(CampusGradeBridgeService::class),
+                $this->resolveGradeBridge($app, SchoolGradeBridgeService::class),
+                $this->resolveGradeBridge($app, CampusGradeBridgeService::class),
             ]);
         });
+    }
+
+    /**
+     * @param  class-string<GradeBridgeInterface>  $bridgeClass
+     */
+    private function resolveGradeBridge(Application $app, string $bridgeClass): GradeBridgeInterface
+    {
+        $bridge = $app->make($bridgeClass);
+        if (! $bridge instanceof GradeBridgeInterface) {
+            throw new \RuntimeException('Invalid grade bridge binding.');
+        }
+
+        return $bridge;
     }
 }

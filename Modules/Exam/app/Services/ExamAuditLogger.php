@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\User;
@@ -34,7 +35,7 @@ class ExamAuditLogger
             'user_id' => $user?->getKey(),
             'organization_id' => $exam->organization_id,
             'auditable_type' => $auditable::class,
-            'auditable_id' => (string) $auditable->getKey(),
+            'auditable_id' => TypedValue::string($auditable->getKey()),
             'action' => $action->value,
             'category' => AuditLog::CATEGORY_SECURITY,
             'description' => $description,

@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Organization;
 use Modules\Finance\Models\ChartOfAccount;
@@ -74,7 +75,7 @@ class RevenueJournalHelper
                 ]);
             }
 
-            return $entry->fresh(['lines']);
+            return TypedValue::model($entry->fresh(['lines']));
         });
     }
 

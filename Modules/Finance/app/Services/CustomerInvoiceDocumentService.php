@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Support\TypedValue;
 use Modules\Finance\Models\CustomerInvoice;
 
 class CustomerInvoiceDocumentService
@@ -22,6 +23,6 @@ class CustomerInvoiceDocumentService
 
     public function filename(CustomerInvoice $invoice): string
     {
-        return sprintf('CustomerInvoice_%s.pdf', str_replace(' ', '_', $invoice->invoice_number ?? (string) $invoice->getKey()));
+        return sprintf('CustomerInvoice_%s.pdf', str_replace(' ', '_', $invoice->invoice_number ?? TypedValue::string($invoice->getKey())));
     }
 }

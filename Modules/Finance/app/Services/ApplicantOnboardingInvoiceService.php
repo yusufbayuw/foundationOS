@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
@@ -28,7 +29,7 @@ class ApplicantOnboardingInvoiceService
             return null;
         }
 
-        $applicant = $applicant->fresh(['admissionPeriod']);
+        $applicant = TypedValue::model($applicant->fresh(['admissionPeriod']));
 
         $amount = (float) ($applicant->admissionPeriod->registration_fee ?? 0);
 
@@ -73,7 +74,7 @@ class ApplicantOnboardingInvoiceService
 
     protected function generateInvoiceNumber(Applicant $applicant): string
     {
-        $base = 'INV-ADM-'.($applicant->registration_number ?: $applicant->getKey());
+        $base = 'INV-ADM-'.TypedValue::string($applicant->registration_number ?: $applicant->getKey());
         $candidate = $base;
         $seq = 1;
 

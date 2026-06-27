@@ -2,6 +2,7 @@
 
 namespace Modules\Marketplace\Services;
 
+use App\Support\TypedValue;
 use Modules\Marketplace\Exceptions\DuplicateSellerCodeException;
 use Modules\Marketplace\Models\Seller;
 
@@ -45,7 +46,7 @@ class SellerRegistrationService
     {
         $seller->forceFill(['verification_status' => 'verified'])->save();
 
-        return $seller->fresh();
+        return TypedValue::model($seller->fresh());
     }
 
     protected function codeExists(int $tenantId, ?int $organizationId, string $code): bool

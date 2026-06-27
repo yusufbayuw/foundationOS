@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Resources\Students;
 
+use App\Support\TypedValue;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
@@ -63,7 +64,7 @@ class StudentResource extends LocalizedResource
 
         return $record->user->name
             ?? ($record->nis ? 'NIS: '.$record->nis : null)
-            ?? 'Siswa #'.$record->getKey();
+            ?? 'Siswa #'.TypedValue::string($record->getKey());
     }
 
     public static function form(Schema $schema): Schema

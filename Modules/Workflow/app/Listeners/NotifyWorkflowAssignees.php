@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Core\Models\User;
 use Modules\Workflow\Events\WorkflowAssignmentCreated;
 use Modules\Workflow\Notifications\InternalWorkflowNotification;
@@ -34,7 +35,7 @@ class NotifyWorkflowAssignees
             'Workflow task assigned',
             sprintf(
                 'You have a pending task on %s (%s).',
-                $instance->subject_label ?: 'workflow instance #'.$instance->getKey(),
+                $instance->subject_label ?: 'workflow instance #'.TypedValue::string($instance->getKey()),
                 $stepName,
             ),
         ));

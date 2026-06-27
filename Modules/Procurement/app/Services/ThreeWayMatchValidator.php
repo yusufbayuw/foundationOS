@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\PurchaseOrder;
 
@@ -34,7 +35,7 @@ class ThreeWayMatchValidator
         $poItemsById = $po->items->keyBy('id');
         $grQtyByPoItem = $gr->items
             ->groupBy('purchase_order_item_id')
-            ->map(fn ($items) => (int) $items->sum('quantity_accepted'));
+            ->map(fn ($items) => TypedValue::int($items->sum('quantity_accepted')));
 
         foreach ($billLines as $line) {
             $poItemId = (int) ($line['purchase_order_item_id']);

@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Inventory\Models\StockAdjustment;
 use Modules\Inventory\Services\StockAdjustmentService;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
@@ -15,7 +16,7 @@ class CommitStockAdjustmentOnWorkflowApproval
 
     public function handle(WorkflowAdvanced $event): void
     {
-        $instance = $event->instance->fresh(['subject']);
+        $instance = TypedValue::model($event->instance->fresh(['subject']));
 
         if (! $instance->subject instanceof StockAdjustment) {
             return;

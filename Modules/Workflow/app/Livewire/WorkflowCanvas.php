@@ -6,6 +6,7 @@ use App\Support\CurrentTenant;
 use App\Support\TypedValue;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -57,7 +58,7 @@ class WorkflowCanvas extends Component
 
     private function loadWorkflow(int $workflowId): void
     {
-        $workflow = Workflow::with(['steps' => fn ($q) => $q->orderBy('sort_order'), 'transitions'])->find($workflowId);
+        $workflow = Workflow::with(['steps' => fn (Builder $q): Builder => $q->orderBy('sort_order'), 'transitions'])->find($workflowId);
 
         if (! $workflow) {
             return;
@@ -77,7 +78,7 @@ class WorkflowCanvas extends Component
             'gateway_type' => $step->gateway_type->value,
             'quorum_strategy' => $step->quorum_strategy?->value,
             'quorum_value' => $step->quorum_value,
-            'assignee_type' => $step->assignee_type->value,
+            'assignee_type' => $step->assignee_type !== null ? $step->assignee_type->value : 'user',
             'assignee_value' => $step->assignee_value ?? '',
             'assignee_config' => $step->assignee_config ?? [],
             'form_schema' => $step->form_schema ?? [],
@@ -327,7 +328,11 @@ class WorkflowCanvas extends Component
         }
 
         $porter = app(WorkflowDefinitionPorter::class);
-        $errors = $porter->validatePayload($decoded);
+        $decodedPayload = collect($decoded)
+            ->mapWithKeys(fn (mixed $value, mixed $key): array => [TypedValue::string($key) => $value])
+            ->all();
+
+        $errors = $porter->validatePayload($decodedPayload);
 
         if ($errors !== []) {
             Notification::make()
@@ -340,7 +345,7 @@ class WorkflowCanvas extends Component
         }
 
         try {
-            $workflow = $porter->import($decoded, $tenantId);
+            $workflow = $porter->import($decodedPayload, $tenantId);
         } catch (\InvalidArgumentException $e) {
             Notification::make()
                 ->danger()
@@ -388,7 +393,9 @@ class WorkflowCanvas extends Component
                 $workflow->steps()->forceDelete();
             } else {
                 $code = $this->workflowCode ?: 'wf_'.Str::random(6);
-                $version = (int) Workflow::query()->where('tenant_id', $tenantId)->where('code', $code)->max('version') + 1;
+                $version = TypedValue::int(
+                    Workflow::query()->where('tenant_id', $tenantId)->where('code', $code)->max('version'),
+                ) + 1;
 
                 $workflow = Workflow::create([
                     'tenant_id' => $tenantId,
@@ -409,16 +416,28 @@ class WorkflowCanvas extends Component
             $stepsWithNewUuids = [];
             foreach ($this->steps as $stepData) {
                 $newUuid = (string) Str::uuid();
-                $oldToNewUuid[$stepData['uuid']] = $newUuid;
+                $stepUuid = TypedValue::string($stepData['uuid']);
+
+                if ($stepUuid === '') {
+                    continue;
+                }
+
+                $oldToNewUuid[$stepUuid] = $newUuid;
                 $stepsWithNewUuids[] = array_merge($stepData, ['uuid' => $newUuid]);
             }
 
             $uuidToId = [];
 
             foreach ($stepsWithNewUuids as $order => $stepData) {
+                $stepUuid = TypedValue::string($stepData['uuid']);
+
+                if ($stepUuid === '') {
+                    continue;
+                }
+
                 $step = WorkflowStep::create([
                     'workflow_id' => $workflow->id,
-                    'uuid' => $stepData['uuid'],
+                    'uuid' => $stepUuid,
                     'code' => $stepData['code'],
                     'name' => $stepData['name'],
                     'description' => $stepData['description'] ?: null,
@@ -437,12 +456,19 @@ class WorkflowCanvas extends Component
                     'canvas_position' => $stepData['canvas_position'] ?: null,
                 ]);
 
-                $uuidToId[$stepData['uuid']] = $step->id;
+                $uuidToId[$stepUuid] = $step->id;
             }
 
             foreach ($this->transitions as $t) {
-                $fromUuid = $oldToNewUuid[$t['from_uuid']] ?? $t['from_uuid'];
-                $toUuid = isset($t['to_uuid']) ? ($oldToNewUuid[$t['to_uuid']] ?? $t['to_uuid']) : null;
+                $fromUuidKey = TypedValue::string($t['from_uuid'] ?? '');
+                $toUuidKey = TypedValue::string($t['to_uuid'] ?? '');
+
+                if ($fromUuidKey === '') {
+                    continue;
+                }
+
+                $fromUuid = $oldToNewUuid[$fromUuidKey] ?? $fromUuidKey;
+                $toUuid = $toUuidKey !== '' ? ($oldToNewUuid[$toUuidKey] ?? $toUuidKey) : null;
 
                 WorkflowTransition::create([
                     'workflow_id' => $workflow->id,

@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Modules\Core\Models\User;
 use Modules\Exam\Models\ExamDefinition;
 use Modules\Exam\Models\ExamParticipant;
@@ -44,7 +45,7 @@ class ExamRuntimePayloadBuilder
                 'grade_sync_mode' => $definition->grade_sync_mode->value,
                 'grade_sync_target' => $definition->grade_sync_target,
                 'school_assessment_reference' => ExamRuntimeEntityRef::forModel($definition->schoolAssessment),
-                'snapshot_version' => (int) $definition->examPublishSnapshots()->max('version') + 1,
+                'snapshot_version' => TypedValue::int($definition->examPublishSnapshots()->max('version')) + 1,
             ],
         ];
     }
@@ -158,9 +159,11 @@ class ExamRuntimePayloadBuilder
         }
 
         $metadata = $definition->metadata_json ?? [];
+        $proctorUserIds = is_array($metadata['proctor_user_ids'] ?? null) ? $metadata['proctor_user_ids'] : [];
+        $adminAccessRows = is_array($metadata['admin_access'] ?? null) ? $metadata['admin_access'] : [];
 
-        foreach ($metadata['proctor_user_ids'] ?? [] as $userId) {
-            $userId = (int) $userId;
+        foreach ($proctorUserIds as $userId) {
+            $userId = TypedValue::int($userId);
 
             if (isset($seen[$userId])) {
                 continue;
@@ -171,19 +174,19 @@ class ExamRuntimePayloadBuilder
             $seen[$userId] = true;
         }
 
-        foreach ($metadata['admin_access'] ?? [] as $row) {
+        foreach ($adminAccessRows as $row) {
             if (! is_array($row)) {
                 continue;
             }
 
-            $userId = (int) ($row['user_id'] ?? $row['user_reference'] ?? 0);
+            $userId = TypedValue::int($row['user_id'] ?? $row['user_reference'] ?? 0);
 
             if ($userId === 0 || isset($seen[$userId])) {
                 continue;
             }
 
             $user = User::query()->find($userId);
-            $access[] = $this->mapAdminUser($user, (string) ($row['role'] ?? 'proctor'));
+            $access[] = $this->mapAdminUser($user, TypedValue::string($row['role'] ?? 'proctor'));
             $seen[$userId] = true;
         }
 
@@ -266,10 +269,15 @@ class ExamRuntimePayloadBuilder
         return [
             'foundation_id' => $payload['foundation_id'] ?? null,
             'runtime_id' => $payload['runtime_id'] ?? null,
-            'question_count' => count($payload['questions'] ?? []),
-            'option_count' => count($payload['options'] ?? []),
-            'participant_count' => count($payload['participants'] ?? []),
-            'admin_access_count' => count($payload['admin_access'] ?? []),
+            'question_count' => $this->countList($payload['questions'] ?? []),
+            'option_count' => $this->countList($payload['options'] ?? []),
+            'participant_count' => $this->countList($payload['participants'] ?? []),
+            'admin_access_count' => $this->countList($payload['admin_access'] ?? []),
         ];
+    }
+
+    private function countList(mixed $value): int
+    {
+        return is_countable($value) ? count($value) : 0;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Services;
 
+use App\Support\TypedValue;
 use Modules\Library\Models\Fine;
 
 class FineDocumentService
@@ -22,6 +23,6 @@ class FineDocumentService
 
     public function filename(Fine $fine): string
     {
-        return sprintf('Fine_%s.pdf', (string) $fine->getKey());
+        return sprintf('Fine_%s.pdf', TypedValue::string($fine->getKey()));
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Modules\Workflow\Support;
 
+use App\Support\TypedValue;
+
 class JsonLogicEvaluator
 {
     /**
@@ -26,8 +28,13 @@ class JsonLogicEvaluator
         }
 
         $operator = array_key_first($logic);
-        $values = $logic[$operator];
-        $values = is_array($values) ? $values : [$values];
+        if (! is_string($operator)) {
+            return false;
+        }
+
+        $rawValues = $logic[$operator];
+        $values = is_array($rawValues) ? array_values($rawValues) : [$rawValues];
+        /** @var array<int, mixed> $values */
 
         return match ($operator) {
             'var' => static::resolveVar($values, $data),
@@ -43,7 +50,7 @@ class JsonLogicEvaluator
             '<' => static::apply($values[0] ?? null, $data) < static::apply($values[1] ?? null, $data),
             '<=' => static::apply($values[0] ?? null, $data) <= static::apply($values[1] ?? null, $data),
             'in' => static::applyIn($values, $data),
-            '+' => array_sum(array_map(fn ($item) => (float) static::apply($item, $data), $values)),
+            '+' => array_sum(array_map(fn ($item): float => TypedValue::float(static::apply($item, $data)), $values)),
             default => false,
         };
     }
@@ -54,7 +61,7 @@ class JsonLogicEvaluator
      */
     protected static function resolveVar(array $values, array $data): mixed
     {
-        $path = (string) ($values[0] ?? '');
+        $path = TypedValue::string($values[0] ?? '');
         $default = $values[1] ?? null;
 
         if ($path === '') {
@@ -121,7 +128,7 @@ class JsonLogicEvaluator
         }
 
         if (is_string($haystack)) {
-            return str_contains($haystack, (string) $needle);
+            return str_contains($haystack, TypedValue::string($needle));
         }
 
         return false;

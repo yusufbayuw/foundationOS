@@ -2,6 +2,7 @@
 
 namespace Modules\EOffice\Services;
 
+use App\Support\TypedValue;
 use Modules\EOffice\Models\Letter;
 use Modules\EOffice\Models\LetterTemplate;
 
@@ -23,7 +24,7 @@ class LetterNumberingService
         $number = str_replace(
             ['{seq}', '{type}', '{month}', '{year}'],
             [str_pad((string) $sequence, 4, '0', STR_PAD_LEFT), $letter->direction ?? 'OUT', $month, (string) $year],
-            $format,
+            TypedValue::string($format, '{seq}/{type}/{month}/{year}'),
         );
 
         $letter->forceFill(['letter_number' => $number])->save();

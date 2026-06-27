@@ -6,6 +6,7 @@ use App\Integrations\Moodle\Exceptions\MoodleIntegrationException;
 use App\Integrations\Moodle\MoodleClient;
 use App\Models\MoodleEntityMapping;
 use App\Models\MoodleLearningMetric;
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Modules\Core\Models\UserTenantRole;
 
@@ -119,12 +120,14 @@ class MoodlePullAttendanceCommand extends Command
         }
 
         $available = [];
-        foreach (($siteInfo['functions'] ?? []) as $function) {
+        $functions = is_array($siteInfo['functions'] ?? null) ? $siteInfo['functions'] : [];
+
+        foreach ($functions as $function) {
             if (! is_array($function) || ! isset($function['name'])) {
                 continue;
             }
 
-            $available[] = (string) $function['name'];
+            $available[] = TypedValue::string($function['name']);
         }
 
         foreach (['mod_attendance_get_courses_with_today_sessions', 'mod_attendance_get_user_absences'] as $candidate) {

@@ -3,6 +3,7 @@
 namespace Modules\Workflow\Listeners;
 
 use App\Concerns\InteractsWithTenant;
+use App\Support\TypedValue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
@@ -36,7 +37,7 @@ class RunWorkflowAutomatedActions implements ShouldQueue
 
     protected function runForEvent(WorkflowStarted|WorkflowAdvanced|WorkflowCancelled|WorkflowReturned|WorkflowSlaBreached $event): void
     {
-        $instance = $event->instance->fresh();
+        $instance = TypedValue::model($event->instance->fresh());
 
         match ($event::class) {
             WorkflowStarted::class => $this->runner->run($instance, 'started', [

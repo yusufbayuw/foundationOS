@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Reports;
 
 use App\Services\CrossModuleReportService;
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -64,7 +65,7 @@ class CostEfficiencyReportPage extends Page
         }
 
         $this->reportData = app(CrossModuleReportService::class)->costEfficiency(
-            (int) $tenant->getKey(),
+            TypedValue::int($tenant->getKey()),
             Carbon::parse($this->dateFrom),
             Carbon::parse($this->dateTo),
         );
@@ -96,10 +97,10 @@ class CostEfficiencyReportPage extends Page
                 ])
                 ->action(function (array $data): void {
                     if (isset($data['periodPreset'])) {
-                        $this->applyPreset($data['periodPreset']);
+                        $this->applyPreset(TypedValue::string($data['periodPreset'], '30'));
                     }
-                    $this->dateFrom = $data['dateFrom'];
-                    $this->dateTo = $data['dateTo'];
+                    $this->dateFrom = TypedValue::string($data['dateFrom'], $this->dateFrom);
+                    $this->dateTo = TypedValue::string($data['dateTo'], $this->dateTo);
                     $this->generateReport();
                 }),
         ];

@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
 use Modules\Campus\Models\StudyPlan;
@@ -93,8 +94,9 @@ class CampusGradeBridgeService implements GradeBridgeInterface
         $percentage = (float) ($result->percentage ?? ($definition->max_score > 0
             ? round(($score / (float) $definition->max_score) * 100, 2)
             : 0));
+        $tenantId = TypedValue::int($definition->tenant_id);
 
-        $graded = $this->gradebookConfig->gradeFor($definition->tenant_id, $percentage);
+        $graded = $this->gradebookConfig->gradeFor($tenantId, $percentage);
 
         $studyResult = StudyResult::query()->firstOrCreate(
             ['study_plan_item_id' => $studyPlanItemId],
@@ -117,7 +119,7 @@ class CampusGradeBridgeService implements GradeBridgeInterface
 
         return GradebookExportOutcome::success(
             StudyResult::class,
-            (int) $studyResult->getKey(),
+            TypedValue::int($studyResult->getKey()),
             [
                 'study_plan_item_id' => $studyPlanItemId,
                 'component_key' => $componentKey,
@@ -156,6 +158,6 @@ class CampusGradeBridgeService implements GradeBridgeInterface
             })
             ->first();
 
-        return $item !== null ? (int) $item->getKey() : null;
+        return $item !== null ? TypedValue::int($item->getKey()) : null;
     }
 }

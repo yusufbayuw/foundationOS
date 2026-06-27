@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use App\Support\TypedValue;
 use Illuminate\Support\Carbon;
 use Modules\Campus\Models\CourseOffering;
 
@@ -66,7 +67,7 @@ class CourseOfferingObserver
             return;
         }
 
-        $version = optional($offering->updated_at)->timestamp ?? now()->timestamp;
+        $version = TypedValue::int(data_get($offering, 'updated_at.timestamp'), TypedValue::int(now()->timestamp));
         $dedupe = "course_offering:{$offering->id}:{$action}:{$version}";
 
         $this->outbox->enqueue(

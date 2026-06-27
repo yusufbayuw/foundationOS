@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\Schema;
 use Modules\Exam\Contracts\GradeBridgeInterface;
 use Modules\Exam\Enums\ExamAcademicContext;
@@ -116,7 +117,7 @@ class SchoolGradeBridgeService implements GradeBridgeInterface
 
         return GradebookExportOutcome::success(
             StudentGrade::class,
-            (int) $grade->getKey(),
+            TypedValue::int($grade->getKey()),
             [
                 'student_id' => $studentId,
                 'assessment_id' => $definition->school_assessment_id,

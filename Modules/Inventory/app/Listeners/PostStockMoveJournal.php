@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Listeners;
 
+use App\Support\TypedValue;
 use Modules\Inventory\Events\StockMoveCommitted;
 use Modules\Inventory\Services\StockJournalService;
 use Modules\Monitoring\Services\AuditTrailRecorder;
@@ -20,7 +21,7 @@ class PostStockMoveJournal
 
         try {
             $journal = $this->journalService->postForMove($event->stockMove);
-            $move = $event->stockMove->fresh();
+            $move = TypedValue::model($event->stockMove->fresh());
 
             AuditTrailRecorder::record(
                 $move,

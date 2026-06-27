@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Services;
 
+use App\Support\TypedValue;
 use Modules\Procurement\Models\GoodsReceipt;
 
 class GoodsReceiptDocumentService
@@ -27,6 +28,6 @@ class GoodsReceiptDocumentService
 
     public function filename(GoodsReceipt $receipt): string
     {
-        return sprintf('GoodsReceipt_%s.pdf', str_replace(' ', '_', $receipt->receipt_number ?? (string) $receipt->getKey()));
+        return sprintf('GoodsReceipt_%s.pdf', str_replace(' ', '_', $receipt->receipt_number ?? TypedValue::string($receipt->getKey())));
     }
 }

@@ -37,7 +37,7 @@ class ExamResultExportService
             fputcsv($handle, array_keys($rows[0] ?? []));
 
             foreach ($rows as $row) {
-                fputcsv($handle, $row);
+                fputcsv($handle, $this->toCsvFields($row));
             }
 
             fclose($handle);
@@ -66,7 +66,7 @@ class ExamResultExportService
             fputcsv($handle, array_keys($rows[0] ?? []), "\t");
 
             foreach ($rows as $row) {
-                fputcsv($handle, $row, "\t");
+                fputcsv($handle, $this->toCsvFields($row), "\t");
             }
 
             fclose($handle);
@@ -163,5 +163,26 @@ class ExamResultExportService
             'file_name' => $fileName,
             'row_count' => $rowCount,
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     * @return array<int, bool|float|int|string|null>
+     */
+    private function toCsvFields(array $row): array
+    {
+        $fields = [];
+
+        foreach ($row as $value) {
+            if (is_bool($value) || is_float($value) || is_int($value) || is_string($value) || $value === null) {
+                $fields[] = $value;
+
+                continue;
+            }
+
+            $fields[] = json_encode($value);
+        }
+
+        return $fields;
     }
 }

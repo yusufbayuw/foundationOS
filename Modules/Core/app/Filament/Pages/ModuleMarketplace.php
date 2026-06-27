@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -66,7 +67,7 @@ class ModuleMarketplace extends Page
             ]);
         }
 
-        Cache::forget("tenant_module_active:{$tenant->getKey()}:{$module->code}");
+        Cache::forget('tenant_module_active:'.TypedValue::string($tenant->getKey()).':'.TypedValue::string($module->code));
 
         Notification::make()
             ->title(FilamentUi::text('Module updated'))

@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -108,7 +109,7 @@ class LeaveRequest extends Model implements ProvidesWorkflowContext, StartsWorkf
 
     public function workflowSubjectLabel(): string
     {
-        return 'Cuti #'.$this->getKey().' — '.($this->employee->full_name ?? '');
+        return 'Cuti #'.TypedValue::string($this->getKey()).' — '.($this->employee->full_name ?? '');
     }
 
     public function workflowSubjectType(): string

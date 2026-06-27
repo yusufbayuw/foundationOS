@@ -12,6 +12,7 @@ class AnonymousReportController extends Controller
 {
     public function store(Request $request): JsonResponse
     {
+        /** @var array{tenant_id: int, body: string} $validated */
         $validated = $request->validate([
             'tenant_id' => ['required', 'integer', 'exists:tenants,id'],
             'body' => ['required', 'string', 'max:5000'],

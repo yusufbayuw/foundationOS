@@ -53,18 +53,19 @@ class TenantDocumentContext
             ->whereIn('key', ['brand_logo', 'primary_color', 'default_locale'])
             ->pluck('value', 'key');
 
-        $locale = auth()->user()->preferred_locale
+        $user = auth()->user();
+        $locale = data_get($user, 'preferred_locale')
             ?? $branding->get('default_locale')
             ?? config('app.locale', 'id');
 
-        $logoPath = $branding->get('brand_logo') ?: $organization?->logo;
-        $primaryColor = $branding->get('primary_color') ?: '#6366f1';
+        $logoPath = self::nullableString($branding->get('brand_logo')) ?? $organization?->logo;
+        $primaryColor = TypedValue::string($branding->get('primary_color'), '#6366f1');
 
         return new self(
             tenant: $tenant,
             organization: $organization,
             logoDataUri: self::fileToDataUri($logoPath),
-            primaryColor: is_string($primaryColor) ? $primaryColor : '#6366f1',
+            primaryColor: $primaryColor,
             stampDataUri: self::fileToDataUri($organization?->stamp),
             signatureDataUri: self::fileToDataUri($organization?->signature),
             locale: is_string($locale) ? $locale : 'id',
@@ -110,5 +111,12 @@ class TenantDocumentContext
             'institutionName' => $this->institutionName,
             'locale' => $this->locale,
         ];
+    }
+
+    private static function nullableString(mixed $value): ?string
+    {
+        $stringValue = TypedValue::string($value);
+
+        return $stringValue !== '' ? $stringValue : null;
     }
 }

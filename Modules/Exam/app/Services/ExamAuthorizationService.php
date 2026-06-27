@@ -3,6 +3,7 @@
 namespace Modules\Exam\Services;
 
 use App\Support\CurrentTenant;
+use App\Support\TypedValue;
 use BezhanSalleh\FilamentShield\Support\Utils as ShieldUtils;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as AuthUser;
@@ -136,7 +137,7 @@ class ExamAuthorizationService
 
     public function passesContextualScope(User $user, ExamDefinition $exam): bool
     {
-        if ((int) $exam->owner_user_id === (int) $user->getKey()) {
+        if (TypedValue::int($exam->owner_user_id) === TypedValue::int($user->getKey())) {
             return true;
         }
 
@@ -167,7 +168,11 @@ class ExamAuthorizationService
             return false;
         }
 
-        return in_array((int) $user->getKey(), array_map('intval', $proctorIds), true);
+        return in_array(
+            TypedValue::int($user->getKey()),
+            array_map(fn (mixed $proctorId): int => TypedValue::int($proctorId), $proctorIds),
+            true
+        );
     }
 
     protected function teacherCanAccess(AuthUser $user, ExamDefinition $exam): bool

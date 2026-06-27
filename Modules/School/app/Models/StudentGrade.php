@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -97,7 +98,7 @@ class StudentGrade extends Model implements ProvidesWorkflowContext, StartsWorkf
 
     public function workflowSubjectLabel(): string
     {
-        return 'Grade #'.$this->getKey();
+        return 'Grade #'.TypedValue::string($this->getKey());
     }
 
     public function workflowSubjectType(): string

@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowTransitions\Schemas;
 
+use App\Support\TypedValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -36,7 +37,7 @@ class WorkflowTransitionForm
             Textarea::make('condition_rules')
                 ->label(FilamentUi::field('condition_rules'))
                 ->formatStateUsing(fn ($state) => is_array($state) ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $state)
-                ->dehydrateStateUsing(fn ($state) => blank($state) ? null : json_decode((string) $state, true))
+                ->dehydrateStateUsing(fn ($state) => blank($state) ? null : json_decode(TypedValue::string($state), true))
                 ->helperText(FilamentUi::text('Use valid JsonLogic format'))
                 ->columnSpanFull(),
             TextInput::make('priority')->label(FilamentUi::field('priority'))->numeric()->default(0)->required(),
@@ -44,7 +45,7 @@ class WorkflowTransitionForm
             Textarea::make('transition_meta')
                 ->label(FilamentUi::field('transition_meta'))
                 ->formatStateUsing(fn ($state) => is_array($state) ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $state)
-                ->dehydrateStateUsing(fn ($state) => blank($state) ? null : json_decode((string) $state, true))
+                ->dehydrateStateUsing(fn ($state) => blank($state) ? null : json_decode(TypedValue::string($state), true))
                 ->columnSpanFull(),
         ]);
     }

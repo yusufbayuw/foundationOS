@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Services\ExecutiveMetricsService;
+use App\Support\TypedValue;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -19,7 +20,7 @@ class ExecutiveStatsOverview extends StatsOverviewWidget
             return [];
         }
 
-        $metrics = app(ExecutiveMetricsService::class)->forTenant((int) $tenant->getKey());
+        $metrics = app(ExecutiveMetricsService::class)->forTenant(TypedValue::int($tenant->getKey()));
         $activeTenants = auth()->user()?->isGlobalSuperAdmin()
             ? app(ExecutiveMetricsService::class)->activeTenantsCount()
             : 1;

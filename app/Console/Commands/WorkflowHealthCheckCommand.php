@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\TypedValue;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Modules\Workflow\Contracts\WorkflowDynamicAssigneeResolver;
@@ -46,6 +47,7 @@ class WorkflowHealthCheckCommand extends Command
                 ->where('is_terminal', false)
                 ->filter(fn ($step) => $workflow->transitions->where('from_step_id', $step->id)->isEmpty())
                 ->pluck('code')
+                ->map(fn (mixed $code): string => TypedValue::string($code))
                 ->all();
 
             if ($nonTerminalWithoutTransitions !== []) {
@@ -64,7 +66,7 @@ class WorkflowHealthCheckCommand extends Command
 
             foreach ($workflow->steps as $step) {
                 if ($step->assignee_type === WorkflowAssigneeType::Resolver) {
-                    $resolverClass = (string) (data_get($step->assignee_config, 'resolver_class') ?: $step->assignee_value);
+                    $resolverClass = TypedValue::string(data_get($step->assignee_config, 'resolver_class') ?: $step->assignee_value);
                     $allowedResolvers = (array) config('workflow.allowed_assignee_resolvers', []);
 
                     if ($resolverClass === '') {
@@ -80,7 +82,7 @@ class WorkflowHealthCheckCommand extends Command
 
                 $schema = Arr::wrap($step->form_schema);
 
-                if (count($schema) > (int) config('workflow.max_schema_fields', 50)) {
+                if (count($schema) > TypedValue::int(config('workflow.max_schema_fields'), 50)) {
                     $issues[] = "step {$step->code} exceeds max schema fields";
                 }
             }
