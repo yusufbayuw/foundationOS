@@ -11,6 +11,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Modules\Core\Models\TenantSetting;
+use Modules\Core\Support\Filament\TenantBrandingResolver;
 use Modules\Core\Support\FilamentUi;
 
 class BrandingSettingsPage extends Page
@@ -110,6 +111,8 @@ class BrandingSettingsPage extends Page
                 );
             }
         }
+
+        app(TenantBrandingResolver::class)->forget($tenant->getKey());
 
         Notification::make()
             ->title(FilamentUi::text('Branding updated'))
