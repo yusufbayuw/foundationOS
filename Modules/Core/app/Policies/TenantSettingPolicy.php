@@ -7,9 +7,11 @@ namespace Modules\Core\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\TenantSetting;
+use Modules\Core\Policies\Concerns\AuthorizesTenantScopedRecord;
 
 class TenantSettingPolicy
 {
+    use AuthorizesTenantScopedRecord;
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
@@ -19,7 +21,8 @@ class TenantSettingPolicy
 
     public function view(AuthUser $authUser, TenantSetting $tenantSetting): bool
     {
-        return $authUser->can('View:TenantSetting');
+        return $authUser->can('View:TenantSetting')
+            && $this->belongsToActiveTenant($authUser, $tenantSetting);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +32,14 @@ class TenantSettingPolicy
 
     public function update(AuthUser $authUser, TenantSetting $tenantSetting): bool
     {
-        return $authUser->can('Update:TenantSetting');
+        return $authUser->can('Update:TenantSetting')
+            && $this->belongsToActiveTenant($authUser, $tenantSetting);
     }
 
     public function delete(AuthUser $authUser, TenantSetting $tenantSetting): bool
     {
-        return $authUser->can('Delete:TenantSetting');
+        return $authUser->can('Delete:TenantSetting')
+            && $this->belongsToActiveTenant($authUser, $tenantSetting);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +49,14 @@ class TenantSettingPolicy
 
     public function restore(AuthUser $authUser, TenantSetting $tenantSetting): bool
     {
-        return $authUser->can('Restore:TenantSetting');
+        return $authUser->can('Restore:TenantSetting')
+            && $this->belongsToActiveTenant($authUser, $tenantSetting);
     }
 
     public function forceDelete(AuthUser $authUser, TenantSetting $tenantSetting): bool
     {
-        return $authUser->can('ForceDelete:TenantSetting');
+        return $authUser->can('ForceDelete:TenantSetting')
+            && $this->belongsToActiveTenant($authUser, $tenantSetting);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +71,8 @@ class TenantSettingPolicy
 
     public function replicate(AuthUser $authUser, TenantSetting $tenantSetting): bool
     {
-        return $authUser->can('Replicate:TenantSetting');
+        return $authUser->can('Replicate:TenantSetting')
+            && $this->belongsToActiveTenant($authUser, $tenantSetting);
     }
 
     public function reorder(AuthUser $authUser): bool

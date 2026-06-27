@@ -7,9 +7,11 @@ namespace Modules\Core\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\TenantRole;
+use Modules\Core\Policies\Concerns\AuthorizesTenantScopedRecord;
 
 class TenantRolePolicy
 {
+    use AuthorizesTenantScopedRecord;
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
@@ -19,7 +21,8 @@ class TenantRolePolicy
 
     public function view(AuthUser $authUser, TenantRole $tenantRole): bool
     {
-        return $authUser->can('View:TenantRole');
+        return $authUser->can('View:TenantRole')
+            && $this->belongsToActiveTenant($authUser, $tenantRole);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +32,14 @@ class TenantRolePolicy
 
     public function update(AuthUser $authUser, TenantRole $tenantRole): bool
     {
-        return $authUser->can('Update:TenantRole');
+        return $authUser->can('Update:TenantRole')
+            && $this->belongsToActiveTenant($authUser, $tenantRole);
     }
 
     public function delete(AuthUser $authUser, TenantRole $tenantRole): bool
     {
-        return $authUser->can('Delete:TenantRole');
+        return $authUser->can('Delete:TenantRole')
+            && $this->belongsToActiveTenant($authUser, $tenantRole);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +49,14 @@ class TenantRolePolicy
 
     public function restore(AuthUser $authUser, TenantRole $tenantRole): bool
     {
-        return $authUser->can('Restore:TenantRole');
+        return $authUser->can('Restore:TenantRole')
+            && $this->belongsToActiveTenant($authUser, $tenantRole);
     }
 
     public function forceDelete(AuthUser $authUser, TenantRole $tenantRole): bool
     {
-        return $authUser->can('ForceDelete:TenantRole');
+        return $authUser->can('ForceDelete:TenantRole')
+            && $this->belongsToActiveTenant($authUser, $tenantRole);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +71,8 @@ class TenantRolePolicy
 
     public function replicate(AuthUser $authUser, TenantRole $tenantRole): bool
     {
-        return $authUser->can('Replicate:TenantRole');
+        return $authUser->can('Replicate:TenantRole')
+            && $this->belongsToActiveTenant($authUser, $tenantRole);
     }
 
     public function reorder(AuthUser $authUser): bool

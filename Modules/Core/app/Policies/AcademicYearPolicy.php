@@ -7,9 +7,11 @@ namespace Modules\Core\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\AcademicYear;
+use Modules\Core\Policies\Concerns\AuthorizesTenantScopedRecord;
 
 class AcademicYearPolicy
 {
+    use AuthorizesTenantScopedRecord;
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
@@ -19,7 +21,8 @@ class AcademicYearPolicy
 
     public function view(AuthUser $authUser, AcademicYear $academicYear): bool
     {
-        return $authUser->can('View:AcademicYear');
+        return $authUser->can('View:AcademicYear')
+            && $this->belongsToActiveTenant($authUser, $academicYear);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +32,14 @@ class AcademicYearPolicy
 
     public function update(AuthUser $authUser, AcademicYear $academicYear): bool
     {
-        return $authUser->can('Update:AcademicYear');
+        return $authUser->can('Update:AcademicYear')
+            && $this->belongsToActiveTenant($authUser, $academicYear);
     }
 
     public function delete(AuthUser $authUser, AcademicYear $academicYear): bool
     {
-        return $authUser->can('Delete:AcademicYear');
+        return $authUser->can('Delete:AcademicYear')
+            && $this->belongsToActiveTenant($authUser, $academicYear);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +49,14 @@ class AcademicYearPolicy
 
     public function restore(AuthUser $authUser, AcademicYear $academicYear): bool
     {
-        return $authUser->can('Restore:AcademicYear');
+        return $authUser->can('Restore:AcademicYear')
+            && $this->belongsToActiveTenant($authUser, $academicYear);
     }
 
     public function forceDelete(AuthUser $authUser, AcademicYear $academicYear): bool
     {
-        return $authUser->can('ForceDelete:AcademicYear');
+        return $authUser->can('ForceDelete:AcademicYear')
+            && $this->belongsToActiveTenant($authUser, $academicYear);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +71,8 @@ class AcademicYearPolicy
 
     public function replicate(AuthUser $authUser, AcademicYear $academicYear): bool
     {
-        return $authUser->can('Replicate:AcademicYear');
+        return $authUser->can('Replicate:AcademicYear')
+            && $this->belongsToActiveTenant($authUser, $academicYear);
     }
 
     public function reorder(AuthUser $authUser): bool

@@ -7,9 +7,11 @@ namespace Modules\Core\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\Department;
+use Modules\Core\Policies\Concerns\AuthorizesTenantScopedRecord;
 
 class DepartmentPolicy
 {
+    use AuthorizesTenantScopedRecord;
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
@@ -19,7 +21,8 @@ class DepartmentPolicy
 
     public function view(AuthUser $authUser, Department $department): bool
     {
-        return $authUser->can('View:Department');
+        return $authUser->can('View:Department')
+            && $this->belongsToActiveTenant($authUser, $department);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +32,14 @@ class DepartmentPolicy
 
     public function update(AuthUser $authUser, Department $department): bool
     {
-        return $authUser->can('Update:Department');
+        return $authUser->can('Update:Department')
+            && $this->belongsToActiveTenant($authUser, $department);
     }
 
     public function delete(AuthUser $authUser, Department $department): bool
     {
-        return $authUser->can('Delete:Department');
+        return $authUser->can('Delete:Department')
+            && $this->belongsToActiveTenant($authUser, $department);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +49,14 @@ class DepartmentPolicy
 
     public function restore(AuthUser $authUser, Department $department): bool
     {
-        return $authUser->can('Restore:Department');
+        return $authUser->can('Restore:Department')
+            && $this->belongsToActiveTenant($authUser, $department);
     }
 
     public function forceDelete(AuthUser $authUser, Department $department): bool
     {
-        return $authUser->can('ForceDelete:Department');
+        return $authUser->can('ForceDelete:Department')
+            && $this->belongsToActiveTenant($authUser, $department);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +71,8 @@ class DepartmentPolicy
 
     public function replicate(AuthUser $authUser, Department $department): bool
     {
-        return $authUser->can('Replicate:Department');
+        return $authUser->can('Replicate:Department')
+            && $this->belongsToActiveTenant($authUser, $department);
     }
 
     public function reorder(AuthUser $authUser): bool

@@ -7,9 +7,11 @@ namespace Modules\Core\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\Organization;
+use Modules\Core\Policies\Concerns\AuthorizesTenantScopedRecord;
 
 class OrganizationPolicy
 {
+    use AuthorizesTenantScopedRecord;
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
@@ -19,7 +21,8 @@ class OrganizationPolicy
 
     public function view(AuthUser $authUser, Organization $organization): bool
     {
-        return $authUser->can('View:Organization');
+        return $authUser->can('View:Organization')
+            && $this->belongsToActiveTenant($authUser, $organization);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +32,14 @@ class OrganizationPolicy
 
     public function update(AuthUser $authUser, Organization $organization): bool
     {
-        return $authUser->can('Update:Organization');
+        return $authUser->can('Update:Organization')
+            && $this->belongsToActiveTenant($authUser, $organization);
     }
 
     public function delete(AuthUser $authUser, Organization $organization): bool
     {
-        return $authUser->can('Delete:Organization');
+        return $authUser->can('Delete:Organization')
+            && $this->belongsToActiveTenant($authUser, $organization);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +49,14 @@ class OrganizationPolicy
 
     public function restore(AuthUser $authUser, Organization $organization): bool
     {
-        return $authUser->can('Restore:Organization');
+        return $authUser->can('Restore:Organization')
+            && $this->belongsToActiveTenant($authUser, $organization);
     }
 
     public function forceDelete(AuthUser $authUser, Organization $organization): bool
     {
-        return $authUser->can('ForceDelete:Organization');
+        return $authUser->can('ForceDelete:Organization')
+            && $this->belongsToActiveTenant($authUser, $organization);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +71,8 @@ class OrganizationPolicy
 
     public function replicate(AuthUser $authUser, Organization $organization): bool
     {
-        return $authUser->can('Replicate:Organization');
+        return $authUser->can('Replicate:Organization')
+            && $this->belongsToActiveTenant($authUser, $organization);
     }
 
     public function reorder(AuthUser $authUser): bool

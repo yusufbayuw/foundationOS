@@ -20,8 +20,8 @@ class TenantField
     public static function make(): Hidden
     {
         return Hidden::make('tenant_id')
-            ->default(fn () => Filament::getTenant()?->getKey())
-            ->dehydrateStateUsing(fn ($state) => $state ?: Filament::getTenant()?->getKey());
+            ->default(fn (): int|string|null => Filament::getTenant()?->getKey())
+            ->dehydrateStateUsing(fn (): int|string|null => Filament::getTenant()?->getKey());
     }
 
     /**
@@ -44,11 +44,11 @@ class TenantField
     public static function organizationHidden(): Hidden
     {
         return Hidden::make('organization_id')
-            ->default(fn () => app(ContextDefaults::class)->resolveOrganizationId(
+            ->default(fn (): int|string|null => app(ContextDefaults::class)->resolveOrganizationId(
                 auth()->user(),
                 Filament::getTenant()?->getKey(),
             ))
-            ->dehydrateStateUsing(fn ($state) => $state ?: app(ContextDefaults::class)->resolveOrganizationId(
+            ->dehydrateStateUsing(fn (): int|string|null => app(ContextDefaults::class)->resolveOrganizationId(
                 auth()->user(),
                 Filament::getTenant()?->getKey(),
             ));
@@ -60,10 +60,10 @@ class TenantField
     public static function academicPeriodHidden(): Hidden
     {
         return Hidden::make('academic_period_id')
-            ->default(fn () => app(ContextDefaults::class)->resolveAcademicPeriodId(
+            ->default(fn (): int|string|null => app(ContextDefaults::class)->resolveAcademicPeriodId(
                 Filament::getTenant()?->getKey(),
             ))
-            ->dehydrateStateUsing(fn ($state) => $state ?: app(ContextDefaults::class)->resolveAcademicPeriodId(
+            ->dehydrateStateUsing(fn (): int|string|null => app(ContextDefaults::class)->resolveAcademicPeriodId(
                 Filament::getTenant()?->getKey(),
             ));
     }

@@ -2,10 +2,10 @@
 
 namespace Modules\Core\Models\Concerns;
 
-use App\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Scopes\TenantScope;
 
 /**
  * Trait for models that belong to a tenant.

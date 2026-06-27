@@ -7,9 +7,11 @@ namespace Modules\Core\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\AcademicPeriod;
+use Modules\Core\Policies\Concerns\AuthorizesTenantScopedRecord;
 
 class AcademicPeriodPolicy
 {
+    use AuthorizesTenantScopedRecord;
     use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
@@ -19,7 +21,8 @@ class AcademicPeriodPolicy
 
     public function view(AuthUser $authUser, AcademicPeriod $academicPeriod): bool
     {
-        return $authUser->can('View:AcademicPeriod');
+        return $authUser->can('View:AcademicPeriod')
+            && $this->belongsToActiveTenant($authUser, $academicPeriod);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +32,14 @@ class AcademicPeriodPolicy
 
     public function update(AuthUser $authUser, AcademicPeriod $academicPeriod): bool
     {
-        return $authUser->can('Update:AcademicPeriod');
+        return $authUser->can('Update:AcademicPeriod')
+            && $this->belongsToActiveTenant($authUser, $academicPeriod);
     }
 
     public function delete(AuthUser $authUser, AcademicPeriod $academicPeriod): bool
     {
-        return $authUser->can('Delete:AcademicPeriod');
+        return $authUser->can('Delete:AcademicPeriod')
+            && $this->belongsToActiveTenant($authUser, $academicPeriod);
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -44,12 +49,14 @@ class AcademicPeriodPolicy
 
     public function restore(AuthUser $authUser, AcademicPeriod $academicPeriod): bool
     {
-        return $authUser->can('Restore:AcademicPeriod');
+        return $authUser->can('Restore:AcademicPeriod')
+            && $this->belongsToActiveTenant($authUser, $academicPeriod);
     }
 
     public function forceDelete(AuthUser $authUser, AcademicPeriod $academicPeriod): bool
     {
-        return $authUser->can('ForceDelete:AcademicPeriod');
+        return $authUser->can('ForceDelete:AcademicPeriod')
+            && $this->belongsToActiveTenant($authUser, $academicPeriod);
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
@@ -64,7 +71,8 @@ class AcademicPeriodPolicy
 
     public function replicate(AuthUser $authUser, AcademicPeriod $academicPeriod): bool
     {
-        return $authUser->can('Replicate:AcademicPeriod');
+        return $authUser->can('Replicate:AcademicPeriod')
+            && $this->belongsToActiveTenant($authUser, $academicPeriod);
     }
 
     public function reorder(AuthUser $authUser): bool

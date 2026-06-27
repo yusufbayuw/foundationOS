@@ -33,6 +33,7 @@ class CoreServiceProvider extends ModuleServiceProvider
         EventServiceProvider::class,
         RouteServiceProvider::class,
         FilamentTranslationServiceProvider::class,
+        TenancyServiceProvider::class,
     ];
 
     /**
