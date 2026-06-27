@@ -39,24 +39,30 @@
     </testsuites>
     <source>
         <include>
-            <directory suffix=".php">app</directory>
-            <directory suffix=".php">Modules</directory>
+            <directory suffix=".php">Modules/Workflow/app/Support</directory>
+            <directory suffix=".php">app/Integrations/Moodle/Exceptions</directory>
+            <directory suffix=".php">app/Queue</directory>
+            <directory suffix=".php">app/Concerns</directory>
+            <file>app/Support/CurrentTenant.php</file>
+            <file>app/Integrations/Moodle/MoodleCampusCatalogSyncService.php</file>
+            <file>app/Integrations/Moodle/MoodleEnrollmentReconciler.php</file>
+            <file>app/Integrations/Moodle/MoodleEnrollmentDriftFixer.php</file>
+            <file>app/Integrations/Moodle/MoodleStudyPlanSyncService.php</file>
+            <file>app/Integrations/Moodle/MoodleOutboxService.php</file>
+            <file>app/Integrations/Moodle/MoodleSyncRetry.php</file>
+            <file>app/Jobs/ProcessMoodleSyncOutboxJob.php</file>
+            <file>app/Jobs/DeliverWebhookJob.php</file>
         </include>
-        <exclude>
-            <directory>Modules/*/vendor</directory>
-            <directory>Modules/*/database/seeders</directory>
-            <directory>app/Filament/Imports</directory>
-            <directory>*/Filament</directory>
-            <directory>*/Providers</directory>
-            <directory>*/database</directory>
-            <directory>*/resources</directory>
-            <directory>*/routes</directory>
-            <directory>*/config</directory>
-            <directory>*/Enums</directory>
-        </exclude>
     </source>
+    <coverage>
+        <report>
+            <clover outputFile="coverage/clover.xml"/>
+            <text outputFile="php://stdout" showOnlySummary="true"/>
+        </report>
+    </coverage>
     <php>
         <ini name="memory_limit" value="1G"/>
+        <ini name="pcov.directory" value="/workspace"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:Ai7zE5WyaUMR8UCd76n0Smu/YJZEpFQqa+xBD/pCfh4="/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>

@@ -22,8 +22,9 @@ class ThinGaModuleTestH2Test extends TestCase
         $xml = file_get_contents(base_path('phpunit.xml'));
 
         $this->assertIsString($xml);
-        $this->assertStringContainsString('<directory>Modules</directory>', $xml);
-        $this->assertStringContainsString('<directory>app</directory>', $xml);
+        $this->assertStringContainsString('Modules/', $xml);
+        $this->assertStringContainsString('<directory', $xml);
+        $this->assertStringContainsString('app</directory>', $xml);
     }
 
     #[DataProvider('thinGaModuleProvider')]

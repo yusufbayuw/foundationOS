@@ -12,10 +12,12 @@ use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Mockery;
+use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
 
 class MoodleOperationalG1G5Test extends TestCase
 {
+    use CreatesTenantForTests;
     use LazilyRefreshDatabase;
 
     public function test_enroll_user_treats_already_enrolled_as_success(): void
@@ -51,10 +53,12 @@ class MoodleOperationalG1G5Test extends TestCase
             'moodle.readonly' => true,
         ]);
 
+        ['tenant' => $tenant] = $this->makeTenantContext();
+
         $outbox = MoodleSyncOutbox::query()->create([
             'entity_type' => 'user',
             'entity_id' => 1,
-            'tenant_id' => 1,
+            'tenant_id' => $tenant->id,
             'action' => 'upsert',
             'payload' => ['email' => 'student@example.test'],
             'dedupe_key' => 'user:1:upsert:readonly-test',

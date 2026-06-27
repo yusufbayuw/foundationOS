@@ -24,3 +24,4 @@ Homestead.yaml
 Thumbs.db
 /laravel-code-2026-03-25
 composer.phar
+/coverage/

@@ -23,9 +23,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, pcov
           tools: composer:v2
-          coverage: none
+          coverage: pcov
 
       - name: Get Composer cache directory
         id: composer-cache
@@ -48,3 +48,78 @@ jobs:
 
       - name: Run tests
         run: php artisan test --compact
+
+  coverage:
+    name: Coverage (80% minimum)
+    runs-on: ubuntu-latest
+    needs: phpunit
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, pcov
+          tools: composer:v2
+          coverage: pcov
+          ini-values: pcov.directory=.
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Run coverage
+        run: |
+          mkdir -p coverage
+          php -d pcov.directory=${{ github.workspace }} vendor/bin/phpunit -c phpunit.coverage.xml --coverage-clover=coverage/clover.xml --colors=never
+
+      - name: Enforce 80% coverage threshold
+        run: php scripts/check-coverage-threshold.php coverage/clover.xml 80
+
+  suites:
+    name: Named suites smoke
+    runs-on: ubuntu-latest
+    needs: phpunit
+
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - Unit
+          - Feature
+          - Workflow
+          - Tenant
+          - Policy
+          - Permission
+          - Regression
+          - Queue
+          - ParallelWorkflow
+          - ImportExport
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Run ${{ matrix.suite }} suite
+        run: php artisan test --compact --testsuite=${{ matrix.suite }}

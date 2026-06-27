@@ -21,6 +21,7 @@ use Modules\Workflow\Models\WorkflowAssignment;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
+use Modules\Workflow\Support\WorkflowActionGuard;
 use Modules\Workflow\Support\WorkflowContextData;
 
 class DatabaseWorkflowEngine implements WorkflowEngine
@@ -32,6 +33,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         private readonly WorkflowSlaService $slaService,
         private readonly WorkflowParallelCoordinator $parallelCoordinator,
         private readonly WorkflowSnapshotStepResolver $snapshotStepResolver,
+        private readonly WorkflowActionGuard $actionGuard,
     ) {}
 
     public function advance(WorkflowInstance $instance, string $actionName, array $formData, User $actor, ?string $notes = null): WorkflowInstance
@@ -48,6 +50,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
             $this->authorizeActor($instance, $actor);
 
             $currentStep = $this->snapshotStepResolver->resolveCurrent($instance);
+            $this->actionGuard->assertAdvanceActionAllowed($instance, $currentStep, $actionName);
 
             if ($currentStep?->requiresEvidence()) {
                 $uploaded = $instance->evidences()

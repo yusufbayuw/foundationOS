@@ -28,13 +28,22 @@ class WorkflowAutomatedActionRunner
         $type = $action['action_type'] ?? null;
         $config = (array) ($action['config'] ?? []);
 
-        match ($type) {
-            WorkflowAutomationActionType::InternalNotification->value,
-            WorkflowAutomationActionType::AuditNote->value,
-            WorkflowAutomationActionType::DispatchJob->value,
-            WorkflowAutomationActionType::SetComputedData->value => $this->runMappedAction($instance, $type, $config, $context),
-            default => null,
-        };
+        if (! $this->isAllowedActionType($type)) {
+            $this->writeSkippedActionAudit($instance, $type, $config, $context, 'unsupported_action_type');
+
+            return;
+        }
+
+        $this->runMappedAction($instance, $type, $config, $context);
+    }
+
+    protected function isAllowedActionType(mixed $type): bool
+    {
+        if (! is_string($type) || $type === '') {
+            return false;
+        }
+
+        return in_array($type, array_column(WorkflowAutomationActionType::cases(), 'value'), true);
     }
 
     protected function runMappedAction(WorkflowInstance $instance, ?string $type, array $config, array $context): void
@@ -43,7 +52,7 @@ class WorkflowAutomatedActionRunner
             match ($type) {
                 WorkflowAutomationActionType::InternalNotification->value => $this->sendInternalNotification($instance, $config),
                 WorkflowAutomationActionType::AuditNote->value => $this->writeAuditNote($instance, $config, $context),
-                WorkflowAutomationActionType::DispatchJob->value => $this->dispatchJob($instance, $config),
+                WorkflowAutomationActionType::DispatchJob->value => $this->dispatchJob($instance, $config, $context),
                 WorkflowAutomationActionType::SetComputedData->value => $this->setComputedData($instance, $config),
                 default => null,
             };
@@ -74,6 +83,7 @@ class WorkflowAutomatedActionRunner
 
         User::query()
             ->whereIn('id', $recipientIds)
+            ->whereHas('userTenantRoles', fn ($query) => $query->where('tenant_id', $instance->tenant_id))
             ->get()
             ->each(fn (User $user) => $user->notify(new InternalWorkflowNotification(
                 $instance,
@@ -105,17 +115,21 @@ class WorkflowAutomatedActionRunner
         ]);
     }
 
-    protected function dispatchJob(WorkflowInstance $instance, array $config): void
+    protected function dispatchJob(WorkflowInstance $instance, array $config, array $context): void
     {
         $jobClass = $config['job_class'] ?? null;
 
         if (! is_string($jobClass) || ! class_exists($jobClass)) {
+            $this->writeSkippedActionAudit($instance, WorkflowAutomationActionType::DispatchJob->value, $config, $context, 'missing_job_class');
+
             return;
         }
 
         $allowedJobs = config('workflow.allowed_automation_jobs', []);
 
         if (! in_array($jobClass, $allowedJobs, true)) {
+            $this->writeSkippedActionAudit($instance, WorkflowAutomationActionType::DispatchJob->value, $config, $context, 'job_not_allowlisted');
+
             return;
         }
 
@@ -133,6 +147,38 @@ class WorkflowAutomatedActionRunner
         $instance->forceFill([
             'computed_data' => array_replace_recursive($instance->computed_data ?? [], $data),
         ])->save();
+    }
+
+    protected function writeSkippedActionAudit(
+        WorkflowInstance $instance,
+        ?string $type,
+        array $config,
+        array $context,
+        string $reason,
+    ): void {
+        AuditLog::query()->create([
+            'tenant_id' => $instance->tenant_id,
+            'organization_id' => $instance->organization_id,
+            'user_id' => data_get($context, 'actor_id'),
+            'auditable_type' => $instance->subject_type ?: $instance::class,
+            'auditable_id' => $instance->subject_id ?: $instance->getKey(),
+            'action' => 'workflow_automation_skipped',
+            'description' => 'Workflow automated action was skipped by security policy.',
+            'old_values' => null,
+            'new_values' => [
+                'workflow_instance_id' => $instance->getKey(),
+                'trigger_event' => $context['trigger_event'] ?? null,
+                'action_type' => $type,
+                'action_name' => $config['name'] ?? null,
+                'job_class' => $config['job_class'] ?? null,
+                'reason' => $reason,
+            ],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'request_id' => request()?->headers->get('X-Request-Id'),
+            'status' => 'failed',
+            'error_message' => $reason,
+        ]);
     }
 
     protected function writeFailureAudit(WorkflowInstance $instance, ?string $type, array $config, Throwable $exception, array $context): void

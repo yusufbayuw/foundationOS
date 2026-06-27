@@ -108,6 +108,14 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "test:coverage": [
+            "@php artisan config:clear --ansi",
+            "php -d pcov.directory=/workspace vendor/bin/phpunit -c phpunit.coverage.xml --coverage-clover=coverage/clover.xml"
+        ],
+        "test:coverage-check": [
+            "@test:coverage",
+            "@php scripts/check-coverage-threshold.php coverage/clover.xml 80"
+        ],
         "lint:translations": [
             "@php scripts/lint-translations.php"
         ],
