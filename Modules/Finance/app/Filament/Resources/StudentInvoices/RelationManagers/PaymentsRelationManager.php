@@ -42,7 +42,7 @@ class PaymentsRelationManager extends RelationManager
             Select::make('chart_of_account_id')
                 ->label(FilamentUi::field('chart_of_account_id'))
                 ->options(fn () => ChartOfAccount::withoutTenantScope()
-                    ->where('tenant_id', filament()->getTenant()?->id)
+                    ->where('tenant_id', filament()->getTenant()?->getKey())
                     ->where('is_active', true)
                     ->orderBy('code')
                     ->pluck('name', 'id')
@@ -77,7 +77,7 @@ class PaymentsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['tenant_id'] = filament()->getTenant()?->id;
+                        $data['tenant_id'] = filament()->getTenant()?->getKey();
 
                         return $data;
                     }),

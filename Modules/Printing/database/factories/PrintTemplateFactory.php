@@ -12,9 +12,6 @@ class PrintTemplateFactory extends Factory
 {
     protected $model = PrintTemplate::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

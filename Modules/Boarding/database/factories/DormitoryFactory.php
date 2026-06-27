@@ -12,9 +12,6 @@ class DormitoryFactory extends Factory
 {
     protected $model = Dormitory::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

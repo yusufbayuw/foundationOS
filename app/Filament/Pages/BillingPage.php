@@ -9,6 +9,7 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Core\Models\SubscriptionLog;
+use Modules\Core\Models\Tenant;
 use Modules\Core\Support\CurrencyFormatter;
 use Modules\Core\Support\FilamentUi;
 
@@ -45,7 +46,7 @@ class BillingPage extends Page
     {
         $tenant = Filament::getTenant();
 
-        if ($tenant) {
+        if ($tenant instanceof Tenant) {
             $this->currency = $tenant->currency ?: 'IDR';
             $billing = app(BillingService::class);
             $this->currentAmounts = $billing->calculateMonthlyAmount($tenant);
@@ -57,6 +58,7 @@ class BillingPage extends Page
         return CurrencyFormatter::format($amount, $this->currency);
     }
 
+    /** @return Collection<int, SubscriptionLog> */
     public function getRecentInvoices(): Collection
     {
         $tenant = Filament::getTenant();

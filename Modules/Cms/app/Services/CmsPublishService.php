@@ -2,6 +2,7 @@
 
 namespace Modules\Cms\Services;
 
+use Illuminate\Support\Carbon;
 use Modules\Cms\Models\Article;
 use Modules\Cms\Models\Page;
 use RuntimeException;
@@ -32,7 +33,7 @@ class CmsPublishService
             throw new RuntimeException('Article must be approved before publishing.');
         }
 
-        if ($article->publish_at && $article->publish_at->isFuture()) {
+        if ($article->publish_at instanceof Carbon && $article->publish_at->isFuture()) {
             throw new RuntimeException('Scheduled publish date has not been reached.');
         }
 

@@ -12,9 +12,6 @@ class DocumentFolderFactory extends Factory
 {
     protected $model = DocumentFolder::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

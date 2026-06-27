@@ -174,7 +174,7 @@ class ExamQuestionForm
             return null;
         }
 
-        $parts = [FilamentUi::text($bank->academic_context_type?->label() ?? (string) $bank->academic_context_type)];
+        $parts = [$bank->academic_context_type?->label() ?? ''];
 
         if ($bank->isSchool()) {
             if ($bank->schoolSubject) {

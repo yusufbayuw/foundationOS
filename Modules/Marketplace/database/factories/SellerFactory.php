@@ -12,9 +12,6 @@ class SellerFactory extends Factory
 {
     protected $model = Seller::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

@@ -4,7 +4,6 @@ namespace Modules\Donation\Filament\Resources\RecurringDonations\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Modules\Donation\Models\RecurringDonation;
 
 class RecurringDonationInfolist
 {
@@ -34,9 +33,6 @@ class RecurringDonationInfolist
                 TextEntry::make('updated_at')
                     ->dateTime()
                     ->placeholder('-'),
-                TextEntry::make('deleted_at')
-                    ->dateTime()
-                    ->visible(fn (RecurringDonation $record): bool => $record->trashed()),
             ]);
     }
 }

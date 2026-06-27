@@ -12,9 +12,6 @@ class UniformPackageFactory extends Factory
 {
     protected $model = UniformPackage::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

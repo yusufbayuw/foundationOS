@@ -15,7 +15,7 @@ class FinancialReportController extends Controller
 
     public function profitLossPdf(Request $request)
     {
-        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->id ?? 0);
+        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
         $tenant = Tenant::findOrFail($tenantId);
         $from = Carbon::parse($request->query('from', now()->startOfYear()->toDateString()));
         $to = Carbon::parse($request->query('to', now()->toDateString()));
@@ -31,7 +31,7 @@ class FinancialReportController extends Controller
 
     public function balanceSheetPdf(Request $request)
     {
-        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->id ?? 0);
+        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
         $tenant = Tenant::findOrFail($tenantId);
         $asOf = Carbon::parse($request->query('as_of', now()->toDateString()));
         $organizationId = $request->query('organization_id') ? (int) $request->query('organization_id') : null;
@@ -46,7 +46,7 @@ class FinancialReportController extends Controller
 
     public function cashFlowPdf(Request $request)
     {
-        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->id ?? 0);
+        $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
         $tenant = Tenant::findOrFail($tenantId);
         $from = Carbon::parse($request->query('from', now()->startOfYear()->toDateString()));
         $to = Carbon::parse($request->query('to', now()->toDateString()));

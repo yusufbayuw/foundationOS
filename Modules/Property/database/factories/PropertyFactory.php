@@ -12,9 +12,6 @@ class PropertyFactory extends Factory
 {
     protected $model = Property::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

@@ -88,7 +88,7 @@ class AdmissionPeriod extends Model
     }
 
     /**
-     * @return HasManyThrough<Registration, $this>
+     * @return HasManyThrough<Registration, Applicant, $this>
      */
     public function registrations(): HasManyThrough
     {

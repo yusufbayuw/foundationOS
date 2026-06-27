@@ -60,7 +60,7 @@ class MoodleArchiveSemesterCohortsCommand extends Command
 
             if (! $this->option('dry-run')) {
                 try {
-                    $client->call($tenant, 'core_course_update_categories', [
+                    $client->call('core_course_update_categories', [
                         'categories' => [[
                             'id' => $mapping->moodle_id,
                             'visible' => 0,

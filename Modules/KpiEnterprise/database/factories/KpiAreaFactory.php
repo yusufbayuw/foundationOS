@@ -12,9 +12,6 @@ class KpiAreaFactory extends Factory
 {
     protected $model = KpiArea::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

@@ -12,9 +12,6 @@ class RiskCategoryFactory extends Factory
 {
     protected $model = RiskCategory::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

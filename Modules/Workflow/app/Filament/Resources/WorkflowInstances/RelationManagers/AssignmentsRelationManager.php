@@ -13,6 +13,7 @@ use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Models\WorkflowAssignment;
+use Modules\Workflow\Models\WorkflowInstance;
 
 class AssignmentsRelationManager extends RelationManager
 {
@@ -68,6 +69,7 @@ class AssignmentsRelationManager extends RelationManager
                             ->label(FilamentUi::text('Target user'))
                             ->options(function (): array {
                                 $instance = $this->getOwnerRecord();
+                                assert($instance instanceof WorkflowInstance);
 
                                 return User::query()
                                     ->whereHas('userTenantRoles', function ($query) use ($instance): void {

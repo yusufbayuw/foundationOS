@@ -901,7 +901,7 @@ class Tenant extends Model
         return $this->morphMany(FileUpload::class, 'fileable');
     }
 
-    /** @return HasMany<AcademicPeriod, self> */
+    /** @return HasMany<AcademicPeriod, $this> */
     public function academicPeriods(): HasMany
     {
         return $this->hasMany(AcademicPeriod::class);

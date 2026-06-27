@@ -12,9 +12,6 @@ class PageFactory extends Factory
 {
     protected $model = Page::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

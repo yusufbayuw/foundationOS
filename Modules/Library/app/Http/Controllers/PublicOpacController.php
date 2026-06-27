@@ -232,9 +232,9 @@ class PublicOpacController extends Controller
             ->with('category')
             ->limit(5)
             ->get()
-            ->map(fn (Book $book) => [
+            ->map(fn (Book $book): array => [
                 'name' => $book->category?->name ?? 'Tanpa Kategori',
-                'total' => (int) $book->aggregate,
+                'total' => (int) ($book->getAttribute('aggregate') ?? 0),
             ]);
 
         $organizations = $organizationModel === null
@@ -257,10 +257,22 @@ class PublicOpacController extends Controller
         $publisherOptions = (clone $filterQuery)
             ->with('publisher')
             ->get()
-            ->flatMap(fn (Book $book) => array_filter([
-                $book->publisher?->name,
-                $book->publisher,
-            ]))
+            ->flatMap(function (Book $book): array {
+                $names = [];
+                $publisherRelation = $book->getRelationValue('publisher');
+
+                if ($publisherRelation !== null) {
+                    $names[] = $publisherRelation->name;
+                }
+
+                $publisherColumn = $book->getAttribute('publisher');
+
+                if (is_string($publisherColumn) && $publisherColumn !== '') {
+                    $names[] = $publisherColumn;
+                }
+
+                return $names;
+            })
             ->unique()
             ->sort()
             ->values();

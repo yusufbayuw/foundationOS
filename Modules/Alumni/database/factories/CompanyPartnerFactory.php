@@ -12,9 +12,6 @@ class CompanyPartnerFactory extends Factory
 {
     protected $model = CompanyPartner::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

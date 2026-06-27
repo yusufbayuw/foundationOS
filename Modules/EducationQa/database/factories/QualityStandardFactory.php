@@ -12,9 +12,6 @@ class QualityStandardFactory extends Factory
 {
     protected $model = QualityStandard::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

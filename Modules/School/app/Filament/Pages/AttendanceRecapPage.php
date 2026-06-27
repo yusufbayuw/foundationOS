@@ -36,8 +36,8 @@ class AttendanceRecapPage extends Page implements HasForms
 
     public function mount(): void
     {
-        $this->month = date('n');
-        $this->year = date('Y');
+        $this->month = (int) date('n');
+        $this->year = (int) date('Y');
         $this->form->fill([
             'month' => $this->month,
             'year' => $this->year,
@@ -92,7 +92,7 @@ class AttendanceRecapPage extends Page implements HasForms
             return collect();
         }
 
-        $tenantId = filament()->getTenant()?->id
+        $tenantId = filament()->getTenant()?->getKey()
             ?? SchoolClass::query()->find($this->class_id)?->tenant_id;
 
         if (! $tenantId) {

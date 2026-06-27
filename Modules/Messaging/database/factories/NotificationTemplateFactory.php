@@ -12,9 +12,6 @@ class NotificationTemplateFactory extends Factory
 {
     protected $model = NotificationTemplate::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

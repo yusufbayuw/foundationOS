@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use Illuminate\Support\Carbon;
 use Modules\School\Models\ClassStudent;
 
 class ClassStudentObserver
@@ -77,7 +78,7 @@ class ClassStudentObserver
                 'tenant_id' => (int) $classStudent->tenant_id,
                 'status' => $classStudent->status,
                 'exit_date' => $classStudent->exit_date?->toDateString(),
-                'deleted_at' => $classStudent->deleted_at?->toDateTimeString(),
+                'deleted_at' => (($d = $classStudent->getAttribute('deleted_at')) instanceof Carbon ? $d->toDateTimeString() : null),
             ],
             $dedupe,
         );

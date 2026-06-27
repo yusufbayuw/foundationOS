@@ -17,6 +17,9 @@ use Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResour
 use Modules\Workflow\Models\WorkflowInstance;
 use Throwable;
 
+/**
+ * @property PurchaseRequisition $record
+ */
 class ViewPurchaseRequisition extends ViewRecord
 {
     protected static string $resource = PurchaseRequisitionResource::class;

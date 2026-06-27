@@ -9,8 +9,12 @@ use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Filament\Resources\Workflows\WorkflowResource;
+use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
 
+/**
+ * @property Workflow $record
+ */
 class ViewWorkflow extends ViewRecord
 {
     protected static string $resource = WorkflowResource::class;

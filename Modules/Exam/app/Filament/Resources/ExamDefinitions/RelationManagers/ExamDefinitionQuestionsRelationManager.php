@@ -189,7 +189,14 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                 TextInput::make('sort_order')
                     ->label(FilamentUi::field('sort_order'))
                     ->numeric()
-                    ->default(fn (): int => (int) $this->getOwnerRecord()?->examDefinitionQuestions()->max('sort_order') + 1),
+                    ->default(function (): int {
+                        $owner = $this->getOwnerRecord();
+                        if (! $owner instanceof ExamDefinition) {
+                            return 1;
+                        }
+
+                        return (int) $owner->examDefinitionQuestions()->max('sort_order') + 1;
+                    }),
                 TextInput::make('score_override')
                     ->label(FilamentUi::field('score_override'))
                     ->numeric(),

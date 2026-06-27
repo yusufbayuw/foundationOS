@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use Illuminate\Support\Carbon;
 use Modules\Core\Models\User;
 
 class UserObserver
@@ -70,7 +71,7 @@ class UserObserver
             [
                 'email' => $user->email,
                 'status' => $user->status,
-                'deleted_at' => $user->deleted_at?->toDateTimeString(),
+                'deleted_at' => (($d = $user->getAttribute('deleted_at')) instanceof Carbon ? $d->toDateTimeString() : null),
             ],
             $dedupe,
         );

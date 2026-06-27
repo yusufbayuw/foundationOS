@@ -12,9 +12,6 @@ class SiteFactory extends Factory
 {
     protected $model = Site::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

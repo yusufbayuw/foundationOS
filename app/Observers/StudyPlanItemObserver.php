@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncContext;
+use Illuminate\Support\Carbon;
 use Modules\Campus\Models\StudyPlanItem;
 
 class StudyPlanItemObserver
@@ -84,7 +85,7 @@ class StudyPlanItemObserver
                 'course_offering_id' => (int) $item->course_offering_id,
                 'user_id' => $userId,
                 'status' => $item->status,
-                'deleted_at' => $item->deleted_at?->toDateTimeString(),
+                'deleted_at' => (($d = $item->getAttribute('deleted_at')) instanceof Carbon ? $d->toDateTimeString() : null),
             ],
             $dedupe,
         );

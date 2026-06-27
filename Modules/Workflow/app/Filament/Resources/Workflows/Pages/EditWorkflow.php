@@ -5,7 +5,11 @@ namespace Modules\Workflow\Filament\Resources\Workflows\Pages;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Validation\ValidationException;
 use Modules\Workflow\Filament\Resources\Workflows\WorkflowResource;
+use Modules\Workflow\Models\Workflow;
 
+/**
+ * @property Workflow $record
+ */
 class EditWorkflow extends EditRecord
 {
     protected static string $resource = WorkflowResource::class;

@@ -12,9 +12,6 @@ class TicketCategoryFactory extends Factory
 {
     protected $model = TicketCategory::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

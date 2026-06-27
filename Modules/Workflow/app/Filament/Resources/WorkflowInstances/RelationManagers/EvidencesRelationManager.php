@@ -4,7 +4,6 @@ namespace Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers
 
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -14,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Support\FilamentUi;
+use Modules\Workflow\Models\WorkflowInstance;
 
 class EvidencesRelationManager extends RelationManager
 {
@@ -76,7 +76,7 @@ class EvidencesRelationManager extends RelationManager
     }
 
     /**
-     * @return array<int, Component>
+     * @return array<int, FileUpload|Select|Textarea|TextInput>
      */
     protected function evidenceSchema(): array
     {
@@ -85,6 +85,7 @@ class EvidencesRelationManager extends RelationManager
                 ->label(FilamentUi::text('Step'))
                 ->options(function (): array {
                     $instance = $this->getOwnerRecord();
+                    assert($instance instanceof WorkflowInstance);
 
                     return $instance->workflow?->steps()
                         ->orderBy('sort_order')

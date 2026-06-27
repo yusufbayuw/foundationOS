@@ -70,8 +70,12 @@ class ExamDefinitionResource extends LocalizedResource
         ];
     }
 
+    /**
+     * @return Builder<ExamDefinition>
+     */
     public static function getEloquentQuery(): Builder
     {
+        /** @var Builder<ExamDefinition> $query */
         $query = parent::getEloquentQuery();
 
         return app(ExamAuthorizationService::class)

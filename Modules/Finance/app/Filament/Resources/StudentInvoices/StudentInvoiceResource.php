@@ -31,7 +31,7 @@ class StudentInvoiceResource extends LocalizedResource
         return ['invoice_number'];
     }
 
-    protected static function globalSearchResultDetails(Model $record): array
+    protected static function globalSearchResultDetails(StudentInvoice $record): array
     {
         return static::detailStatus($record->status);
     }

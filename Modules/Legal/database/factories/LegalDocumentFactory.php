@@ -12,9 +12,6 @@ class LegalDocumentFactory extends Factory
 {
     protected $model = LegalDocument::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

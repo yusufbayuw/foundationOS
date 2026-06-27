@@ -9,8 +9,12 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Support\FilamentUi;
 use Modules\Procurement\Filament\Resources\Vendors\VendorResource;
+use Modules\Procurement\Models\Vendor;
 use Throwable;
 
+/**
+ * @property Vendor $record
+ */
 class ViewVendor extends ViewRecord
 {
     protected static string $resource = VendorResource::class;
@@ -36,7 +40,7 @@ class ViewVendor extends ViewRecord
                             'blacklist_reason' => $data['blacklist_reason'],
                         ]);
                         Notification::make()->title('Vendor has been blacklisted.')->success()->send();
-                        $this->record = $this->getRecord()->fresh();
+                        $this->refreshRecord();
                     } catch (Throwable $exception) {
                         report($exception);
                         Notification::make()->title('Failed to blacklist vendor.')->body($exception->getMessage())->danger()->send();
@@ -55,7 +59,7 @@ class ViewVendor extends ViewRecord
                             'blacklist_reason' => null,
                         ]);
                         Notification::make()->title('Vendor removed from blacklist.')->success()->send();
-                        $this->record = $this->getRecord()->fresh();
+                        $this->refreshRecord();
                     } catch (Throwable $exception) {
                         report($exception);
                         Notification::make()->title('Failed to remove vendor from blacklist.')->body($exception->getMessage())->danger()->send();
@@ -71,7 +75,7 @@ class ViewVendor extends ViewRecord
                     try {
                         $this->record->update(['is_active' => false]);
                         Notification::make()->title('Vendor deactivated.')->success()->send();
-                        $this->record = $this->getRecord()->fresh();
+                        $this->refreshRecord();
                     } catch (Throwable $exception) {
                         report($exception);
                         Notification::make()->title('Failed to deactivate vendor.')->body($exception->getMessage())->danger()->send();
@@ -87,7 +91,7 @@ class ViewVendor extends ViewRecord
                     try {
                         $this->record->update(['is_active' => true]);
                         Notification::make()->title('Vendor activated.')->success()->send();
-                        $this->record = $this->getRecord()->fresh();
+                        $this->refreshRecord();
                     } catch (Throwable $exception) {
                         report($exception);
                         Notification::make()->title('Failed to activate vendor.')->body($exception->getMessage())->danger()->send();
@@ -95,5 +99,14 @@ class ViewVendor extends ViewRecord
                 }),
             EditAction::make(),
         ];
+    }
+
+    protected function refreshRecord(): void
+    {
+        $fresh = $this->getRecord()->fresh();
+
+        if ($fresh instanceof Vendor) {
+            $this->record = $fresh;
+        }
     }
 }

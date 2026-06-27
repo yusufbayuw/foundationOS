@@ -3,6 +3,7 @@
 namespace Modules\Library\Support;
 
 use App\Models\LibrarySlimsMapping;
+use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Query\Builder;
 use Modules\Core\Models\OrganizationSetting;
@@ -139,6 +140,10 @@ class SlimsImportService
 
     protected function hasColumn(ConnectionInterface $connection, string $table, string $column): bool
     {
+        if (! $connection instanceof Connection) {
+            return false;
+        }
+
         try {
             return $connection->getSchemaBuilder()->hasColumn($table, $column);
         } catch (\Throwable) {

@@ -12,9 +12,6 @@ class IsoControlFactory extends Factory
 {
     protected $model = IsoControl::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

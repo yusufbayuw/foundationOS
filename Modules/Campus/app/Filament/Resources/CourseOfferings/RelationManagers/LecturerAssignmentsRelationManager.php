@@ -13,6 +13,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Campus\Enums\CourseOfferingLecturerRole;
+use Modules\Campus\Models\CourseOffering;
 use Modules\Campus\Models\Lecturer;
 use Modules\Core\Support\FilamentUi;
 
@@ -28,10 +29,16 @@ class LecturerAssignmentsRelationManager extends RelationManager
             ->components([
                 Select::make('lecturer_id')
                     ->label(FilamentUi::text('Lecturer'))
-                    ->options(fn () => Lecturer::query()
-                        ->where('tenant_id', $this->getOwnerRecord()->tenant_id)
-                        ->where('is_active', true)
-                        ->pluck('full_name', 'id'))
+                    ->options(function (): array {
+                        $owner = $this->getOwnerRecord();
+                        assert($owner instanceof CourseOffering);
+
+                        return Lecturer::query()
+                            ->where('tenant_id', $owner->tenant_id)
+                            ->where('is_active', true)
+                            ->pluck('full_name', 'id')
+                            ->all();
+                    })
                     ->required()
                     ->searchable(),
                 Select::make('role')
@@ -58,7 +65,9 @@ class LecturerAssignmentsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['tenant_id'] = $this->getOwnerRecord()->tenant_id;
+                        $owner = $this->getOwnerRecord();
+                        assert($owner instanceof CourseOffering);
+                        $data['tenant_id'] = $owner->tenant_id;
                         $data['assigned_at'] = now();
 
                         return $data;

@@ -386,8 +386,8 @@ class ExamQuestionBulkImportService
                 throw new RowImportFailedException('correct_answer must be True or False (or A/B).');
             }
 
-            $options[0]['is_correct'] = $wantTrue;
-            $options[1]['is_correct'] = $wantFalse;
+            $options[0] = array_merge($options[0], ['text' => $options[0]['text'] ?? '', 'is_correct' => $wantTrue]);
+            $options[1] = array_merge($options[1], ['text' => $options[1]['text'] ?? '', 'is_correct' => $wantFalse]);
 
             return $wantTrue ? $options[0]['text'] : $options[1]['text'];
         }

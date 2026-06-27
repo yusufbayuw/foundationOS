@@ -12,9 +12,6 @@ class AssetCategoryFactory extends Factory
 {
     protected $model = AssetCategory::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

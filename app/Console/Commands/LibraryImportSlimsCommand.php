@@ -643,12 +643,20 @@ class LibraryImportSlimsCommand extends Command
             return new $modelClass;
         }
 
-        $model = $modelClass::withTrashed()->find(TypedValue::int($mapping->fos_id));
+        $model = $modelClass::query()->find(TypedValue::int($mapping->fos_id));
         if (! $model instanceof Model) {
             return new $modelClass;
         }
 
-        if (method_exists($model, 'trashed') && $model->trashed()) {
+        if (method_exists($modelClass, 'withTrashed')) {
+            $trashedModel = $modelClass::withTrashed()->find(TypedValue::int($mapping->fos_id));
+
+            if ($trashedModel instanceof Model) {
+                $model = $trashedModel;
+            }
+        }
+
+        if (method_exists($model, 'restore') && method_exists($model, 'trashed') && $model->trashed()) {
             $model->restore();
         }
 

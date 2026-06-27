@@ -12,9 +12,6 @@ class CapacityResourceFactory extends Factory
 {
     protected $model = CapacityResource::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

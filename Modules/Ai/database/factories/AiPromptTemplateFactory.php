@@ -12,9 +12,6 @@ class AiPromptTemplateFactory extends Factory
 {
     protected $model = AiPromptTemplate::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

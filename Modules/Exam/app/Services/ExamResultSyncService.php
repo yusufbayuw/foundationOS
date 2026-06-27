@@ -596,6 +596,8 @@ class ExamResultSyncService
         ExamResult::withoutTenantScope()
             ->where('exam_definition_id', $definition->id)
             ->whereNotNull('exam_participant_id')
-            ->each(fn (ExamResult $result): mixed => $this->gradebookEvents->synced($result));
+            ->each(function (ExamResult $result): void {
+                $this->gradebookEvents->synced($result);
+            });
     }
 }

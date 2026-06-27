@@ -205,6 +205,10 @@ class ExamParticipantsRelationManager extends RelationManager
                 ->visible(fn (): bool => $definition instanceof ExamDefinition
                     && $definition->exam_academic_context === ExamAcademicContext::Standalone)
                 ->mutateFormDataUsing(function (array $data) use ($definition): array {
+                    if (! $definition instanceof ExamDefinition) {
+                        return $data;
+                    }
+
                     $data['participant_source'] = ParticipantSource::Manual;
                     $data['tenant_id'] = $definition->tenant_id;
                     $data['assigned_at'] = now();

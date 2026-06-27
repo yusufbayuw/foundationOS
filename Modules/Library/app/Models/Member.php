@@ -12,6 +12,9 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
 
+/**
+ * @property int|null $organization_id
+ */
 class Member extends Model
 {
     /** @use HasFactory<Factory<static>> */

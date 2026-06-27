@@ -12,9 +12,6 @@ class LetterCategoryFactory extends Factory
 {
     protected $model = LetterCategory::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

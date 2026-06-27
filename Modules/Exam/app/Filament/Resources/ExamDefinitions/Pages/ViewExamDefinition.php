@@ -13,6 +13,7 @@ use Modules\Exam\Enums\ExamAuditAction;
 use Modules\Exam\Enums\ExamStatus;
 use Modules\Exam\Exceptions\ExamRuntimeException;
 use Modules\Exam\Filament\Resources\ExamDefinitions\ExamDefinitionResource;
+use Modules\Exam\Models\ExamDefinition;
 use Modules\Exam\Services\ExamAuditLogger;
 use Modules\Exam\Services\ExamGradebookExportService;
 use Modules\Exam\Services\ExamLifecycleService;
@@ -20,6 +21,9 @@ use Modules\Exam\Services\ExamParticipantSyncService;
 use Modules\Exam\Services\ExamPublishService;
 use Modules\Exam\Services\ExamResultSyncService;
 
+/**
+ * @property ExamDefinition $record
+ */
 class ViewExamDefinition extends ViewRecord
 {
     protected static string $resource = ExamDefinitionResource::class;

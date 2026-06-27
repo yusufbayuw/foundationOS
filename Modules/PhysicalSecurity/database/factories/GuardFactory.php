@@ -12,9 +12,6 @@ class GuardFactory extends Factory
 {
     protected $model = Guard::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

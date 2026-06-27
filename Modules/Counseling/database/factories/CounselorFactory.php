@@ -12,9 +12,6 @@ class CounselorFactory extends Factory
 {
     protected $model = Counselor::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

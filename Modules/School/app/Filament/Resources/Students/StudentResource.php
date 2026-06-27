@@ -37,7 +37,7 @@ class StudentResource extends LocalizedResource
         return ['nis', 'nisn', 'user.name'];
     }
 
-    protected static function globalSearchResultDetails(Model $record): array
+    protected static function globalSearchResultDetails(Student $record): array
     {
         return array_merge(
             static::detailStatus($record->status),
@@ -49,7 +49,7 @@ class StudentResource extends LocalizedResource
 
     public static function getRecordTitle(?Model $record): string|Htmlable|null
     {
-        if ($record === null) {
+        if (! $record instanceof Student) {
             return null;
         }
 

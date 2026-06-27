@@ -4,7 +4,6 @@ namespace Modules\Donation\Filament\Resources\CampaignUpdates\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Modules\Donation\Models\CampaignUpdate;
 
 class CampaignUpdateInfolist
 {
@@ -34,9 +33,6 @@ class CampaignUpdateInfolist
                 TextEntry::make('updated_at')
                     ->dateTime()
                     ->placeholder('-'),
-                TextEntry::make('deleted_at')
-                    ->dateTime()
-                    ->visible(fn (CampaignUpdate $record): bool => $record->trashed()),
             ]);
     }
 }

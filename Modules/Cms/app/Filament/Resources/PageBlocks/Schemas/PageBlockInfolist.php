@@ -4,7 +4,6 @@ namespace Modules\Cms\Filament\Resources\PageBlocks\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Modules\Cms\Models\PageBlock;
 
 class PageBlockInfolist
 {
@@ -34,9 +33,6 @@ class PageBlockInfolist
                 TextEntry::make('updated_at')
                     ->dateTime()
                     ->placeholder('-'),
-                TextEntry::make('deleted_at')
-                    ->dateTime()
-                    ->visible(fn (PageBlock $record): bool => $record->trashed()),
                 TextEntry::make('page.name')
                     ->label('Page')
                     ->placeholder('-'),

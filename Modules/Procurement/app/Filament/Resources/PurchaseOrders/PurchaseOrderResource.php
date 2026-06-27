@@ -4,7 +4,6 @@ namespace Modules\Procurement\Filament\Resources\PurchaseOrders;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Procurement\Filament\Resources\PurchaseOrders\Pages\CreatePurchaseOrder;
@@ -29,7 +28,7 @@ class PurchaseOrderResource extends LocalizedResource
         return ['po_number'];
     }
 
-    protected static function globalSearchResultDetails(Model $record): array
+    protected static function globalSearchResultDetails(PurchaseOrder $record): array
     {
         return static::detailStatus($record->status);
     }

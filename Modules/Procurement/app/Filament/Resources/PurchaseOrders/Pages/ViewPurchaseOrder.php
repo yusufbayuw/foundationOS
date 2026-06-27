@@ -12,6 +12,9 @@ use Modules\Procurement\Filament\Resources\PurchaseOrders\PurchaseOrderResource;
 use Modules\Procurement\Models\PurchaseOrder;
 use Throwable;
 
+/**
+ * @property PurchaseOrder $record
+ */
 class ViewPurchaseOrder extends ViewRecord
 {
     protected static string $resource = PurchaseOrderResource::class;
@@ -43,7 +46,7 @@ class ViewPurchaseOrder extends ViewRecord
                             'approved_by' => auth()->id(),
                         ]);
                         Notification::make()->title('Purchase order approved.')->success()->send();
-                        $this->record = $this->getRecord()->fresh();
+                        $this->refreshRecord();
                     } catch (Throwable $exception) {
                         report($exception);
                         Notification::make()->title('Failed to approve purchase order.')->body($exception->getMessage())->danger()->send();
@@ -67,7 +70,7 @@ class ViewPurchaseOrder extends ViewRecord
                             'notes' => $data['rejection_reason'],
                         ]);
                         Notification::make()->title('Purchase order rejected.')->success()->send();
-                        $this->record = $this->getRecord()->fresh();
+                        $this->refreshRecord();
                     } catch (Throwable $exception) {
                         report($exception);
                         Notification::make()->title('Failed to reject purchase order.')->body($exception->getMessage())->danger()->send();
@@ -75,5 +78,14 @@ class ViewPurchaseOrder extends ViewRecord
                 }),
             EditAction::make(),
         ];
+    }
+
+    protected function refreshRecord(): void
+    {
+        $fresh = $this->getRecord()->fresh();
+
+        if ($fresh instanceof PurchaseOrder) {
+            $this->record = $fresh;
+        }
     }
 }

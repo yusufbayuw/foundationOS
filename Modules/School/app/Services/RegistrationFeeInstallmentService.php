@@ -12,7 +12,7 @@ class RegistrationFeeInstallmentService
     /**
      * @param  array{installments: int, start_month?: string}  $options
      */
-    public function createInstallments(Student $student, TuitionType $tuitionType, array $options = []): int
+    public function createInstallments(Student $student, TuitionType $tuitionType, array $options = ['installments' => 3]): int
     {
         $installments = max(1, (int) ($options['installments'] ?? 3));
         $start = Carbon::parse($options['start_month'] ?? now()->format('Y-m').'-01');

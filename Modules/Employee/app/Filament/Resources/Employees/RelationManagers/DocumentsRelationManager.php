@@ -101,7 +101,7 @@ class DocumentsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['tenant_id'] = filament()->getTenant()?->id;
+                        $data['tenant_id'] = filament()->getTenant()?->getKey();
 
                         return $data;
                     }),

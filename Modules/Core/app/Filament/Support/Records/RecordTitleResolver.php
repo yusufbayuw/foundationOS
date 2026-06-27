@@ -27,8 +27,12 @@ class RecordTitleResolver
             }
         }
 
-        if ($record->isRelation('user') && $record->user?->name) {
-            return $record->user->name;
+        if ($record->isRelation('user')) {
+            $user = $record->getRelationValue('user');
+
+            if ($user !== null && isset($user->name) && $user->name !== '') {
+                return (string) $user->name;
+            }
         }
 
         return (string) $record->getKey();

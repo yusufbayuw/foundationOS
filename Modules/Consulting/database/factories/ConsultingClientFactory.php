@@ -12,9 +12,6 @@ class ConsultingClientFactory extends Factory
 {
     protected $model = ConsultingClient::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

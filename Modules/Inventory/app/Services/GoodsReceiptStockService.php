@@ -23,7 +23,7 @@ class GoodsReceiptStockService
         $receipt = $receipt->fresh(['items.purchaseOrderItem.procurementItem', 'purchaseOrder']);
         $warehouse = $this->warehouseResolver->defaultForTenant(
             (int) $receipt->tenant_id,
-            $receipt->purchaseOrder?->organization_id,
+            null,
         );
 
         $moves = [];

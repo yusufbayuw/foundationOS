@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property bool $is_tenant_enabled Runtime flag set by ModuleMarketplace listing.
+ */
 class Module extends Model
 {
     /** @use HasFactory<Factory<static>> */

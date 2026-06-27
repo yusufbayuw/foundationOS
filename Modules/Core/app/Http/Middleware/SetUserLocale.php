@@ -21,7 +21,7 @@ class SetUserLocale
                 // Fall back to tenant's default locale setting
                 $tenant = $request->route('tenant');
                 if ($tenant instanceof Tenant) {
-                    $setting = $tenant->settings()
+                    $setting = $tenant->tenantSettings()
                         ->where('group', 'core')
                         ->where('key', 'default_locale')
                         ->first();
@@ -34,7 +34,7 @@ class SetUserLocale
         } elseif ($tenant = $request->route('tenant')) {
             // Guest on tenant panel: use tenant's default locale setting
             if ($tenant instanceof Tenant) {
-                $setting = $tenant->settings()->where('group', 'core')->where('key', 'default_locale')->first();
+                $setting = $tenant->tenantSettings()->where('group', 'core')->where('key', 'default_locale')->first();
                 if ($setting) {
                     App::setLocale($setting->value);
                 }

@@ -12,7 +12,7 @@ class Role extends SpatieRole
 {
     //
 
-    /** @return BelongsTo<Tenant, self> */
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

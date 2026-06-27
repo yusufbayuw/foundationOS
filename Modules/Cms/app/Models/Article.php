@@ -26,12 +26,16 @@ class Article extends Model
         'status',
         'description',
         'meta',
+        'publish_at',
+        'published_at',
     ];
 
     protected function casts(): array
     {
         return [
             'meta' => 'array',
+            'publish_at' => 'datetime',
+            'published_at' => 'datetime',
         ];
     }
 

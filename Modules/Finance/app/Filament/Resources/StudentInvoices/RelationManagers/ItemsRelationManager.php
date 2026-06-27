@@ -24,7 +24,7 @@ class ItemsRelationManager extends RelationManager
             Select::make('tuition_type_id')
                 ->label(FilamentUi::field('tuition_type_id'))
                 ->options(fn () => TuitionType::withoutTenantScope()
-                    ->where('tenant_id', filament()->getTenant()?->id)
+                    ->where('tenant_id', filament()->getTenant()?->getKey())
                     ->orderBy('name')
                     ->pluck('name', 'id')
                     ->toArray()
@@ -84,7 +84,7 @@ class ItemsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
-                        $data['tenant_id'] = filament()->getTenant()?->id;
+                        $data['tenant_id'] = filament()->getTenant()?->getKey();
 
                         return $data;
                     }),

@@ -12,9 +12,6 @@ class DonorFactory extends Factory
 {
     protected $model = Donor::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

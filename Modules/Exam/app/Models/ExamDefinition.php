@@ -263,7 +263,7 @@ class ExamDefinition extends ExamModel
     }
 
     /**
-     * @return BelongsToMany<ExamQuestion, $this>
+     * @return BelongsToMany<ExamQuestion, $this, ExamDefinitionQuestion, 'pivot'>
      */
     public function examQuestions(): BelongsToMany
     {

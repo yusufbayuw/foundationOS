@@ -100,7 +100,9 @@ class ExamManualGradingService
             ExamResult::withoutTenantScope()
                 ->where('exam_attempt_id', $attempt->id)
                 ->whereNotNull('exam_participant_id')
-                ->each(fn (ExamResult $result): mixed => $this->gradebookEvents->graded($result));
+                ->each(function (ExamResult $result): void {
+                    $this->gradebookEvents->graded($result);
+                });
         }
     }
 }

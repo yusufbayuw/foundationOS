@@ -34,8 +34,13 @@ class StudentInvoiceDocumentService
             return '-';
         }
 
-        if (method_exists($invoiceable, 'user') && $invoiceable->user) {
-            return (string) ($invoiceable->user->name ?? '-');
+        if (method_exists($invoiceable, 'user')) {
+            /** @var object{user?: object{name?: string|null}} $invoiceable */
+            $relatedUser = $invoiceable->user ?? null;
+
+            if ($relatedUser !== null) {
+                return (string) ($relatedUser->name ?? '-');
+            }
         }
 
         if (isset($invoiceable->name)) {

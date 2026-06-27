@@ -4,7 +4,6 @@ namespace Modules\Donation\Filament\Resources\Donations\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
-use Modules\Donation\Models\Donation;
 
 class DonationInfolist
 {
@@ -34,9 +33,6 @@ class DonationInfolist
                 TextEntry::make('updated_at')
                     ->dateTime()
                     ->placeholder('-'),
-                TextEntry::make('deleted_at')
-                    ->dateTime()
-                    ->visible(fn (Donation $record): bool => $record->trashed()),
             ]);
     }
 }

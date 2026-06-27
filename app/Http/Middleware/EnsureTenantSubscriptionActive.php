@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
+use Modules\Core\Models\Tenant;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTenantSubscriptionActive
@@ -13,7 +14,7 @@ class EnsureTenantSubscriptionActive
     {
         $tenant = Filament::getTenant();
 
-        if (! $tenant) {
+        if (! $tenant instanceof Tenant) {
             return $next($request);
         }
 

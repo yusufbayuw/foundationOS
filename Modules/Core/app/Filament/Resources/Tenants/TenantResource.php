@@ -4,7 +4,6 @@ namespace Modules\Core\Filament\Resources\Tenants;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
 use Modules\Core\Filament\Resources\Tenants\Pages\CreateTenant;
 use Modules\Core\Filament\Resources\Tenants\Pages\EditTenant;
@@ -70,7 +69,7 @@ class TenantResource extends LocalizedResource
         return ['name', 'code'];
     }
 
-    protected static function globalSearchResultDetails(Model $record): array
+    protected static function globalSearchResultDetails(Tenant $record): array
     {
         return static::detailStatus($record->status);
     }

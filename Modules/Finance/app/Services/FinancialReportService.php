@@ -146,7 +146,7 @@ class FinancialReportService
      * Revenue / Liability / Equity → credit-normal (balance = credit − debit)
      * Asset / Expense → debit-normal (balance = debit − credit)
      *
-     * @return Collection<int, object{code:string, name:string, balance:float}>
+     * @return Collection<int, object{id: mixed, code: string, name: string, balance: float}&\stdClass>
      */
     private function groupByAccount(Collection $lines, string $type): Collection
     {
@@ -163,8 +163,8 @@ class FinancialReportService
 
                 return (object) [
                     'id' => $coa?->id,
-                    'code' => $coa?->code ?? '',
-                    'name' => $coa?->name ?? 'Unknown',
+                    'code' => (string) ($coa?->code ?? ''),
+                    'name' => (string) ($coa?->name ?? 'Unknown'),
                     'balance' => round($balance, 2),
                 ];
             })

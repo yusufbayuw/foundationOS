@@ -12,9 +12,6 @@ class InstructorFactory extends Factory
 {
     protected $model = Instructor::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

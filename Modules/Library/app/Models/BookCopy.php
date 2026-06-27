@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 
+/**
+ * @property int|null $organization_id
+ */
 class BookCopy extends Model
 {
     /** @use HasFactory<Factory<static>> */

@@ -12,9 +12,6 @@ class RouteFactory extends Factory
 {
     protected $model = Route::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

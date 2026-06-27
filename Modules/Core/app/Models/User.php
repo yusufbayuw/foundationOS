@@ -198,8 +198,12 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->with('tenant')
             ->first();
 
-        if ($primaryAssignment?->tenant) {
-            return $primaryAssignment->tenant;
+        if ($primaryAssignment !== null) {
+            $tenant = $primaryAssignment->getRelationValue('tenant');
+
+            if ($tenant !== null) {
+                return $tenant;
+            }
         }
 
         return $this->getTenants($panel)->first();

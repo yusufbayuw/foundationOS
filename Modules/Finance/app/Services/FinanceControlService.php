@@ -3,6 +3,7 @@
 namespace Modules\Finance\Services;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Organization;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Core\Support\NotificationService;
@@ -232,7 +233,11 @@ class FinanceControlService
 
         $entry = JournalEntry::query()->create([
             'tenant_id' => $payment->tenant_id,
-            'organization_id' => $invoice->invoiceable?->organization_id ?? $cashAccount->organization_id,
+            'organization_id' => $invoice->invoiceable instanceof Organization
+                ? $invoice->invoiceable->getKey()
+                : ($invoice->invoiceable !== null && isset($invoice->invoiceable->organization_id)
+                    ? $invoice->invoiceable->organization_id
+                    : $cashAccount->organization_id),
             'posted_by' => $actor->getKey(),
             'entry_number' => 'PAY-'.$payment->payment_number,
             'date' => $payment->payment_date,

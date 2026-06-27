@@ -12,9 +12,6 @@ class SoftwareLicenseFactory extends Factory
 {
     protected $model = SoftwareLicense::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

@@ -14,9 +14,6 @@ class ExamQuestionBankFactory extends Factory
 {
     protected $model = ExamQuestionBank::class;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [

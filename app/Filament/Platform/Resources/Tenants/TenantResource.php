@@ -136,7 +136,7 @@ class TenantResource extends Resource
         return static::canManagePlatformTenants();
     }
 
-    private static function canManagePlatformTenants(): bool
+    protected static function canManagePlatformTenants(): bool
     {
         $user = auth()->user();
 

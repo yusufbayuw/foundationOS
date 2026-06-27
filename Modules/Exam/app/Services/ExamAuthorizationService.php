@@ -122,7 +122,7 @@ class ExamAuthorizationService
         return (int) $exam->tenant_id === (int) $tenantId;
     }
 
-    public function hasUnrestrictedExamAccess(AuthUser $user): bool
+    public function hasUnrestrictedExamAccess(User $user): bool
     {
         if ($user->hasRole(ShieldUtils::getSuperAdminName())) {
             return true;
@@ -134,7 +134,7 @@ class ExamAuthorizationService
         ]);
     }
 
-    public function passesContextualScope(AuthUser $user, ExamDefinition $exam): bool
+    public function passesContextualScope(User $user, ExamDefinition $exam): bool
     {
         if ((int) $exam->owner_user_id === (int) $user->getKey()) {
             return true;
