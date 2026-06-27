@@ -2,9 +2,7 @@
 
 namespace Modules\Library\Support;
 
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
-use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 
 class LibraryScopeResolver
@@ -15,13 +13,13 @@ class LibraryScopeResolver
             return $tenantId;
         }
 
-        $tenant = Filament::getTenant();
+        $tenantId = current_tenant_id();
 
-        if ($tenant instanceof Tenant) {
-            return (int) $tenant->getKey();
+        if ($tenantId === null) {
+            return null;
         }
 
-        return null;
+        return (int) $tenantId;
     }
 
     /**

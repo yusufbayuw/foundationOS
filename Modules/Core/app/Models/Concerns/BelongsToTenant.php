@@ -16,7 +16,7 @@ use Modules\Core\Scopes\TenantScope;
  * - Auto-fill tenant_id on creating event
  * - withoutTenantScope() / allTenants() helpers for cross-tenant CLI work
  *
- * Tenant resolution priority is implemented in App\Support\CurrentTenant.
+ * Tenant resolution is implemented in Modules\Core\Support\Tenancy\CurrentTenant.
  */
 trait BelongsToTenant
 {

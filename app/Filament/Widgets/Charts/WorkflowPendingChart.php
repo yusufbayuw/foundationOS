@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets\Charts;
 
 use App\Filament\Widgets\Charts\Concerns\CachesChartData;
-use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Models\WorkflowInstance;
@@ -28,7 +27,7 @@ class WorkflowPendingChart extends ChartWidget
 
     protected function getData(): array
     {
-        $tenantId = Filament::getTenant()?->getKey();
+        $tenantId = current_tenant_id();
         if (! $tenantId) {
             return ['datasets' => [], 'labels' => []];
         }

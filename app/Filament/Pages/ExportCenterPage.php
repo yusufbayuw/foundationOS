@@ -5,7 +5,6 @@ namespace App\Filament\Pages;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Actions\Exports\Models\Export;
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -71,7 +70,7 @@ class ExportCenterPage extends Page implements HasTable
 
     protected function exportQuery(): Builder
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         $userIds = [];
 
         if ($tenant) {

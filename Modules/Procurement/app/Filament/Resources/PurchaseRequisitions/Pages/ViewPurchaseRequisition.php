@@ -4,7 +4,6 @@ namespace Modules\Procurement\Filament\Resources\PurchaseRequisitions\Pages;
 
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Modules\Core\Models\User;
@@ -66,7 +65,7 @@ class ViewPurchaseRequisition extends ViewRecord
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        $tenant = Filament::getTenant();
+                        $tenant = current_tenant_model();
 
                         $workflow = app(WorkflowResolver::class)->resolveForSubject(
                             $this->record->workflowSubjectType(),

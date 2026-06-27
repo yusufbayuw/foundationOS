@@ -8,7 +8,6 @@ use App\Filament\Widgets\Charts\RevenueTrendChart;
 use App\Filament\Widgets\Charts\WorkflowPendingChart;
 use App\Filament\Widgets\ExecutiveStatsOverview;
 use App\Filament\Widgets\NavigationGridWidget;
-use Filament\Facades\Filament;
 use Filament\Pages\Dashboard;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
@@ -146,7 +145,7 @@ class TabbedDashboard extends Dashboard
             return true;
         }
 
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         if (! $tenant) {
             return false;
         }

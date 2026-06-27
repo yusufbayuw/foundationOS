@@ -2,7 +2,6 @@
 
 namespace Modules\Finance\Filament\Resources\Budgets\Schemas;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -25,16 +24,16 @@ class BudgetForm
                         Select::make('organization_id')
                             ->label(FilamentUi::field('organization_id'))
                             ->relationship('organization', 'name', modifyQueryUsing: function ($query): void {
-                                if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                if (current_tenant_model()) {
+                                    $query->where('tenant_id', current_tenant_id());
                                 }
                             })
                             ->required(),
                         Select::make('chart_of_account_id')
                             ->label(FilamentUi::field('chart_of_account_id'))
                             ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
-                                if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                if (current_tenant_model()) {
+                                    $query->where('tenant_id', current_tenant_id());
                                 }
                             })
                             ->required(),

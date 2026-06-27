@@ -2,18 +2,20 @@
 
 namespace Modules\Core\Support\Tenancy;
 
-use Filament\Facades\Filament;
+use Modules\Core\Exceptions\MissingTenantContextException;
 use Modules\Core\Models\Tenant;
 
 /**
  * Singleton resolver for the active tenant.
  *
- * Resolution priority:
- *   1. Manually set value (via set() / forTenant()) — used by queues, console, tests.
- *   2. Filament panel tenant (Filament::getTenant()).
+ * Tenant context is bound explicitly by entry-point middleware and runners:
+ * - Filament: BindTenantToContainer (from Filament panel tenant)
+ * - API: ResolveApiTenant (from Sanctum token tenant_id)
+ * - Queue: WithTenantContext (from InteractsWithTenant)
+ * - CLI: tenant:run (CurrentTenant::forTenant)
+ * - Tests: explicit set() / forget()
  *
- * When no tenant context exists, returns null so global scopes become a no-op
- * and cross-tenant CLI/seeder operations remain unrestricted.
+ * Application code must read tenant context only through this class.
  */
 class CurrentTenant
 {
@@ -21,30 +23,63 @@ class CurrentTenant
 
     protected bool $manuallySet = false;
 
+    protected ?Tenant $tenantModel = null;
+
     public function set(int|string|Tenant|null $tenant): void
     {
         if ($tenant instanceof Tenant) {
             $this->tenantId = $tenant->getKey();
+            $this->tenantModel = $tenant;
         } else {
             $this->tenantId = $tenant;
+            $this->tenantModel = null;
         }
 
-        $this->manuallySet = true;
+        $this->manuallySet = $tenant !== null;
     }
 
     public function forget(): void
     {
         $this->tenantId = null;
+        $this->tenantModel = null;
         $this->manuallySet = false;
+    }
+
+    public function isBound(): bool
+    {
+        return $this->manuallySet && $this->tenantId !== null;
     }
 
     public function id(): int|string|null
     {
-        if ($this->manuallySet) {
-            return $this->tenantId;
+        return $this->tenantId;
+    }
+
+    /**
+     * @throws MissingTenantContextException
+     */
+    public function requiredId(): int|string
+    {
+        $tenantId = $this->id();
+
+        if ($tenantId === null) {
+            throw new MissingTenantContextException('tenant context');
         }
 
-        return $this->resolveFromFilament();
+        return $tenantId;
+    }
+
+    public function model(): ?Tenant
+    {
+        if (! $this->isBound()) {
+            return null;
+        }
+
+        if ($this->tenantModel !== null && (string) $this->tenantModel->getKey() === (string) $this->tenantId) {
+            return $this->tenantModel;
+        }
+
+        return $this->tenantModel = Tenant::query()->find($this->tenantId);
     }
 
     /**
@@ -58,6 +93,7 @@ class CurrentTenant
     public function forTenant(int|string|Tenant|null $tenant, \Closure $callback): mixed
     {
         $previousId = $this->tenantId;
+        $previousModel = $this->tenantModel;
         $previouslySet = $this->manuallySet;
 
         $this->set($tenant);
@@ -66,20 +102,8 @@ class CurrentTenant
             return $callback();
         } finally {
             $this->tenantId = $previousId;
+            $this->tenantModel = $previousModel;
             $this->manuallySet = $previouslySet;
-        }
-    }
-
-    protected function resolveFromFilament(): int|string|null
-    {
-        if (! class_exists(Filament::class)) {
-            return null;
-        }
-
-        try {
-            return Filament::getTenant()?->getKey();
-        } catch (\Throwable) {
-            return null;
         }
     }
 }

@@ -22,13 +22,23 @@ class CreateRfqFromApprovedPurchaseRequisition implements ShouldQueue
             return;
         }
 
-        $rfq = app(RfqAutoCreationService::class)->createDraftFor($requisition);
+        $handler = function () use ($event, $requisition): void {
+            $rfq = app(RfqAutoCreationService::class)->createDraftFor($requisition);
 
-        if (! $rfq) {
+            if (! $rfq) {
+                return;
+            }
+
+            $this->notifyRecipient($event->approver ?? $requisition->approver ?? $requisition->requester, $rfq);
+        };
+
+        if ($requisition->tenant_id) {
+            current_tenant()->forTenant((int) $requisition->tenant_id, $handler);
+
             return;
         }
 
-        $this->notifyRecipient($event->approver ?? $requisition->approver ?? $requisition->requester, $rfq);
+        $handler();
     }
 
     protected function notifyRecipient(?User $user, $rfq): void

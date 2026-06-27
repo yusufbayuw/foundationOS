@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Scopes;
 
+use App\Http\Middleware\MarkHttpTenancyContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -11,9 +12,10 @@ use Modules\Core\Support\Tenancy\CurrentTenant;
 /**
  * Global scope that restricts queries to the active tenant's records.
  *
- * When tenancy.scope_fail_closed is enabled, HTTP requests and PHPUnit runs
- * without tenant context throw MissingTenantContextException. Real Artisan/queue
- * console (non-test) stays fail-open for cross-tenant commands.
+ * HTTP requests always fail-closed when tenant context is missing.
+ * Artisan/queue console stays fail-open unless running PHPUnit with
+ * tenancy.scope_fail_closed enabled, so seeders and cross-tenant commands
+ * can use withoutTenantScope() explicitly.
  */
 class TenantScope implements Scope
 {
@@ -45,14 +47,27 @@ class TenantScope implements Scope
 
     protected function shouldFailClosed(Model $model): bool
     {
+        if ($this->isHttpContext()) {
+            return true;
+        }
+
         if (! config('tenancy.scope_fail_closed', false)) {
             return false;
         }
 
+        return app()->runningUnitTests();
+    }
+
+    protected function isHttpContext(): bool
+    {
         if (! app()->runningInConsole()) {
             return true;
         }
 
-        return app()->runningUnitTests();
+        if (! app()->bound('request')) {
+            return false;
+        }
+
+        return request()->attributes->get(MarkHttpTenancyContext::ATTRIBUTE) === true;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Modules\Helpdesk\Filament\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Modules\Core\Support\FilamentUi;
@@ -24,7 +23,7 @@ class HelpdeskDashboard extends Page
 
     public function mount(): void
     {
-        $tenantId = Filament::getTenant()?->getKey();
+        $tenantId = current_tenant_id();
 
         $base = Ticket::query()->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId));
 

@@ -2,7 +2,6 @@
 
 namespace Modules\Library\Filament\Resources\LibraryStockTakes;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -39,8 +38,8 @@ class LibraryStockTakeResource extends LocalizedResource
             Select::make('organization_id')
                 ->label(FilamentUi::field('organization_id'))
                 ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
-                    if (Filament::getTenant()) {
-                        $query->where('tenant_id', Filament::getTenant()->getKey());
+                    if (current_tenant_model()) {
+                        $query->where('tenant_id', current_tenant_id());
                     }
                 })
                 ->nullable()

@@ -2,7 +2,6 @@
 
 namespace Modules\Finance\Filament\Resources\StudentInvoices\Schemas;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -27,8 +26,8 @@ class StudentInvoiceForm
                         Select::make('tuition_type_id')
                             ->label(FilamentUi::field('tuition_type_id'))
                             ->relationship('tuitionType', 'name', modifyQueryUsing: function ($query): void {
-                                if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                if (current_tenant_model()) {
+                                    $query->where('tenant_id', current_tenant_id());
                                 }
                             }),
                         TextInput::make('invoice_number')

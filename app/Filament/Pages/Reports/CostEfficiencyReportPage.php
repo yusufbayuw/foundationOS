@@ -6,7 +6,6 @@ use App\Services\CrossModuleReportService;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
@@ -55,7 +54,7 @@ class CostEfficiencyReportPage extends Page
 
     public function generateReport(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         if (! $tenant) {
             return;
         }

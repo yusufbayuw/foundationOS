@@ -3,7 +3,6 @@
 namespace Modules\Finance\Filament\Pages;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Models\Budget;
@@ -33,7 +32,7 @@ class FinanceOverviewPage extends Page
 
     public function getStats(): array
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         $tenantId = $tenant?->getKey();
 
         if (! $tenantId) {

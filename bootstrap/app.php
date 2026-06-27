@@ -3,6 +3,7 @@
 use App\Http\Middleware\AttachApiVersionMeta;
 use App\Http\Middleware\EnsureTenantSubscriptionActive;
 use App\Http\Middleware\IdempotencyKey;
+use App\Http\Middleware\MarkHttpTenancyContext;
 use App\Http\Middleware\ResolveApiTenant;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Exceptions\MissingTenantContextException;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -27,6 +29,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies('*');
+        $middleware->web(append: [
+            MarkHttpTenancyContext::class,
+        ]);
+        $middleware->api(append: [
+            MarkHttpTenancyContext::class,
+        ]);
         $middleware->validateCsrfTokens(except: [
             'billing/webhook',
             'donation/webhook',
@@ -68,5 +76,15 @@ return Application::configure(basePath: dirname(__DIR__))
                     'error' => ['code' => 'not_found', 'message' => 'Resource not found.'],
                 ], 404);
             }
+        });
+
+        $exceptions->renderable(function (MissingTenantContextException $e, $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'error' => ['code' => 'tenant_context_required', 'message' => $e->getMessage()],
+                ], 403);
+            }
+
+            abort(403, $e->getMessage());
         });
     })->create();

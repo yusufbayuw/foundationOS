@@ -3,7 +3,6 @@
 namespace Modules\School\Filament\Pages;
 
 use BackedEnum;
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Modules\Core\Support\FilamentUi;
@@ -34,7 +33,7 @@ class AcademicAnalytics extends Page
      */
     public function getAnalyticsSummary(): array
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         if (! $tenant) {
             return [];
         }

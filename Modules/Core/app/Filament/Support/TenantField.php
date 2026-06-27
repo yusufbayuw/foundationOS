@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Support;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Modules\Core\Models\AcademicPeriod;
@@ -12,16 +11,13 @@ use Modules\Core\Support\FilamentUi;
 class TenantField
 {
     /**
-     * Create a hidden tenant_id field that auto-fills from the current Filament tenant.
-     *
-     * Replaces the manual tenant_id Select pattern that shouldn't be // fos:lint-ignore-tenant-field
-     * user-facing in a tenant-aware panel.
+     * Create a hidden tenant_id field that auto-fills from CurrentTenant.
      */
     public static function make(): Hidden
     {
         return Hidden::make('tenant_id')
-            ->default(fn (): int|string|null => Filament::getTenant()?->getKey())
-            ->dehydrateStateUsing(fn (): int|string|null => Filament::getTenant()?->getKey());
+            ->default(fn (): int|string|null => current_tenant_id())
+            ->dehydrateStateUsing(fn (): int|string|null => current_tenant_id());
     }
 
     /**
@@ -34,7 +30,7 @@ class TenantField
             ->relationship(
                 'organization',
                 'name',
-                fn ($query) => $query->where('tenant_id', Filament::getTenant()?->getKey()),
+                fn ($query) => $query->where('tenant_id', current_tenant_id()),
             );
     }
 
@@ -46,11 +42,11 @@ class TenantField
         return Hidden::make('organization_id')
             ->default(fn (): int|string|null => app(ContextDefaults::class)->resolveOrganizationId(
                 auth()->user(),
-                Filament::getTenant()?->getKey(),
+                current_tenant_id(),
             ))
             ->dehydrateStateUsing(fn (): int|string|null => app(ContextDefaults::class)->resolveOrganizationId(
                 auth()->user(),
-                Filament::getTenant()?->getKey(),
+                current_tenant_id(),
             ));
     }
 
@@ -61,10 +57,10 @@ class TenantField
     {
         return Hidden::make('academic_period_id')
             ->default(fn (): int|string|null => app(ContextDefaults::class)->resolveAcademicPeriodId(
-                Filament::getTenant()?->getKey(),
+                current_tenant_id(),
             ))
             ->dehydrateStateUsing(fn (): int|string|null => app(ContextDefaults::class)->resolveAcademicPeriodId(
-                Filament::getTenant()?->getKey(),
+                current_tenant_id(),
             ));
     }
 
@@ -76,7 +72,7 @@ class TenantField
         return Select::make('academic_period_id')
             ->label(FilamentUi::field('academic_period_id'))
             ->options(fn () => AcademicPeriod::query()
-                ->where('tenant_id', Filament::getTenant()?->getKey())
+                ->where('tenant_id', current_tenant_id())
                 ->orderByDesc('is_active')
                 ->orderByDesc('start_date')
                 ->pluck('name', 'id')

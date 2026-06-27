@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Exceptions\MissingTenantContextException;
 use App\Support\CurrentTenant;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Modules\Core\Exceptions\MissingTenantContextException;
 use Modules\Procurement\Models\Vendor;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;

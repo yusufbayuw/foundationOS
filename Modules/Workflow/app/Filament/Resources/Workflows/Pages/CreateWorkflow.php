@@ -2,7 +2,6 @@
 
 namespace Modules\Workflow\Filament\Resources\Workflows\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
 use Modules\Workflow\Filament\Resources\Workflows\WorkflowResource;
 
@@ -14,7 +13,7 @@ class CreateWorkflow extends CreateRecord
     {
         $userId = auth()->id();
 
-        $data['tenant_id'] ??= Filament::getTenant()?->getKey();
+        $data['tenant_id'] ??= current_tenant_id();
         $data['created_by'] = $userId;
         $data['updated_by'] = $userId;
 

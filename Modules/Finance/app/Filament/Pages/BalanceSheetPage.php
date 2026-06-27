@@ -5,7 +5,6 @@ namespace Modules\Finance\Filament\Pages;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
@@ -47,7 +46,7 @@ class BalanceSheetPage extends Page
 
     public function generateReport(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         if (! $tenant) {
             return;
         }
@@ -74,7 +73,7 @@ class BalanceSheetPage extends Page
                     Select::make('organization_id')
                         ->label(FilamentUi::field('organization_id'))
                         ->options(fn () => Organization::withoutTenantScope()
-                            ->where('tenant_id', Filament::getTenant()?->getKey())
+                            ->where('tenant_id', current_tenant_id())
                             ->pluck('name', 'id')
                             ->toArray()
                         )

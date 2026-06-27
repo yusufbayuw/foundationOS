@@ -31,7 +31,6 @@ class LeaveRequestController extends ApiController
         }
 
         $leaveRequest = LeaveRequest::create(array_merge($validator->validated(), [
-            'tenant_id' => $this->currentTenant->id(),
             'status' => 'draft',
         ]));
 

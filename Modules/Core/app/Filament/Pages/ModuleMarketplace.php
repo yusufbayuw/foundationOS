@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -37,7 +36,7 @@ class ModuleMarketplace extends Page
 
     public function toggleModule(int $moduleId): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return;
@@ -76,7 +75,7 @@ class ModuleMarketplace extends Page
 
     public function getModulesWithStatus(): Collection
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         $enabledModuleIds = $tenant
             ? TenantModule::query()

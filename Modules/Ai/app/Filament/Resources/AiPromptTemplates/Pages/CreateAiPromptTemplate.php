@@ -2,7 +2,6 @@
 
 namespace Modules\Ai\Filament\Resources\AiPromptTemplates\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Ai\Filament\Resources\AiPromptTemplates\AiPromptTemplateResource;
@@ -17,7 +16,7 @@ class CreateAiPromptTemplate extends CreateRecord
      */
     protected function handleRecordCreation(array $data): Model
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         return app(AiPromptTemplateRegistrationService::class)->register(
             tenantId: (int) $tenant?->getKey(),

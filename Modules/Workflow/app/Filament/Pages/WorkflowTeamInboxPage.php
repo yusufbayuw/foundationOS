@@ -2,7 +2,6 @@
 
 namespace Modules\Workflow\Filament\Pages;
 
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Models\WorkflowAssignment;
@@ -25,7 +24,7 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
 
     protected function baseAssignmentsQuery(): Builder
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         $user = auth()->user();
         $organizationIds = $user?->userTenantRoles()
             ->when($tenant, fn (Builder $query) => $query->where('tenant_id', $tenant->getKey()))

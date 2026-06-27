@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets\Charts\Concerns;
 
 use Carbon\Carbon;
-use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Cache;
 
 trait CachesChartData
@@ -12,7 +11,7 @@ trait CachesChartData
 
     protected function chartCacheKey(string $suffix): string
     {
-        $tenantId = Filament::getTenant()?->getKey() ?? 'global';
+        $tenantId = current_tenant_id() ?? 'global';
 
         return "chart:{$suffix}:{$tenantId}:{$this->chartPeriod}";
     }

@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Support\Navigation;
 
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Models\TenantModule;
@@ -18,7 +17,7 @@ class ModuleVisibility
             return true;
         }
 
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return true;

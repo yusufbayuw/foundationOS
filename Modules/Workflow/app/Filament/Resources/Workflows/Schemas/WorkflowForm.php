@@ -2,7 +2,6 @@
 
 namespace Modules\Workflow\Filament\Resources\Workflows\Schemas;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -21,15 +20,15 @@ class WorkflowForm
     {
         return $schema->components([
             TenantField::make()
-                ->default(Filament::getTenant()?->getKey())
-                ->disabled(Filament::getTenant() !== null)
+                ->default(current_tenant_id())
+                ->disabled(current_tenant_model() !== null)
                 ->dehydrated()
                 ->required(),
             Select::make('organization_id')
                 ->label(FilamentUi::field('organization_id'))
                 ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
-                    if (Filament::getTenant()) {
-                        $query->where('tenant_id', Filament::getTenant()->getKey());
+                    if (current_tenant_model()) {
+                        $query->where('tenant_id', current_tenant_id());
                     }
                 })
                 ->nullable()

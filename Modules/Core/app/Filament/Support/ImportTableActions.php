@@ -6,7 +6,6 @@ use Filament\Actions\Action;
 use Filament\Actions\ImportAction;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Support\FilamentUi;
 
@@ -28,7 +27,7 @@ class ImportTableActions
                     $model = app($modelClass);
 
                     return [
-                        'tenant_id' => Filament::getTenant()?->getKey(),
+                        'tenant_id' => current_tenant_id(),
                         'model_has_tenant_relation' => $model->isRelation('tenant'),
                     ];
                 }),

@@ -2,16 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\CurrentTenant;
 use Closure;
-use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTenantSubscriptionActive
 {
+    public function __construct(protected CurrentTenant $currentTenant) {}
+
     public function handle(Request $request, Closure $next): Response
     {
-        $tenant = Filament::getTenant();
+        $tenant = $this->currentTenant->model();
 
         if (! $tenant) {
             return $next($request);

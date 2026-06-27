@@ -66,8 +66,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton(\Modules\Core\Support\Tenancy\CurrentTenant::class);
-        $this->app->alias(\Modules\Core\Support\Tenancy\CurrentTenant::class, CurrentTenant::class);
+        $this->app->singleton(CurrentTenant::class);
+        $this->app->alias(CurrentTenant::class, \Modules\Core\Support\Tenancy\CurrentTenant::class);
 
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }

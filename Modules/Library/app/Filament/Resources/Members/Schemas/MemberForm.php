@@ -2,7 +2,6 @@
 
 namespace Modules\Library\Filament\Resources\Members\Schemas;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -28,8 +27,8 @@ class MemberForm
                         Select::make('organization_id')
                             ->label(FilamentUi::field('organization_id'))
                             ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
-                                if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                if (current_tenant_model()) {
+                                    $query->where('tenant_id', current_tenant_id());
                                 }
                             })
                             ->nullable()
@@ -37,8 +36,8 @@ class MemberForm
                         Select::make('user_id')
                             ->label(FilamentUi::field('user_id'))
                             ->relationship('user', 'name', modifyQueryUsing: function (Builder $query): void {
-                                if (Filament::getTenant()) {
-                                    $query->whereHas('userTenantRoles', fn (Builder $inner) => $inner->where('tenant_id', Filament::getTenant()->getKey()));
+                                if (current_tenant_model()) {
+                                    $query->whereHas('userTenantRoles', fn (Builder $inner) => $inner->where('tenant_id', current_tenant_id()));
                                 }
                             })
                             ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->name.' ('.$record->email.')')

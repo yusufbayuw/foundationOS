@@ -3,7 +3,6 @@
 namespace Modules\Core\Filament\Pages;
 
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
@@ -42,7 +41,7 @@ class BrandingSettingsPage extends Page
 
     public function mount(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return;
@@ -87,7 +86,7 @@ class BrandingSettingsPage extends Page
 
     public function save(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return;

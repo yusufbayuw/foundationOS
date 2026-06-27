@@ -10,9 +10,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Bind the active Filament tenant into the container so non-Filament
- * code paths (jobs dispatched mid-request, observers, services) see it
- * via the CurrentTenant resolver.
+ * Bind the active Filament panel tenant into CurrentTenant.
+ *
+ * This is the sole Filament → application bridge for tenant resolution.
  */
 class BindTenantToContainer
 {
@@ -37,9 +37,11 @@ class BindTenantToContainer
                             userId: auth()->id(),
                         ));
                     }
+                } else {
+                    $this->currentTenant->forget();
                 }
             } catch (\Throwable) {
-                // no-op: no tenant context available
+                $this->currentTenant->forget();
             }
         }
 

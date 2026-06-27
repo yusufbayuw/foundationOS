@@ -15,16 +15,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Fail-closed tenant scope (HTTP + explicit test runs)
+    | Fail-closed tenant scope (PHPUnit + optional CLI strictness)
     |--------------------------------------------------------------------------
     |
-    | When true, Eloquent queries on BelongsToTenant models without CurrentTenant
-    | bound will throw instead of returning all rows.
+    | HTTP requests always fail-closed when tenant context is missing.
     |
-    | Defaults to true when APP_ENV=production. Artisan/queue (non-test console)
-    | stay fail-open so seeders and jobs can use withoutTenantScope() explicitly.
+    | When true, PHPUnit and tenant:run contexts also throw when querying
+    | BelongsToTenant models without CurrentTenant bound.
     |
-    | Override locally: TENANCY_SCOPE_FAIL_CLOSED=false in .env
+    | Real Artisan/queue console stays fail-open so seeders and cross-tenant
+    | commands can use withoutTenantScope() explicitly.
     |
     */
     'scope_fail_closed' => filter_var(

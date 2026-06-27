@@ -34,14 +34,13 @@ class PaymentController extends ApiController
             return $this->error('validation_failed', 'The given data was invalid.', 422, $validator->errors()->toArray());
         }
 
-        $tenantId = $this->currentTenant->id();
+        $tenantId = $this->currentTenant->requiredId();
 
         $payment = Payment::create(array_merge($validator->validated(), [
-            'tenant_id' => $tenantId,
             'status' => $validator->validated()['status'] ?? 'pending',
         ]));
 
-        if ($tenantId && $payment->status === 'verified') {
+        if ($payment->status === 'verified') {
             $this->webhooks->dispatch((int) $tenantId, 'payment.verified', [
                 'resource' => 'payment',
                 'id' => $payment->id,

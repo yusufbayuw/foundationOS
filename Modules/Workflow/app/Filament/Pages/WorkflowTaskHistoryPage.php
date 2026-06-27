@@ -3,7 +3,6 @@
 namespace Modules\Workflow\Filament\Pages;
 
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Support\FilamentUi;
@@ -27,7 +26,7 @@ class WorkflowTaskHistoryPage extends Page
     public function getHistory(): array
     {
         $user = auth()->user();
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         return WorkflowAssignment::query()
             ->with(['instance.workflow', 'instance.currentStep', 'instance.requester'])

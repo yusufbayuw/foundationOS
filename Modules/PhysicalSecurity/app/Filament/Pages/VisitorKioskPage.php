@@ -2,7 +2,6 @@
 
 namespace Modules\PhysicalSecurity\Filament\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -52,7 +51,7 @@ class VisitorKioskPage extends Page implements HasForms
     public function checkIn(): void
     {
         $data = $this->form->getState();
-        $tenantId = Filament::getTenant()?->getKey() ?? 1;
+        $tenantId = current_tenant_id() ?? 1;
 
         $visitor = Visitor::query()->create([
             'tenant_id' => $tenantId,

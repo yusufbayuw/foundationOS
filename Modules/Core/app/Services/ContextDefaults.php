@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Services;
 
-use Filament\Facades\Filament;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -20,7 +19,7 @@ class ContextDefaults
     public function forCreate(?Authenticatable $user = null): array
     {
         $user = $user ?? auth()->user();
-        $tenantId = Filament::getTenant()?->getKey();
+        $tenantId = current_tenant_id();
 
         $defaults = array_filter([
             'tenant_id' => $tenantId,

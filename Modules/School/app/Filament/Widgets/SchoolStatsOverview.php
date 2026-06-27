@@ -2,7 +2,6 @@
 
 namespace Modules\School\Filament\Widgets;
 
-use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Core\Support\FilamentUi;
@@ -16,7 +15,7 @@ class SchoolStatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        if (! Filament::getTenant()) {
+        if (! current_tenant_model()) {
             return [];
         }
 

@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Filament\Pages;
 
-use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Collection;
@@ -22,7 +21,7 @@ class FoundationStructurePage extends Page
 
     public function mount(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         $this->tree = Organization::query()
             ->when($tenant, fn ($q) => $q->where('tenant_id', $tenant->getKey()))

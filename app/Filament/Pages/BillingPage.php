@@ -3,7 +3,6 @@
 namespace App\Filament\Pages;
 
 use App\Services\BillingService;
-use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -43,7 +42,7 @@ class BillingPage extends Page
 
     public function mount(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if ($tenant) {
             $this->currency = $tenant->currency ?: 'IDR';
@@ -59,7 +58,7 @@ class BillingPage extends Page
 
     public function getRecentInvoices(): Collection
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return collect();
@@ -74,7 +73,7 @@ class BillingPage extends Page
 
     public function payInvoice(int $invoiceId): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return;
@@ -100,7 +99,7 @@ class BillingPage extends Page
 
     public function generateInvoice(): void
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
 
         if (! $tenant) {
             return;

@@ -3,6 +3,7 @@
 namespace Modules\Workflow\Listeners;
 
 use App\Concerns\InteractsWithTenant;
+use App\Support\CurrentTenant;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Workflow\Enums\WorkflowInstanceStatus;
@@ -22,15 +23,23 @@ class RunWorkflowAutomatedActions implements ShouldQueue
 
     public function handle(object $event): void
     {
-        if (property_exists($event, 'instance') && $event->instance?->tenant_id) {
-            $this->onTenant((int) $event->instance->tenant_id);
+        $tenantId = property_exists($event, 'instance') ? $event->instance?->tenant_id : $this->tenantId;
+
+        $runner = function () use ($event): void {
+            try {
+                $this->runForEvent($event);
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+        };
+
+        if ($tenantId) {
+            app(CurrentTenant::class)->forTenant((int) $tenantId, $runner);
+
+            return;
         }
 
-        try {
-            $this->runForEvent($event);
-        } catch (Throwable $exception) {
-            report($exception);
-        }
+        $runner();
     }
 
     protected function runForEvent(object $event): void

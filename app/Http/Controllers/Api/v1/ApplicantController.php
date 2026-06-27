@@ -19,7 +19,7 @@ class ApplicantController extends ApiController
 
     public function store(Request $request): JsonResponse
     {
-        $tenantId = $this->currentTenant->id();
+        $tenantId = $this->currentTenant->requiredId();
 
         $validator = Validator::make($request->all(), [
             'admission_period_id' => [
@@ -44,20 +44,17 @@ class ApplicantController extends ApiController
         }
 
         $applicant = Applicant::create(array_merge($validator->validated(), [
-            'tenant_id' => $tenantId,
             'status' => $validator->validated()['status'] ?? 'registered',
             'achievement_count' => 0,
         ]));
 
-        if ($tenantId) {
-            $this->webhooks->dispatch((int) $tenantId, 'enrollment.created', [
-                'resource' => 'applicant',
-                'id' => $applicant->id,
-                'registration_number' => $applicant->registration_number,
-                'full_name' => $applicant->full_name,
-                'status' => $applicant->status,
-            ]);
-        }
+        $this->webhooks->dispatch((int) $tenantId, 'enrollment.created', [
+            'resource' => 'applicant',
+            'id' => $applicant->id,
+            'registration_number' => $applicant->registration_number,
+            'full_name' => $applicant->full_name,
+            'status' => $applicant->status,
+        ]);
 
         return $this->success([
             'id' => $applicant->id,

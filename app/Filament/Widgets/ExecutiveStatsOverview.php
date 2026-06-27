@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Services\ExecutiveMetricsService;
-use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Core\Support\FilamentUi;
@@ -14,7 +13,7 @@ class ExecutiveStatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $tenant = Filament::getTenant();
+        $tenant = current_tenant_model();
         if (! $tenant) {
             return [];
         }

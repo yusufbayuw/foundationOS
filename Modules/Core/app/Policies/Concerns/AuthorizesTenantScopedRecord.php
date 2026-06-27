@@ -2,7 +2,6 @@
 
 namespace Modules\Core\Policies\Concerns;
 
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Core\Models\Tenant;
@@ -45,14 +44,6 @@ trait AuthorizesTenantScopedRecord
 
     protected function resolveActiveTenantId(): int|string|null
     {
-        if (class_exists(Filament::class)) {
-            try {
-                return Filament::getTenant()?->getKey();
-            } catch (\Throwable) {
-                //
-            }
-        }
-
         if (app()->bound(CurrentTenant::class)) {
             return app(CurrentTenant::class)->id();
         }

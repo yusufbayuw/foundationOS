@@ -6,10 +6,10 @@ use RuntimeException;
 
 class MissingTenantContextException extends RuntimeException
 {
-    public function __construct(string $modelClass)
+    public function __construct(string $context)
     {
         parent::__construct(
-            "Tenant context is required to query [{$modelClass}] when tenancy.scope_fail_closed is enabled.",
+            "Tenant context is required to access [{$context}].",
         );
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Modules\Campus\Filament\Widgets;
 
-use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Modules\Campus\Models\CollageStudent;
@@ -17,7 +16,7 @@ class CampusStatsOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        if (! Filament::getTenant()) {
+        if (! current_tenant_model()) {
             return [];
         }
 
