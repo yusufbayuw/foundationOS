@@ -40,17 +40,14 @@ class PayrollTrendChart extends ChartWidget
         };
 
         return $this->rememberChart('payroll_trend', function () use ($tenantId, $days): array {
-            $labels = $this->dateLabels($days);
-            $data = [];
-
-            for ($i = $days - 1; $i >= 0; $i--) {
-                $date = now()->subDays($i);
-                $data[] = (float) SalarySlip::query()
-                    ->where('tenant_id', $tenantId)
-                    ->whereIn('status', ['approved', 'paid'])
-                    ->whereDate('created_at', $date)
-                    ->sum('net_salary');
-            }
+            $data = $this->dailySumSeries(
+                SalarySlip::class,
+                $tenantId,
+                $days,
+                'created_at',
+                'net_salary',
+                fn ($query) => $query->whereIn('status', ['approved', 'paid']),
+            );
 
             return [
                 'datasets' => [
@@ -60,7 +57,7 @@ class PayrollTrendChart extends ChartWidget
                         'borderColor' => '#f59e0b',
                     ],
                 ],
-                'labels' => $labels,
+                'labels' => $this->dateLabels($days),
             ];
         });
     }

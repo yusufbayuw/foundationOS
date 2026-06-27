@@ -5,7 +5,7 @@ namespace Modules\Core\Support\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
-use Modules\Core\Models\TenantSetting;
+use Modules\Core\Support\TenantSettingsResolver;
 
 class TenantDocumentContext
 {
@@ -39,18 +39,14 @@ class TenantDocumentContext
                 ->where('tenant_id', $tenant->getKey())
                 ->first();
 
-        $branding = TenantSetting::query()
-            ->where('tenant_id', $tenant->getKey())
-            ->where('group', 'branding')
-            ->whereIn('key', ['brand_logo', 'primary_color', 'default_locale'])
-            ->pluck('value', 'key');
+        $branding = app(TenantSettingsResolver::class)->group($tenant->getKey(), 'branding');
 
         $locale = auth()->user()?->preferred_locale
-            ?? $branding->get('default_locale')
+            ?? ($branding['default_locale'] ?? null)
             ?? config('app.locale', 'id');
 
-        $logoPath = $branding->get('brand_logo') ?: $organization?->logo;
-        $primaryColor = $branding->get('primary_color') ?: '#6366f1';
+        $logoPath = $branding['brand_logo'] ?? $organization?->logo;
+        $primaryColor = $branding['primary_color'] ?? '#6366f1';
 
         return new self(
             tenant: $tenant,

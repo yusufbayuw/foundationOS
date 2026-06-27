@@ -3,9 +3,9 @@
 namespace Modules\Finance\Services;
 
 use Illuminate\Support\Facades\DB;
-use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Core\Support\NotificationService;
+use Modules\Core\Support\TenantSettingsResolver;
 use Modules\Finance\Events\StudentInvoicePaid;
 use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\ChartOfAccount;
@@ -18,6 +18,10 @@ use RuntimeException;
 
 class FinanceControlService
 {
+    public function __construct(
+        private readonly TenantSettingsResolver $tenantSettings,
+    ) {}
+
     public function markInvoiceIssued(StudentInvoice $invoice, User $actor, ?string $notes = null): StudentInvoice
     {
         return DB::transaction(function () use ($invoice, $actor, $notes): StudentInvoice {
@@ -268,13 +272,12 @@ class FinanceControlService
 
     protected function resolveReceivableAccount(Payment $payment): ChartOfAccount
     {
-        $setting = TenantSetting::query()
-            ->where('tenant_id', $payment->tenant_id)
-            ->where('group', 'finance')
-            ->where('key', 'default_receivable_account_id')
-            ->first();
-
-        $accountId = (int) ($setting?->value ?? 0);
+        $accountId = (int) $this->tenantSettings->value(
+            $payment->tenant_id,
+            'finance',
+            'default_receivable_account_id',
+            0,
+        );
         $account = ChartOfAccount::query()
             ->where('tenant_id', $payment->tenant_id)
             ->find($accountId);

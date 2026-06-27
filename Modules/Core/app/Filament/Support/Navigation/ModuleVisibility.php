@@ -24,17 +24,43 @@ class ModuleVisibility
             return true;
         }
 
+        return in_array(strtolower($module), self::enabledModuleCodes($tenant->getKey()), true);
+    }
+
+    /**
+     * @return list<string> lowercase module codes enabled for the tenant
+     */
+    public static function enabledModuleCodes(int|string $tenantId): array
+    {
         return Cache::remember(
-            self::cacheKey($tenant->getKey(), $module),
+            self::enabledModulesCacheKey($tenantId),
             now()->addMinutes(5),
-            fn () => TenantModule::query()
-                ->whereHas('module', fn (Builder $q) => $q->where('code', strtolower($module)))
-                ->where('tenant_id', $tenant->getKey())
+            fn (): array => TenantModule::query()
+                ->where('tenant_id', $tenantId)
                 ->where('is_enabled', true)
-                ->exists()
+                ->whereHas('module', fn (Builder $query) => $query->where('is_active', true))
+                ->with('module:id,code')
+                ->get()
+                ->pluck('module.code')
+                ->filter()
+                ->map(fn (string $code): string => strtolower($code))
+                ->unique()
+                ->values()
+                ->all(),
         );
     }
 
+    public static function forgetForTenant(int|string $tenantId): void
+    {
+        Cache::forget(self::enabledModulesCacheKey($tenantId));
+    }
+
+    public static function enabledModulesCacheKey(int|string $tenantId): string
+    {
+        return "tenant_enabled_module_codes:{$tenantId}";
+    }
+
+    /** @deprecated Use forgetForTenant() */
     public static function cacheKey(int|string $tenantId, string $module): string
     {
         return "tenant_module_active:{$tenantId}:{$module}";

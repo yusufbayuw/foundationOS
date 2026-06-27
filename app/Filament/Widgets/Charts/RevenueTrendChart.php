@@ -42,17 +42,14 @@ class RevenueTrendChart extends ChartWidget
         };
 
         return $this->rememberChart('revenue_trend', function () use ($tenantId, $days): array {
-            $labels = $this->dateLabels($days);
-            $data = [];
-
-            for ($i = $days - 1; $i >= 0; $i--) {
-                $date = now()->subDays($i)->toDateString();
-                $data[] = (float) Payment::query()
-                    ->where('tenant_id', $tenantId)
-                    ->where('status', 'verified')
-                    ->whereDate('payment_date', $date)
-                    ->sum('amount');
-            }
+            $data = $this->dailySumSeries(
+                Payment::class,
+                $tenantId,
+                $days,
+                'payment_date',
+                'amount',
+                fn ($query) => $query->where('status', 'verified'),
+            );
 
             return [
                 'datasets' => [
@@ -62,7 +59,7 @@ class RevenueTrendChart extends ChartWidget
                         'borderColor' => '#6366f1',
                     ],
                 ],
-                'labels' => $labels,
+                'labels' => $this->dateLabels($days),
             ];
         });
     }

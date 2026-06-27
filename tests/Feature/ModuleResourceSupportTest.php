@@ -73,7 +73,7 @@ class ModuleResourceSupportTest extends TestCase
             'is_enabled' => true,
         ]);
 
-        Cache::forget(ModuleVisibility::cacheKey($tenant->id, 'School'));
+        Cache::forget(ModuleVisibility::enabledModulesCacheKey($tenant->id));
 
         $this->assertTrue(ModuleVisibility::shouldRegisterNavigation('School'));
     }

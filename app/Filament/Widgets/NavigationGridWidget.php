@@ -19,6 +19,12 @@ class NavigationGridWidget extends Widget
 
     public string $activeGroup = '';
 
+    /** @var array<string, list<array{label: string, url: string, icon: string}>>|null */
+    protected ?array $groupedItemsCache = null;
+
+    /** @var list<string>|null */
+    protected ?array $pinnedUrlsCache = null;
+
     public function getTitle(): string
     {
         return FilamentUi::text('Navigation');
@@ -55,6 +61,10 @@ class NavigationGridWidget extends Widget
      */
     public function getGroupedItems(): array
     {
+        if ($this->groupedItemsCache !== null) {
+            return $this->groupedItemsCache;
+        }
+
         $groups = [];
 
         foreach (Filament::getNavigation() as $group) {
@@ -78,7 +88,7 @@ class NavigationGridWidget extends Widget
             }
         }
 
-        return $groups;
+        return $this->groupedItemsCache = $groups;
     }
 
     /**
@@ -123,7 +133,23 @@ class NavigationGridWidget extends Widget
 
     public function isPinned(string $url): bool
     {
-        return collect($this->getPinnedItems())->contains('url', $url);
+        return in_array($url, $this->pinnedUrlList(), true);
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function pinnedUrlList(): array
+    {
+        if ($this->pinnedUrlsCache !== null) {
+            return $this->pinnedUrlsCache;
+        }
+
+        return $this->pinnedUrlsCache = collect($this->getPinnedItems())
+            ->pluck('url')
+            ->filter()
+            ->values()
+            ->all();
     }
 
     private function resolveIcon(mixed $icon): string

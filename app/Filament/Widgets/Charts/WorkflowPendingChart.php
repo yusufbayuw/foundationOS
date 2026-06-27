@@ -40,17 +40,13 @@ class WorkflowPendingChart extends ChartWidget
         };
 
         return $this->rememberChart('workflow_pending', function () use ($tenantId, $days): array {
-            $labels = $this->dateLabels($days);
-            $data = [];
-
-            for ($i = $days - 1; $i >= 0; $i--) {
-                $date = now()->subDays($i);
-                $data[] = (int) WorkflowInstance::query()
-                    ->where('tenant_id', $tenantId)
-                    ->whereIn('status', ['pending', 'in_progress'])
-                    ->whereDate('created_at', '<=', $date)
-                    ->count();
-            }
+            $data = $this->dailyCumulativeCountSeries(
+                WorkflowInstance::class,
+                $tenantId,
+                $days,
+                'created_at',
+                fn ($query) => $query->whereIn('status', ['pending', 'in_progress']),
+            );
 
             return [
                 'datasets' => [
@@ -60,7 +56,7 @@ class WorkflowPendingChart extends ChartWidget
                         'backgroundColor' => '#8b5cf6',
                     ],
                 ],
-                'labels' => $labels,
+                'labels' => $this->dateLabels($days),
             ];
         });
     }

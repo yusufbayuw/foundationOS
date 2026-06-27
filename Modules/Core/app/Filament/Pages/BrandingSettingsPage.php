@@ -12,6 +12,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Support\FilamentUi;
+use Modules\Core\Support\TenantSettingsResolver;
 
 class BrandingSettingsPage extends Page
 {
@@ -48,14 +49,10 @@ class BrandingSettingsPage extends Page
             return;
         }
 
-        $settings = TenantSetting::query()
-            ->where('tenant_id', $tenant->getKey())
-            ->where('group', 'branding')
-            ->whereIn('key', ['brand_logo', 'primary_color'])
-            ->pluck('value', 'key');
+        $settings = app(TenantSettingsResolver::class)->group($tenant->getKey(), 'branding');
 
-        $this->brand_logo = $settings->get('brand_logo');
-        $this->primary_color = $settings->get('primary_color') ?? '#6366f1';
+        $this->brand_logo = $settings['brand_logo'] ?? null;
+        $this->primary_color = $settings['primary_color'] ?? '#6366f1';
     }
 
     public function form(Schema $schema): Schema
@@ -110,6 +107,8 @@ class BrandingSettingsPage extends Page
                 );
             }
         }
+
+        app(TenantSettingsResolver::class)->forgetGroup($tenant->getKey(), 'branding');
 
         Notification::make()
             ->title(FilamentUi::text('Branding updated'))

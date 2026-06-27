@@ -2,7 +2,7 @@
 
 namespace Modules\Core\Services;
 
-use Illuminate\Support\Facades\Cache;
+use Modules\Core\Filament\Support\Navigation\ModuleVisibility;
 use Modules\Core\Models\Module;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
@@ -62,8 +62,8 @@ class TenantModuleProvisioner
                     'disabled_at' => null,
                 ],
             );
-
-            Cache::forget("tenant_module_active:{$tenant->getKey()}:".str($module->code)->studly());
         }
+
+        ModuleVisibility::forgetForTenant($tenant->getKey());
     }
 }

@@ -18,10 +18,8 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -30,14 +28,17 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Modules\Core\Http\Middleware\SetUserLocale;
 use Modules\Core\Models\Tenant;
-use Modules\Core\Models\TenantSetting;
+use Modules\Core\Support\Filament\EnabledModuleRegistry;
+use Modules\Core\Support\Filament\TenantBrandingResolver;
 use Modules\Core\Support\FilamentUi;
-use Nwidart\Modules\Facades\Module;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $enabledModules = app(EnabledModuleRegistry::class);
+        $brandingResolver = app(TenantBrandingResolver::class);
+
         $panel = $panel
             ->default()
             ->id('admin')
@@ -54,42 +55,13 @@ class AdminPanelProvider extends PanelProvider
                 AppAuthentication::make()->recoverable(),
                 EmailAuthentication::make(),
             ])
-            ->colors(function (): array {
-                $tenant = filament()->getTenant();
-                if ($tenant) {
-                    $primaryColor = TenantSetting::query()
-                        ->where('tenant_id', $tenant->getKey())
-                        ->where('group', 'branding')
-                        ->where('key', 'primary_color')
-                        ->value('value');
-
-                    if ($primaryColor) {
-                        return ['primary' => Color::hex($primaryColor)];
-                    }
-                }
-
-                return ['primary' => Color::Indigo];
-            })
-            ->brandLogo(function (): ?string {
-                $tenant = filament()->getTenant();
-                if ($tenant) {
-                    $logo = TenantSetting::query()
-                        ->where('tenant_id', $tenant->getKey())
-                        ->where('group', 'branding')
-                        ->where('key', 'brand_logo')
-                        ->value('value');
-
-                    if ($logo) {
-                        return asset('storage/'.$logo);
-                    }
-                }
-
-                return null;
-            })
-            ->navigationGroups(collect(Module::allEnabled())
-                ->map(fn ($module) => NavigationGroup::make()->label(FilamentUi::module($module->getName())))
-                ->values()
-                ->all())
+            ->colors(fn (): array => $brandingResolver
+                ->forTenant(filament()->getTenant())
+                ->filamentColors())
+            ->brandLogo(fn (): ?string => $brandingResolver
+                ->forTenant(filament()->getTenant())
+                ->filamentLogoUrl())
+            ->navigationGroups($enabledModules->navigationGroups())
             ->tenant(Tenant::class)
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
@@ -142,7 +114,7 @@ class AdminPanelProvider extends PanelProvider
                 fn () => view('filament.tenant-badge'),
             );
 
-        foreach (Module::allEnabled() as $module) {
+        foreach ($enabledModules->all() as $module) {
             $panel
                 ->discoverResources(
                     in: $module->appPath('Filament/Resources'),

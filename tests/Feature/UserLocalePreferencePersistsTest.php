@@ -16,7 +16,7 @@ class UserLocalePreferencePersistsTest extends TestCase
 
     private function runMiddleware(Request $request): void
     {
-        $middleware = new SetUserLocale;
+        $middleware = app(SetUserLocale::class);
         $middleware->handle($request, fn () => new Response);
     }
 

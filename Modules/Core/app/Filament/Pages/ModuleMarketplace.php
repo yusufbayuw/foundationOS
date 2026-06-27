@@ -7,7 +7,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
+use Modules\Core\Filament\Support\Navigation\ModuleVisibility;
 use Modules\Core\Models\Module;
 use Modules\Core\Models\TenantModule;
 use Modules\Core\Support\FilamentUi;
@@ -66,7 +66,7 @@ class ModuleMarketplace extends Page
             ]);
         }
 
-        Cache::forget("tenant_module_active:{$tenant->getKey()}:{$module->code}");
+        ModuleVisibility::forgetForTenant($tenant->getKey());
 
         Notification::make()
             ->title(FilamentUi::text('Module updated'))
