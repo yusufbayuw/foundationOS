@@ -32,26 +32,41 @@ class ExamAttempt extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamParticipant, $this>
+     */
     public function examParticipant(): BelongsTo
     {
         return $this->belongsTo(ExamParticipant::class);
     }
 
+    /**
+     * @return HasMany<ExamAnswer, $this>
+     */
     public function examAnswers(): HasMany
     {
         return $this->hasMany(ExamAnswer::class);
     }
 
+    /**
+     * @return HasOne<ExamResult, $this>
+     */
     public function examResult(): HasOne
     {
         return $this->hasOne(ExamResult::class);
     }
 
+    /**
+     * @return HasMany<ExamActivityLog, $this>
+     */
     public function examActivityLogs(): HasMany
     {
         return $this->hasMany(ExamActivityLog::class);

@@ -20,11 +20,17 @@ class ParentSurveyResponse extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<ParentSurvey, $this>
+     */
     public function survey(): BelongsTo
     {
         return $this->belongsTo(ParentSurvey::class, 'parent_survey_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function parentUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_user_id');

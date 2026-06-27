@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Modules\Monitoring\Models\FileUpload;
 
 class StudyProgram extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -39,41 +41,65 @@ class StudyProgram extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Faculty, $this>
+     */
     public function faculty(): BelongsTo
     {
         return $this->belongsTo(Faculty::class);
     }
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function headOfProgram(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class, 'head_of_program_id');
     }
 
+    /**
+     * @return HasMany<Course, $this>
+     */
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
     }
 
+    /**
+     * @return HasMany<Lecturer, $this>
+     */
     public function lecturers(): HasMany
     {
         return $this->hasMany(Lecturer::class);
     }
 
+    /**
+     * @return HasMany<CollageStudent, $this>
+     */
     public function students(): HasMany
     {
         return $this->hasMany(CollageStudent::class);
     }
 
+    /**
+     * @return MorphMany<AuditLog, $this>
+     */
     public function auditLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'auditable');
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');

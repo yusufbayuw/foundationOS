@@ -2,6 +2,7 @@
 
 namespace Modules\Boarding\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class Dormitory extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected static function newFactory(): DormitoryFactory
@@ -39,6 +41,9 @@ class Dormitory extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -90,6 +91,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Tenant extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, LogsActivity, SoftDeletes;
 
     public function getRouteKeyName(): string
@@ -168,56 +170,89 @@ class Tenant extends Model
             || ($this->status === 'past_due' && ($this->grace_period_ends_at === null || $this->grace_period_ends_at->isPast()));
     }
 
+    /**
+     * @return BelongsTo<SubscriptionPlan, $this>
+     */
     public function subscriptionPlan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<Organization, $this>
+     */
     public function organizations(): HasMany
     {
         return $this->hasMany(Organization::class);
     }
 
+    /**
+     * @return HasMany<TenantRole, $this>
+     */
     public function tenantRoles(): HasMany
     {
         return $this->hasMany(TenantRole::class);
     }
 
+    /**
+     * @return HasMany<UserTenantRole, $this>
+     */
     public function userTenantRoles(): HasMany
     {
         return $this->hasMany(UserTenantRole::class);
     }
 
+    /**
+     * @return HasMany<SubscriptionLog, $this>
+     */
     public function subscriptionLogs(): HasMany
     {
         return $this->hasMany(SubscriptionLog::class);
     }
 
+    /**
+     * @return HasMany<TenantSetting, $this>
+     */
     public function tenantSettings(): HasMany
     {
         return $this->hasMany(TenantSetting::class);
     }
 
+    /**
+     * @return HasMany<AcademicYear, $this>
+     */
     public function academicYears(): HasMany
     {
         return $this->hasMany(AcademicYear::class);
     }
 
+    /**
+     * @return HasMany<Department, $this>
+     */
     public function departments(): HasMany
     {
         return $this->hasMany(Department::class);
     }
 
+    /**
+     * @return HasMany<TenantModule, $this>
+     */
     public function tenantModules(): HasMany
     {
         return $this->hasMany(TenantModule::class);
     }
 
+    /**
+     * @return BelongsToMany<Module, $this>
+     */
     public function modules(): BelongsToMany
     {
         return $this->belongsToMany(Module::class, 'tenant_modules')
@@ -225,6 +260,9 @@ class Tenant extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_tenant_roles')
@@ -239,156 +277,249 @@ class Tenant extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return HasMany<Curriculum, $this>
+     */
     public function curricula(): HasMany
     {
         return $this->hasMany(Curriculum::class);
     }
 
+    /**
+     * @return HasMany<Subject, $this>
+     */
     public function subjects(): HasMany
     {
         return $this->hasMany(Subject::class);
     }
 
+    /**
+     * @return HasMany<Student, $this>
+     */
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
     }
 
+    /**
+     * @return HasMany<Teacher, $this>
+     */
     public function teachers(): HasMany
     {
         return $this->hasMany(Teacher::class);
     }
 
+    /**
+     * @return HasMany<SchoolClass, $this>
+     */
     public function schoolClasses(): HasMany
     {
         return $this->hasMany(SchoolClass::class, 'tenant_id');
     }
 
+    /**
+     * @return HasMany<ClassStudent, $this>
+     */
     public function classStudents(): HasMany
     {
         return $this->hasMany(ClassStudent::class);
     }
 
+    /**
+     * @return HasMany<Schedule, $this>
+     */
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
     }
 
+    /**
+     * @return HasMany<Attendance, $this>
+     */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
 
+    /**
+     * @return HasMany<Assessment, $this>
+     */
     public function assessments(): HasMany
     {
         return $this->hasMany(Assessment::class);
     }
 
+    /**
+     * @return HasMany<AssessmentItem, $this>
+     */
     public function assessmentItems(): HasMany
     {
         return $this->hasMany(AssessmentItem::class);
     }
 
+    /**
+     * @return HasMany<StudentAssessmentAnswer, $this>
+     */
     public function studentAssessmentAnswers(): HasMany
     {
         return $this->hasMany(StudentAssessmentAnswer::class);
     }
 
+    /**
+     * @return HasMany<StudentGrade, $this>
+     */
     public function studentGrades(): HasMany
     {
         return $this->hasMany(StudentGrade::class);
     }
 
+    /**
+     * @return HasMany<ViolationType, $this>
+     */
     public function violationTypes(): HasMany
     {
         return $this->hasMany(ViolationType::class);
     }
 
+    /**
+     * @return HasMany<Violation, $this>
+     */
     public function violations(): HasMany
     {
         return $this->hasMany(Violation::class);
     }
 
+    /**
+     * @return HasMany<AchievementType, $this>
+     */
     public function achievementTypes(): HasMany
     {
         return $this->hasMany(AchievementType::class);
     }
 
+    /**
+     * @return HasMany<StudentAchievement, $this>
+     */
     public function studentAchievements(): HasMany
     {
         return $this->hasMany(StudentAchievement::class);
     }
 
+    /**
+     * @return HasMany<AdmissionPeriod, $this>
+     */
     public function admissionPeriods(): HasMany
     {
         return $this->hasMany(AdmissionPeriod::class);
     }
 
+    /**
+     * @return HasMany<Applicant, $this>
+     */
     public function applicants(): HasMany
     {
         return $this->hasMany(Applicant::class);
     }
 
+    /**
+     * @return HasMany<ExamSchedule, $this>
+     */
     public function examSchedules(): HasMany
     {
         return $this->hasMany(ExamSchedule::class);
     }
 
+    /**
+     * @return HasMany<ExamResult, $this>
+     */
     public function examResults(): HasMany
     {
         return $this->hasMany(ExamResult::class);
     }
 
+    /**
+     * @return HasMany<Registration, $this>
+     */
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
     }
 
+    /**
+     * @return HasMany<ChartOfAccount, $this>
+     */
     public function chartOfAccounts(): HasMany
     {
         return $this->hasMany(ChartOfAccount::class);
     }
 
+    /**
+     * @return HasMany<TuitionType, $this>
+     */
     public function tuitionTypes(): HasMany
     {
         return $this->hasMany(TuitionType::class);
     }
 
+    /**
+     * @return HasMany<StudentInvoice, $this>
+     */
     public function studentInvoices(): HasMany
     {
         return $this->hasMany(StudentInvoice::class);
     }
 
+    /**
+     * @return HasMany<StudentInvoiceItem, $this>
+     */
     public function studentInvoiceItems(): HasMany
     {
         return $this->hasMany(StudentInvoiceItem::class);
     }
 
+    /**
+     * @return HasMany<Payment, $this>
+     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
+    /**
+     * @return HasMany<JournalEntry, $this>
+     */
     public function journalEntries(): HasMany
     {
         return $this->hasMany(JournalEntry::class);
     }
 
+    /**
+     * @return HasMany<JournalEntryLine, $this>
+     */
     public function journalEntryLines(): HasMany
     {
         return $this->hasMany(JournalEntryLine::class);
     }
 
+    /**
+     * @return HasMany<Budget, $this>
+     */
     public function budgets(): HasMany
     {
         return $this->hasMany(Budget::class);
     }
 
+    /**
+     * @return HasMany<BookCategory, $this>
+     */
     public function bookCategories(): HasMany
     {
         return $this->hasMany(BookCategory::class);
     }
 
+    /**
+     * @return HasMany<Book, $this>
+     */
     public function books(): HasMany
     {
         return $this->hasMany(Book::class);
@@ -402,101 +533,161 @@ class Tenant extends Model
         return $this->hasMany(BookCopy::class);
     }
 
+    /**
+     * @return HasMany<Member, $this>
+     */
     public function members(): HasMany
     {
         return $this->hasMany(Member::class);
     }
 
+    /**
+     * @return HasMany<BookReservation, $this>
+     */
     public function bookReservations(): HasMany
     {
         return $this->hasMany(BookReservation::class);
     }
 
+    /**
+     * @return HasMany<LibraryPolicy, $this>
+     */
     public function libraryPolicies(): HasMany
     {
         return $this->hasMany(LibraryPolicy::class);
     }
 
+    /**
+     * @return HasMany<Loan, $this>
+     */
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
+    /**
+     * @return HasMany<Fine, $this>
+     */
     public function fines(): HasMany
     {
         return $this->hasMany(Fine::class);
     }
 
+    /**
+     * @return HasMany<Position, $this>
+     */
     public function positions(): HasMany
     {
         return $this->hasMany(Position::class);
     }
 
+    /**
+     * @return HasMany<Shift, $this>
+     */
     public function shifts(): HasMany
     {
         return $this->hasMany(Shift::class);
     }
 
+    /**
+     * @return HasMany<Employee, $this>
+     */
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class);
     }
 
+    /**
+     * @return HasMany<EmploymentContract, $this>
+     */
     public function employmentContracts(): HasMany
     {
         return $this->hasMany(EmploymentContract::class);
     }
 
+    /**
+     * @return HasMany<AttendanceLog, $this>
+     */
     public function attendanceLogs(): HasMany
     {
         return $this->hasMany(AttendanceLog::class);
     }
 
+    /**
+     * @return HasMany<LeaveRequest, $this>
+     */
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);
     }
 
+    /**
+     * @return HasMany<PayrollComponent, $this>
+     */
     public function payrollComponents(): HasMany
     {
         return $this->hasMany(PayrollComponent::class);
     }
 
+    /**
+     * @return HasMany<SalarySlip, $this>
+     */
     public function salarySlips(): HasMany
     {
         return $this->hasMany(SalarySlip::class);
     }
 
+    /**
+     * @return HasMany<SalarySlipComponent, $this>
+     */
     public function salarySlipComponents(): HasMany
     {
         return $this->hasMany(SalarySlipComponent::class);
     }
 
+    /**
+     * @return HasMany<KpiTemplate, $this>
+     */
     public function kpiTemplates(): HasMany
     {
         return $this->hasMany(KpiTemplate::class);
     }
 
+    /**
+     * @return HasMany<KpiIndicator, $this>
+     */
     public function kpiIndicators(): HasMany
     {
         return $this->hasMany(KpiIndicator::class);
     }
 
+    /**
+     * @return HasMany<KpiScore, $this>
+     */
     public function kpiScores(): HasMany
     {
         return $this->hasMany(KpiScore::class);
     }
 
+    /**
+     * @return HasMany<Vendor, $this>
+     */
     public function vendors(): HasMany
     {
         return $this->hasMany(Vendor::class);
     }
 
+    /**
+     * @return HasMany<ProcurementCategory, $this>
+     */
     public function procurementCategories(): HasMany
     {
         return $this->hasMany(ProcurementCategory::class);
     }
 
+    /**
+     * @return HasMany<ProcurementItem, $this>
+     */
     public function procurementItems(): HasMany
     {
         return $this->hasMany(ProcurementItem::class);
@@ -510,6 +701,9 @@ class Tenant extends Model
         return $this->hasMany(PurchaseRequisition::class);
     }
 
+    /**
+     * @return HasMany<PurchaseRequisitionItem, $this>
+     */
     public function purchaseRequisitionItems(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class);
@@ -523,116 +717,185 @@ class Tenant extends Model
         return $this->hasMany(RequestForQuotation::class);
     }
 
+    /**
+     * @return HasMany<RfqItem, $this>
+     */
     public function rfqItems(): HasMany
     {
         return $this->hasMany(RfqItem::class);
     }
 
+    /**
+     * @return HasMany<RfqVendor, $this>
+     */
     public function rfqVendors(): HasMany
     {
         return $this->hasMany(RfqVendor::class);
     }
 
+    /**
+     * @return HasMany<PurchaseOrder, $this>
+     */
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);
     }
 
+    /**
+     * @return HasMany<PurchaseOrderItem, $this>
+     */
     public function purchaseOrderItems(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);
     }
 
+    /**
+     * @return HasMany<GoodsReceipt, $this>
+     */
     public function goodsReceipts(): HasMany
     {
         return $this->hasMany(GoodsReceipt::class);
     }
 
+    /**
+     * @return HasMany<GoodsReceiptItem, $this>
+     */
     public function goodsReceiptItems(): HasMany
     {
         return $this->hasMany(GoodsReceiptItem::class);
     }
 
+    /**
+     * @return HasMany<VendorBill, $this>
+     */
     public function vendorBills(): HasMany
     {
         return $this->hasMany(VendorBill::class);
     }
 
+    /**
+     * @return HasMany<VendorBillItem, $this>
+     */
     public function vendorBillItems(): HasMany
     {
         return $this->hasMany(VendorBillItem::class);
     }
 
+    /**
+     * @return HasMany<Faculty, $this>
+     */
     public function faculties(): HasMany
     {
         return $this->hasMany(Faculty::class);
     }
 
+    /**
+     * @return HasMany<StudyProgram, $this>
+     */
     public function studyPrograms(): HasMany
     {
         return $this->hasMany(StudyProgram::class);
     }
 
+    /**
+     * @return HasMany<Course, $this>
+     */
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
     }
 
+    /**
+     * @return HasMany<Lecturer, $this>
+     */
     public function lecturers(): HasMany
     {
         return $this->hasMany(Lecturer::class);
     }
 
+    /**
+     * @return HasMany<CollageStudent, $this>
+     */
     public function collageStudents(): HasMany
     {
         return $this->hasMany(CollageStudent::class);
     }
 
+    /**
+     * @return HasMany<CourseOffering, $this>
+     */
     public function courseOfferings(): HasMany
     {
         return $this->hasMany(CourseOffering::class);
     }
 
+    /**
+     * @return HasMany<StudyPlan, $this>
+     */
     public function studyPlans(): HasMany
     {
         return $this->hasMany(StudyPlan::class);
     }
 
+    /**
+     * @return HasMany<StudyPlanItem, $this>
+     */
     public function studyPlanItems(): HasMany
     {
         return $this->hasMany(StudyPlanItem::class);
     }
 
+    /**
+     * @return HasMany<StudyResult, $this>
+     */
     public function studyResults(): HasMany
     {
         return $this->hasMany(StudyResult::class);
     }
 
+    /**
+     * @return HasMany<FeederLog, $this>
+     */
     public function feederLogs(): HasMany
     {
         return $this->hasMany(FeederLog::class);
     }
 
+    /**
+     * @return HasMany<Thesis, $this>
+     */
     public function theses(): HasMany
     {
         return $this->hasMany(Thesis::class);
     }
 
+    /**
+     * @return HasMany<AuditLog, $this>
+     */
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
     }
 
+    /**
+     * @return HasMany<FileUpload, $this>
+     */
     public function fileUploads(): HasMany
     {
         return $this->hasMany(FileUpload::class);
     }
 
+    /**
+     * @return MorphMany<AuditLog, $this>
+     */
     public function auditableLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'auditable');
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function attachedFiles(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');

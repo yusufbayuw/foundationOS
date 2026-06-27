@@ -25,11 +25,17 @@ class ExtracurricularEnrollment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Extracurricular, $this>
+     */
     public function extracurricular(): BelongsTo
     {
         return $this->belongsTo(Extracurricular::class);
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

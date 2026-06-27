@@ -2,6 +2,7 @@
 
 namespace Modules\Counseling\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class CounselingNote extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $table = 'counseling_notes';
@@ -37,11 +39,17 @@ class CounselingNote extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<CounselingCase, $this>
+     */
     public function counselingCase(): BelongsTo
     {
         return $this->belongsTo(CounselingCase::class);
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Core\Models\User;
 
 class LibraryStockTakeItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -28,16 +30,25 @@ class LibraryStockTakeItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<LibraryStockTake, $this>
+     */
     public function stockTake(): BelongsTo
     {
         return $this->belongsTo(LibraryStockTake::class, 'stock_take_id');
     }
 
+    /**
+     * @return BelongsTo<BookCopy, $this>
+     */
     public function bookCopy(): BelongsTo
     {
         return $this->belongsTo(BookCopy::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function scannedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'scanned_by');

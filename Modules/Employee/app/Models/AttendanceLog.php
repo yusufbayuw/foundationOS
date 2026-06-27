@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\User;
 
 class AttendanceLog extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -46,16 +48,25 @@ class AttendanceLog extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsTo<Shift, $this>
+     */
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');

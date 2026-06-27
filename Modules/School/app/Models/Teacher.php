@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\User;
 
 class Teacher extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -57,26 +59,41 @@ class Teacher extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<SchoolClass, $this>
+     */
     public function homeroomClasses(): HasMany
     {
         return $this->hasMany(SchoolClass::class, 'homeroom_teacher_id');
     }
 
+    /**
+     * @return HasMany<SchoolClass, $this>
+     */
     public function assistantClasses(): HasMany
     {
         return $this->hasMany(SchoolClass::class, 'assistant_teacher_id');
     }
 
+    /**
+     * @return HasMany<Schedule, $this>
+     */
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);

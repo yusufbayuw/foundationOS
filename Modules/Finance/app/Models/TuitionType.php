@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Modules\Core\Models\Organization;
 
 class TuitionType extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -44,16 +46,25 @@ class TuitionType extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return HasMany<StudentInvoiceItem, $this>
+     */
     public function studentInvoiceItems(): HasMany
     {
         return $this->hasMany(StudentInvoiceItem::class);
     }
 
+    /**
+     * @return HasMany<StudentInvoice, $this>
+     */
     public function studentInvoices(): HasMany
     {
         return $this->hasMany(StudentInvoice::class);

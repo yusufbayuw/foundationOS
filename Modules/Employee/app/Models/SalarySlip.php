@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,7 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 class SalarySlip extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -68,21 +70,33 @@ class SalarySlip extends Model implements ProvidesWorkflowContext, StartsWorkflo
         ];
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return HasMany<SalarySlipComponent, $this>
+     */
     public function components(): HasMany
     {
         return $this->hasMany(SalarySlipComponent::class);
     }
 
+    /**
+     * @return BelongsTo<JournalEntry, $this>
+     */
     public function journalEntry(): BelongsTo
     {
         return $this->belongsTo(JournalEntry::class);
     }
 
+    /**
+     * @return MorphMany<WorkflowInstance, $this>
+     */
     public function workflowInstances(): MorphMany
     {
         return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');

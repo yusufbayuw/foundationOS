@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class AssessmentItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -39,11 +41,17 @@ class AssessmentItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Assessment, $this>
+     */
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);
     }
 
+    /**
+     * @return HasMany<StudentAssessmentAnswer, $this>
+     */
     public function studentAssessmentAnswers(): HasMany
     {
         return $this->hasMany(StudentAssessmentAnswer::class);

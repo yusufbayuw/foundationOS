@@ -2,6 +2,7 @@
 
 namespace Modules\Counseling\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Modules\School\Models\Student;
 
 class CounselingCase extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $table = 'counseling_cases';
@@ -40,21 +42,33 @@ class CounselingCase extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<Counselor, $this>
+     */
     public function counselor(): BelongsTo
     {
         return $this->belongsTo(Counselor::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function caseTarget(): MorphTo
     {
         return $this->morphTo();

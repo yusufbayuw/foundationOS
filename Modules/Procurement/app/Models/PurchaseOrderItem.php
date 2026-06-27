@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class PurchaseOrderItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -45,26 +47,41 @@ class PurchaseOrderItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<PurchaseOrder, $this>
+     */
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
     }
 
+    /**
+     * @return BelongsTo<PurchaseRequisitionItem, $this>
+     */
     public function purchaseRequisitionItem(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequisitionItem::class);
     }
 
+    /**
+     * @return BelongsTo<ProcurementItem, $this>
+     */
     public function procurementItem(): BelongsTo
     {
         return $this->belongsTo(ProcurementItem::class);
     }
 
+    /**
+     * @return HasMany<GoodsReceiptItem, $this>
+     */
     public function goodsReceiptItems(): HasMany
     {
         return $this->hasMany(GoodsReceiptItem::class);
     }
 
+    /**
+     * @return HasMany<VendorBillItem, $this>
+     */
     public function vendorBillItems(): HasMany
     {
         return $this->hasMany(VendorBillItem::class);

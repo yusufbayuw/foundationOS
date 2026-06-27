@@ -2,6 +2,7 @@
 
 namespace Modules\Transport\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class RouteSchedule extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $table = 'route_schedules';
@@ -33,6 +35,9 @@ class RouteSchedule extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

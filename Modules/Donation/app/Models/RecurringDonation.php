@@ -29,11 +29,17 @@ class RecurringDonation extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Campaign, $this>
+     */
     public function campaign(): BelongsTo
     {
         return $this->belongsTo(Campaign::class);
     }
 
+    /**
+     * @return BelongsTo<Donor, $this>
+     */
     public function donor(): BelongsTo
     {
         return $this->belongsTo(Donor::class);

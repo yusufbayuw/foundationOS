@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class TenantRole extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -33,6 +35,9 @@ class TenantRole extends Model
         ];
     }
 
+    /**
+     * @return HasMany<UserTenantRole, $this>
+     */
     public function userTenantRoles(): HasMany
     {
         return $this->hasMany(UserTenantRole::class);

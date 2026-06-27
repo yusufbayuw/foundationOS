@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Modules\Workflow\Enums\WorkflowTriggerMode;
 
 class Workflow extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -45,36 +47,57 @@ class Workflow extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    /**
+     * @return HasMany<WorkflowStep, $this>
+     */
     public function steps(): HasMany
     {
         return $this->hasMany(WorkflowStep::class);
     }
 
+    /**
+     * @return HasMany<WorkflowTransition, $this>
+     */
     public function transitions(): HasMany
     {
         return $this->hasMany(WorkflowTransition::class);
     }
 
+    /**
+     * @return HasMany<WorkflowInstance, $this>
+     */
     public function instances(): HasMany
     {
         return $this->hasMany(WorkflowInstance::class);
     }
 
+    /**
+     * @return HasMany<WorkflowAutomatedAction, $this>
+     */
     public function automatedActions(): HasMany
     {
         return $this->hasMany(WorkflowAutomatedAction::class);

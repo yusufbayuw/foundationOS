@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,7 @@ use Modules\Monitoring\Models\FileUpload;
 
 class Student extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -78,71 +80,113 @@ class Student extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<AcademicYear, $this>
+     */
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<ClassStudent, $this>
+     */
     public function classStudents(): HasMany
     {
         return $this->hasMany(ClassStudent::class);
     }
 
+    /**
+     * @return HasMany<Attendance, $this>
+     */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
 
+    /**
+     * @return HasMany<StudentGrade, $this>
+     */
     public function studentGrades(): HasMany
     {
         return $this->hasMany(StudentGrade::class);
     }
 
+    /**
+     * @return HasMany<Violation, $this>
+     */
     public function violations(): HasMany
     {
         return $this->hasMany(Violation::class);
     }
 
+    /**
+     * @return HasMany<StudentAssessmentAnswer, $this>
+     */
     public function studentAssessmentAnswers(): HasMany
     {
         return $this->hasMany(StudentAssessmentAnswer::class);
     }
 
+    /**
+     * @return HasMany<StudentAchievement, $this>
+     */
     public function studentAchievements(): HasMany
     {
         return $this->hasMany(StudentAchievement::class);
     }
 
+    /**
+     * @return MorphMany<StudentInvoice, $this>
+     */
     public function studentInvoices(): MorphMany
     {
         return $this->morphMany(StudentInvoice::class, 'invoiceable');
     }
 
+    /**
+     * @return MorphMany<AuditLog, $this>
+     */
     public function auditLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'auditable');
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');
     }
 
+    /**
+     * @return HasOne<StudentRiskScore, $this>
+     */
     public function riskScore(): HasOne
     {
         return $this->hasOne(StudentRiskScore::class);
     }
 
+    /**
+     * @return HasMany<ParentStudent, $this>
+     */
     public function parentLinks(): HasMany
     {
         return $this->hasMany(ParentStudent::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Thesis extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -37,16 +39,25 @@ class Thesis extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<CollageStudent, $this>
+     */
     public function collageStudent(): BelongsTo
     {
         return $this->belongsTo(CollageStudent::class);
     }
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function advisorLecturer(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class, 'advisor_lecturer_id');
     }
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function examinerLecturer(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class, 'examiner_lecturer_id');

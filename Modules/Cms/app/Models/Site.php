@@ -33,6 +33,9 @@ class Site extends Model
         return ['is_active' => 'boolean'];
     }
 
+    /**
+     * @return HasMany<Page, $this>
+     */
     public function pages(): HasMany
     {
         return $this->hasMany(Page::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Module extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -44,11 +46,17 @@ class Module extends Model
         ];
     }
 
+    /**
+     * @return HasMany<TenantModule, $this>
+     */
     public function tenantModules(): HasMany
     {
         return $this->hasMany(TenantModule::class);
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'tenant_modules')

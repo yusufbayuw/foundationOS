@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Modules\Core\Models\Organization;
 
 class CourseOffering extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -41,36 +43,57 @@ class CourseOffering extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Course, $this>
+     */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
+    /**
+     * @return BelongsTo<AcademicPeriod, $this>
+     */
     public function academicPeriod(): BelongsTo
     {
         return $this->belongsTo(AcademicPeriod::class);
     }
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function lecturer(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class);
     }
 
+    /**
+     * @return HasMany<StudyPlanItem, $this>
+     */
     public function studyPlanItems(): HasMany
     {
         return $this->hasMany(StudyPlanItem::class);
     }
 
+    /**
+     * @return HasMany<CourseOfferingLecturer, $this>
+     */
     public function lecturerAssignments(): HasMany
     {
         return $this->hasMany(CourseOfferingLecturer::class);
     }
 
+    /**
+     * @return BelongsToMany<Lecturer, $this>
+     */
     public function lecturers(): BelongsToMany
     {
         return $this->belongsToMany(Lecturer::class, 'course_offering_lecturers')

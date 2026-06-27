@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Modules\Core\Models\User;
 
 class Lecturer extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -42,26 +44,41 @@ class Lecturer extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<StudyProgram, $this>
+     */
     public function studyProgram(): BelongsTo
     {
         return $this->belongsTo(StudyProgram::class);
     }
 
+    /**
+     * @return HasMany<CourseOffering, $this>
+     */
     public function courseOfferings(): HasMany
     {
         return $this->hasMany(CourseOffering::class);
     }
 
+    /**
+     * @return BelongsToMany<CourseOffering, $this>
+     */
     public function taughtCourseOfferings(): BelongsToMany
     {
         return $this->belongsToMany(CourseOffering::class, 'course_offering_lecturers')
@@ -69,26 +86,41 @@ class Lecturer extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return HasMany<CourseOfferingLecturer, $this>
+     */
     public function courseOfferingAssignments(): HasMany
     {
         return $this->hasMany(CourseOfferingLecturer::class);
     }
 
+    /**
+     * @return HasMany<StudyProgram, $this>
+     */
     public function headedStudyPrograms(): HasMany
     {
         return $this->hasMany(StudyProgram::class, 'head_of_program_id');
     }
 
+    /**
+     * @return HasMany<CollageStudent, $this>
+     */
     public function adviseeStudents(): HasMany
     {
         return $this->hasMany(CollageStudent::class, 'academic_advisor_id');
     }
 
+    /**
+     * @return HasMany<Thesis, $this>
+     */
     public function advisedTheses(): HasMany
     {
         return $this->hasMany(Thesis::class, 'advisor_lecturer_id');
     }
 
+    /**
+     * @return HasMany<Thesis, $this>
+     */
     public function examinedTheses(): HasMany
     {
         return $this->hasMany(Thesis::class, 'examiner_lecturer_id');

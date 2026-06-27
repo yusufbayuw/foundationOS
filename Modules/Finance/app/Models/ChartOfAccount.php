@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Modules\Procurement\Models\PurchaseRequisitionItem;
 
 class ChartOfAccount extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -49,41 +51,65 @@ class ChartOfAccount extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<ChartOfAccount, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<JournalEntryLine, $this>
+     */
     public function journalEntryLines(): HasMany
     {
         return $this->hasMany(JournalEntryLine::class, 'chart_of_account_id');
     }
 
+    /**
+     * @return HasMany<Budget, $this>
+     */
     public function budgets(): HasMany
     {
         return $this->hasMany(Budget::class, 'chart_of_account_id');
     }
 
+    /**
+     * @return HasMany<Payment, $this>
+     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'chart_of_account_id');
     }
 
+    /**
+     * @return HasMany<ProcurementItem, $this>
+     */
     public function procurementItems(): HasMany
     {
         return $this->hasMany(ProcurementItem::class, 'chart_of_account_id');
     }
 
+    /**
+     * @return HasMany<PurchaseRequisitionItem, $this>
+     */
     public function purchaseRequisitionItems(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class, 'budget_account_id');

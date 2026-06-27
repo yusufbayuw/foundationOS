@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LibrarySerialIssue extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -28,6 +30,9 @@ class LibrarySerialIssue extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<LibrarySerial, $this>
+     */
     public function serial(): BelongsTo
     {
         return $this->belongsTo(LibrarySerial::class, 'serial_id');

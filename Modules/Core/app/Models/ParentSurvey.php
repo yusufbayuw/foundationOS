@@ -29,6 +29,9 @@ class ParentSurvey extends Model
         ];
     }
 
+    /**
+     * @return HasMany<ParentSurveyResponse, $this>
+     */
     public function responses(): HasMany
     {
         return $this->hasMany(ParentSurveyResponse::class);

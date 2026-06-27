@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Finance\Models\ChartOfAccount;
 
 class PurchaseRequisitionItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -50,36 +52,57 @@ class PurchaseRequisitionItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<PurchaseRequisition, $this>
+     */
     public function requisition(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequisition::class, 'purchase_requisition_id');
     }
 
+    /**
+     * @return BelongsTo<ProcurementItem, $this>
+     */
     public function procurementItem(): BelongsTo
     {
         return $this->belongsTo(ProcurementItem::class);
     }
 
+    /**
+     * @return BelongsTo<Vendor, $this>
+     */
     public function preferredVendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class, 'preferred_vendor_id');
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * @return BelongsTo<PurchaseOrder, $this>
+     */
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
     }
 
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
     public function budgetAccount(): BelongsTo
     {
         return $this->belongsTo(ChartOfAccount::class, 'budget_account_id');

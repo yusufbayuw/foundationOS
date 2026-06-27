@@ -26,6 +26,9 @@ class ExamPublishSnapshot extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);

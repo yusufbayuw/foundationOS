@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class TenantModule extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -31,6 +33,9 @@ class TenantModule extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Module, $this>
+     */
     public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class);

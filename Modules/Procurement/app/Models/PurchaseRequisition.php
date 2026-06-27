@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 class PurchaseRequisition extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -50,36 +52,57 @@ class PurchaseRequisition extends Model implements ProvidesWorkflowContext, Star
         ];
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function requester(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requested_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    /**
+     * @return HasMany<PurchaseRequisitionItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class);
     }
 
+    /**
+     * @return HasMany<RequestForQuotation, $this>
+     */
     public function rfqs(): HasMany
     {
         return $this->hasMany(RequestForQuotation::class);
     }
 
+    /**
+     * @return MorphMany<WorkflowInstance, $this>
+     */
     public function workflowInstances(): MorphMany
     {
         return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');

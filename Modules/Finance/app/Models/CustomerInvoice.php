@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class CustomerInvoice extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -105,16 +107,25 @@ class CustomerInvoice extends Model
         $this->saveQuietly();
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return HasMany<CustomerInvoiceItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(CustomerInvoiceItem::class);
     }
 
+    /**
+     * @return BelongsTo<JournalEntry, $this>
+     */
     public function journalEntry(): BelongsTo
     {
         return $this->belongsTo(JournalEntry::class);

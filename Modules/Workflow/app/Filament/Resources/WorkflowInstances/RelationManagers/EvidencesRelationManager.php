@@ -2,6 +2,8 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers;
 
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -45,7 +47,7 @@ class EvidencesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label(FilamentUi::text('Upload Evidence'))
                     ->schema($this->evidenceSchema())
                     ->mutateFormDataUsing(function (array $data): array {
@@ -68,7 +70,7 @@ class EvidencesRelationManager extends RelationManager
                     ->createAnother(false),
             ])
             ->recordActions([
-                Tables\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

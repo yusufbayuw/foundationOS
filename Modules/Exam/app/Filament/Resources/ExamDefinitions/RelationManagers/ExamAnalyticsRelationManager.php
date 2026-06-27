@@ -2,8 +2,8 @@
 
 namespace Modules\Exam\Filament\Resources\ExamDefinitions\RelationManagers;
 
+use Filament\Forms\Components\Placeholder;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Placeholder;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;

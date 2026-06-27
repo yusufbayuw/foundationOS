@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Workflow\Enums\WorkflowRuleType;
 
 class WorkflowTransition extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -35,16 +37,25 @@ class WorkflowTransition extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Workflow, $this>
+     */
     public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class);
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function fromStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'from_step_id');
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function toStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'to_step_id');

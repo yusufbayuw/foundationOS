@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\User;
 
 class RequestForQuotation extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -39,31 +41,49 @@ class RequestForQuotation extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<PurchaseRequisition, $this>
+     */
     public function purchaseRequisition(): BelongsTo
     {
         return $this->belongsTo(PurchaseRequisition::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<RfqVendor, $this>
+     */
     public function vendors(): HasMany
     {
         return $this->hasMany(RfqVendor::class);
     }
 
+    /**
+     * @return HasMany<RfqItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(RfqItem::class);
     }
 
+    /**
+     * @return HasMany<PurchaseOrder, $this>
+     */
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);

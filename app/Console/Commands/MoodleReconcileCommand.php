@@ -144,7 +144,12 @@ class MoodleReconcileCommand extends Command
                 continue;
             }
 
-            $suspended = (int) ($moodleUsers[0]['suspended'] ?? 0);
+            $firstUser = $moodleUsers[0] ?? null;
+            if (! is_array($firstUser)) {
+                continue;
+            }
+
+            $suspended = (int) ($firstUser['suspended'] ?? 0);
             $mismatch = $shouldDeactivate ? $suspended !== 1 : $suspended !== 0;
             if (! $mismatch) {
                 continue;

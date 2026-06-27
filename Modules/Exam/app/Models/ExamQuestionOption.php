@@ -34,6 +34,9 @@ class ExamQuestionOption extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamQuestion, $this>
+     */
     public function examQuestion(): BelongsTo
     {
         return $this->belongsTo(ExamQuestion::class);

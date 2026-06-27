@@ -36,21 +36,33 @@ class WorkflowStepBranch extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<WorkflowInstance, $this>
+     */
     public function instance(): BelongsTo
     {
         return $this->belongsTo(WorkflowInstance::class, 'workflow_instance_id');
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function splitStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'split_step_id');
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function branchStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'branch_step_id');
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function joinStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'join_step_id');

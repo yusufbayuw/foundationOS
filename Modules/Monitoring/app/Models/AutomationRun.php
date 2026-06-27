@@ -47,16 +47,25 @@ class AutomationRun extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<AutomationRun, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<AutomationRun, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function subject(): MorphTo
     {
         return $this->morphTo();

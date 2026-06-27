@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class StockLevel extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory;
 
     protected $fillable = [
@@ -29,11 +31,17 @@ class StockLevel extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return BelongsTo<StockItem, $this>
+     */
     public function stockItem(): BelongsTo
     {
         return $this->belongsTo(StockItem::class);

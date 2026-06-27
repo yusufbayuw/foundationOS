@@ -2,8 +2,11 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
+use Modules\Core\Models\UserTenantRole;
 use Modules\Workflow\Contracts\RuleEngine;
 use Modules\Workflow\Contracts\WorkflowAssigneeResolver;
 use Modules\Workflow\Contracts\WorkflowDynamicAssigneeResolver;
@@ -17,6 +20,9 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
 {
     public function __construct(private readonly RuleEngine $ruleEngine) {}
 
+    /**
+     * @return Collection<int, User>
+     */
     public function resolveUsers(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
         $type = $step->assignee_type;
@@ -31,32 +37,46 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
         };
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     protected function resolveDirectUser(WorkflowStep $step): Collection
     {
-        $userId = (int) $step->assignee_value;
+        $userId = TypedValue::int($step->assignee_value);
         $user = User::query()->find($userId);
 
-        return $user ? collect([$user]) : collect();
+        return $user instanceof User ? collect([$user]) : collect();
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     protected function resolveRoleUsers(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
-        $candidates = collect(data_get($step->assignee_config, 'candidates', []));
+        /** @var list<array<string, mixed>> $candidateConfig */
+        $candidateConfig = data_get($step->assignee_config, 'candidates', []);
+        $candidates = collect($candidateConfig);
 
         if ($candidates->isNotEmpty()) {
             $matched = $this->ruleEngine->resolveCandidates($candidates, WorkflowContextData::fromInstance($instance));
-            $role = (string) data_get($matched->first(), 'role', $step->assignee_value);
+            if ($matched instanceof Collection && $matched->isNotEmpty()) {
+                $first = $matched->first();
+                $role = TypedValue::string(is_array($first) ? data_get($first, 'role') : null, TypedValue::string($step->assignee_value));
+            } else {
+                $role = TypedValue::string($step->assignee_value);
+            }
         } else {
-            $role = (string) $step->assignee_value;
+            $role = TypedValue::string($step->assignee_value);
         }
 
         return User::query()
             ->role($role)
-            ->whereHas('userTenantRoles', function ($query) use ($instance): void {
+            ->whereHas('userTenantRoles', function (Builder $query) use ($instance): void {
+                /** @var Builder<UserTenantRole> $query */
                 $query->where('tenant_id', $instance->tenant_id);
 
                 if ($instance->organization_id) {
-                    $query->where(function ($inner) use ($instance): void {
+                    $query->where(function (Builder $inner) use ($instance): void {
                         $inner->where('organization_id', $instance->organization_id)
                             ->orWhereNull('organization_id');
                     });
@@ -65,9 +85,12 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
             ->get();
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     protected function resolveSubjectFieldUsers(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
-        $field = (string) $step->assignee_value;
+        $field = TypedValue::string($step->assignee_value);
         $userId = data_get($instance->context_data ?? [], $field)
             ?? data_get($instance->form_data ?? [], $field)
             ?? data_get($instance->computed_data ?? [], $field);
@@ -80,41 +103,57 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
             return collect();
         }
 
-        $user = User::query()->find((int) $userId);
+        $user = User::query()->find(TypedValue::int($userId));
 
-        return $user ? collect([$user]) : collect();
+        return $user instanceof User ? collect([$user]) : collect();
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     protected function resolveRequesterManager(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
-        $candidates = array_filter([
+        /** @var list<string|null> $candidateFields */
+        $candidateFields = array_values(array_filter([
             data_get($step->assignee_config, 'manager_field'),
             'requester_manager_id',
             'manager_id',
             'supervisor_id',
             'approver_id',
-        ]);
+        ], fn (mixed $field): bool => is_string($field) && $field !== ''));
 
-        foreach ($candidates as $field) {
-            $userId = data_get(WorkflowContextData::fromInstance($instance), $field);
+        $context = WorkflowContextData::fromInstance($instance);
 
-            if ($userId && ($user = User::query()->find((int) $userId))) {
-                return collect([$user]);
+        foreach ($candidateFields as $field) {
+            $userId = data_get($context, $field);
+
+            if ($userId !== null && $userId !== '') {
+                $user = User::query()->find(TypedValue::int($userId));
+
+                if ($user instanceof User) {
+                    return collect([$user]);
+                }
             }
         }
 
         throw new WorkflowConfigurationException('Requester manager assignee requires a manager user id in workflow context.');
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     protected function resolveCustomResolver(WorkflowInstance $instance, WorkflowStep $step): Collection
     {
-        $resolverClass = (string) (data_get($step->assignee_config, 'resolver_class') ?: $step->assignee_value);
+        $resolverClass = TypedValue::string(
+            data_get($step->assignee_config, 'resolver_class') ?: $step->assignee_value,
+        );
 
         if ($resolverClass === '') {
             throw new WorkflowConfigurationException('Custom assignee resolver class is missing.');
         }
 
-        $allowedResolvers = (array) config('workflow.allowed_assignee_resolvers', []);
+        /** @var list<class-string> $allowedResolvers */
+        $allowedResolvers = config('workflow.allowed_assignee_resolvers', []);
 
         if (! in_array($resolverClass, $allowedResolvers, true)) {
             throw new WorkflowConfigurationException("Custom assignee resolver [{$resolverClass}] is not allowed.");

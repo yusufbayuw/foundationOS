@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Modules\Workflow\Enums\WorkflowStepType;
 
 class WorkflowStep extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -75,31 +77,49 @@ class WorkflowStep extends Model
         return (int) ($this->required_evidence['file_count'] ?? 0);
     }
 
+    /**
+     * @return BelongsTo<Workflow, $this>
+     */
     public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class);
     }
 
+    /**
+     * @return HasMany<WorkflowTransition, $this>
+     */
     public function outgoingTransitions(): HasMany
     {
         return $this->hasMany(WorkflowTransition::class, 'from_step_id');
     }
 
+    /**
+     * @return HasMany<WorkflowTransition, $this>
+     */
     public function incomingTransitions(): HasMany
     {
         return $this->hasMany(WorkflowTransition::class, 'to_step_id');
     }
 
+    /**
+     * @return HasMany<WorkflowAssignment, $this>
+     */
     public function assignments(): HasMany
     {
         return $this->hasMany(WorkflowAssignment::class, 'step_id');
     }
 
+    /**
+     * @return HasMany<WorkflowAutomatedAction, $this>
+     */
     public function automatedActions(): HasMany
     {
         return $this->hasMany(WorkflowAutomatedAction::class, 'step_id');
     }
 
+    /**
+     * @return HasMany<WorkflowEvidence, $this>
+     */
     public function evidences(): HasMany
     {
         return $this->hasMany(WorkflowEvidence::class, 'workflow_step_id');

@@ -41,26 +41,41 @@ class Lead extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<LeadSource, $this>
+     */
     public function leadSource(): BelongsTo
     {
         return $this->belongsTo(LeadSource::class);
     }
 
+    /**
+     * @return BelongsTo<MarketingCampaign, $this>
+     */
     public function marketingCampaign(): BelongsTo
     {
         return $this->belongsTo(MarketingCampaign::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to_user_id');
     }
 
+    /**
+     * @return BelongsTo<Applicant, $this>
+     */
     public function applicant(): BelongsTo
     {
         return $this->belongsTo(Applicant::class);
     }
 
+    /**
+     * @return HasMany<LeadActivity, $this>
+     */
     public function activities(): HasMany
     {
         return $this->hasMany(LeadActivity::class);

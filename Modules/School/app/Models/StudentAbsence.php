@@ -33,16 +33,25 @@ class StudentAbsence extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function requestedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requested_by_user_id');
     }
 
+    /**
+     * @return BelongsTo<FileUpload, $this>
+     */
     public function fileUpload(): BelongsTo
     {
         return $this->belongsTo(FileUpload::class);

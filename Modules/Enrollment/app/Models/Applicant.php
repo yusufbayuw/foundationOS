@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +22,7 @@ use Modules\School\Models\Student;
 
 class Applicant extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected ?int $previousAdmissionPeriodId = null;
@@ -158,61 +160,97 @@ class Applicant extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Lead, $this>
+     */
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class);
     }
 
+    /**
+     * @return BelongsTo<AdmissionPeriod, $this>
+     */
     public function admissionPeriod(): BelongsTo
     {
         return $this->belongsTo(AdmissionPeriod::class);
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function firstProgramChoice(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'program_choice_1_id');
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function secondProgramChoice(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'program_choice_2_id');
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function acceptedProgram(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'accepted_program_id');
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function convertedStudent(): BelongsTo
     {
         return $this->belongsTo(Student::class, 'converted_to_student_id');
     }
 
+    /**
+     * @return HasMany<ExamResult, $this>
+     */
     public function examResults(): HasMany
     {
         return $this->hasMany(ExamResult::class);
     }
 
+    /**
+     * @return HasMany<Registration, $this>
+     */
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
     }
 
+    /**
+     * @return HasOne<Registration, $this>
+     */
     public function registration(): HasOne
     {
         return $this->hasOne(Registration::class);
     }
 
+    /**
+     * @return MorphMany<StudentInvoice, $this>
+     */
     public function studentInvoices(): MorphMany
     {
         return $this->morphMany(StudentInvoice::class, 'invoiceable');
     }
 
+    /**
+     * @return MorphMany<AuditLog, $this>
+     */
     public function auditLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'auditable');
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');

@@ -2,6 +2,7 @@
 
 namespace Modules\Monitoring\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\User;
 
 class FileUpload extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -45,16 +47,25 @@ class FileUpload extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function fileable(): MorphTo
     {
         return $this->morphTo();

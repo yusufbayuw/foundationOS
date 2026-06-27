@@ -17,6 +17,9 @@ class LeadSource extends Model
         return ['is_active' => 'boolean'];
     }
 
+    /**
+     * @return HasMany<Lead, $this>
+     */
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);

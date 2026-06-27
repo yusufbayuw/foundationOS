@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,7 @@ use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class StockMove extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -50,26 +52,41 @@ class StockMove extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return BelongsTo<StockItem, $this>
+     */
     public function stockItem(): BelongsTo
     {
         return $this->belongsTo(StockItem::class);
     }
 
+    /**
+     * @return BelongsTo<JournalEntry, $this>
+     */
     public function journalEntry(): BelongsTo
     {
         return $this->belongsTo(JournalEntry::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function reference(): MorphTo
     {
         return $this->morphTo();

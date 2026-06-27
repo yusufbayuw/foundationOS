@@ -8,6 +8,9 @@ use Modules\Workflow\Models\WorkflowInstanceLog;
 
 class DatabaseWorkflowAuditLogger implements WorkflowAuditLogger
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function log(WorkflowInstance $instance, string $logType, array $context = []): WorkflowInstanceLog
     {
         return WorkflowInstanceLog::query()->create([
@@ -18,7 +21,7 @@ class DatabaseWorkflowAuditLogger implements WorkflowAuditLogger
             'log_type' => $logType,
             'action_taken' => $context['action_taken'] ?? null,
             'status_before' => $context['status_before'] ?? null,
-            'status_after' => $context['status_after'] ?? ($instance->status?->value ?? $instance->status),
+            'status_after' => $context['status_after'] ?? ($instance->status->value),
             'payload_before' => $context['payload_before'] ?? null,
             'payload_after' => $context['payload_after'] ?? [
                 'context_data' => $instance->context_data,
@@ -30,7 +33,7 @@ class DatabaseWorkflowAuditLogger implements WorkflowAuditLogger
             'notes' => $context['notes'] ?? null,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'request_id' => request()?->headers->get('X-Request-Id'),
+            'request_id' => request()->headers->get('X-Request-Id'),
             'logged_at' => now(),
         ]);
     }

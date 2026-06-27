@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
@@ -17,6 +18,7 @@ use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAutomatedAction;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
+use Modules\Workflow\Models\WorkflowTransition;
 
 class DatabaseWorkflowInstanceStarter implements WorkflowInstanceStarter
 {
@@ -25,11 +27,18 @@ class DatabaseWorkflowInstanceStarter implements WorkflowInstanceStarter
         private readonly WorkflowSlaService $slaService,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function start(Workflow $workflow, User $requester, array $context = [], ?Model $subject = null, ?User $startedBy = null): WorkflowInstance
     {
-        /** @var WorkflowInstance $instance */
         $instance = DB::transaction(function () use ($workflow, $requester, $context, $subject, $startedBy): WorkflowInstance {
             $workflow = $workflow->fresh(['steps.outgoingTransitions', 'transitions', 'automatedActions']);
+
+            if ($workflow === null) {
+                throw new WorkflowConfigurationException('Workflow definition could not be loaded.');
+            }
+
             $initialStep = $workflow->steps()->where('is_initial', true)->orderBy('sort_order')->first();
 
             if (! $initialStep instanceof WorkflowStep) {
@@ -55,7 +64,7 @@ class DatabaseWorkflowInstanceStarter implements WorkflowInstanceStarter
                 'subject_id' => $subject?->getKey(),
                 'subject_label' => $subject instanceof ProvidesWorkflowContext
                     ? $subject->workflowSubjectLabel()
-                    : (string) (data_get($subject, 'name') ?? data_get($subject, 'title') ?? data_get($subject, 'code') ?? ''),
+                    : TypedValue::string(data_get($subject, 'name') ?? data_get($subject, 'title') ?? data_get($subject, 'code')),
                 'context_data' => $context,
                 'form_data' => [],
                 'computed_data' => [],
@@ -82,11 +91,20 @@ class DatabaseWorkflowInstanceStarter implements WorkflowInstanceStarter
             return $instance;
         });
 
-        WorkflowStarted::dispatch($instance->fresh(['currentStep']), $startedBy ?? $requester);
+        $fresh = $instance->fresh(['currentStep', 'assignments', 'logs']);
 
-        return $instance->fresh(['currentStep', 'assignments', 'logs']);
+        if ($fresh === null) {
+            throw new \RuntimeException('Workflow instance could not be loaded after start.');
+        }
+
+        WorkflowStarted::dispatch($fresh, $startedBy ?? $requester);
+
+        return $fresh;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function snapshotWorkflow(Workflow $workflow): array
     {
         return [
@@ -132,7 +150,7 @@ class DatabaseWorkflowInstanceStarter implements WorkflowInstanceStarter
                 ->values()
                 ->all(),
             'transitions' => $workflow->transitions
-                ->map(fn ($transition) => $transition->only([
+                ->map(fn (WorkflowTransition $transition) => $transition->only([
                     'id',
                     'from_step_id',
                     'to_step_id',

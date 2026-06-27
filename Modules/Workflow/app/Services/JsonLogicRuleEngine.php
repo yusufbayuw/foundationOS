@@ -8,20 +8,31 @@ use Modules\Workflow\Support\JsonLogicEvaluator;
 
 class JsonLogicRuleEngine implements RuleEngine
 {
+    /**
+     * @param  array<string, mixed>  $rule
+     * @param  array<string, mixed>  $context
+     */
     public function matches(array $rule, array $context): bool
     {
         if ($rule === []) {
             return true;
         }
 
+        /** @var class-string $evaluator */
         $evaluator = config('workflow.json_logic_class', JsonLogicEvaluator::class);
 
         return (bool) $evaluator::apply($rule, $context);
     }
 
+    /**
+     * @param  list<array<string, mixed>>  $schema
+     * @param  array<string, mixed>  $context
+     * @return list<array<string, mixed>>
+     */
     public function evaluateFieldState(array $schema, array $context): array
     {
-        return collect($schema)
+        /** @var list<array<string, mixed>> $fields */
+        $fields = collect($schema)
             ->map(function (array $field) use ($context): array {
                 $visible = $this->evaluateBooleanRule($field['visibility_rules'] ?? null, $context, true);
                 $disabled = $this->evaluateBooleanRule($field['disabled_rules'] ?? null, $context, false);
@@ -39,14 +50,21 @@ class JsonLogicRuleEngine implements RuleEngine
             })
             ->values()
             ->all();
+
+        return $fields;
     }
 
-    public function resolveCandidates(iterable $rules, array $context): mixed
+    /**
+     * @param  iterable<int|string, mixed>  $rules
+     * @param  array<string, mixed>  $context
+     * @return Collection<int, mixed>
+     */
+    public function resolveCandidates(iterable $rules, array $context): Collection
     {
         $collection = $rules instanceof Collection ? $rules : collect($rules);
 
         return $collection
-            ->filter(function ($candidate) use ($context): bool {
+            ->filter(function (mixed $candidate) use ($context): bool {
                 $rule = (array) data_get($candidate, 'condition_rules', []);
 
                 return $this->matches($rule, $context);
@@ -54,6 +72,9 @@ class JsonLogicRuleEngine implements RuleEngine
             ->values();
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     protected function evaluateBooleanRule(mixed $rule, array $context, bool $default): bool
     {
         if ($rule === null || $rule === []) {

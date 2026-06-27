@@ -2,6 +2,9 @@
 
 namespace Modules\Finance\Filament\Resources\CustomerInvoices\RelationManagers;
 
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -85,7 +88,7 @@ class ItemsRelationManager extends RelationManager
                     ->weight('bold'),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['tenant_id'] = filament()->getTenant()?->id;
 
@@ -94,9 +97,9 @@ class ItemsRelationManager extends RelationManager
                     ->after(fn (CustomerInvoiceItem $record) => $record->customerInvoice->recalculate()),
             ])
             ->recordActions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->after(fn (CustomerInvoiceItem $record) => $record->customerInvoice->recalculate()),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->after(fn (CustomerInvoiceItem $record) => $record->customerInvoice->recalculate()),
             ])
             ->defaultSort('sort_order');

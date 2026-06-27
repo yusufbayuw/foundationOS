@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 class StudentGrade extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -44,21 +46,33 @@ class StudentGrade extends Model implements ProvidesWorkflowContext, StartsWorkf
         ];
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<Assessment, $this>
+     */
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function gradedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'graded_by');
     }
 
+    /**
+     * @return MorphMany<WorkflowInstance, $this>
+     */
     public function workflowInstances(): MorphMany
     {
         return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');

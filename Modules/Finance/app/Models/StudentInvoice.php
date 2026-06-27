@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class StudentInvoice extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -64,21 +66,33 @@ class StudentInvoice extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<TuitionType, $this>
+     */
     public function tuitionType(): BelongsTo
     {
         return $this->belongsTo(TuitionType::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function invoiceable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * @return HasMany<StudentInvoiceItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(StudentInvoiceItem::class);
     }
 
+    /**
+     * @return HasMany<Payment, $this>
+     */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);

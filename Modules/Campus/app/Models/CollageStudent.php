@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ use Modules\Monitoring\Models\FileUpload;
 
 class CollageStudent extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -48,46 +50,73 @@ class CollageStudent extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<StudyProgram, $this>
+     */
     public function studyProgram(): BelongsTo
     {
         return $this->belongsTo(StudyProgram::class);
     }
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function academicAdvisor(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class, 'academic_advisor_id');
     }
 
+    /**
+     * @return HasMany<StudyPlan, $this>
+     */
     public function studyPlans(): HasMany
     {
         return $this->hasMany(StudyPlan::class);
     }
 
+    /**
+     * @return HasMany<Thesis, $this>
+     */
     public function theses(): HasMany
     {
         return $this->hasMany(Thesis::class);
     }
 
+    /**
+     * @return MorphMany<StudentInvoice, $this>
+     */
     public function studentInvoices(): MorphMany
     {
         return $this->morphMany(StudentInvoice::class, 'invoiceable');
     }
 
+    /**
+     * @return MorphMany<AuditLog, $this>
+     */
     public function auditLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'auditable');
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');

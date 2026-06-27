@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\User;
 
 class Member extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -53,26 +55,41 @@ class Member extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return HasMany<Loan, $this>
+     */
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
+    /**
+     * @return BelongsTo<LibraryMemberType, $this>
+     */
     public function memberType(): BelongsTo
     {
         return $this->belongsTo(LibraryMemberType::class, 'member_type_id');
     }
 
+    /**
+     * @return HasMany<BookReservation, $this>
+     */
     public function reservations(): HasMany
     {
         return $this->hasMany(BookReservation::class);

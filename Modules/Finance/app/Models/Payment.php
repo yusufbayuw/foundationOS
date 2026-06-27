@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Payment extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -56,16 +58,25 @@ class Payment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<StudentInvoice, $this>
+     */
     public function studentInvoice(): BelongsTo
     {
         return $this->belongsTo(StudentInvoice::class);
     }
 
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
     public function chartOfAccount(): BelongsTo
     {
         return $this->belongsTo(ChartOfAccount::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');

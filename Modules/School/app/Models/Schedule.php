@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\Organization;
 
 class Schedule extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -46,31 +48,49 @@ class Schedule extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<AcademicPeriod, $this>
+     */
     public function academicPeriod(): BelongsTo
     {
         return $this->belongsTo(AcademicPeriod::class);
     }
 
+    /**
+     * @return BelongsTo<SchoolClass, $this>
+     */
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    /**
+     * @return BelongsTo<Subject, $this>
+     */
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
 
+    /**
+     * @return BelongsTo<Teacher, $this>
+     */
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class);
     }
 
+    /**
+     * @return HasMany<Attendance, $this>
+     */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);

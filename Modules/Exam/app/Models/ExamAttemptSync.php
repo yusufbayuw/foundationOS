@@ -29,11 +29,17 @@ class ExamAttemptSync extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamParticipant, $this>
+     */
     public function examParticipant(): BelongsTo
     {
         return $this->belongsTo(ExamParticipant::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Modules\Monitoring\Models\FileUpload;
 
 class GoodsReceipt extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -40,31 +42,49 @@ class GoodsReceipt extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<PurchaseOrder, $this>
+     */
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function receiver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'received_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function inspector(): BelongsTo
     {
         return $this->belongsTo(User::class, 'inspected_by');
     }
 
+    /**
+     * @return HasMany<GoodsReceiptItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(GoodsReceiptItem::class);
     }
 
+    /**
+     * @return HasMany<VendorBill, $this>
+     */
     public function vendorBills(): HasMany
     {
         return $this->hasMany(VendorBill::class);
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');

@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,7 @@ use Modules\Procurement\Models\ProcurementItem;
 
 class StockItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -40,31 +42,49 @@ class StockItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<ProcurementItem, $this>
+     */
     public function procurementItem(): BelongsTo
     {
         return $this->belongsTo(ProcurementItem::class);
     }
 
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
     public function inventoryCoa(): BelongsTo
     {
         return $this->belongsTo(ChartOfAccount::class, 'inventory_coa_id');
     }
 
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
     public function cogsCoa(): BelongsTo
     {
         return $this->belongsTo(ChartOfAccount::class, 'cogs_coa_id');
     }
 
+    /**
+     * @return HasMany<StockLevel, $this>
+     */
     public function stockLevels(): HasMany
     {
         return $this->hasMany(StockLevel::class);
     }
 
+    /**
+     * @return HasMany<StockMove, $this>
+     */
     public function stockMoves(): HasMany
     {
         return $this->hasMany(StockMove::class);

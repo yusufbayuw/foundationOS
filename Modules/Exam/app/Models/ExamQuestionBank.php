@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,7 +18,9 @@ use Modules\School\Models\Subject;
 
 class ExamQuestionBank extends ExamModel
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory;
+
     use SoftDeletes;
 
     protected static function newFactory(): ExamQuestionBankFactory
@@ -52,11 +55,17 @@ class ExamQuestionBank extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return HasMany<ExamQuestion, $this>
+     */
     public function examQuestions(): HasMany
     {
         return $this->hasMany(ExamQuestion::class);
@@ -77,21 +86,33 @@ class ExamQuestionBank extends ExamModel
         return $this->academic_context_type === ExamAcademicContext::Standalone;
     }
 
+    /**
+     * @return BelongsTo<Subject, $this>
+     */
     public function schoolSubject(): BelongsTo
     {
         return $this->belongsTo(Subject::class, 'school_subject_reference');
     }
 
+    /**
+     * @return BelongsTo<Curriculum, $this>
+     */
     public function schoolCurriculum(): BelongsTo
     {
         return $this->belongsTo(Curriculum::class, 'school_curriculum_reference');
     }
 
+    /**
+     * @return BelongsTo<Course, $this>
+     */
     public function campusCourse(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'campus_course_reference');
     }
 
+    /**
+     * @return BelongsTo<StudyProgram, $this>
+     */
     public function campusStudyProgram(): BelongsTo
     {
         return $this->belongsTo(StudyProgram::class, 'campus_study_program_reference');

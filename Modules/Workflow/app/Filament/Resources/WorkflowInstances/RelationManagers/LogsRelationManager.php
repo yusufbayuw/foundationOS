@@ -2,11 +2,11 @@
 
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\RelationManagers;
 
+use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Modules\Core\Support\FilamentUi;

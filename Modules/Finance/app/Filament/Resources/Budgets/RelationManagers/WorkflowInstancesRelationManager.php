@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Resources\Budgets\RelationManagers;
 
+use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -39,7 +40,7 @@ class WorkflowInstancesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->recordActions([
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->url(fn ($record): string => WorkflowInstanceResource::getUrl('view', ['record' => $record])),
             ])
             ->defaultSort('started_at', 'desc');

@@ -25,16 +25,25 @@ class ExamActivityLog extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamAttempt, $this>
+     */
     public function examAttempt(): BelongsTo
     {
         return $this->belongsTo(ExamAttempt::class);
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamParticipant, $this>
+     */
     public function examParticipant(): BelongsTo
     {
         return $this->belongsTo(ExamParticipant::class);

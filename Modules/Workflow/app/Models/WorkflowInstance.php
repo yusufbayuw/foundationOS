@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Modules\Workflow\Enums\WorkflowInstanceStatus;
 
 class WorkflowInstance extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -59,46 +61,73 @@ class WorkflowInstance extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Workflow, $this>
+     */
     public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class);
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function currentStep(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'current_step_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function requester(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requester_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function starter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'started_by');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function subject(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'subject_type', 'subject_id');
     }
 
+    /**
+     * @return HasMany<WorkflowInstanceLog, $this>
+     */
     public function logs(): HasMany
     {
         return $this->hasMany(WorkflowInstanceLog::class);
     }
 
+    /**
+     * @return HasMany<WorkflowAssignment, $this>
+     */
     public function assignments(): HasMany
     {
         return $this->hasMany(WorkflowAssignment::class);
     }
 
+    /**
+     * @return HasMany<WorkflowEvidence, $this>
+     */
     public function evidences(): HasMany
     {
         return $this->hasMany(WorkflowEvidence::class);

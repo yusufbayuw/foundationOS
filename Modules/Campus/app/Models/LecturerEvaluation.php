@@ -23,6 +23,9 @@ class LecturerEvaluation extends Model
         return $this->belongsTo(Lecturer::class);
     }
 
+    /**
+     * @return BelongsTo<CourseOffering, $this>
+     */
     public function courseOffering(): BelongsTo
     {
         return $this->belongsTo(CourseOffering::class);

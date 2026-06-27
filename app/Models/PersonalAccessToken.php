@@ -27,9 +27,6 @@ class PersonalAccessToken extends SanctumToken
     /**
      * @return BelongsTo<Tenant, $this>
      */
-    /**
-     * @return BelongsTo<Tenant, $this>
-     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

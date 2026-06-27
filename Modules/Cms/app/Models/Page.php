@@ -43,11 +43,17 @@ class Page extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Site, $this>
+     */
     public function site(): BelongsTo
     {
         return $this->belongsTo(Site::class);
     }
 
+    /**
+     * @return HasMany<PageBlock, $this>
+     */
     public function blocks(): HasMany
     {
         return $this->hasMany(PageBlock::class)->orderBy('sort_order');

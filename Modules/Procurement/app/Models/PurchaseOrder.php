@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +19,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class PurchaseOrder extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -72,46 +74,73 @@ class PurchaseOrder extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<RequestForQuotation, $this>
+     */
     public function requestForQuotation(): BelongsTo
     {
         return $this->belongsTo(RequestForQuotation::class);
     }
 
+    /**
+     * @return BelongsTo<Vendor, $this>
+     */
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    /**
+     * @return HasMany<PurchaseOrderItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);
     }
 
+    /**
+     * @return HasMany<GoodsReceipt, $this>
+     */
     public function goodsReceipts(): HasMany
     {
         return $this->hasMany(GoodsReceipt::class);
     }
 
+    /**
+     * @return HasMany<VendorBill, $this>
+     */
     public function vendorBills(): HasMany
     {
         return $this->hasMany(VendorBill::class);
     }
 
+    /**
+     * @return HasMany<PurchaseRequisitionItem, $this>
+     */
     public function requisitionItems(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class);
     }
 
+    /**
+     * @return MorphMany<FileUpload, $this>
+     */
     public function fileUploads(): MorphMany
     {
         return $this->morphMany(FileUpload::class, 'fileable');

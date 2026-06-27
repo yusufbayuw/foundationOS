@@ -24,6 +24,9 @@ class TrainingEnrollment extends Model
         return $this->belongsTo(TrainingBatch::class, 'training_batch_id');
     }
 
+    /**
+     * @return HasOne<TrainingCertificate, $this>
+     */
     public function certificate(): HasOne
     {
         return $this->hasOne(TrainingCertificate::class);

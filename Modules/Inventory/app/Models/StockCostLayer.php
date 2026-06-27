@@ -27,16 +27,25 @@ class StockCostLayer extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return BelongsTo<StockItem, $this>
+     */
     public function stockItem(): BelongsTo
     {
         return $this->belongsTo(StockItem::class);
     }
 
+    /**
+     * @return BelongsTo<StockMove, $this>
+     */
     public function stockMove(): BelongsTo
     {
         return $this->belongsTo(StockMove::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Workflow\Enums\WorkflowAutomationTrigger;
 
 class WorkflowAutomatedAction extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -35,11 +37,17 @@ class WorkflowAutomatedAction extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Workflow, $this>
+     */
     public function workflow(): BelongsTo
     {
         return $this->belongsTo(Workflow::class);
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function step(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'step_id');

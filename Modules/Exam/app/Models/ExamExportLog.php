@@ -25,11 +25,17 @@ class ExamExportLog extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function exporter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'exported_by');

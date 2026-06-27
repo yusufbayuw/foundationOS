@@ -28,6 +28,9 @@ class TrainingBatch extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<TrainingProgram, $this>
+     */
     public function program(): BelongsTo
     {
         return $this->belongsTo(TrainingProgram::class, 'training_program_id');

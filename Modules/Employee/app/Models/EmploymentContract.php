@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class EmploymentContract extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -48,11 +50,17 @@ class EmploymentContract extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Employee, $this>
+     */
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
+    /**
+     * @return BelongsTo<EmploymentContract, $this>
+     */
     public function previousContract(): BelongsTo
     {
         return $this->belongsTo(self::class, 'previous_contract_id');

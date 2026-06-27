@@ -32,11 +32,17 @@ class WorkflowDelegation extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function fromUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'from_user_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function toUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'to_user_id');

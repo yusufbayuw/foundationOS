@@ -29,11 +29,17 @@ class Extracurricular extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function advisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'advisor_user_id');
     }
 
+    /**
+     * @return HasMany<ExtracurricularEnrollment, $this>
+     */
     public function enrollments(): HasMany
     {
         return $this->hasMany(ExtracurricularEnrollment::class);

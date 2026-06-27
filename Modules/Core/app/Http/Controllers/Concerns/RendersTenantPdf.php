@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Http\Controllers\Concerns;
 
+use App\Support\TypedValue;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -35,7 +36,7 @@ trait RendersTenantPdf
             throw new AuthorizationException('This document cannot be printed in its current status.');
         }
 
-        $tenant ??= Tenant::query()->findOrFail($record->getAttribute('tenant_id'));
+        $tenant ??= Tenant::query()->findOrFail(TypedValue::int($record->getAttribute('tenant_id')));
         $context = TenantDocumentContext::resolve($tenant, $organization);
 
         return app(PdfDocumentRenderer::class)->download(
@@ -65,7 +66,7 @@ trait RendersTenantPdf
             throw new AuthorizationException('This document cannot be printed in its current status.');
         }
 
-        $tenant ??= Tenant::query()->findOrFail($record->getAttribute('tenant_id'));
+        $tenant ??= Tenant::query()->findOrFail(TypedValue::int($record->getAttribute('tenant_id')));
         $context = TenantDocumentContext::resolve($tenant, $organization);
 
         return app(PrintableDocumentService::class)->download(

@@ -41,7 +41,7 @@ class ExamAnalyticsService
         };
 
         return [
-            'context' => $exam->exam_academic_context?->value ?? 'unknown',
+            'context' => $exam->exam_academic_context->value,
             'sections' => $sections,
             'ranking' => $results->sortByDesc('score')->values(),
         ];
@@ -201,7 +201,9 @@ class ExamAnalyticsService
 
         return $answers
             ->groupBy(fn (ExamAnswer $answer): string => $answer->examQuestion?->topic ?? 'Unknown')
-            ->map(fn (Collection $group, string $topic): string => round((float) $group->avg(fn (ExamAnswer $a) => $a->effectiveScore() ?? 0), 2).' avg')
+            ->mapWithKeys(fn (Collection $group, string $topic): array => [
+                $topic => (string) round((float) $group->avg(fn (ExamAnswer $a) => $a->effectiveScore() ?? 0), 2).' avg',
+            ])
             ->all();
     }
 
@@ -217,7 +219,9 @@ class ExamAnalyticsService
 
         return $answers
             ->groupBy(fn (ExamAnswer $answer): string => $answer->examQuestion?->subtopic ?? 'General')
-            ->map(fn (Collection $group, string $subtopic): string => round((float) $group->avg(fn (ExamAnswer $a) => $a->effectiveScore() ?? 0), 2).' avg')
+            ->mapWithKeys(fn (Collection $group, string $subtopic): array => [
+                $subtopic => (string) round((float) $group->avg(fn (ExamAnswer $a) => $a->effectiveScore() ?? 0), 2).' avg',
+            ])
             ->all();
     }
 

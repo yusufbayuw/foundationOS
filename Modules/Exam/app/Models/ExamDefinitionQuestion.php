@@ -44,11 +44,17 @@ class ExamDefinitionQuestion extends Pivot
         });
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamQuestion, $this>
+     */
     public function examQuestion(): BelongsTo
     {
         return $this->belongsTo(ExamQuestion::class);

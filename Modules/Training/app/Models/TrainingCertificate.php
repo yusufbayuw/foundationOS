@@ -23,6 +23,9 @@ class TrainingCertificate extends Model
         return ['issued_at' => 'datetime'];
     }
 
+    /**
+     * @return BelongsTo<TrainingEnrollment, $this>
+     */
     public function enrollment(): BelongsTo
     {
         return $this->belongsTo(TrainingEnrollment::class, 'training_enrollment_id');

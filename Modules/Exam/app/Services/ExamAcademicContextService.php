@@ -31,8 +31,8 @@ class ExamAcademicContextService
         $context = $definition->exam_academic_context;
 
         $payload = [
-            'academic_context_type' => $context?->value,
-            'academic_context_label' => $context !== null ? $context->label() : null,
+            'academic_context_type' => $context->value,
+            'academic_context_label' => $context->label(),
             'organization_label' => $definition->organization?->name,
             'academic_year_label' => $definition->academicYear?->name
                 ?? $definition->campusAcademicYear?->name,
@@ -42,7 +42,6 @@ class ExamAcademicContextService
             ExamAcademicContext::School => array_merge($payload, $this->schoolContext($definition)),
             ExamAcademicContext::Campus => array_merge($payload, $this->campusContext($definition)),
             ExamAcademicContext::Standalone => array_merge($payload, $this->standaloneContext($definition)),
-            default => $payload,
         };
     }
 
@@ -72,6 +71,8 @@ class ExamAcademicContextService
     {
         $offering = $definition->campusClass;
         $lecturer = $definition->campusLecturer;
+        $classCode = $offering?->class_code ?? '';
+        $courseName = $offering?->course?->name ?? '';
 
         return [
             'campus_context' => [
@@ -82,7 +83,7 @@ class ExamAcademicContextService
                 'course_reference' => ExamRuntimeEntityRef::forModel($definition->campusCourse),
                 'course_label' => $definition->campusCourse?->name,
                 'class_reference' => ExamRuntimeEntityRef::forModel($offering),
-                'class_label' => trim(($offering?->class_code ?? '').' '.($offering?->course?->name ?? '')),
+                'class_label' => trim($classCode.' '.$courseName),
                 'lecturer_reference' => ExamRuntimeEntityRef::forModel($lecturer),
                 'lecturer_name' => $lecturer?->full_name,
             ],

@@ -26,6 +26,9 @@ class Wisuda extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Yudisium, $this>
+     */
     public function yudisium(): BelongsTo
     {
         return $this->belongsTo(Yudisium::class);

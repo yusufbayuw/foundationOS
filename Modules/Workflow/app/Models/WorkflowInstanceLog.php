@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Workflow\Enums\WorkflowLogType;
 
 class WorkflowInstanceLog extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory;
 
     protected $fillable = [
@@ -42,21 +44,33 @@ class WorkflowInstanceLog extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<WorkflowInstance, $this>
+     */
     public function instance(): BelongsTo
     {
         return $this->belongsTo(WorkflowInstance::class, 'workflow_instance_id');
     }
 
+    /**
+     * @return BelongsTo<WorkflowStep, $this>
+     */
     public function step(): BelongsTo
     {
         return $this->belongsTo(WorkflowStep::class, 'step_id');
     }
 
+    /**
+     * @return BelongsTo<WorkflowTransition, $this>
+     */
     public function transition(): BelongsTo
     {
         return $this->belongsTo(WorkflowTransition::class, 'transition_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'actor_id');

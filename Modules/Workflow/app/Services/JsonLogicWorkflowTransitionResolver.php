@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Collection;
 use Modules\Workflow\Contracts\RuleEngine;
 use Modules\Workflow\Contracts\WorkflowTransitionResolver;
@@ -17,9 +18,14 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
         private readonly WorkflowSnapshotStepResolver $snapshotStepResolver,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $incomingData
+     */
     public function resolve(WorkflowInstance $instance, WorkflowStep $step, string $actionName, array $incomingData): WorkflowTransition
     {
-        $snapshotTransitions = collect(data_get($instance->workflow_snapshot, 'transitions', []));
+        /** @var list<array<string, mixed>> $transitionRows */
+        $transitionRows = data_get($instance->workflow_snapshot, 'transitions', []);
+        $snapshotTransitions = collect($transitionRows);
 
         if ($snapshotTransitions->isNotEmpty()) {
             $fromSnapshot = $this->resolveFromSnapshot(
@@ -44,6 +50,7 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
 
     /**
      * @param  Collection<int, array<string, mixed>>  $snapshotTransitions
+     * @param  array<string, mixed>  $incomingData
      */
     protected function resolveFromSnapshot(
         WorkflowInstance $instance,
@@ -53,10 +60,10 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
         array $incomingData,
     ): ?WorkflowTransition {
         $candidates = $snapshotTransitions
-            ->filter(fn (array $transition): bool => (int) ($transition['from_step_id'] ?? 0) === (int) $fromStepId
-                && ($transition['action_name'] ?? '') === $actionName)
+            ->filter(fn (array $transition): bool => TypedValue::int($transition['from_step_id'] ?? 0) === TypedValue::int($fromStepId)
+                && TypedValue::string($transition['action_name'] ?? '') === $actionName)
             ->sort(function (array $left, array $right): int {
-                $priority = ((int) ($right['priority'] ?? 0)) <=> ((int) ($left['priority'] ?? 0));
+                $priority = (TypedValue::int($right['priority'] ?? 0)) <=> (TypedValue::int($left['priority'] ?? 0));
 
                 if ($priority !== 0) {
                     return $priority;
@@ -73,7 +80,7 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
                 return $this->materializeTransition($instance, $snapshot);
             }
 
-            if ($this->ruleEngine->matches($rules, $incomingData)) {
+            if (is_array($rules) && $this->ruleEngine->matches($rules, $incomingData)) {
                 return $this->materializeTransition($instance, $snapshot);
             }
         }
@@ -86,9 +93,12 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
      */
     protected function materializeTransition(WorkflowInstance $instance, array $snapshot): WorkflowTransition
     {
-        $transition = WorkflowTransition::query()->find($snapshot['id'] ?? null);
+        $transitionId = $snapshot['id'] ?? null;
+        $transition = is_scalar($transitionId)
+            ? WorkflowTransition::query()->find($transitionId)
+            : null;
 
-        if ($transition === null) {
+        if (! $transition instanceof WorkflowTransition) {
             $transition = new WorkflowTransition($snapshot);
             $transition->exists = isset($snapshot['id']);
 
@@ -98,7 +108,7 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
         }
 
         if (isset($snapshot['to_step_id'])) {
-            $toStep = $this->snapshotStepResolver->materialize($instance, (int) $snapshot['to_step_id']);
+            $toStep = $this->snapshotStepResolver->materialize($instance, TypedValue::int($snapshot['to_step_id']));
             if ($toStep !== null) {
                 $transition->setRelation('toStep', $toStep);
             }
@@ -107,6 +117,9 @@ class JsonLogicWorkflowTransitionResolver implements WorkflowTransitionResolver
         return $transition;
     }
 
+    /**
+     * @param  array<string, mixed>  $incomingData
+     */
     protected function resolveFromLiveDefinition(WorkflowStep $step, string $actionName, array $incomingData): WorkflowTransition
     {
         $candidates = WorkflowTransition::query()

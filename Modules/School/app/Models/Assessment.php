@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\Organization;
 
 class Assessment extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -58,36 +60,57 @@ class Assessment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<AcademicPeriod, $this>
+     */
     public function academicPeriod(): BelongsTo
     {
         return $this->belongsTo(AcademicPeriod::class);
     }
 
+    /**
+     * @return BelongsTo<Subject, $this>
+     */
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
     }
 
+    /**
+     * @return BelongsTo<SchoolClass, $this>
+     */
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    /**
+     * @return HasMany<AssessmentItem, $this>
+     */
     public function assessmentItems(): HasMany
     {
         return $this->hasMany(AssessmentItem::class);
     }
 
+    /**
+     * @return HasMany<StudentGrade, $this>
+     */
     public function studentGrades(): HasMany
     {
         return $this->hasMany(StudentGrade::class);
     }
 
+    /**
+     * @return HasMany<StudentAssessmentAnswer, $this>
+     */
     public function studentAssessmentAnswers(): HasMany
     {
         return $this->hasMany(StudentAssessmentAnswer::class);

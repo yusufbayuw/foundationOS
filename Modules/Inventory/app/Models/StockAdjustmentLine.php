@@ -28,11 +28,17 @@ class StockAdjustmentLine extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<StockAdjustment, $this>
+     */
     public function stockAdjustment(): BelongsTo
     {
         return $this->belongsTo(StockAdjustment::class);
     }
 
+    /**
+     * @return BelongsTo<StockItem, $this>
+     */
     public function stockItem(): BelongsTo
     {
         return $this->belongsTo(StockItem::class);

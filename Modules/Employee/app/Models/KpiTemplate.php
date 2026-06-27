@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\Organization;
 
 class KpiTemplate extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -35,21 +37,33 @@ class KpiTemplate extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * @return BelongsTo<Position, $this>
+     */
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
     }
 
+    /**
+     * @return HasMany<KpiScore, $this>
+     */
     public function kpiScores(): HasMany
     {
         return $this->hasMany(KpiScore::class);

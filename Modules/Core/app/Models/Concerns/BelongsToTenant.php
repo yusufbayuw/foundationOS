@@ -3,6 +3,7 @@
 namespace Modules\Core\Models\Concerns;
 
 use App\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\Tenant;
@@ -17,6 +18,8 @@ use Modules\Core\Models\Tenant;
  * - withoutTenantScope() / allTenants() helpers for cross-tenant CLI work
  *
  * Tenant resolution priority is implemented in App\Support\CurrentTenant.
+ *
+ * @property int|null $tenant_id
  */
 trait BelongsToTenant
 {
@@ -25,15 +28,18 @@ trait BelongsToTenant
         static::addGlobalScope(new TenantScope);
 
         static::creating(function (Model $model) {
-            if (empty($model->tenant_id)) {
+            if (empty($model->getAttribute('tenant_id'))) {
                 $tenantId = TenantScope::resolveTenantId();
                 if ($tenantId !== null) {
-                    $model->tenant_id = $tenantId;
+                    $model->setAttribute('tenant_id', $tenantId);
                 }
             }
         });
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
@@ -41,16 +47,20 @@ trait BelongsToTenant
 
     /**
      * Query builder without the tenant scope — for cross-tenant CLI/seeders.
+     *
+     * @return Builder<static>
      */
-    public static function withoutTenantScope()
+    public static function withoutTenantScope(): Builder
     {
         return static::query()->withoutGlobalScope(TenantScope::class);
     }
 
     /**
      * Alias matching common multi-tenancy package naming.
+     *
+     * @return Builder<static>
      */
-    public static function allTenants()
+    public static function allTenants(): Builder
     {
         return static::withoutTenantScope();
     }

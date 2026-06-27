@@ -13,6 +13,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -31,6 +32,7 @@ use Modules\Employee\Models\KpiScore;
 use Modules\Employee\Models\LeaveRequest;
 use Modules\Enrollment\Models\ExamResult;
 use Modules\Enrollment\Models\Registration;
+use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\Budget as FinanceBudget;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\Payment;
@@ -56,6 +58,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants
 {
+    /** @use HasFactory<Factory<static>> */
     use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, Notifiable, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -252,6 +255,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<JournalEntry, $this>
+     */
+    /**
      * @deprecated Query Modules\Finance\Models\JournalEntry by posted_by from the Finance module instead.
      */
     public function postedJournalEntries(): HasMany
@@ -259,6 +265,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(JournalEntry::class, 'posted_by');
     }
 
+    /**
+     * @return HasMany<Budget, $this>
+     */
     /**
      * @deprecated Query Modules\Finance\Models\Budget by approved_by from the Finance module instead.
      */
@@ -268,6 +277,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<PurchaseRequisition, $this>
+     */
+    /**
      * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by requested_by from the Procurement module instead.
      */
     public function requestedPurchaseRequisitions(): HasMany
@@ -275,6 +287,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(PurchaseRequisition::class, 'requested_by');
     }
 
+    /**
+     * @return HasMany<PurchaseRequisition, $this>
+     */
     /**
      * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by user_id from the Procurement module instead.
      */
@@ -292,6 +307,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<RequestForQuotation, $this>
+     */
+    /**
      * @deprecated Query Modules\Procurement\Models\RequestForQuotation by created_by from the Procurement module instead.
      */
     public function createdRequestForQuotations(): HasMany
@@ -299,6 +317,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(RequestForQuotation::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<PurchaseOrder, $this>
+     */
     /**
      * @deprecated Query Modules\Procurement\Models\PurchaseOrder by approved_by from the Procurement module instead.
      */
@@ -308,6 +329,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<GoodsReceipt, $this>
+     */
+    /**
      * @deprecated Query Modules\Procurement\Models\GoodsReceipt by received_by from the Procurement module instead.
      */
     public function receivedGoodsReceipts(): HasMany
@@ -315,6 +339,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(GoodsReceipt::class, 'received_by');
     }
 
+    /**
+     * @return HasMany<GoodsReceipt, $this>
+     */
     /**
      * @deprecated Query Modules\Procurement\Models\GoodsReceipt by inspected_by from the Procurement module instead.
      */
@@ -324,6 +351,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<VendorBill, $this>
+     */
+    /**
      * @deprecated Query Modules\Procurement\Models\VendorBill by processed_by from the Procurement module instead.
      */
     public function processedVendorBills(): HasMany
@@ -331,6 +361,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(VendorBill::class, 'processed_by');
     }
 
+    /**
+     * @return HasMany<Loan, $this>
+     */
     /**
      * @deprecated Query Modules\Library\Models\Loan by processed_by from the Library module instead.
      */
@@ -340,6 +373,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<Loan, $this>
+     */
+    /**
      * @deprecated Query Modules\Library\Models\Loan by returned_by from the Library module instead.
      */
     public function returnedLoans(): HasMany
@@ -347,6 +383,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(Loan::class, 'returned_by');
     }
 
+    /**
+     * @return HasMany<AttendanceLog, $this>
+     */
     /**
      * @deprecated Query Modules\Employee\Models\AttendanceLog by approved_by from the Employee module instead.
      */
@@ -356,6 +395,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<LeaveRequest, $this>
+     */
+    /**
      * @deprecated Query Modules\Employee\Models\LeaveRequest by supervisor_id from the Employee module instead.
      */
     public function supervisedLeaveRequests(): HasMany
@@ -363,6 +405,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(LeaveRequest::class, 'supervisor_id');
     }
 
+    /**
+     * @return HasMany<LeaveRequest, $this>
+     */
     /**
      * @deprecated Query Modules\Employee\Models\LeaveRequest by approver_id from the Employee module instead.
      */
@@ -372,6 +417,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<KpiScore, $this>
+     */
+    /**
      * @deprecated Query Modules\Employee\Models\KpiScore by evaluator_id from the Employee module instead.
      */
     public function evaluatedKpiScores(): HasMany
@@ -379,36 +427,57 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(KpiScore::class, 'evaluator_id');
     }
 
+    /**
+     * @return HasMany<Attendance, $this>
+     */
     public function verifiedAttendances(): HasMany
     {
         return $this->hasMany(Attendance::class, 'verified_by');
     }
 
+    /**
+     * @return HasMany<Violation, $this>
+     */
     public function reportedViolations(): HasMany
     {
         return $this->hasMany(Violation::class, 'reported_by');
     }
 
+    /**
+     * @return HasMany<Violation, $this>
+     */
     public function handledViolations(): HasMany
     {
         return $this->hasMany(Violation::class, 'handled_by');
     }
 
+    /**
+     * @return HasMany<StudentAssessmentAnswer, $this>
+     */
     public function gradedStudentAnswers(): HasMany
     {
         return $this->hasMany(StudentAssessmentAnswer::class, 'graded_by');
     }
 
+    /**
+     * @return HasMany<StudentGrade, $this>
+     */
     public function gradedStudentGrades(): HasMany
     {
         return $this->hasMany(StudentGrade::class, 'graded_by');
     }
 
+    /**
+     * @return HasMany<StudentAchievement, $this>
+     */
     public function verifiedStudentAchievements(): HasMany
     {
         return $this->hasMany(StudentAchievement::class, 'verified_by');
     }
 
+    /**
+     * @return HasMany<Registration, $this>
+     */
     /**
      * @deprecated Query Modules\Enrollment\Models\Registration by completed_by from the Enrollment module instead.
      */
@@ -418,6 +487,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
+     * @return HasMany<ExamResult, $this>
+     */
+    /**
      * @deprecated Query Modules\Enrollment\Models\ExamResult by examiner_id from the Enrollment module instead.
      */
     public function examinedExamResults(): HasMany
@@ -425,26 +497,41 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(ExamResult::class, 'examiner_id');
     }
 
+    /**
+     * @return HasMany<StudyPlan, $this>
+     */
     public function approvedStudyPlans(): HasMany
     {
         return $this->hasMany(StudyPlan::class, 'approved_by');
     }
 
+    /**
+     * @return HasMany<FeederLog, $this>
+     */
     public function syncedFeederLogs(): HasMany
     {
         return $this->hasMany(FeederLog::class, 'synced_by');
     }
 
+    /**
+     * @return HasMany<SubscriptionLog, $this>
+     */
     public function processedSubscriptionLogs(): HasMany
     {
         return $this->hasMany(SubscriptionLog::class, 'processed_by');
     }
 
+    /**
+     * @return HasMany<AuditLog, $this>
+     */
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
     }
 
+    /**
+     * @return HasMany<FileUpload, $this>
+     */
     public function uploadedFiles(): HasMany
     {
         return $this->hasMany(FileUpload::class, 'uploaded_by');

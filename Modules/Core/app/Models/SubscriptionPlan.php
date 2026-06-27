@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubscriptionPlan extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -63,16 +65,25 @@ class SubscriptionPlan extends Model
             + ($billableModules * (float) $this->price_per_module);
     }
 
+    /**
+     * @return HasMany<Tenant, $this>
+     */
     public function tenants(): HasMany
     {
         return $this->hasMany(Tenant::class);
     }
 
+    /**
+     * @return HasMany<SubscriptionLog, $this>
+     */
     public function previousSubscriptionLogs(): HasMany
     {
         return $this->hasMany(SubscriptionLog::class, 'previous_plan_id');
     }
 
+    /**
+     * @return HasMany<SubscriptionLog, $this>
+     */
     public function newSubscriptionLogs(): HasMany
     {
         return $this->hasMany(SubscriptionLog::class, 'new_plan_id');

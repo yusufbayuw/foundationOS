@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class ExamSchedule extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     public function synchronizeCounters(): void
@@ -45,11 +47,17 @@ class ExamSchedule extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<AdmissionPeriod, $this>
+     */
     public function admissionPeriod(): BelongsTo
     {
         return $this->belongsTo(AdmissionPeriod::class);
     }
 
+    /**
+     * @return HasMany<ExamResult, $this>
+     */
     public function examResults(): HasMany
     {
         return $this->hasMany(ExamResult::class);

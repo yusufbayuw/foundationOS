@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class SubscriptionLog extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -41,16 +43,25 @@ class SubscriptionLog extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<SubscriptionPlan, $this>
+     */
     public function previousPlan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class, 'previous_plan_id');
     }
 
+    /**
+     * @return BelongsTo<SubscriptionPlan, $this>
+     */
     public function newPlan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class, 'new_plan_id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function processedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by');

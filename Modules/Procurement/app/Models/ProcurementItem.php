@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Modules\Finance\Models\ChartOfAccount;
 
 class ProcurementItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -42,31 +44,49 @@ class ProcurementItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<ProcurementCategory, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProcurementCategory::class, 'category_id');
     }
 
+    /**
+     * @return BelongsTo<Vendor, $this>
+     */
     public function preferredVendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class, 'preferred_vendor_id');
     }
 
+    /**
+     * @return BelongsTo<ChartOfAccount, $this>
+     */
     public function chartOfAccount(): BelongsTo
     {
         return $this->belongsTo(ChartOfAccount::class);
     }
 
+    /**
+     * @return HasMany<PurchaseRequisitionItem, $this>
+     */
     public function requisitionItems(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class);
     }
 
+    /**
+     * @return HasMany<RfqItem, $this>
+     */
     public function rfqItems(): HasMany
     {
         return $this->hasMany(RfqItem::class);
     }
 
+    /**
+     * @return HasMany<PurchaseOrderItem, $this>
+     */
     public function purchaseOrderItems(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\Tenant;
 
 class RfqItem extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -37,16 +39,25 @@ class RfqItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /**
+     * @return BelongsTo<RequestForQuotation, $this>
+     */
     public function requestForQuotation(): BelongsTo
     {
         return $this->belongsTo(RequestForQuotation::class);
     }
 
+    /**
+     * @return BelongsTo<ProcurementItem, $this>
+     */
     public function procurementItem(): BelongsTo
     {
         return $this->belongsTo(ProcurementItem::class);

@@ -46,11 +46,17 @@ class ExamQuestion extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamQuestionBank, $this>
+     */
     public function examQuestionBank(): BelongsTo
     {
         return $this->belongsTo(ExamQuestionBank::class);
     }
 
+    /**
+     * @return HasMany<ExamQuestionOption, $this>
+     */
     public function examQuestionOptions(): HasMany
     {
         return $this->hasMany(ExamQuestionOption::class)->orderBy('sort_order');

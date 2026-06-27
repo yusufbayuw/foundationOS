@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\User;
 
 class Violation extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -44,21 +46,33 @@ class Violation extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<ViolationType, $this>
+     */
     public function violationType(): BelongsTo
     {
         return $this->belongsTo(ViolationType::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function reportedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reported_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function handledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'handled_by');

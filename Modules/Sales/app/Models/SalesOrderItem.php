@@ -25,6 +25,9 @@ class SalesOrderItem extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<SalesOrder, $this>
+     */
     public function salesOrder(): BelongsTo
     {
         return $this->belongsTo(SalesOrder::class);

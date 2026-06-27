@@ -2,6 +2,10 @@
 
 namespace Modules\Employee\Filament\Resources\Employees\RelationManagers;
 
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -95,7 +99,7 @@ class DocumentsRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['tenant_id'] = filament()->getTenant()?->id;
 
@@ -103,8 +107,8 @@ class DocumentsRelationManager extends RelationManager
                     }),
             ])
             ->recordActions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('verify')
+                EditAction::make(),
+                Action::make('verify')
                     ->label(FilamentUi::text('Verify'))
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
@@ -117,7 +121,7 @@ class DocumentsRelationManager extends RelationManager
                             'verified_by' => auth()->id(),
                         ]);
                     }),
-                Tables\Actions\DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }

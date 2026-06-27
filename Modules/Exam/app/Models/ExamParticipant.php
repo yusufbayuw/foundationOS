@@ -46,46 +46,73 @@ class ExamParticipant extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function schoolStudent(): BelongsTo
     {
         return $this->belongsTo(Student::class, 'school_student_reference');
     }
 
+    /**
+     * @return BelongsTo<CollageStudent, $this>
+     */
     public function campusStudent(): BelongsTo
     {
         return $this->belongsTo(CollageStudent::class, 'campus_student_reference');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_reference');
     }
 
+    /**
+     * @return HasMany<ExamToken, $this>
+     */
     public function examTokens(): HasMany
     {
         return $this->hasMany(ExamToken::class);
     }
 
+    /**
+     * @return HasOne<ExamToken, $this>
+     */
     public function activeToken(): HasOne
     {
         return $this->hasOne(ExamToken::class)->where('is_active', true)->latestOfMany();
     }
 
+    /**
+     * @return HasMany<ExamAttemptSync, $this>
+     */
     public function examAttemptSyncs(): HasMany
     {
         return $this->hasMany(ExamAttemptSync::class);
     }
 
+    /**
+     * @return HasMany<ExamAttempt, $this>
+     */
     public function examAttempts(): HasMany
     {
         return $this->hasMany(ExamAttempt::class);
     }
 
+    /**
+     * @return HasMany<ExamResult, $this>
+     */
     public function examResults(): HasMany
     {
         return $this->hasMany(ExamResult::class);

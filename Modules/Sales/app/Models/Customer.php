@@ -42,6 +42,9 @@ class Customer extends Model
         ];
     }
 
+    /**
+     * @return HasMany<SalesOrder, $this>
+     */
     public function salesOrders(): HasMany
     {
         return $this->hasMany(SalesOrder::class);

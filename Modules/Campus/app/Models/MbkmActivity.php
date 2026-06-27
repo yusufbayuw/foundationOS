@@ -30,6 +30,9 @@ class MbkmActivity extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<CollageStudent, $this>
+     */
     public function collageStudent(): BelongsTo
     {
         return $this->belongsTo(CollageStudent::class);

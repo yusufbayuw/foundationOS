@@ -33,11 +33,17 @@ class Campaign extends Model
         ];
     }
 
+    /**
+     * @return HasMany<Donation, $this>
+     */
     public function donations(): HasMany
     {
         return $this->hasMany(Donation::class);
     }
 
+    /**
+     * @return HasMany<CampaignUpdate, $this>
+     */
     public function updates(): HasMany
     {
         return $this->hasMany(CampaignUpdate::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Campus\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class Course extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -40,21 +42,33 @@ class Course extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<StudyProgram, $this>
+     */
     public function studyProgram(): BelongsTo
     {
         return $this->belongsTo(StudyProgram::class);
     }
 
+    /**
+     * @return HasMany<CourseOffering, $this>
+     */
     public function courseOfferings(): HasMany
     {
         return $this->hasMany(CourseOffering::class);
     }
 
+    /**
+     * @return HasMany<StudyPlanItem, $this>
+     */
     public function studyPlanItems(): HasMany
     {
         return $this->hasMany(StudyPlanItem::class);
     }
 
+    /**
+     * @return HasMany<CoursePrerequisite, $this>
+     */
     public function prerequisites(): HasMany
     {
         return $this->hasMany(CoursePrerequisite::class);

@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 class StockAdjustment extends Model implements ProvidesWorkflowContext, StartsWorkflow
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -43,26 +45,41 @@ class StockAdjustment extends Model implements ProvidesWorkflowContext, StartsWo
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Warehouse, $this>
+     */
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
     }
 
+    /**
+     * @return BelongsTo<JournalEntry, $this>
+     */
     public function journalEntry(): BelongsTo
     {
         return $this->belongsTo(JournalEntry::class);
     }
 
+    /**
+     * @return HasMany<StockAdjustmentLine, $this>
+     */
     public function lines(): HasMany
     {
         return $this->hasMany(StockAdjustmentLine::class);
     }
 
+    /**
+     * @return MorphMany<WorkflowInstance, $this>
+     */
     public function workflowInstances(): MorphMany
     {
         return $this->morphMany(WorkflowInstance::class, 'subject', 'subject_type', 'subject_id');

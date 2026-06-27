@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\User;
 
 class LibraryStockTake extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -34,16 +36,25 @@ class LibraryStockTake extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function processedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by');
     }
 
+    /**
+     * @return HasMany<LibraryStockTakeItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(LibraryStockTakeItem::class, 'stock_take_id');

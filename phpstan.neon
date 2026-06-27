@@ -1,11 +1,66 @@
 includes:
     - vendor/larastan/larastan/extension.neon
-    - phpstan-baseline.neon
 
 parameters:
-    level: 1
+    level: 10
     checkModelProperties: true
-    reportUnmatchedIgnoredErrors: false
+    parseModelCastsMethod: true
+    reportUnmatchedIgnoredErrors: true
+    stubFiles:
+        - phpstan-stubs/Filament/Pages/BasePage.php
+        - phpstan-stubs/Filament/Schemas/Schema.php
+    configDirectories:
+        - config
+        - Modules/Exam/config
+        - Modules/Messaging/config
+        - Modules/Workflow/config
+    databaseMigrationsPath:
+        - database/migrations
+        - Modules/Ai/database/migrations
+        - Modules/Alumni/database/migrations
+        - Modules/Asset/database/migrations
+        - Modules/Boarding/database/migrations
+        - Modules/Cafeteria/database/migrations
+        - Modules/Campus/database/migrations
+        - Modules/Capacity/database/migrations
+        - Modules/Clinic/database/migrations
+        - Modules/Cms/database/migrations
+        - Modules/Consulting/database/migrations
+        - Modules/Core/database/migrations
+        - Modules/Counseling/database/migrations
+        - Modules/Dms/database/migrations
+        - Modules/Donation/database/migrations
+        - Modules/EducationQa/database/migrations
+        - Modules/Employee/database/migrations
+        - Modules/Enrollment/database/migrations
+        - Modules/EOffice/database/migrations
+        - Modules/Event/database/migrations
+        - Modules/Exam/database/migrations
+        - Modules/Facility/database/migrations
+        - Modules/Finance/database/migrations
+        - Modules/Global/database/migrations
+        - Modules/Helpdesk/database/migrations
+        - Modules/InternalAudit/database/migrations
+        - Modules/Inventory/database/migrations
+        - Modules/IsoCompliance/database/migrations
+        - Modules/ItOps/database/migrations
+        - Modules/KpiEnterprise/database/migrations
+        - Modules/Legal/database/migrations
+        - Modules/Library/database/migrations
+        - Modules/Marketplace/database/migrations
+        - Modules/MerchOrder/database/migrations
+        - Modules/Messaging/database/migrations
+        - Modules/Monitoring/database/migrations
+        - Modules/PhysicalSecurity/database/migrations
+        - Modules/Printing/database/migrations
+        - Modules/Procurement/database/migrations
+        - Modules/Property/database/migrations
+        - Modules/Risk/database/migrations
+        - Modules/Sales/database/migrations
+        - Modules/School/database/migrations
+        - Modules/Training/database/migrations
+        - Modules/Transport/database/migrations
+        - Modules/Workflow/database/migrations
     paths:
         - app
         - Modules/Global

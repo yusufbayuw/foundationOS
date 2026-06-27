@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,7 @@ use Modules\Core\Models\User;
 
 class Employee extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -63,51 +65,81 @@ class Employee extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<Department, $this>
+     */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
     }
 
+    /**
+     * @return BelongsTo<Position, $this>
+     */
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
     }
 
+    /**
+     * @return HasMany<EmploymentContract, $this>
+     */
     public function employmentContracts(): HasMany
     {
         return $this->hasMany(EmploymentContract::class);
     }
 
+    /**
+     * @return HasMany<AttendanceLog, $this>
+     */
     public function attendanceLogs(): HasMany
     {
         return $this->hasMany(AttendanceLog::class);
     }
 
+    /**
+     * @return HasMany<LeaveRequest, $this>
+     */
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);
     }
 
+    /**
+     * @return HasMany<SalarySlip, $this>
+     */
     public function salarySlips(): HasMany
     {
         return $this->hasMany(SalarySlip::class);
     }
 
+    /**
+     * @return HasMany<KpiScore, $this>
+     */
     public function kpiScores(): HasMany
     {
         return $this->hasMany(KpiScore::class);
     }
 
+    /**
+     * @return HasMany<EmployeeDocument, $this>
+     */
     public function documents(): HasMany
     {
         return $this->hasMany(EmployeeDocument::class);

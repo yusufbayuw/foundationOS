@@ -36,11 +36,17 @@ class SalesOrder extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Customer, $this>
+     */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /**
+     * @return HasMany<SalesOrderItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(SalesOrderItem::class);

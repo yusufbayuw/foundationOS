@@ -27,6 +27,9 @@ class WebhookSubscription extends Model
         ];
     }
 
+    /**
+     * @return HasMany<WebhookDelivery, $this>
+     */
     public function deliveries(): HasMany
     {
         return $this->hasMany(WebhookDelivery::class);

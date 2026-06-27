@@ -37,6 +37,9 @@ class ExamAnswer extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function grader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'graded_by');
@@ -56,16 +59,25 @@ class ExamAnswer extends ExamModel
         return $this->examQuestion?->type === QuestionType::Essay;
     }
 
+    /**
+     * @return BelongsTo<ExamAttempt, $this>
+     */
     public function examAttempt(): BelongsTo
     {
         return $this->belongsTo(ExamAttempt::class);
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamQuestion, $this>
+     */
     public function examQuestion(): BelongsTo
     {
         return $this->belongsTo(ExamQuestion::class);

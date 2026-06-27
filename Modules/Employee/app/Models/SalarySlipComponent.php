@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Modules\Core\Models\Concerns\BelongsToTenant;
 
 class SalarySlipComponent extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -41,11 +43,17 @@ class SalarySlipComponent extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<SalarySlip, $this>
+     */
     public function salarySlip(): BelongsTo
     {
         return $this->belongsTo(SalarySlip::class);
     }
 
+    /**
+     * @return BelongsTo<PayrollComponent, $this>
+     */
     public function payrollComponent(): BelongsTo
     {
         return $this->belongsTo(PayrollComponent::class);

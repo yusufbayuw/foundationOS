@@ -7,6 +7,7 @@ namespace Modules\Exam\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Exam\Enums\ExamPermission;
+use Modules\Exam\Models\ExamDefinition;
 use Modules\Exam\Models\ExamQuestionBank;
 use Modules\Exam\Services\ExamAuthorizationService;
 

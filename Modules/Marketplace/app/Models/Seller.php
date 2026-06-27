@@ -37,6 +37,9 @@ class Seller extends Model
         return ['meta' => 'array'];
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function sellable(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'seller_type', 'seller_id');

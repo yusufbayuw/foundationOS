@@ -28,6 +28,9 @@ class MarketplaceOrder extends Model
         return ['meta' => 'array'];
     }
 
+    /**
+     * @return BelongsTo<Seller, $this>
+     */
     public function seller(): BelongsTo
     {
         return $this->belongsTo(Seller::class);

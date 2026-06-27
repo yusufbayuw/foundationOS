@@ -31,11 +31,17 @@ class CoursePrerequisite extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Course, $this>
+     */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
+    /**
+     * @return BelongsTo<Course, $this>
+     */
     public function prerequisiteCourse(): BelongsTo
     {
         return $this->belongsTo(Course::class, 'prerequisite_course_id');

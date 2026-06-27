@@ -39,16 +39,25 @@ class BookReservation extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<Book, $this>
+     */
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class);
     }
 
+    /**
+     * @return BelongsTo<Member, $this>
+     */
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);

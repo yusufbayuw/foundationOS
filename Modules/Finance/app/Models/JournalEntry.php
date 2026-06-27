@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,6 +16,7 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class JournalEntry extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
@@ -55,21 +57,33 @@ class JournalEntry extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function postedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'posted_by');
     }
 
+    /**
+     * @return BelongsTo<JournalEntry, $this>
+     */
     public function reversedEntry(): BelongsTo
     {
         return $this->belongsTo(self::class, 'reversed_entry_id');
     }
 
+    /**
+     * @return HasMany<JournalEntryLine, $this>
+     */
     public function lines(): HasMany
     {
         return $this->hasMany(JournalEntryLine::class);

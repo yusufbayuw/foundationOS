@@ -27,11 +27,17 @@ class ExamPackage extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamQuestionBank, $this>
+     */
     public function examQuestionBank(): BelongsTo
     {
         return $this->belongsTo(ExamQuestionBank::class);

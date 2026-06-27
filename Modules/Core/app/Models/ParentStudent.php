@@ -28,11 +28,17 @@ class ParentStudent extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function parentUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'parent_user_id');
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

@@ -18,6 +18,9 @@ class PollResponse extends Model
         return $this->belongsTo(Poll::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

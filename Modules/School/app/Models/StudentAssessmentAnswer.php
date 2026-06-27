@@ -2,6 +2,7 @@
 
 namespace Modules\School\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\User;
 
 class StudentAssessmentAnswer extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -44,26 +46,41 @@ class StudentAssessmentAnswer extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Assessment, $this>
+     */
     public function assessment(): BelongsTo
     {
         return $this->belongsTo(Assessment::class);
     }
 
+    /**
+     * @return BelongsTo<AssessmentItem, $this>
+     */
     public function assessmentItem(): BelongsTo
     {
         return $this->belongsTo(AssessmentItem::class);
     }
 
+    /**
+     * @return BelongsTo<Student, $this>
+     */
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }
 
+    /**
+     * @return BelongsTo<ClassStudent, $this>
+     */
     public function classStudent(): BelongsTo
     {
         return $this->belongsTo(ClassStudent::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function gradedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'graded_by');

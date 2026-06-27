@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ use Modules\Core\Models\User;
 
 class Loan extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -49,31 +51,49 @@ class Loan extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }
 
+    /**
+     * @return BelongsTo<BookCopy, $this>
+     */
     public function bookCopy(): BelongsTo
     {
         return $this->belongsTo(BookCopy::class);
     }
 
+    /**
+     * @return BelongsTo<Member, $this>
+     */
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function processedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function returnedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'returned_by');
     }
 
+    /**
+     * @return HasMany<Fine, $this>
+     */
     public function fines(): HasMany
     {
         return $this->hasMany(Fine::class);

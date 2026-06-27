@@ -19,6 +19,9 @@ class PageBlock extends Model
         return ['content' => 'array'];
     }
 
+    /**
+     * @return BelongsTo<Page, $this>
+     */
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class);

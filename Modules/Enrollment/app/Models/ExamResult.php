@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Models;
 
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Modules\Core\Models\User;
 
 class ExamResult extends Model
 {
+    /** @use HasFactory<Factory<static>> */
     use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected ?int $previousExamScheduleId = null;
@@ -74,16 +76,25 @@ class ExamResult extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Applicant, $this>
+     */
     public function applicant(): BelongsTo
     {
         return $this->belongsTo(Applicant::class);
     }
 
+    /**
+     * @return BelongsTo<ExamSchedule, $this>
+     */
     public function examSchedule(): BelongsTo
     {
         return $this->belongsTo(ExamSchedule::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function examiner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'examiner_id');

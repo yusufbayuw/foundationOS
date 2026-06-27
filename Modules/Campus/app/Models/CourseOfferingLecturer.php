@@ -33,11 +33,17 @@ class CourseOfferingLecturer extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<CourseOffering, $this>
+     */
     public function courseOffering(): BelongsTo
     {
         return $this->belongsTo(CourseOffering::class);
     }
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function lecturer(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class);

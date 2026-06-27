@@ -33,21 +33,33 @@ class ExamGradebookExportLog extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamDefinition, $this>
+     */
     public function examDefinition(): BelongsTo
     {
         return $this->belongsTo(ExamDefinition::class);
     }
 
+    /**
+     * @return BelongsTo<ExamResult, $this>
+     */
     public function examResult(): BelongsTo
     {
         return $this->belongsTo(ExamResult::class);
     }
 
+    /**
+     * @return BelongsTo<ExamParticipant, $this>
+     */
     public function examParticipant(): BelongsTo
     {
         return $this->belongsTo(ExamParticipant::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function pushedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pushed_by');

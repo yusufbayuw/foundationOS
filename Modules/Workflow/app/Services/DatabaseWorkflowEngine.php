@@ -34,22 +34,19 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         private readonly WorkflowSnapshotStepResolver $snapshotStepResolver,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $formData
+     */
     public function advance(WorkflowInstance $instance, string $actionName, array $formData, User $actor, ?string $notes = null): WorkflowInstance
     {
         $result = DB::transaction(function () use ($instance, $actionName, $formData, $actor, $notes): array {
-            // Row-lock the instance to serialize concurrent advance() calls
-            // from parallel approvers.
-            $instance = WorkflowInstance::query()
-                ->whereKey($instance->getKey())
-                ->lockForUpdate()
-                ->first()
-                ->load(['currentStep', 'assignments', 'workflow']);
+            $instance = $this->lockInstance($instance, ['currentStep', 'assignments', 'workflow']);
 
             $this->authorizeActor($instance, $actor);
 
             $currentStep = $this->snapshotStepResolver->resolveCurrent($instance);
 
-            if ($currentStep?->requiresEvidence()) {
+            if ($currentStep instanceof WorkflowStep && $currentStep->requiresEvidence()) {
                 $uploaded = $instance->evidences()
                     ->where('workflow_step_id', $currentStep->getKey())
                     ->count();
@@ -62,14 +59,21 @@ class DatabaseWorkflowEngine implements WorkflowEngine
                     );
                 }
             }
+
+            if (! $currentStep instanceof WorkflowStep) {
+                throw new \RuntimeException('Workflow instance does not have a resolvable current step.');
+            }
+
             $currentStepId = $instance->current_step_id;
             $statusBefore = $instance->status->value;
             $incomingContext = WorkflowContextData::fromInstance($instance, $formData);
+            /** @var array<string, mixed> $validated */
             $validated = $this->validator->validate($currentStep, $formData, $incomingContext);
             $payloadBefore = $this->payloadSnapshot($instance);
+            /** @var array<string, mixed> $mergedFormData */
             $mergedFormData = array_replace_recursive($instance->form_data ?? [], $validated);
 
-            if ($currentStep && $this->parallelCoordinator->isParallel($currentStep)) {
+            if ($this->parallelCoordinator->isParallel($currentStep)) {
                 return $this->advanceParallel(
                     $instance, $currentStep, $actor, $actionName, $validated,
                     $mergedFormData, $statusBefore, $payloadBefore, $notes, $currentStepId,
@@ -84,6 +88,10 @@ class DatabaseWorkflowEngine implements WorkflowEngine
 
         $fresh = $instance->fresh(['currentStep', 'assignments', 'logs']);
 
+        if ($fresh === null) {
+            throw new \RuntimeException('Workflow instance no longer exists.');
+        }
+
         if ($result['advanced'] && $result['transition'] !== null) {
             WorkflowAdvanced::dispatch($fresh, $result['transition'], $actor);
         }
@@ -92,11 +100,14 @@ class DatabaseWorkflowEngine implements WorkflowEngine
     }
 
     /**
-     * @return array{advanced:bool,transition: WorkflowTransition|null}
+     * @param  array<string, mixed>  $validated
+     * @param  array<string, mixed>  $mergedFormData
+     * @param  array<string, mixed>  $payloadBefore
+     * @return array{advanced: bool, transition: WorkflowTransition|null}
      */
     protected function advanceLinear(
         WorkflowInstance $instance,
-        ?WorkflowStep $currentStep,
+        WorkflowStep $currentStep,
         User $actor,
         string $actionName,
         array $validated,
@@ -109,7 +120,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         $incoming = WorkflowContextData::fromInstance($instance, $mergedFormData);
         $transition = $this->transitionResolver->resolve($instance, $currentStep, $actionName, $incoming);
 
-        $nextStep = $transition->toStep;
+        $nextStep = $transition->toStep instanceof WorkflowStep ? $transition->toStep : null;
         $nextStatus = $this->determineStatus($actionName, $nextStep);
 
         $instance->assignments()
@@ -153,7 +164,10 @@ class DatabaseWorkflowEngine implements WorkflowEngine
      * Parallel/quorum step: record actor's outcome, then evaluate quorum.
      * Only advance once the coordinator says the step has reached a decision.
      *
-     * @return array{advanced:bool,transition: WorkflowTransition|null}
+     * @param  array<string, mixed>  $validated
+     * @param  array<string, mixed>  $mergedFormData
+     * @param  array<string, mixed>  $payloadBefore
+     * @return array{advanced: bool, transition: WorkflowTransition|null}
      */
     protected function advanceParallel(
         WorkflowInstance $instance,
@@ -183,7 +197,13 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         // Persist merged form data even when still waiting on other approvers.
         $instance->forceFill(['form_data' => $mergedFormData])->save();
 
-        $verdict = $this->parallelCoordinator->evaluate($instance->fresh(['assignments']), $currentStep);
+        $refreshed = $instance->fresh(['assignments']);
+
+        if ($refreshed === null) {
+            throw new \RuntimeException('Workflow instance no longer exists.');
+        }
+
+        $verdict = $this->parallelCoordinator->evaluate($refreshed, $currentStep);
 
         if (! $verdict['reached']) {
             $this->auditLogger->log($instance, WorkflowLogType::Advanced->value, [
@@ -215,7 +235,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         $incoming = WorkflowContextData::fromInstance($instance, $mergedFormData);
         $transition = $this->transitionResolver->resolve($instance, $currentStep, $verdict['outcome'], $incoming);
 
-        $nextStep = $transition->toStep;
+        $nextStep = $transition->toStep instanceof WorkflowStep ? $transition->toStep : null;
         $nextStatus = $this->determineStatus($verdict['outcome'], $nextStep);
 
         $instance->forceFill([
@@ -246,25 +266,31 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         return ['advanced' => true, 'transition' => $transition];
     }
 
+    /**
+     * @param  array<string, mixed>  $formData
+     */
     public function returnToStep(WorkflowInstance $instance, int $targetStepId, array $formData, User $actor, ?string $notes = null): WorkflowInstance
     {
-        $instance = DB::transaction(function () use ($instance, $targetStepId, $formData, $actor, $notes) {
-            $instance = WorkflowInstance::query()
-                ->whereKey($instance->getKey())
-                ->lockForUpdate()
-                ->first()
-                ->load(['workflow.steps', 'assignments', 'currentStep']);
+        $targetStep = null;
+
+        $returned = DB::transaction(function () use ($instance, $targetStepId, $formData, $actor, $notes, &$targetStep): WorkflowInstance {
+            $instance = $this->lockInstance($instance, ['workflow.steps', 'assignments', 'currentStep']);
 
             $this->authorizeActor($instance, $actor);
             $statusBefore = $instance->status->value;
 
             $targetStep = $this->snapshotStepResolver->materialize($instance, $targetStepId);
 
-            if (! $targetStep) {
+            if (! $targetStep instanceof WorkflowStep) {
                 throw new WorkflowAuthorizationException('Target return step is not part of the workflow.');
             }
 
             $currentStep = $this->snapshotStepResolver->resolveCurrent($instance);
+
+            if (! $currentStep instanceof WorkflowStep) {
+                throw new \RuntimeException('Workflow instance does not have a resolvable current step.');
+            }
+
             $incomingContext = WorkflowContextData::fromInstance($instance, $formData);
             $validated = $this->validator->validate($currentStep, $formData, $incomingContext);
             $payloadBefore = $this->payloadSnapshot($instance);
@@ -299,27 +325,36 @@ class DatabaseWorkflowEngine implements WorkflowEngine
                 'notes' => $notes,
             ]);
 
-            return $instance->fresh(['currentStep', 'assignments', 'logs']);
+            $fresh = $instance->fresh(['currentStep', 'assignments', 'logs']);
+
+            if ($fresh === null) {
+                throw new \RuntimeException('Workflow instance no longer exists.');
+            }
+
+            return $fresh;
         });
 
+        $returnStep = $this->snapshotStepResolver->resolveCurrent($returned)
+            ?? ($targetStep instanceof WorkflowStep ? $targetStep : null);
+
+        if (! $returnStep instanceof WorkflowStep) {
+            throw new \RuntimeException('Workflow return step could not be resolved.');
+        }
+
         WorkflowReturned::dispatch(
-            $instance,
-            $this->snapshotStepResolver->resolveCurrent($instance),
+            $returned,
+            $returnStep,
             $actor,
             $notes,
         );
 
-        return $instance;
+        return $returned;
     }
 
     public function cancel(WorkflowInstance $instance, User $actor, ?string $reason = null): WorkflowInstance
     {
-        $instance = DB::transaction(function () use ($instance, $actor, $reason) {
-            $instance = WorkflowInstance::query()
-                ->whereKey($instance->getKey())
-                ->lockForUpdate()
-                ->first()
-                ->load(['assignments', 'currentStep']);
+        $cancelled = DB::transaction(function () use ($instance, $actor, $reason): WorkflowInstance {
+            $instance = $this->lockInstance($instance, ['assignments', 'currentStep']);
 
             $this->authorizeActor($instance, $actor);
             $statusBefore = $instance->status->value;
@@ -350,29 +385,41 @@ class DatabaseWorkflowEngine implements WorkflowEngine
                 'notes' => $reason,
             ]);
 
-            return $instance->fresh(['currentStep', 'assignments', 'logs']);
+            $fresh = $instance->fresh(['currentStep', 'assignments', 'logs']);
+
+            if ($fresh === null) {
+                throw new \RuntimeException('Workflow instance no longer exists.');
+            }
+
+            return $fresh;
         });
 
-        WorkflowCancelled::dispatch($instance, $actor, $reason);
+        WorkflowCancelled::dispatch($cancelled, $actor, $reason);
 
-        return $instance;
+        return $cancelled;
     }
 
     public function reassign(WorkflowAssignment $assignment, User $actor, User $targetUser, ?string $reason = null): WorkflowAssignment
     {
-        return DB::transaction(function () use ($assignment, $actor, $targetUser, $reason) {
+        return DB::transaction(function () use ($assignment, $actor, $targetUser, $reason): WorkflowAssignment {
             $assignment = $assignment->fresh(['instance', 'step']);
+
+            if ($assignment === null) {
+                throw new \RuntimeException('Workflow assignment no longer exists.');
+            }
 
             $instance = WorkflowInstance::query()
                 ->whereKey($assignment->workflow_instance_id)
                 ->lockForUpdate()
                 ->first();
 
-            if ($instance) {
-                $assignment->setRelation('instance', $instance);
+            if (! $instance instanceof WorkflowInstance) {
+                throw new \RuntimeException('Workflow instance no longer exists.');
             }
 
-            $this->authorizeActor($assignment->instance, $actor);
+            $assignment->setRelation('instance', $instance);
+
+            $this->authorizeActor($instance, $actor);
 
             $assignment->forceFill([
                 'status' => WorkflowAssignmentStatus::Cancelled,
@@ -394,7 +441,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
                 ]),
             ]);
 
-            $assignment->instance->forceFill([
+            $instance->forceFill([
                 'current_assignees' => [[
                     'id' => $targetUser->getKey(),
                     'name' => $targetUser->name,
@@ -402,7 +449,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
                 ]],
             ])->save();
 
-            $this->auditLogger->log($assignment->instance->fresh(), WorkflowLogType::Reassigned->value, [
+            $this->auditLogger->log($instance->fresh() ?? $instance, WorkflowLogType::Reassigned->value, [
                 'step_id' => $assignment->step_id,
                 'actor_id' => $actor->getKey(),
                 'action_taken' => 'reassign',
@@ -411,6 +458,27 @@ class DatabaseWorkflowEngine implements WorkflowEngine
 
             return $newAssignment;
         });
+    }
+
+    /**
+     * @param  list<string>  $relations
+     */
+    protected function lockInstance(WorkflowInstance $instance, array $relations = []): WorkflowInstance
+    {
+        $locked = WorkflowInstance::query()
+            ->whereKey($instance->getKey())
+            ->lockForUpdate()
+            ->first();
+
+        if (! $locked instanceof WorkflowInstance) {
+            throw new \RuntimeException('Workflow instance no longer exists.');
+        }
+
+        if ($relations !== []) {
+            $locked->load($relations);
+        }
+
+        return $locked;
     }
 
     protected function authorizeActor(WorkflowInstance $instance, User $actor): void
@@ -447,6 +515,9 @@ class DatabaseWorkflowEngine implements WorkflowEngine
         return WorkflowInstanceStatus::Running;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function payloadSnapshot(WorkflowInstance $instance): array
     {
         return [
@@ -454,7 +525,7 @@ class DatabaseWorkflowEngine implements WorkflowEngine
             'form_data' => $instance->form_data,
             'computed_data' => $instance->computed_data,
             'current_assignees' => $instance->current_assignees,
-            'status' => $instance->status?->value ?? $instance->status,
+            'status' => $instance->status->value,
             'current_step_id' => $instance->current_step_id,
         ];
     }

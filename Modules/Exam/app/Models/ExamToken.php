@@ -27,6 +27,9 @@ class ExamToken extends ExamModel
         ];
     }
 
+    /**
+     * @return BelongsTo<ExamParticipant, $this>
+     */
     public function examParticipant(): BelongsTo
     {
         return $this->belongsTo(ExamParticipant::class);
