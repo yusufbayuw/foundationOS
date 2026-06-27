@@ -3,16 +3,16 @@
 namespace Modules\Workflow\Services;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Exceptions\WorkflowConfigurationException;
 use Modules\Workflow\Models\Workflow;
-use Modules\Workflow\Models\WorkflowAutomatedAction;
-use Modules\Workflow\Models\WorkflowStep;
-use Modules\Workflow\Models\WorkflowTransition;
 
 class WorkflowDefinitionLifecycleService
 {
+    public function __construct(
+        private readonly WorkflowDefinitionGraphMaterializer $graphMaterializer,
+    ) {}
+
     /**
      * @throws WorkflowConfigurationException
      */
@@ -97,59 +97,9 @@ class WorkflowDefinitionLifecycleService
                 'updated_by' => $actorId,
             ]);
 
-            $stepIdMap = [];
-
-            foreach ($workflow->steps()->orderBy('sort_order')->get() as $step) {
-                $newStep = WorkflowStep::query()->create([
-                    'workflow_id' => $clone->id,
-                    'uuid' => (string) Str::uuid(),
-                    'code' => $step->code,
-                    'name' => $step->name,
-                    'description' => $step->description,
-                    'step_type' => $step->step_type,
-                    'assignee_type' => $step->assignee_type,
-                    'assignee_value' => $step->assignee_value,
-                    'assignee_config' => $step->assignee_config,
-                    'form_schema' => $step->form_schema,
-                    'action_schema' => $step->action_schema,
-                    'sla_hours' => $step->sla_hours,
-                    'allow_reassign' => $step->allow_reassign,
-                    'allow_delegate' => $step->allow_delegate,
-                    'is_initial' => $step->is_initial,
-                    'is_terminal' => $step->is_terminal,
-                    'sort_order' => $step->sort_order,
-                    'canvas_position' => $step->canvas_position,
-                ]);
-
-                $stepIdMap[$step->id] = $newStep->id;
-            }
-
-            foreach ($workflow->transitions as $transition) {
-                WorkflowTransition::query()->create([
-                    'workflow_id' => $clone->id,
-                    'from_step_id' => $stepIdMap[$transition->from_step_id] ?? $transition->from_step_id,
-                    'to_step_id' => $transition->to_step_id ? ($stepIdMap[$transition->to_step_id] ?? $transition->to_step_id) : null,
-                    'action_name' => $transition->action_name,
-                    'rule_type' => $transition->rule_type,
-                    'condition_rules' => $transition->condition_rules,
-                    'priority' => $transition->priority,
-                    'is_default' => $transition->is_default,
-                    'transition_meta' => $transition->transition_meta,
-                ]);
-            }
-
-            foreach ($workflow->automatedActions as $action) {
-                WorkflowAutomatedAction::query()->create([
-                    'workflow_id' => $clone->id,
-                    'step_id' => $action->step_id ? ($stepIdMap[$action->step_id] ?? $action->step_id) : null,
-                    'trigger_event' => $action->trigger_event,
-                    'action_type' => $action->action_type,
-                    'name' => $action->name,
-                    'config' => $action->config,
-                    'is_active' => $action->is_active,
-                    'sort_order' => $action->sort_order,
-                ]);
-            }
+            $stepIdMap = $this->graphMaterializer->copyStepsFromWorkflow($workflow, $clone);
+            $this->graphMaterializer->copyTransitionsFromWorkflow($workflow, $clone, $stepIdMap);
+            $this->graphMaterializer->copyAutomatedActionsFromWorkflow($workflow, $clone, $stepIdMap);
 
             return $clone->fresh(['steps', 'transitions', 'automatedActions']);
         });

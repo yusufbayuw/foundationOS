@@ -6,13 +6,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Models\Workflow;
-use Modules\Workflow\Models\WorkflowAutomatedAction;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
 
 class WorkflowDefinitionPorter
 {
     private const SCHEMA_VERSION = '1.0';
+
+    public function __construct(
+        private readonly WorkflowDefinitionGraphMaterializer $graphMaterializer,
+    ) {}
 
     /**
      * Export a workflow definition to a portable JSON-safe array.
@@ -149,63 +152,9 @@ class WorkflowDefinitionPorter
                 'is_active' => false,
             ]);
 
-            // Map old_uuid → new WorkflowStep id
-            $uuidMap = []; // old_uuid => new_step_id
-
-            foreach ($payload['steps'] as $stepData) {
-                $newStep = WorkflowStep::query()->create([
-                    'workflow_id' => $workflow->id,
-                    'uuid' => (string) Str::uuid(),
-                    'code' => $stepData['code'] ?? Str::slug($stepData['name'] ?? 'step'),
-                    'name' => $stepData['name'] ?? 'Step',
-                    'description' => $stepData['description'] ?? null,
-                    'step_type' => $stepData['step_type'] ?? 'task',
-                    'gateway_type' => $stepData['gateway_type'] ?? 'none',
-                    'quorum_strategy' => $stepData['quorum_strategy'] ?? null,
-                    'quorum_value' => $stepData['quorum_value'] ?? null,
-                    'assignee_type' => $stepData['assignee_type'] ?? 'user',
-                    'assignee_value' => $stepData['assignee_value'] ?? null,
-                    'assignee_config' => $stepData['assignee_config'] ?? null,
-                    'form_schema' => $stepData['form_schema'] ?? [],
-                    'action_schema' => $stepData['action_schema'] ?? null,
-                    'sla_hours' => $stepData['sla_hours'] ?? null,
-                    'allow_reassign' => $stepData['allow_reassign'] ?? false,
-                    'allow_delegate' => $stepData['allow_delegate'] ?? false,
-                    'is_initial' => $stepData['is_initial'] ?? false,
-                    'is_terminal' => $stepData['is_terminal'] ?? false,
-                    'sort_order' => $stepData['sort_order'] ?? 0,
-                    'canvas_position' => $stepData['canvas_position'] ?? null,
-                ]);
-
-                $uuidMap[$stepData['uuid']] = $newStep->id;
-            }
-
-            foreach ($payload['transitions'] ?? [] as $t) {
-                WorkflowTransition::query()->create([
-                    'workflow_id' => $workflow->id,
-                    'from_step_id' => $uuidMap[$t['from_uuid']] ?? null,
-                    'to_step_id' => isset($t['to_uuid']) ? ($uuidMap[$t['to_uuid']] ?? null) : null,
-                    'action_name' => $t['action_name'] ?? 'proceed',
-                    'rule_type' => $t['rule_type'] ?? 'none',
-                    'condition_rules' => $t['condition_rules'] ?? null,
-                    'priority' => $t['priority'] ?? 0,
-                    'is_default' => $t['is_default'] ?? false,
-                    'transition_meta' => $t['transition_meta'] ?? null,
-                ]);
-            }
-
-            foreach ($payload['automated_actions'] ?? [] as $action) {
-                WorkflowAutomatedAction::query()->create([
-                    'workflow_id' => $workflow->id,
-                    'step_id' => isset($action['step_uuid']) ? ($uuidMap[$action['step_uuid']] ?? null) : null,
-                    'trigger_event' => $action['trigger_event'] ?? null,
-                    'action_type' => $action['action_type'] ?? null,
-                    'name' => $action['name'] ?? 'Action',
-                    'config' => $action['config'] ?? null,
-                    'is_active' => $action['is_active'] ?? true,
-                    'sort_order' => $action['sort_order'] ?? 0,
-                ]);
-            }
+            $uuidMap = $this->graphMaterializer->createStepsFromPayload($workflow, $payload['steps']);
+            $this->graphMaterializer->createTransitionsFromPayload($workflow, $payload['transitions'] ?? [], $uuidMap);
+            $this->graphMaterializer->createAutomatedActionsFromPayload($workflow, $payload['automated_actions'] ?? [], $uuidMap);
 
             return $workflow->fresh(['steps', 'transitions']);
         });
