@@ -8,14 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Modules\Core\Models\Concerns\HasLegacyTenantDomainRelations;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @mixin TenantDelegatedRelations
+ */
 class Tenant extends Model
 {
     use HasFactory;
-    use HasLegacyTenantDomainRelations;
     use LogsActivity;
     use SoftDeletes;
 
@@ -130,16 +131,6 @@ class Tenant extends Model
         return $this->hasMany(TenantSetting::class);
     }
 
-    public function academicYears(): HasMany
-    {
-        return $this->hasMany(AcademicYear::class);
-    }
-
-    public function departments(): HasMany
-    {
-        return $this->hasMany(Department::class);
-    }
-
     public function tenantModules(): HasMany
     {
         return $this->hasMany(TenantModule::class);
@@ -164,11 +155,5 @@ class Tenant extends Model
                 'is_primary',
             ])
             ->withTimestamps();
-    }
-
-    /** @return HasMany<AcademicPeriod, self> */
-    public function academicPeriods(): HasMany
-    {
-        return $this->hasMany(AcademicPeriod::class);
     }
 }

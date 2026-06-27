@@ -6,7 +6,6 @@ use App\Support\CurrentTenant;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
-use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
 use Modules\Core\Scopes\TenantScope;
 use Modules\Core\Support\Tenancy\CurrentTenant as CoreCurrentTenant;
@@ -32,13 +31,19 @@ class CoreArchitectureTest extends TestCase
 
         $this->assertStringNotContainsString('Modules\\School\\', $source);
         $this->assertStringNotContainsString('Modules\\Finance\\', $source);
-        $this->assertStringContainsString('HasLegacyTenantDomainRelations', $source);
+        $this->assertStringNotContainsString('HasLegacyTenantDomainRelations', $source);
+        $this->assertStringNotContainsString('students', $source);
     }
 
-    public function test_legacy_tenant_relations_remain_available_for_backward_compatibility(): void
+    public function test_tenant_retains_first_class_core_relationships(): void
     {
-        $this->assertTrue(method_exists(Tenant::class, 'students'));
-        $this->assertTrue(method_exists(Tenant::class, 'budgets'));
+        $this->assertTrue(method_exists(Tenant::class, 'organizations'));
+        $this->assertTrue(method_exists(Tenant::class, 'users'));
+        $this->assertTrue(method_exists(Tenant::class, 'tenantRoles'));
+        $this->assertTrue(method_exists(Tenant::class, 'modules'));
+        $this->assertTrue(method_exists(Tenant::class, 'tenantSettings'));
+        $this->assertTrue(method_exists(Tenant::class, 'subscriptionPlan'));
+        $this->assertTrue(method_exists(Tenant::class, 'subscriptionLogs'));
     }
 
     public function test_user_legacy_relations_remain_available_for_backward_compatibility(): void
