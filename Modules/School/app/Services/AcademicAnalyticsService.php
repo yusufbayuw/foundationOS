@@ -7,6 +7,9 @@ use Modules\School\Models\StudentGrade;
 
 class AcademicAnalyticsService
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function summaryForTenant(int $tenantId): array
     {
         return Cache::remember(
@@ -28,7 +31,8 @@ class AcademicAnalyticsService
     {
         $grades = StudentGrade::query()
             ->where('tenant_id', $tenantId)
-            ->get(['score', 'school_class_id']);
+            ->select('score', 'school_class_id')
+            ->get();
 
         if ($grades->isEmpty()) {
             return [
@@ -41,7 +45,7 @@ class AcademicAnalyticsService
 
         $scores = $grades->pluck('score')->filter()->map(fn ($s) => (float) $s);
         $average = $scores->avg();
-        $stdDev = $this->standardDeviation($scores->all());
+        $stdDev = $this->standardDeviation(array_values($scores->all()));
         $outliers = $scores->filter(fn (float $s): bool => abs($s - $average) > max(10, $stdDev * 2))->count();
 
         $distribution = [

@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\Procurement\Models\RequestForQuotation;
 use Modules\Procurement\Services\RequestForQuotationDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class RequestForQuotationPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(RequestForQuotation $requestForQuotation, RequestForQuotationDocumentService $service)
+    public function __invoke(RequestForQuotation $requestForQuotation, RequestForQuotationDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $requestForQuotation,

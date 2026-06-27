@@ -31,6 +31,9 @@ class FinanceOverviewPage extends Page
         return FilamentUi::module('Finance');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getStats(): array
     {
         $tenant = Filament::getTenant();

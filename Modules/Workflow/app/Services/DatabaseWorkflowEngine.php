@@ -18,6 +18,7 @@ use Modules\Workflow\Events\WorkflowReturned;
 use Modules\Workflow\Exceptions\WorkflowAuthorizationException;
 use Modules\Workflow\Exceptions\WorkflowEvidenceRequiredException;
 use Modules\Workflow\Models\WorkflowAssignment;
+use Modules\Workflow\Models\WorkflowEvidence;
 use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
@@ -47,7 +48,8 @@ class DatabaseWorkflowEngine implements WorkflowEngine
             $currentStep = $this->snapshotStepResolver->resolveCurrent($instance);
 
             if ($currentStep instanceof WorkflowStep && $currentStep->requiresEvidence()) {
-                $uploaded = $instance->evidences()
+                $uploaded = WorkflowEvidence::query()
+                    ->where('workflow_instance_id', $instance->getKey())
                     ->where('workflow_step_id', $currentStep->getKey())
                     ->count();
 

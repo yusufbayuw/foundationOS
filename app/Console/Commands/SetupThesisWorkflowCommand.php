@@ -49,7 +49,7 @@ class SetupThesisWorkflowCommand extends Command
         $existing = Workflow::query()
             ->where('tenant_id', $tenant->id)
             ->where('code', 'thesis-lifecycle')
-            ->when($organization, fn ($q) => $q->where('organization_id', $organization->id), fn ($q) => $q->whereNull('organization_id'))
+            ->when($organization, fn ($q) => $q->where($q->getModel()->qualifyColumn('organization_id'), $organization->id), fn ($q) => $q->whereNull('organization_id'))
             ->latest('version')
             ->first();
 
@@ -289,7 +289,7 @@ class SetupThesisWorkflowCommand extends Command
             ->where('tenant_id', $tenant->id)
             ->when($organization, function ($query) use ($organization): void {
                 $query->where(function ($inner) use ($organization): void {
-                    $inner->where('organization_id', $organization->id)
+                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), $organization->id)
                         ->orWhereNull('organization_id');
                 });
             })
@@ -301,6 +301,9 @@ class SetupThesisWorkflowCommand extends Command
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     protected function makeStep(Workflow $workflow, array $attributes): WorkflowStep
     {
         return WorkflowStep::query()->create([
@@ -334,6 +337,9 @@ class SetupThesisWorkflowCommand extends Command
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $rules
+     */
     protected function makeTransition(
         Workflow $workflow,
         WorkflowStep $fromStep,
@@ -356,6 +362,9 @@ class SetupThesisWorkflowCommand extends Command
         ]);
     }
 
+    /**
+     * @return list<array<string, list<string>|string>>
+     */
     protected function defaultApprovalActions(): array
     {
         return [

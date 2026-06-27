@@ -5,6 +5,7 @@ namespace Modules\Core\Filament\Support\Navigation;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\Module;
 use Modules\Core\Models\TenantModule;
 
 class ModuleVisibility
@@ -28,7 +29,10 @@ class ModuleVisibility
             self::cacheKey($tenant->getKey(), $module),
             now()->addMinutes(5),
             fn () => TenantModule::query()
-                ->whereHas('module', fn (Builder $q) => $q->where('code', strtolower($module)))
+                ->whereHas('module', function (Builder $query) use ($module): void {
+                    /** @var Builder<Module> $query */
+                    $query->where('code', strtolower($module));
+                })
                 ->where('tenant_id', $tenant->getKey())
                 ->where('is_enabled', true)
                 ->exists()

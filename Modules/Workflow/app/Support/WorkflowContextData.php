@@ -6,6 +6,10 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 class WorkflowContextData
 {
+    /**
+     * @param  array<string, mixed>  $incoming
+     * @return array<string, mixed>
+     */
     public static function fromInstance(WorkflowInstance $instance, array $incoming = []): array
     {
         return array_replace_recursive(

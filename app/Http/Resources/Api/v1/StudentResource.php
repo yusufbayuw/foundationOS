@@ -8,6 +8,9 @@ use Modules\School\Models\Student;
 
 class StudentResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         /** @var Student $student */

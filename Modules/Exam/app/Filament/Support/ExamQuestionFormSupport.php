@@ -3,6 +3,7 @@
 namespace Modules\Exam\Filament\Support;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Modules\Core\Support\FilamentUi;
 use Modules\Exam\Models\ExamQuestion;
 
@@ -79,6 +80,9 @@ class ExamQuestionFormSupport
         return $data;
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function miFieldsSchema(): array
     {
         $fields = [];

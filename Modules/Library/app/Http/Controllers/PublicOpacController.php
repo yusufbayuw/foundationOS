@@ -15,6 +15,7 @@ use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCopy;
+use Modules\Library\Models\LibraryPublisher;
 use Modules\Library\Models\Loan;
 use Modules\Library\Models\Member;
 use Modules\Library\Support\CirculationPolicyResolver;
@@ -23,7 +24,7 @@ use Modules\Library\Support\LibraryScopeResolver;
 
 class PublicOpacController extends Controller
 {
-    public function index(Request $request, string $tenant)
+    public function index(Request $request, string $tenant): View
     {
         $tenantModel = $this->resolveTenant($tenant);
         abort_unless($tenantModel !== null, 404);
@@ -31,7 +32,7 @@ class PublicOpacController extends Controller
         return $this->renderCatalog($request, $tenantModel);
     }
 
-    public function organizationIndex(Request $request, string $tenant, string $organization)
+    public function organizationIndex(Request $request, string $tenant, string $organization): View
     {
         $tenantModel = $this->resolveTenant($tenant);
         abort_unless($tenantModel !== null, 404);
@@ -42,7 +43,7 @@ class PublicOpacController extends Controller
         return $this->renderCatalog($request, $tenantModel, $organizationModel);
     }
 
-    public function show(string $tenant, Book $book)
+    public function show(string $tenant, Book $book): View
     {
         $tenantModel = $this->resolveTenant($tenant);
         abort_unless($tenantModel !== null && (int) $book->tenant_id === (int) $tenantModel->id, 404);
@@ -50,7 +51,7 @@ class PublicOpacController extends Controller
         return $this->renderBookDetail($tenantModel, $book);
     }
 
-    public function organizationShow(string $tenant, string $organization, Book $book)
+    public function organizationShow(string $tenant, string $organization, Book $book): View
     {
         $tenantModel = $this->resolveTenant($tenant);
         abort_unless($tenantModel !== null && (int) $book->tenant_id === (int) $tenantModel->id, 404);
@@ -61,7 +62,7 @@ class PublicOpacController extends Controller
         return $this->renderBookDetail($tenantModel, $book, $organizationModel);
     }
 
-    public function reserve(Request $request, string $tenant, Book $book, LibraryCirculationService $circulationService)
+    public function reserve(Request $request, string $tenant, Book $book, LibraryCirculationService $circulationService): RedirectResponse
     {
         $tenantModel = $this->resolveTenant($tenant);
         abort_unless($tenantModel !== null && (int) $book->tenant_id === (int) $tenantModel->id, 404);
@@ -69,7 +70,7 @@ class PublicOpacController extends Controller
         return $this->handleReservation($request, $tenantModel, $book, $circulationService);
     }
 
-    public function organizationReserve(Request $request, string $tenant, string $organization, Book $book, LibraryCirculationService $circulationService)
+    public function organizationReserve(Request $request, string $tenant, string $organization, Book $book, LibraryCirculationService $circulationService): RedirectResponse
     {
         $tenantModel = $this->resolveTenant($tenant);
         abort_unless($tenantModel !== null && (int) $book->tenant_id === (int) $tenantModel->id, 404);
@@ -180,7 +181,7 @@ class PublicOpacController extends Controller
         return $this->handleMarkIssue($request, $tenantModel, $circulationService, $organizationModel);
     }
 
-    protected function renderCatalog(Request $request, Tenant $tenantModel, ?Organization $organizationModel = null)
+    protected function renderCatalog(Request $request, Tenant $tenantModel, ?Organization $organizationModel = null): View
     {
         $search = trim((string) $request->query('q', ''));
         $categoryId = is_numeric($request->query('category')) ? (int) $request->query('category') : null;
@@ -202,13 +203,16 @@ class PublicOpacController extends Controller
         $filterQuery = clone $query;
 
         if ($categoryId !== null) {
-            $query->where('book_category_id', $categoryId);
+            $query->where($query->getModel()->qualifyColumn('book_category_id'), $categoryId);
         }
 
         if ($publisher !== '') {
             $query->where(function (Builder $builder) use ($publisher): void {
                 $builder->where('publisher', $publisher)
-                    ->orWhereHas('publisher', fn (Builder $inner) => $inner->where('name', $publisher));
+                    ->orWhereHas('publisher', function (Builder $inner) use ($publisher): void {
+                        /** @var Builder<LibraryPublisher> $inner */
+                        $inner->where('name', $publisher);
+                    });
             });
         }
 
@@ -307,7 +311,7 @@ class PublicOpacController extends Controller
         ]);
     }
 
-    protected function renderBookDetail(Tenant $tenantModel, Book $book, ?Organization $organizationModel = null)
+    protected function renderBookDetail(Tenant $tenantModel, Book $book, ?Organization $organizationModel = null): View
     {
         $book->load(['category', 'copies', 'reservations.member']);
         $relatedBooks = Book::query()
@@ -320,7 +324,7 @@ class PublicOpacController extends Controller
                         ->orWhere('organization_id', $organizationModel->id);
                 });
             })
-            ->when($book->book_category_id !== null, fn (Builder $query) => $query->where('book_category_id', $book->book_category_id))
+            ->when($book->book_category_id !== null, fn (Builder $query) => $query->where($query->getModel()->qualifyColumn('book_category_id'), $book->book_category_id))
             ->orderByDesc('available_copies')
             ->orderBy('title')
             ->limit(4)
@@ -349,7 +353,7 @@ class PublicOpacController extends Controller
         ]);
     }
 
-    protected function handleReservation(Request $request, Tenant $tenantModel, Book $book, LibraryCirculationService $circulationService, ?Organization $organizationModel = null)
+    protected function handleReservation(Request $request, Tenant $tenantModel, Book $book, LibraryCirculationService $circulationService, ?Organization $organizationModel = null): RedirectResponse
     {
         $validated = $request->validate([
             'member_id' => ['required', 'integer'],
@@ -431,7 +435,8 @@ class PublicOpacController extends Controller
                     $query->where('member_number', 'like', "%{$memberQuery}%")
                         ->orWhere('status', 'like', "%{$memberQuery}%")
                         ->orWhereHas('user', function (Builder $inner) use ($memberQuery): void {
-                            $inner->where('name', 'like', "%{$memberQuery}%")
+                            /** @var Builder<User> $inner */
+                            $inner->where($inner->qualifyColumn('name'), 'like', "%{$memberQuery}%")
                                 ->orWhere('email', 'like', "%{$memberQuery}%");
                         });
                 })
@@ -453,9 +458,12 @@ class PublicOpacController extends Controller
                     });
                 })
                 ->where(function (Builder $query) use ($itemQuery): void {
-                    $query->where('barcode', 'like', "%{$itemQuery}%")
+                    $query->where($query->qualifyColumn('barcode'), 'like', "%{$itemQuery}%")
                         ->orWhere('copy_number', 'like', "%{$itemQuery}%")
-                        ->orWhereHas('book', fn (Builder $bookQuery) => $bookQuery->where('title', 'like', "%{$itemQuery}%"));
+                        ->orWhereHas('book', function (Builder $bookQuery) use ($itemQuery): void {
+                            /** @var Builder<Book> $bookQuery */
+                            $bookQuery->where('title', 'like', "%{$itemQuery}%");
+                        });
                 })
                 ->orderBy('copy_number')
                 ->limit(12)
@@ -467,6 +475,7 @@ class PublicOpacController extends Controller
                 ->whereNull('return_date')
                 ->whereIn('status', ['borrowed', 'overdue'])
                 ->whereHas('bookCopy', function (Builder $query) use ($itemQuery, $organizationModel): void {
+                    /** @var Builder<BookCopy> $query */
                     $query->where(function (Builder $builder) use ($itemQuery): void {
                         $builder->where('barcode', 'like', "%{$itemQuery}%")
                             ->orWhere('copy_number', 'like', "%{$itemQuery}%");

@@ -66,12 +66,14 @@ class SetupApprovalLimitsCommandTest extends TestCase
 
         [$otherTenant, $otherOrg, $komisaris] = $this->makeTenantContext('komisaris@other.com');
 
-        $this->artisan('fos:workflow:setup-approval-limits', [
+        $command = $this->artisan('fos:workflow:setup-approval-limits', [
             'tenant' => $tenant->id,
             '--manager' => $manager->id,
             '--direktur' => $direktur->id,
             '--komisaris' => $komisaris->id,
-        ])->assertFailed();
+        ]);
+
+        $command->assertFailed();
     }
 
     protected function createUserInTenant(Tenant $tenant, Organization $organization, string $email): User
@@ -103,6 +105,9 @@ class SetupApprovalLimitsCommandTest extends TestCase
         return $user;
     }
 
+    /**
+     * @return array{0: Tenant, 1: Organization, 2: User}
+     */
     protected function makeTenantContext(string $email): array
     {
         $plan = SubscriptionPlan::query()->firstOrCreate([

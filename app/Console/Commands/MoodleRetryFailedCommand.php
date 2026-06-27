@@ -30,7 +30,7 @@ class MoodleRetryFailedCommand extends Command
         }
 
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $items = $query->limit($limit)->get();

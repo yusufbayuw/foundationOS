@@ -62,7 +62,7 @@ class RiskCategoryService
             ->where('code', $code)
             ->when(
                 $organizationId !== null,
-                fn ($query) => $query->where('organization_id', $organizationId),
+                fn ($query) => $query->where($query->getModel()->qualifyColumn('organization_id'), $organizationId),
                 fn ($query) => $query->whereNull('organization_id'),
             )
             ->exists();

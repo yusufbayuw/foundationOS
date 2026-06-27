@@ -35,7 +35,9 @@ class ViewLeaveRequest extends ViewRecord
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->getRecord()->update(['status' => 'pending']);
+                    /** @var LeaveRequest $leaveRequest */
+                    $leaveRequest = $this->getRecord();
+                    $leaveRequest->update(['status' => 'pending']);
                     Notification::make()->title('Leave request submitted for approval.')->success()->send();
                     $this->record = $this->getRecord()->fresh();
                 }),
@@ -47,7 +49,9 @@ class ViewLeaveRequest extends ViewRecord
                 ->visible(fn (): bool => $record->status === 'pending' && $record->supervisor_approved_at === null)
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->getRecord()->update([
+                    /** @var LeaveRequest $leaveRequest */
+                    $leaveRequest = $this->getRecord();
+                    $leaveRequest->update([
                         'supervisor_approved_at' => now(),
                     ]);
                     Notification::make()->title('Leave request supervisor-approved.')->success()->send();
@@ -61,7 +65,9 @@ class ViewLeaveRequest extends ViewRecord
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->getRecord()->update([
+                    /** @var LeaveRequest $leaveRequest */
+                    $leaveRequest = $this->getRecord();
+                    $leaveRequest->update([
                         'status' => 'approved',
                         'approved_at' => now(),
                         'approver_id' => auth()->id(),
@@ -82,7 +88,9 @@ class ViewLeaveRequest extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data): void {
-                    $this->getRecord()->update([
+                    /** @var LeaveRequest $leaveRequest */
+                    $leaveRequest = $this->getRecord();
+                    $leaveRequest->update([
                         'status' => 'rejected',
                         'rejection_reason' => $data['rejection_reason'],
                     ]);

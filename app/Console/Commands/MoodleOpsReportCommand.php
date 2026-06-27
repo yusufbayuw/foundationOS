@@ -29,8 +29,11 @@ class MoodleOpsReportCommand extends Command
             ->selectRaw('entity_type, COUNT(*) AS total')
             ->where('status', MoodleSyncOutbox::STATUS_FAILED)
             ->groupBy('entity_type')
-            ->pluck('total', 'entity_type')
-            ->toArray();
+            ->get()
+            ->mapWithKeys(fn (MoodleSyncOutbox $row): array => [
+                (string) $row->entity_type => (int) ($row->getAttribute('total') ?? 0),
+            ])
+            ->all();
 
         $pullLast24h = MoodleLearningMetric::query()
             ->where('pulled_at', '>=', now()->subDay())
@@ -40,8 +43,11 @@ class MoodleOpsReportCommand extends Command
             ->selectRaw('metric_type, COUNT(*) AS total')
             ->where('pulled_at', '>=', now()->subDay())
             ->groupBy('metric_type')
-            ->pluck('total', 'metric_type')
-            ->toArray();
+            ->get()
+            ->mapWithKeys(fn (MoodleLearningMetric $row): array => [
+                (string) $row->metric_type => (int) ($row->getAttribute('total') ?? 0),
+            ])
+            ->all();
 
         $report = [
             'outbox' => [
@@ -60,7 +66,8 @@ class MoodleOpsReportCommand extends Command
         ];
 
         if ((bool) $this->option('json')) {
-            $this->line(json_encode($report, JSON_PRETTY_PRINT));
+            $encoded = json_encode($report, JSON_PRETTY_PRINT);
+            $this->line($encoded !== false ? $encoded : '{}');
 
             return self::SUCCESS;
         }

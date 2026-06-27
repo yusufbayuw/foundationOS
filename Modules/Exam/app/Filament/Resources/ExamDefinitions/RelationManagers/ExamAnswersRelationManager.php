@@ -87,13 +87,13 @@ class ExamAnswersRelationManager extends RelationManager
                     ])
                     ->query(function ($query, array $data) {
                         if (($data['value'] ?? null) === 'yes') {
-                            $query->whereHas('examQuestion', fn ($q) => $q->where('type', QuestionType::Essay))
+                            $query->whereHas('examQuestion', fn ($q) => $q->where($q->qualifyColumn('type'), QuestionType::Essay))
                                 ->whereNull('manual_score');
                         }
 
                         if (($data['value'] ?? null) === 'no') {
                             $query->where(function ($q): void {
-                                $q->whereDoesntHave('examQuestion', fn ($inner) => $inner->where('type', QuestionType::Essay))
+                                $q->whereDoesntHave('examQuestion', fn ($inner) => $inner->where($inner->qualifyColumn('type'), QuestionType::Essay))
                                     ->orWhereNotNull('manual_score');
                             });
                         }

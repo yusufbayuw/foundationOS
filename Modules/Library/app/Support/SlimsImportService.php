@@ -11,6 +11,9 @@ use Modules\Core\Models\TenantSetting;
 
 class SlimsImportService
 {
+    /**
+     * @return array{connection: array<string, mixed>, email_domain: string, default_member_status: string}|null
+     */
     public function resolveConfig(int $tenantId, ?int $organizationId = null): ?array
     {
         if ($organizationId !== null && $organizationId > 0) {
@@ -30,6 +33,9 @@ class SlimsImportService
         return $this->normalizeSettings($tenantSettings);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function readTenantSettings(int $tenantId): array
     {
         $rows = TenantSetting::query()
@@ -40,6 +46,9 @@ class SlimsImportService
         return $this->mapSettings($rows->all());
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function readOrganizationSettings(int $organizationId): array
     {
         $rows = OrganizationSetting::query()
@@ -50,6 +59,9 @@ class SlimsImportService
         return $this->mapSettings($rows->all());
     }
 
+    /**
+     * @return list<string>
+     */
     protected function settingKeys(): array
     {
         return [
@@ -67,6 +79,10 @@ class SlimsImportService
         ];
     }
 
+    /**
+     * @param  array<int, OrganizationSetting|TenantSetting>  $rows
+     * @return array<string, mixed>
+     */
     protected function mapSettings(array $rows): array
     {
         $settings = [];
@@ -78,14 +94,20 @@ class SlimsImportService
         return $settings;
     }
 
+    /**
+     * @param  array<string, mixed>  $settings
+     */
     protected function isEnabled(array $settings): bool
     {
         return filter_var($settings['slims_import_enabled'] ?? false, FILTER_VALIDATE_BOOL);
     }
 
+    /**
+     * @param  array<string, mixed>  $settings
+     * @return array{connection: array<string, mixed>, email_domain: string, default_member_status: string}|null
+     */
     protected function normalizeSettings(array $settings): ?array
     {
-
         $database = (string) ($settings['slims_db_database'] ?? '');
         $username = (string) ($settings['slims_db_username'] ?? '');
 
@@ -122,6 +144,8 @@ class SlimsImportService
 
     /**
      * Apply an incremental filter only when the legacy table exposes a compatible datetime/date column.
+     *
+     * @param  list<string>  $columns
      */
     public function applySince(Builder $query, ConnectionInterface $connection, string $table, ?string $since, array $columns): Builder
     {

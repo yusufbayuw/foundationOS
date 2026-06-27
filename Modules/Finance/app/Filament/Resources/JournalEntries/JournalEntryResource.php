@@ -26,11 +26,17 @@ class JournalEntryResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'entry_number';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['entry_number', 'description'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         assert($record instanceof JournalEntry);

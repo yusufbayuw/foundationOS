@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Boarding\Models\BoardingLeavePermit;
 use Modules\Boarding\Services\BoardingLeavePermitDocumentService;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
+use Symfony\Component\HttpFoundation\Response;
 
 class BoardingLeavePermitPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(BoardingLeavePermit $boardingLeavePermit, BoardingLeavePermitDocumentService $service)
+    public function __invoke(BoardingLeavePermit $boardingLeavePermit, BoardingLeavePermitDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $boardingLeavePermit,

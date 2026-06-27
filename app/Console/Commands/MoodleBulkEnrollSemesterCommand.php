@@ -38,12 +38,12 @@ class MoodleBulkEnrollSemesterCommand extends Command
         $tenantId = is_numeric($tenantOption) ? (int) $tenantOption : null;
 
         $query = StudyPlanItem::withoutTenantScope()
-            ->whereHas('studyPlan', fn ($q) => $q->where('academic_period_id', $periodId))
+            ->whereHas('studyPlan', fn ($q) => $q->where($q->getModel()->qualifyColumn('academic_period_id'), $periodId))
             ->whereIn('status', StudyPlanItemObserver::ENROLLED_STATUSES)
             ->whereNotNull('course_offering_id');
 
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $total = (clone $query)->count();

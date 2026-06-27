@@ -26,11 +26,17 @@ class StudentInvoiceResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['invoice_number'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         assert($record instanceof StudentInvoice);

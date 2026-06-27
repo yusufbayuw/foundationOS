@@ -29,7 +29,7 @@ class WorkflowDefinitionLifecycleService
                 ->where('id', '!=', $workflow->id)
                 ->where(function ($query) use ($workflow): void {
                     if ($workflow->organization_id) {
-                        $query->where('organization_id', $workflow->organization_id);
+                        $query->where($query->getModel()->qualifyColumn('organization_id'), $workflow->organization_id);
                     } else {
                         $query->whereNull('organization_id');
                     }
@@ -73,7 +73,7 @@ class WorkflowDefinitionLifecycleService
                 ->where('code', $workflow->code)
                 ->where(function ($query) use ($workflow): void {
                     if ($workflow->organization_id) {
-                        $query->where('organization_id', $workflow->organization_id);
+                        $query->where($query->getModel()->qualifyColumn('organization_id'), $workflow->organization_id);
                     } else {
                         $query->whereNull('organization_id');
                     }

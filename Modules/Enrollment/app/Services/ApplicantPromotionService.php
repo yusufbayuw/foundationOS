@@ -41,7 +41,7 @@ class ApplicantPromotionService
 
             $academicYearId = AcademicYear::query()
                 ->where('tenant_id', $applicant->tenant_id)
-                ->when($organizationId, fn ($q) => $q->where('organization_id', $organizationId))
+                ->when($organizationId, fn ($q) => $q->where($q->getModel()->qualifyColumn('organization_id'), $organizationId))
                 ->where('is_active', true)
                 ->orderByDesc('start_date')
                 ->value('id');

@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Campus\Models\StudyResult;
 use Modules\Campus\Services\StudyResultDocumentService;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
+use Symfony\Component\HttpFoundation\Response;
 
 class StudyResultPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(StudyResult $studyResult, StudyResultDocumentService $service)
+    public function __invoke(StudyResult $studyResult, StudyResultDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $studyResult,

@@ -20,6 +20,9 @@ class Province extends Model
         'name',
     ];
 
+    /**
+     * @return BelongsTo<Country, $this>
+     */
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);

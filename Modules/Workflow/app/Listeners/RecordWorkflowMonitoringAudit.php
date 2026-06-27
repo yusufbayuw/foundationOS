@@ -11,7 +11,7 @@ use Modules\Workflow\Events\WorkflowStarted;
 
 class RecordWorkflowMonitoringAudit
 {
-    public function handle(object $event): void
+    public function handle(WorkflowStarted|WorkflowAdvanced|WorkflowReturned|WorkflowCancelled|WorkflowSlaBreached $event): void
     {
         $instance = $event->instance;
         $actor = property_exists($event, 'actor') ? $event->actor : null;
@@ -22,12 +22,12 @@ class RecordWorkflowMonitoringAudit
             'user_id' => $actor?->getKey(),
             'auditable_type' => $instance->getMorphClass(),
             'auditable_id' => $instance->getKey(),
-            'action' => match (true) {
-                $event instanceof WorkflowStarted => 'workflow_started',
-                $event instanceof WorkflowAdvanced => 'workflow_advanced',
-                $event instanceof WorkflowReturned => 'workflow_returned',
-                $event instanceof WorkflowCancelled => 'workflow_cancelled',
-                $event instanceof WorkflowSlaBreached => 'workflow_sla_breached',
+            'action' => match ($event::class) {
+                WorkflowStarted::class => 'workflow_started',
+                WorkflowAdvanced::class => 'workflow_advanced',
+                WorkflowReturned::class => 'workflow_returned',
+                WorkflowCancelled::class => 'workflow_cancelled',
+                WorkflowSlaBreached::class => 'workflow_sla_breached',
                 default => 'workflow_event',
             },
             'description' => 'Workflow event recorded.',

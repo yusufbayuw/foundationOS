@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
 use Modules\School\Models\StudentGrade;
 use Modules\Workflow\Models\Workflow;
@@ -46,21 +47,26 @@ class SetupStudentGradeRevisionWorkflowCommand extends Command
 
         WorkflowStep::query()->create([
             'workflow_id' => $workflow->id,
-            'tenant_id' => $tenant->id,
+            'uuid' => (string) Str::uuid(),
+            'code' => 'homeroom-review',
             'name' => 'Homeroom Teacher Review',
-            'step_order' => 1,
+            'step_type' => 'approval',
             'assignee_type' => 'user',
-            'assignee_id' => $homeroom,
+            'assignee_value' => (string) $homeroom,
+            'sort_order' => 1,
             'sla_hours' => 48,
+            'is_initial' => true,
         ]);
 
         WorkflowStep::query()->create([
             'workflow_id' => $workflow->id,
-            'tenant_id' => $tenant->id,
+            'uuid' => (string) Str::uuid(),
+            'code' => 'principal-approval',
             'name' => 'Principal Approval',
-            'step_order' => 2,
+            'step_type' => 'approval',
             'assignee_type' => 'user',
-            'assignee_id' => $principal,
+            'assignee_value' => (string) $principal,
+            'sort_order' => 2,
             'sla_hours' => 72,
         ]);
 

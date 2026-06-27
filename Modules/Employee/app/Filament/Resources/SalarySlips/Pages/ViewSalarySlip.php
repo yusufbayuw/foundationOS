@@ -31,7 +31,9 @@ class ViewSalarySlip extends ViewRecord
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->getRecord()->update(['status' => 'approved']);
+                    /** @var SalarySlip $slip */
+                    $slip = $this->getRecord();
+                    $slip->update(['status' => 'approved']);
                     Notification::make()->title('Salary slip approved.')->success()->send();
                     $this->record = $this->getRecord()->fresh();
                 }),
@@ -51,6 +53,7 @@ class ViewSalarySlip extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data): void {
+                    /** @var SalarySlip $slip */
                     $slip = $this->getRecord();
                     $slip->update([
                         'status' => 'paid',
@@ -73,7 +76,9 @@ class ViewSalarySlip extends ViewRecord
                 ->requiresConfirmation()
                 ->modalDescription('This will mark the salary slip as sent to the employee.')
                 ->action(function (): void {
-                    $this->getRecord()->update([
+                    /** @var SalarySlip $slip */
+                    $slip = $this->getRecord();
+                    $slip->update([
                         'is_sent' => true,
                         'sent_at' => now(),
                     ]);

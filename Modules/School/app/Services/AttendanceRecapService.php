@@ -2,8 +2,11 @@
 
 namespace Modules\School\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\School\Models\Attendance;
+use Modules\School\Models\ClassStudent;
+use Modules\School\Models\Schedule;
 use Modules\School\Models\Student;
 
 class AttendanceRecapService
@@ -16,6 +19,18 @@ class AttendanceRecapService
      * @param  int|string  $classId
      * @param  int  $month
      * @param  int  $year
+     * @return Collection<int, object{
+     *     student_id: int|string,
+     *     nis: string|null,
+     *     student_name: string,
+     *     total_present: int,
+     *     total_absent: int,
+     *     total_sick: int,
+     *     total_permission: int,
+     *     total_late: int,
+     *     total_days: int,
+     *     percentage: float
+     * }>
      */
     public function getStudentRecap(
         $tenantId,
@@ -26,7 +41,8 @@ class AttendanceRecapService
     ): Collection {
         // Find students in the given class and period
         $students = Student::with(['user'])
-            ->whereHas('classStudents', function ($query) use ($classId, $academicPeriodId) {
+            ->whereHas('classStudents', function (Builder $query) use ($classId, $academicPeriodId): void {
+                /** @var Builder<ClassStudent> $query */
                 $query->where('class_id', $classId)
                     ->where('academic_period_id', $academicPeriodId);
             })
@@ -40,7 +56,8 @@ class AttendanceRecapService
         // Find attendances for these students in this month
         $attendances = Attendance::whereIn('student_id', $students->pluck('id'))
             ->where('tenant_id', $tenantId)
-            ->whereHas('schedule', function ($query) use ($classId, $academicPeriodId) {
+            ->whereHas('schedule', function (Builder $query) use ($classId, $academicPeriodId): void {
+                /** @var Builder<Schedule> $query */
                 $query->where('class_id', $classId)
                     ->where('academic_period_id', $academicPeriodId);
             })
@@ -81,7 +98,7 @@ class AttendanceRecapService
 
             $totalDays = $studentAttendances->count();
             // Percentage based on present vs total logged days
-            $percentage = $totalDays > 0 ? round(($present / $totalDays) * 100) : 0;
+            $percentage = $totalDays > 0 ? (float) round(($present / $totalDays) * 100) : 0.0;
 
             $recap->push((object) [
                 'student_id' => $student->id,

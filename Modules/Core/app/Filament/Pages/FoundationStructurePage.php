@@ -25,7 +25,7 @@ class FoundationStructurePage extends Page
         $tenant = Filament::getTenant();
 
         $this->tree = Organization::query()
-            ->when($tenant, fn ($q) => $q->where('tenant_id', $tenant->getKey()))
+            ->when($tenant, fn ($q) => $q->where($q->getModel()->qualifyColumn('tenant_id'), $tenant->getKey()))
             ->whereNull('parent_organization_id')
             ->with('childOrganizations')
             ->orderBy('name')

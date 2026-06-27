@@ -23,7 +23,9 @@ class ExamRuntimeWebhookController extends Controller
             'submitted_at' => ['nullable', 'date'],
         ]);
 
+        /** @var ExamDefinition $definition */
         $definition = ExamDefinition::query()->findOrFail($validated['exam_definition_id']);
+        /** @var ExamParticipant $participant */
         $participant = ExamParticipant::query()
             ->where('exam_definition_id', $definition->id)
             ->findOrFail($validated['exam_participant_id']);

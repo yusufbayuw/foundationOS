@@ -11,6 +11,7 @@ use Modules\Workflow\Events\WorkflowCancelled;
 use Modules\Workflow\Events\WorkflowReturned;
 use Modules\Workflow\Events\WorkflowSlaBreached;
 use Modules\Workflow\Events\WorkflowStarted;
+use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Services\WorkflowAutomatedActionRunner;
 use Throwable;
 
@@ -20,9 +21,9 @@ class RunWorkflowAutomatedActions implements ShouldQueue
 
     public function __construct(private readonly WorkflowAutomatedActionRunner $runner) {}
 
-    public function handle(object $event): void
+    public function handle(WorkflowStarted|WorkflowAdvanced|WorkflowCancelled|WorkflowReturned|WorkflowSlaBreached $event): void
     {
-        if (property_exists($event, 'instance') && $event->instance?->tenant_id) {
+        if ($event->instance->tenant_id) {
             $this->onTenant((int) $event->instance->tenant_id);
         }
 
@@ -33,32 +34,32 @@ class RunWorkflowAutomatedActions implements ShouldQueue
         }
     }
 
-    protected function runForEvent(object $event): void
+    protected function runForEvent(WorkflowStarted|WorkflowAdvanced|WorkflowCancelled|WorkflowReturned|WorkflowSlaBreached $event): void
     {
         $instance = $event->instance->fresh();
 
-        match (true) {
-            $event instanceof WorkflowStarted => $this->runner->run($instance, 'started', [
+        match ($event::class) {
+            WorkflowStarted::class => $this->runner->run($instance, 'started', [
                 'actor_id' => $event->actor->getKey(),
                 'trigger_event' => 'started',
             ]),
-            $event instanceof WorkflowAdvanced => $this->runAdvanced($instance, $event),
-            $event instanceof WorkflowCancelled => $this->runner->run($instance, 'cancelled', [
+            WorkflowAdvanced::class => $this->runAdvanced($instance, $event),
+            WorkflowCancelled::class => $this->runner->run($instance, 'cancelled', [
                 'actor_id' => $event->actor->getKey(),
                 'trigger_event' => 'cancelled',
             ]),
-            $event instanceof WorkflowReturned => $this->runner->run($instance, 'returned', [
+            WorkflowReturned::class => $this->runner->run($instance, 'returned', [
                 'actor_id' => $event->actor->getKey(),
                 'trigger_event' => 'returned',
             ]),
-            $event instanceof WorkflowSlaBreached => $this->runner->run($instance, 'sla_breached', [
+            WorkflowSlaBreached::class => $this->runner->run($instance, 'sla_breached', [
                 'trigger_event' => 'sla_breached',
             ]),
             default => null,
         };
     }
 
-    protected function runAdvanced($instance, WorkflowAdvanced $event): void
+    protected function runAdvanced(WorkflowInstance $instance, WorkflowAdvanced $event): void
     {
         $baseContext = [
             'actor_id' => $event->actor->getKey(),

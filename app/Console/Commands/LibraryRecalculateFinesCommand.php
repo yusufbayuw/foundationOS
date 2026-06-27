@@ -20,11 +20,11 @@ class LibraryRecalculateFinesCommand extends Command
         $memberId = is_numeric($this->option('member')) ? (int) $this->option('member') : null;
 
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         if ($memberId !== null) {
-            $query->where('member_id', $memberId);
+            $query->where($query->qualifyColumn('member_id'), $memberId);
         }
 
         $processed = 0;

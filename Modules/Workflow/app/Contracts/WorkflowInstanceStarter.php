@@ -9,5 +9,8 @@ use Modules\Workflow\Models\WorkflowInstance;
 
 interface WorkflowInstanceStarter
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function start(Workflow $workflow, User $requester, array $context = [], ?Model $subject = null, ?User $startedBy = null): WorkflowInstance;
 }

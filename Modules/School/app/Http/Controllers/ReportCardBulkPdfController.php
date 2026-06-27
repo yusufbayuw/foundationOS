@@ -12,6 +12,7 @@ use Modules\School\Models\ClassStudent;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Models\Student;
 use Modules\School\Services\ReportCardDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportCardBulkPdfController extends Controller
 {
@@ -21,7 +22,7 @@ class ReportCardBulkPdfController extends Controller
         Request $request,
         SchoolClass $schoolClass,
         ReportCardDocumentService $service,
-    ) {
+    ): Response {
         $periodId = (int) $request->query('period');
 
         abort_if($periodId <= 0, 404);
@@ -41,7 +42,7 @@ class ReportCardBulkPdfController extends Controller
         $documents = [];
         foreach ($studentIds as $studentId) {
             $student = Student::query()->find($studentId);
-            if ($student === null) {
+            if (! $student instanceof Student) {
                 continue;
             }
 

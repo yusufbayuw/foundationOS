@@ -14,6 +14,8 @@ class ReportCardService
 {
     /**
      * Generate report card data for a student in a specific academic period.
+     *
+     * @return array<string, mixed>
      */
     public function generate(int $studentId, int $academicPeriodId): array
     {
@@ -34,7 +36,7 @@ class ReportCardService
         $grades = StudentGrade::with(['assessment.subject'])
             ->where('student_id', $studentId)
             ->whereHas('assessment', function ($query) use ($academicPeriodId) {
-                $query->where('academic_period_id', $academicPeriodId);
+                $query->where($query->getModel()->qualifyColumn('academic_period_id'), $academicPeriodId);
             })
             ->get();
 
@@ -80,7 +82,7 @@ class ReportCardService
 
         $attendances = Attendance::where('student_id', $studentId)
             ->whereHas('schedule', function ($query) use ($academicPeriodId) {
-                $query->where('academic_period_id', $academicPeriodId);
+                $query->where($query->getModel()->qualifyColumn('academic_period_id'), $academicPeriodId);
             })
             ->get();
 

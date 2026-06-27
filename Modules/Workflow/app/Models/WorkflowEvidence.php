@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
 
+/**
+ * @property int|null $workflow_instance_id
+ * @property int|null $workflow_step_id
+ * @property int|null $uploaded_by
+ */
 class WorkflowEvidence extends Model
 {
     /** @use HasFactory<Factory<static>> */

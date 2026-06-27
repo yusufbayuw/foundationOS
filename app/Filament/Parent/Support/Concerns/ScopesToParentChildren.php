@@ -3,6 +3,7 @@
 namespace App\Filament\Parent\Support\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Models\ParentStudent;
 
 trait ScopesToParentChildren
@@ -21,12 +22,12 @@ trait ScopesToParentChildren
         return false;
     }
 
-    public static function canEdit($record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete($record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }

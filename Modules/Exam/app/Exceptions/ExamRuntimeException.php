@@ -6,6 +6,9 @@ use Exception;
 
 class ExamRuntimeException extends Exception
 {
+    /**
+     * @param  array<string, mixed>  $responseBody
+     */
     public function __construct(
         string $message,
         public readonly ?int $httpStatus = null,

@@ -34,7 +34,7 @@ class TenantField
             ->relationship(
                 'organization',
                 'name',
-                fn ($query) => $query->where('tenant_id', Filament::getTenant()?->getKey()),
+                fn ($query) => $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()?->getKey()),
             );
     }
 

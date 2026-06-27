@@ -23,7 +23,7 @@ class SendContractExpiringNotification
 
         $user = User::query()->find($ownerUserId);
 
-        if (! $user) {
+        if (! $user instanceof User) {
             return;
         }
 

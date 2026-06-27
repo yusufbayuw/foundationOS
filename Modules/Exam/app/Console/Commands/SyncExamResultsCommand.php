@@ -84,7 +84,7 @@ class SyncExamResultsCommand extends Command
             ->whereIn('status', [ExamStatus::Published, ExamStatus::Closed, ExamStatus::Scheduled]);
 
         if ($this->option('tenant')) {
-            $query->where('tenant_id', (int) $this->option('tenant'));
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), (int) $this->option('tenant'));
         }
 
         $exams = $query->get();

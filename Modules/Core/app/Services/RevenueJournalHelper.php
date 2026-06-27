@@ -78,6 +78,9 @@ class RevenueJournalHelper
         });
     }
 
+    /**
+     * @param  array<int, string>  $nameHints
+     */
     public function findCoa(int $tenantId, string $type, array $nameHints): ?ChartOfAccount
     {
         $query = ChartOfAccount::query()

@@ -393,6 +393,9 @@ class ExamResultSyncService
         return $runtimeExamId;
     }
 
+    /**
+     * @param  array<string, mixed>  $row
+     */
     protected function resolveParticipant(ExamDefinition $definition, array $row): ?ExamParticipant
     {
         $foundationId = $row['participant_external_id']
@@ -417,7 +420,7 @@ class ExamResultSyncService
         if (is_string($runtimeParticipantId) && Str::isUuid($runtimeParticipantId)) {
             return ExamParticipant::withoutTenantScope()
                 ->where('exam_definition_id', $definition->id)
-                ->where('metadata_json->runtime_participant_id', $runtimeParticipantId)
+                ->whereRaw('JSON_UNQUOTE(JSON_EXTRACT(metadata_json, ?)) = ?', ['$.runtime_participant_id', $runtimeParticipantId])
                 ->first();
         }
 
@@ -425,6 +428,7 @@ class ExamResultSyncService
     }
 
     /**
+     * @param  array<string, mixed>  $row
      * @param  array<string, ExamAttempt>  $attemptMap
      */
     protected function resolveAttempt(ExamDefinition $definition, array $row, array $attemptMap): ?ExamAttempt
@@ -447,6 +451,9 @@ class ExamResultSyncService
         return null;
     }
 
+    /**
+     * @param  array<string, mixed>  $row
+     */
     protected function resolveQuestionId(ExamDefinition $definition, array $row): ?string
     {
         $questionId = $row['question_external_id']
@@ -566,6 +573,9 @@ class ExamResultSyncService
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $row
+     */
     protected function stringifyAnswerValue(array $row): ?string
     {
         $value = $row['answer_value'] ?? $row['value'] ?? $row['answer'] ?? null;

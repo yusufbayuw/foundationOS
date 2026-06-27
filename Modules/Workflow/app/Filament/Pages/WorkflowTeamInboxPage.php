@@ -28,7 +28,7 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
         $tenant = Filament::getTenant();
         $user = auth()->user();
         $organizationIds = $user?->userTenantRoles()
-            ->when($tenant, fn (Builder $query) => $query->where('tenant_id', $tenant->getKey()))
+            ->when($tenant, fn (Builder $query) => $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenant->getKey()))
             ->pluck('organization_id')
             ->filter()
             ->unique()
@@ -40,7 +40,7 @@ class WorkflowTeamInboxPage extends WorkflowInboxPage
             ->where('assigned_to_type', 'user')
             ->when($tenant, function (Builder $query) use ($tenant, $organizationIds, $user): void {
                 $query->whereHas('instance', function (Builder $inner) use ($tenant, $organizationIds, $user): void {
-                    $inner->where('tenant_id', $tenant->getKey());
+                    $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenant->getKey());
 
                     if (! $user?->isGlobalSuperAdmin() && $organizationIds !== []) {
                         $inner->where(function (Builder $scoped) use ($organizationIds): void {

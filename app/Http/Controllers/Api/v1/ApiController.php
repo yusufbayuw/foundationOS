@@ -10,6 +10,9 @@ use Throwable;
 
 abstract class ApiController extends Controller
 {
+    /**
+     * @param  array<string, mixed>  $meta
+     */
     protected function success(mixed $data, int $status = 200, array $meta = []): JsonResponse
     {
         $payload = ['data' => $data];
@@ -21,6 +24,12 @@ abstract class ApiController extends Controller
         return response()->json($payload, $status);
     }
 
+    /**
+     * @param  array<string, mixed>  $details
+     */
+    /**
+     * @param  array<string, mixed>  $details
+     */
     protected function error(string $code, string $message, int $status = 400, array $details = []): JsonResponse
     {
         $payload = [
@@ -47,15 +56,13 @@ abstract class ApiController extends Controller
     }
 
     /**
-     * Apply filter[field]=value query parameters to a builder.
+     * @template TModel of \Illuminate\Database\Eloquent\Model
      *
-     * Boolean fields in $booleanFields are cast to int comparison.
-     * All other filters do LIKE '%value%' for strings listed in $searchFields,
-     * or exact match otherwise.
-     *
+     * @param  Builder<TModel>  $query
      * @param  string[]  $searchFields  Fields that use LIKE matching.
      * @param  string[]  $booleanFields  Fields that are boolean (0/1 cast).
      * @param  string[]  $exactFields  Fields that use exact match (non-boolean, non-search).
+     * @return Builder<TModel>
      */
     protected function applyFilters(
         Builder $query,
@@ -103,7 +110,9 @@ abstract class ApiController extends Controller
     }
 
     /**
-     * Paginate and return a cursor-paginated resource collection.
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
      */
     protected function paginateCursor(
         Builder $query,
@@ -130,7 +139,9 @@ abstract class ApiController extends Controller
     }
 
     /**
-     * Convenience: resource collection from a cursor-paginated query.
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
      */
     protected function collectionResponse(
         Builder $query,

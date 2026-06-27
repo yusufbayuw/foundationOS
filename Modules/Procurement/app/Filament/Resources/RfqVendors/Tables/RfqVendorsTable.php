@@ -3,6 +3,7 @@
 namespace Modules\Procurement\Filament\Resources\RfqVendors\Tables;
 
 use App\Filament\Imports\RfqVendorImporter;
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -111,7 +112,7 @@ class RfqVendorsTable
                     ])
                     ->action(function (RfqVendor $record, array $data): void {
                         $po = app(PurchaseOrderAutoCreationService::class)
-                            ->awardToVendor($record, auth()->id(), $data['award_reason'] ?? null);
+                            ->awardToVendor($record, TypedValue::nullableInt(auth()->id()), $data['award_reason'] ?? null);
 
                         Notification::make()
                             ->title('PO draft dibuat')

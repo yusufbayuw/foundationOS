@@ -64,7 +64,7 @@ class ReportCardPage extends Page implements HasForms
                         }
 
                         return Student::whereHas('classStudents', function ($q) use ($classId) {
-                            $q->where('class_id', $classId);
+                            $q->where($q->getModel()->qualifyColumn('class_id'), $classId);
                         })->with('user')->get()->pluck('user.name', 'id');
                     })
                     ->required()

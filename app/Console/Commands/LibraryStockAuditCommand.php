@@ -18,7 +18,7 @@ class LibraryStockAuditCommand extends Command
         $query = Book::query()->withCount('copies');
 
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $rows = [];
@@ -28,7 +28,7 @@ class LibraryStockAuditCommand extends Command
                 $borrowed = Loan::query()
                     ->whereNull('return_date')
                     ->whereIn('status', ['borrowed', 'overdue'])
-                    ->whereHas('bookCopy', fn ($query) => $query->where('book_id', $book->id))
+                    ->whereHas('bookCopy', fn ($query) => $query->where($query->getModel()->qualifyColumn('book_id'), $book->id))
                     ->count();
 
                 $expectedAvailable = max(0, (int) $book->copies_count - $borrowed);

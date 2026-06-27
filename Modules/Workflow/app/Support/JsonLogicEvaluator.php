@@ -4,6 +4,9 @@ namespace Modules\Workflow\Support;
 
 class JsonLogicEvaluator
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public static function apply(mixed $logic, array $data = []): mixed
     {
         if ($logic === null || is_scalar($logic)) {
@@ -45,6 +48,10 @@ class JsonLogicEvaluator
         };
     }
 
+    /**
+     * @param  array<int, mixed>  $values
+     * @param  array<string, mixed>  $data
+     */
     protected static function resolveVar(array $values, array $data): mixed
     {
         $path = (string) ($values[0] ?? '');
@@ -70,6 +77,10 @@ class JsonLogicEvaluator
         return $current;
     }
 
+    /**
+     * @param  array<int, mixed>  $values
+     * @param  array<string, mixed>  $data
+     */
     protected static function applyAnd(array $values, array $data): bool
     {
         foreach ($values as $value) {
@@ -81,6 +92,10 @@ class JsonLogicEvaluator
         return true;
     }
 
+    /**
+     * @param  array<int, mixed>  $values
+     * @param  array<string, mixed>  $data
+     */
     protected static function applyOr(array $values, array $data): bool
     {
         foreach ($values as $value) {
@@ -92,6 +107,10 @@ class JsonLogicEvaluator
         return false;
     }
 
+    /**
+     * @param  array<int, mixed>  $values
+     * @param  array<string, mixed>  $data
+     */
     protected static function applyIn(array $values, array $data): bool
     {
         $needle = static::apply($values[0] ?? null, $data);

@@ -7,10 +7,11 @@ use App\Support\TypedValue;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Modules\School\Services\ReportCardService;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportCardController extends Controller
 {
-    public function download(Request $request, ReportCardService $service)
+    public function download(Request $request, ReportCardService $service): Response
     {
         $studentId = $request->query('student');
         $periodId = $request->query('period');

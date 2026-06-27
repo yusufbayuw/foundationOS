@@ -28,7 +28,7 @@ class StudentInvoiceForm
                             ->label(FilamentUi::field('tuition_type_id'))
                             ->relationship('tuitionType', 'name', modifyQueryUsing: function ($query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
                                 }
                             }),
                         TextInput::make('invoice_number')

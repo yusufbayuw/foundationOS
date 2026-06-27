@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Procurement\Exceptions\RfqAwardException;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\PurchaseOrderItem;
+use Modules\Procurement\Models\RequestForQuotation;
 use Modules\Procurement\Models\RfqVendor;
 
 /**
@@ -111,7 +112,7 @@ class PurchaseOrderAutoCreationService
         $rfqVendor->requestForQuotation?->forceFill(['status' => 'awarded'])->save();
     }
 
-    protected function generatePoNumber($rfq): string
+    protected function generatePoNumber(RequestForQuotation $rfq): string
     {
         $base = 'PO-'.($rfq->rfq_number ?: $rfq->getKey());
         $candidate = $base;

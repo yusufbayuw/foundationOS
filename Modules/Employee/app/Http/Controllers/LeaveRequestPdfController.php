@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\Employee\Models\LeaveRequest;
 use Modules\Employee\Services\LeaveRequestDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class LeaveRequestPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(LeaveRequest $leaveRequest, LeaveRequestDocumentService $service)
+    public function __invoke(LeaveRequest $leaveRequest, LeaveRequestDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $leaveRequest,

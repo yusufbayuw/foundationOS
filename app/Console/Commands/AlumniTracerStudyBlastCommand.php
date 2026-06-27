@@ -16,7 +16,7 @@ class AlumniTracerStudyBlastCommand extends Command
         $query = Alumnus::query()->where('status', 'active');
 
         if ($tenantId = $this->option('tenant')) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $count = 0;

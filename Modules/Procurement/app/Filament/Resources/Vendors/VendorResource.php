@@ -24,11 +24,17 @@ class VendorResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['name', 'code'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         return static::detailStatus($record->status ?? null);

@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\Library\Models\Fine;
 use Modules\Library\Services\FineDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class FinePdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(Fine $fine, FineDocumentService $service)
+    public function __invoke(Fine $fine, FineDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $fine,

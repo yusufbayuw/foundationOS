@@ -20,6 +20,9 @@ class District extends Model
         'name',
     ];
 
+    /**
+     * @return BelongsTo<City, $this>
+     */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);

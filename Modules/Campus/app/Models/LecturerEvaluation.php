@@ -18,6 +18,9 @@ class LecturerEvaluation extends Model
         'feedback',
     ];
 
+    /**
+     * @return BelongsTo<Lecturer, $this>
+     */
     public function lecturer(): BelongsTo
     {
         return $this->belongsTo(Lecturer::class);

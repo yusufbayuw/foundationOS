@@ -2,7 +2,9 @@
 
 namespace Modules\Exam\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
+use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyPlanItem;
 use Modules\Campus\Models\StudyResult;
 use Modules\Campus\Services\GradebookConfigResolver;
@@ -148,10 +150,10 @@ class CampusGradeBridgeService implements GradeBridgeInterface
         $item = StudyPlanItem::withoutTenantScope()
             ->where('tenant_id', $definition->tenant_id)
             ->where('course_offering_id', $definition->campus_class_reference)
-            ->whereHas('studyPlan', fn ($query) => $query->where(
-                'collage_student_id',
-                $participant->campus_student_reference,
-            ))
+            ->whereHas('studyPlan', function (Builder $query) use ($participant): void {
+                /** @var Builder<StudyPlan> $query */
+                $query->where('collage_student_id', $participant->campus_student_reference);
+            })
             ->first();
 
         return $item !== null ? (int) $item->getKey() : null;

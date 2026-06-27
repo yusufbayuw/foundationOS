@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Services;
 
+use App\Support\TypedValue;
 use Modules\Core\Models\User;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Workflow\Enums\WorkflowAutomationActionType;
@@ -11,9 +12,15 @@ use Throwable;
 
 class WorkflowAutomatedActionRunner
 {
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public function run(WorkflowInstance $instance, string $triggerEvent, array $context = []): void
     {
-        $actions = collect(data_get($instance->workflow_snapshot, 'automated_actions', []))
+        /** @var list<array<string, mixed>> $configuredActions */
+        $configuredActions = data_get($instance->workflow_snapshot, 'automated_actions', []);
+
+        $actions = collect($configuredActions)
             ->filter(fn (array $action): bool => ($action['is_active'] ?? true) && ($action['trigger_event'] ?? null) === $triggerEvent)
             ->sortBy('sort_order')
             ->values();
@@ -23,6 +30,10 @@ class WorkflowAutomatedActionRunner
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $action
+     * @param  array<string, mixed>  $context
+     */
     protected function runAction(WorkflowInstance $instance, array $action, array $context): void
     {
         $type = $action['action_type'] ?? null;
@@ -37,6 +48,10 @@ class WorkflowAutomatedActionRunner
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     * @param  array<string, mixed>  $context
+     */
     protected function runMappedAction(WorkflowInstance $instance, ?string $type, array $config, array $context): void
     {
         try {
@@ -58,12 +73,21 @@ class WorkflowAutomatedActionRunner
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     protected function sendInternalNotification(WorkflowInstance $instance, array $config): void
     {
-        $recipientIds = collect($config['user_ids'] ?? [])
-            ->map(fn ($value) => (int) $value)
-            ->filter()
-            ->all();
+        /** @var mixed $configuredUserIds */
+        $configuredUserIds = $config['user_ids'] ?? [];
+        /** @var list<int> $recipientIds */
+        $recipientIds = is_array($configuredUserIds)
+            ? collect($configuredUserIds)
+                ->map(fn (mixed $value): int => TypedValue::int($value))
+                ->filter(fn (int $id): bool => $id > 0)
+                ->values()
+                ->all()
+            : [];
 
         if ($recipientIds === []) {
             $recipientIds = $instance->assignments()
@@ -82,6 +106,10 @@ class WorkflowAutomatedActionRunner
             )));
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     * @param  array<string, mixed>  $context
+     */
     protected function writeAuditNote(WorkflowInstance $instance, array $config, array $context): void
     {
         AuditLog::query()->create([
@@ -105,6 +133,9 @@ class WorkflowAutomatedActionRunner
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     protected function dispatchJob(WorkflowInstance $instance, array $config): void
     {
         $jobClass = $config['job_class'] ?? null;
@@ -122,6 +153,9 @@ class WorkflowAutomatedActionRunner
         $jobClass::dispatch($instance->getKey(), $config['payload'] ?? []);
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     */
     protected function setComputedData(WorkflowInstance $instance, array $config): void
     {
         $data = (array) ($config['data'] ?? []);
@@ -135,6 +169,10 @@ class WorkflowAutomatedActionRunner
         ])->save();
     }
 
+    /**
+     * @param  array<string, mixed>  $config
+     * @param  array<string, mixed>  $context
+     */
     protected function writeFailureAudit(WorkflowInstance $instance, ?string $type, array $config, Throwable $exception, array $context): void
     {
         AuditLog::query()->create([

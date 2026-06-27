@@ -8,6 +8,9 @@ use Modules\Core\Models\Organization;
 
 class OrganizationResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         /** @var Organization $organization */

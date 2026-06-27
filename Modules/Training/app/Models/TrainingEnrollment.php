@@ -19,6 +19,9 @@ class TrainingEnrollment extends Model
         'status',
     ];
 
+    /**
+     * @return BelongsTo<TrainingBatch, $this>
+     */
     public function batch(): BelongsTo
     {
         return $this->belongsTo(TrainingBatch::class, 'training_batch_id');

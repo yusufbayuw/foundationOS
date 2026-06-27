@@ -7,10 +7,11 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Modules\Core\Models\Tenant;
 use Modules\Employee\Models\SalarySlip;
+use Symfony\Component\HttpFoundation\Response;
 
 class SalarySlipController extends Controller
 {
-    public function download(Request $request, SalarySlip $salarySlip)
+    public function download(Request $request, SalarySlip $salarySlip): Response
     {
         $this->authorize('view', $salarySlip);
 

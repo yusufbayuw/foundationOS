@@ -8,6 +8,9 @@ use Modules\Campus\Models\CollageStudent;
 
 class CollegeStudentResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         /** @var CollageStudent $student */

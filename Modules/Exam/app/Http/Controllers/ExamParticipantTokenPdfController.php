@@ -7,10 +7,11 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Modules\Core\Models\Tenant;
 use Modules\Exam\Models\ExamDefinition;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExamParticipantTokenPdfController extends Controller
 {
-    public function __invoke(Request $request, ExamDefinition $exam)
+    public function __invoke(Request $request, ExamDefinition $exam): Response
     {
         $this->authorize('view', $exam);
         $this->authorize('regenerateToken', $exam);

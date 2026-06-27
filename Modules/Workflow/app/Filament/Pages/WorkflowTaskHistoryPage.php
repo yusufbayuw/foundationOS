@@ -24,20 +24,24 @@ class WorkflowTaskHistoryPage extends Page
         return FilamentUi::module('Workflow');
     }
 
+    /**
+     * @return list<WorkflowAssignment>
+     */
     public function getHistory(): array
     {
         $user = auth()->user();
         $tenant = Filament::getTenant();
 
-        return WorkflowAssignment::query()
+        return array_values(WorkflowAssignment::query()
             ->with(['instance.workflow', 'instance.currentStep', 'instance.requester'])
             ->where('assigned_to_type', 'user')
             ->when($user, fn (Builder $query) => $query->where('assigned_to_id', $user->getAuthIdentifier()))
             ->whereIn('status', ['completed', 'cancelled', 'expired'])
-            ->when($tenant, fn (Builder $query) => $query->whereHas('instance', fn (Builder $inner) => $inner->where('tenant_id', $tenant->getKey())))
+            ->when($tenant, fn (Builder $query) => $query->whereHas('instance', fn (Builder $inner) => $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenant->getKey())))
             ->latest('updated_at')
             ->limit(50)
             ->get()
-            ->all();
+            ->values()
+            ->all());
     }
 }

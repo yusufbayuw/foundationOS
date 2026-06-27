@@ -23,6 +23,9 @@ class CurrencyFormatter
             : "{$fmt['symbol']} {$formatted}";
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function options(): array
     {
         return [

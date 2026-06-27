@@ -2,9 +2,11 @@
 
 namespace Modules\School\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\School\Models\Assessment;
+use Modules\School\Models\ClassStudent;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Models\Student;
 use Modules\School\Models\StudentGrade;
@@ -28,7 +30,8 @@ class ClassGradeLedgerService
 
         $students = Student::query()
             ->with('user')
-            ->whereHas('classStudents', function ($query) use ($schoolClass, $academicPeriodId): void {
+            ->whereHas('classStudents', function (Builder $query) use ($schoolClass, $academicPeriodId): void {
+                /** @var Builder<ClassStudent> $query */
                 $query->where('class_id', $schoolClass->getKey())
                     ->where('academic_period_id', $academicPeriodId);
             })

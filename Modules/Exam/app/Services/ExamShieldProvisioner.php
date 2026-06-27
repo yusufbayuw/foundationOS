@@ -93,7 +93,7 @@ class ExamShieldProvisioner
         $role = Role::firstOrCreate([
             'name' => $roleName,
             'guard_name' => $this->guardName(),
-            'tenant_id' => $tenant->getKey(),
+            'team_id' => (int) $tenant->getKey(),
         ]);
 
         $role->syncPermissions($permissions);

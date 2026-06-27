@@ -285,6 +285,9 @@ class SetupHrmWorkflowsCommand extends Command
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     private function makeStep(Workflow $workflow, array $attributes): WorkflowStep
     {
         return WorkflowStep::query()->create([
@@ -310,6 +313,9 @@ class SetupHrmWorkflowsCommand extends Command
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $rules
+     */
     private function makeTransition(
         Workflow $workflow,
         WorkflowStep $fromStep,

@@ -32,11 +32,17 @@ class StudentResource extends LocalizedResource
 
     protected static ?string $model = Student::class;
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['nis', 'nisn', 'user.name'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         assert($record instanceof Student);

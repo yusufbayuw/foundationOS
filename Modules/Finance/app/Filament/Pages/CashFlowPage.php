@@ -29,6 +29,9 @@ class CashFlowPage extends Page
 
     public ?int $organizationId = null;
 
+    /**
+     * @var array<string, mixed>
+     */
     public array $reportData = [];
 
     public function mount(): void

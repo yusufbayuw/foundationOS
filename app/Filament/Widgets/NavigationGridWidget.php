@@ -51,7 +51,7 @@ class NavigationGridWidget extends Widget
     }
 
     /**
-     * @return array<string, list<array{label: string, url: string, icon: string}>>
+     * @return array<string, array<int, array{label: string, url: string, icon: string}>>
      */
     public function getGroupedItems(): array
     {
@@ -62,8 +62,8 @@ class NavigationGridWidget extends Widget
             $items = collect($group->getItems())
                 ->filter(fn ($item): bool => $item->isVisible() && ! $item->isHidden())
                 ->map(fn ($item): array => [
-                    'label' => $item->getLabel(),
-                    'url' => $item->getUrl() ?? '#',
+                    'label' => (string) $item->getLabel(),
+                    'url' => (string) ($item->getUrl() ?? '#'),
                     'icon' => $this->resolveIcon($item->getIcon()),
                 ])
                 ->values()
@@ -78,7 +78,7 @@ class NavigationGridWidget extends Widget
     }
 
     /**
-     * @return list<array{label: string, url: string, icon: string}>
+     * @return array<int, array{label: string, url: string, icon: string}>
      */
     public function getVisibleItems(): array
     {
@@ -102,11 +102,14 @@ class NavigationGridWidget extends Widget
     }
 
     /**
-     * @return list<array{label: string, url: string, icon: string}>
+     * @return array<int, array{label: string, url: string, icon: string}>
      */
     public function getPinnedItems(): array
     {
-        return auth()->user()->pinned_menus ?? [];
+        /** @var array<int, array{label: string, url: string, icon: string}> $pinned */
+        $pinned = auth()->user()->pinned_menus ?? [];
+
+        return $pinned;
     }
 
     /**
@@ -125,7 +128,7 @@ class NavigationGridWidget extends Widget
     private function resolveIcon(mixed $icon): string
     {
         if ($icon instanceof \BackedEnum) {
-            $value = $icon->value ?? '';
+            $value = (string) ($icon->value ?? '');
 
             if ($value === '') {
                 return 'heroicon-o-rectangle-stack';

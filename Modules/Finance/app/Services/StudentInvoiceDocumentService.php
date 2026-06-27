@@ -43,8 +43,10 @@ class StudentInvoiceDocumentService
             }
         }
 
-        if (isset($invoiceable->name)) {
-            return (string) $invoiceable->name;
+        $name = data_get($invoiceable, 'name');
+
+        if (is_string($name) && $name !== '') {
+            return $name;
         }
 
         return '-';

@@ -2,6 +2,7 @@
 
 namespace Modules\Employee\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Employee\Models\AttendanceLog;
 use Modules\Employee\Models\Employee;
@@ -123,7 +124,7 @@ class PayrollCalculationService
      */
     private function resolveSlip(Employee $employee, int $month, int $year, array $stats, bool $dryRun): SalarySlip
     {
-        $periodLabel = date('F Y', mktime(0, 0, 0, $month, 1, $year));
+        $periodLabel = Carbon::create($year, $month, 1)->format('F Y');
         $basicSalary = (float) $employee->basic_salary;
 
         if ($dryRun) {
@@ -173,6 +174,9 @@ class PayrollCalculationService
         );
     }
 
+    /**
+     * @return array{working_days: int, absent_days: int, overtime_hours: float, leave_days: int, work_hours: float}
+     */
     private function aggregateAttendance(Employee $employee, int $month, int $year): array
     {
         $logs = AttendanceLog::query()
@@ -190,6 +194,9 @@ class PayrollCalculationService
         ];
     }
 
+    /**
+     * @param  array<string, mixed>  $vars
+     */
     private function resolveAmount(PayrollComponent $component, array $vars): float
     {
         return match ($component->calculation_type) {
@@ -200,6 +207,9 @@ class PayrollCalculationService
         };
     }
 
+    /**
+     * @param  array<string, mixed>  $vars
+     */
     private function evaluateFormula(string $formula, array $vars): float
     {
         // Replace {variable} placeholders with their numeric values

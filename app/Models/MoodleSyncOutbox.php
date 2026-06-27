@@ -43,6 +43,10 @@ class MoodleSyncOutbox extends Model
         ];
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeReady(Builder $query): Builder
     {
         return $query
@@ -73,6 +77,10 @@ class MoodleSyncOutbox extends Model
         return static::query()->find($id);
     }
 
+    /**
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
     public function scopeStaleProcessing(Builder $query, int $minutes): Builder
     {
         return $query

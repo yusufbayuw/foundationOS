@@ -16,7 +16,7 @@ class AuditVerifyChainCommand extends Command
         $query = AuditLog::withoutTenantScope()->orderBy('id');
 
         if ($this->option('tenant') !== null) {
-            $query->where('tenant_id', (int) $this->option('tenant'));
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), (int) $this->option('tenant'));
         }
 
         $previousHash = null;

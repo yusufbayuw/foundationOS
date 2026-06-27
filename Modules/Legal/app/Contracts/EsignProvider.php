@@ -8,6 +8,7 @@ interface EsignProvider
 
     /**
      * @param  array<string, mixed>  $context
+     * @return array<string, mixed>
      */
     public function requestSignature(string $documentPath, array $context = []): array;
 

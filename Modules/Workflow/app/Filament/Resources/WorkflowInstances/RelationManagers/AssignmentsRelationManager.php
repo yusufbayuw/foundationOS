@@ -73,11 +73,11 @@ class AssignmentsRelationManager extends RelationManager
 
                                 return User::query()
                                     ->whereHas('userTenantRoles', function ($query) use ($instance): void {
-                                        $query->where('tenant_id', $instance->tenant_id);
+                                        $query->where($query->getModel()->qualifyColumn('tenant_id'), $instance->tenant_id);
 
                                         if ($instance->organization_id) {
                                             $query->where(function ($inner) use ($instance): void {
-                                                $inner->where('organization_id', $instance->organization_id)
+                                                $inner->where($inner->getModel()->qualifyColumn('organization_id'), $instance->organization_id)
                                                     ->orWhereNull('organization_id');
                                             });
                                         }
@@ -97,6 +97,9 @@ class AssignmentsRelationManager extends RelationManager
                         /** @var User $actor */
                         $actor = auth()->user();
                         $targetUser = User::query()->findOrFail($data['target_user_id']);
+                        if (! $targetUser instanceof User) {
+                            return;
+                        }
 
                         app(WorkflowEngine::class)->reassign(
                             $record,

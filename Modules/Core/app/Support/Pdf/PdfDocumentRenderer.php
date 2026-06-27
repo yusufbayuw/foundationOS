@@ -73,8 +73,8 @@ class PdfDocumentRenderer
                 $document['view'],
                 $document['data'],
                 $context,
-                $document['paper'],
-                $document['orientation'],
+                $document['paper'] ?? 'a4',
+                $document['orientation'] ?? 'portrait',
             );
 
             $zip->addFromString(

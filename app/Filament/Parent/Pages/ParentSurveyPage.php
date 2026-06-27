@@ -25,7 +25,8 @@ class ParentSurveyPage extends Page implements HasForms
 
     protected string $view = 'filament.parent.pages.parent-survey';
 
-    public ?array $data = [];
+    /** @var array<string, mixed>|null */
+    public ?array $data = null;
 
     public static function getNavigationLabel(): string
     {

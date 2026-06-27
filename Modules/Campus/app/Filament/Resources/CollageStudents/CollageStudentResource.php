@@ -28,11 +28,17 @@ class CollageStudentResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['student_number', 'full_name', 'email'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         assert($record instanceof CollageStudent);

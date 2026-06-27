@@ -4,6 +4,7 @@ namespace Modules\Library\Support;
 
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 
@@ -25,7 +26,10 @@ class LibraryScopeResolver
     }
 
     /**
-     * Library data is always tenant-owned, while organization may be tenant-wide.
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Builder<TModel>
      */
     public function apply(Builder $query, ?User $user = null, ?int $tenantId = null): Builder
     {
@@ -35,7 +39,7 @@ class LibraryScopeResolver
             return $query->whereRaw('1 = 0');
         }
 
-        $query->where('tenant_id', $tenantId);
+        $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
 
         if (! $this->hasOrganizationColumn($query) || $user === null || $user->isGlobalSuperAdmin()) {
             return $query;
@@ -88,6 +92,7 @@ class LibraryScopeResolver
             ->exists();
     }
 
+    /** @param Builder<covariant Model> $query */
     protected function hasOrganizationColumn(Builder $query): bool
     {
         return in_array('organization_id', $query->getModel()->getFillable(), true);

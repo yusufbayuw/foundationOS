@@ -29,7 +29,7 @@ class DatabaseWorkflowResolver implements WorkflowResolver
             ->when(! $resolvedSubjectType, fn ($query) => $query->whereNull('subject_type'))
             ->when($organizationId, function ($query) use ($organizationId): void {
                 $query->where(function ($inner) use ($organizationId): void {
-                    $inner->where('organization_id', $organizationId)
+                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), $organizationId)
                         ->orWhereNull('organization_id');
                 });
             }, fn ($query) => $query->whereNull('organization_id'))

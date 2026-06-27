@@ -47,7 +47,7 @@ class TenantRunCommand extends Command
      * expected by Artisan::call().
      *
      * @param  array<int, string>  $args
-     * @return array<string, mixed>
+     * @return array<int|string, string|bool>
      */
     protected function parseForwardedArgs(array $args): array
     {

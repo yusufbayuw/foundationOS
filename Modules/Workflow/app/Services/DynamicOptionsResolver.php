@@ -82,7 +82,7 @@ class DynamicOptionsResolver
 
         if ($tenantAware && $tenantId !== null && method_exists($modelClass, 'withoutTenantScope')) {
             if (! app(CurrentTenant::class)->id()) {
-                $query->where('tenant_id', $tenantId);
+                $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
             }
         } elseif (! $tenantAware && method_exists($modelClass, 'withoutTenantScope')) {
             /** @var Builder<Model> $query */

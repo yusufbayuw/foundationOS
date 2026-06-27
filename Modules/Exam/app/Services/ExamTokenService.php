@@ -2,6 +2,7 @@
 
 namespace Modules\Exam\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Modules\Exam\Models\ExamDefinition;
 use Modules\Exam\Models\ExamParticipant;
@@ -47,7 +48,10 @@ class ExamTokenService
     {
         $query = ExamToken::query()
             ->where('token', $token)
-            ->whereHas('examParticipant', fn ($q) => $q->where('exam_definition_id', $exam->id));
+            ->whereHas('examParticipant', function (Builder $query) use ($exam): void {
+                /** @var Builder<ExamParticipant> $query */
+                $query->where('exam_definition_id', $exam->id);
+            });
 
         if ($excludeParticipant !== null) {
             $query->where('exam_participant_id', '!=', $excludeParticipant->id);

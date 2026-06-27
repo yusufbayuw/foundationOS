@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Modules\Core\Models\User;
 use Modules\Procurement\Events\PurchaseRequisitionApproved;
+use Modules\Procurement\Models\RequestForQuotation;
 use Modules\Procurement\Services\RfqAutoCreationService;
 
 class CreateRfqFromApprovedPurchaseRequisition implements ShouldQueue
@@ -31,7 +32,7 @@ class CreateRfqFromApprovedPurchaseRequisition implements ShouldQueue
         $this->notifyRecipient($event->approver ?? $requisition->approver ?? $requisition->requester, $rfq);
     }
 
-    protected function notifyRecipient(?User $user, $rfq): void
+    protected function notifyRecipient(?User $user, RequestForQuotation $rfq): void
     {
         if (! $user) {
             return;

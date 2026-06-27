@@ -7,7 +7,9 @@ use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Support\FilamentUi;
+use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAssignment;
+use Modules\Workflow\Models\WorkflowInstance;
 
 class WorkflowInboxPage extends Page
 {
@@ -31,6 +33,9 @@ class WorkflowInboxPage extends Page
         return FilamentUi::module('Workflow');
     }
 
+    /**
+     * @return array{modules: list<string>, workflows: array<int, string>}
+     */
     public function getFilterOptions(): array
     {
         $query = $this->baseAssignmentsQuery();
@@ -38,25 +43,29 @@ class WorkflowInboxPage extends Page
         $workflowQuery = clone $query;
 
         return [
-            'modules' => $moduleQuery
+            'modules' => array_values($moduleQuery
                 ->join('workflow_instances', 'workflow_instances.id', '=', 'workflow_assignments.workflow_instance_id')
                 ->join('workflows', 'workflows.id', '=', 'workflow_instances.workflow_id')
                 ->whereNotNull('workflows.module')
                 ->distinct()
                 ->orderBy('workflows.module')
                 ->pluck('workflows.module')
-                ->values()
-                ->all(),
+                ->map(fn (mixed $module): string => (string) $module)
+                ->all()),
             'workflows' => $workflowQuery
                 ->join('workflow_instances', 'workflow_instances.id', '=', 'workflow_assignments.workflow_instance_id')
                 ->join('workflows', 'workflows.id', '=', 'workflow_instances.workflow_id')
                 ->distinct()
                 ->orderBy('workflows.name')
                 ->pluck('workflows.name', 'workflows.id')
+                ->mapWithKeys(fn (mixed $name, mixed $id): array => [(int) $id => (string) $name])
                 ->all(),
         ];
     }
 
+    /**
+     * @return array<int, WorkflowAssignment>
+     */
     public function getMyTasks(): array
     {
         return $this->filteredPendingAssignments()
@@ -66,6 +75,9 @@ class WorkflowInboxPage extends Page
             ->all();
     }
 
+    /**
+     * @return array<int, WorkflowAssignment>
+     */
     public function getOverdueTasks(): array
     {
         return $this->filteredPendingAssignments()
@@ -77,6 +89,9 @@ class WorkflowInboxPage extends Page
             ->all();
     }
 
+    /**
+     * @return array<int, WorkflowAssignment>
+     */
     public function getDelegatedTasks(): array
     {
         return $this->filteredPendingAssignments()
@@ -87,6 +102,9 @@ class WorkflowInboxPage extends Page
             ->all();
     }
 
+    /**
+     * @return array<int, WorkflowAssignment>
+     */
     public function getCompletedRecently(): array
     {
         return $this->baseAssignmentsQuery()
@@ -99,6 +117,9 @@ class WorkflowInboxPage extends Page
             ->all();
     }
 
+    /**
+     * @return Builder<WorkflowAssignment>
+     */
     protected function filteredPendingAssignments(): Builder
     {
         return $this->applyFilters(
@@ -106,6 +127,9 @@ class WorkflowInboxPage extends Page
         );
     }
 
+    /**
+     * @return Builder<WorkflowAssignment>
+     */
     protected function baseAssignmentsQuery(): Builder
     {
         $user = auth()->user();
@@ -116,9 +140,18 @@ class WorkflowInboxPage extends Page
             ->where('assigned_to_type', 'user')
             ->when($user, fn (Builder $query) => $query->where('assigned_to_id', $user->getAuthIdentifier()))
             ->when(! $user, fn (Builder $query) => $query->whereRaw('1 = 0'))
-            ->when($tenant, fn (Builder $query) => $query->whereHas('instance', fn (Builder $inner) => $inner->where('tenant_id', $tenant->getKey())));
+            ->when($tenant, function (Builder $query) use ($tenant): void {
+                $query->whereHas('instance', function (Builder $inner) use ($tenant): void {
+                    /** @var Builder<WorkflowInstance> $inner */
+                    $inner->where($inner->getModel()->qualifyColumn('tenant_id'), $tenant->getKey());
+                });
+            });
     }
 
+    /**
+     * @param  Builder<WorkflowAssignment>  $query
+     * @return Builder<WorkflowAssignment>
+     */
     protected function applyFilters(Builder $query): Builder
     {
         $module = request()->string('module')->toString();
@@ -127,10 +160,16 @@ class WorkflowInboxPage extends Page
 
         $query
             ->when($module !== '', function (Builder $inner) use ($module): void {
-                $inner->whereHas('instance.workflow', fn (Builder $workflowQuery) => $workflowQuery->where('module', $module));
+                $inner->whereHas('instance.workflow', function (Builder $workflowQuery) use ($module): void {
+                    /** @var Builder<Workflow> $workflowQuery */
+                    $workflowQuery->where('module', $module);
+                });
             })
             ->when($workflowId > 0, function (Builder $inner) use ($workflowId): void {
-                $inner->whereHas('instance', fn (Builder $instanceQuery) => $instanceQuery->where('workflow_id', $workflowId));
+                $inner->whereHas('instance', function (Builder $instanceQuery) use ($workflowId): void {
+                    /** @var Builder<WorkflowInstance> $instanceQuery */
+                    $instanceQuery->where('workflow_id', $workflowId);
+                });
             });
 
         if ($sla === 'due_today') {
@@ -144,6 +183,9 @@ class WorkflowInboxPage extends Page
         return $query;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function summarizeAssignment(WorkflowAssignment $assignment): array
     {
         $dueAt = $assignment->due_at;

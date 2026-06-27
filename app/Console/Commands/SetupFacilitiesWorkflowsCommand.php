@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Modules\Facility\Models\RoomBooking;
 use Modules\Legal\Models\Contract;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
@@ -76,9 +77,12 @@ class SetupFacilitiesWorkflowsCommand extends Command
 
         $step = WorkflowStep::query()->create([
             'workflow_id' => $workflow->getKey(),
+            'uuid' => (string) Str::uuid(),
             'code' => 'approval',
             'name' => 'Approval',
-            'assignee_user_id' => $approverId,
+            'step_type' => 'approval',
+            'assignee_type' => 'user',
+            'assignee_value' => (string) $approverId,
             'sort_order' => 1,
             'is_initial' => true,
         ]);
@@ -87,9 +91,11 @@ class SetupFacilitiesWorkflowsCommand extends Command
             'workflow_id' => $workflow->getKey(),
             'from_step_id' => $step->getKey(),
             'to_step_id' => null,
-            'code' => 'approve',
-            'name' => 'Approve',
-            'sort_order' => 1,
+            'action_name' => 'approve',
+            'rule_type' => 'json_logic',
+            'condition_rules' => null,
+            'priority' => 0,
+            'is_default' => true,
         ]);
     }
 }

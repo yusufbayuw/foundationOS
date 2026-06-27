@@ -18,6 +18,9 @@ class Country extends Model
         'name',
     ];
 
+    /**
+     * @return HasMany<Province, $this>
+     */
     public function provinces(): HasMany
     {
         return $this->hasMany(Province::class);

@@ -13,6 +13,9 @@ class PollResponse extends Model
         'selected_option',
     ];
 
+    /**
+     * @return BelongsTo<Poll, $this>
+     */
     public function poll(): BelongsTo
     {
         return $this->belongsTo(Poll::class);

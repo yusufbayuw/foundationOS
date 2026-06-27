@@ -59,6 +59,9 @@ class CustomerInvoice extends Model
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function invoiceTypeOptions(): array
     {
         return [
@@ -69,6 +72,9 @@ class CustomerInvoice extends Model
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function statusOptions(): array
     {
         return [

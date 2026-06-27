@@ -58,7 +58,7 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
         $candidates = collect($candidateConfig);
 
         if ($candidates->isNotEmpty()) {
-            $matched = $this->ruleEngine->resolveCandidates($candidates, WorkflowContextData::fromInstance($instance));
+            $matched = $this->ruleEngine->resolveCandidates($candidates->values()->all(), WorkflowContextData::fromInstance($instance));
             if ($matched instanceof Collection && $matched->isNotEmpty()) {
                 $first = $matched->first();
                 $role = TypedValue::string(is_array($first) ? data_get($first, 'role') : null, TypedValue::string($step->assignee_value));
@@ -73,11 +73,11 @@ class DatabaseWorkflowAssigneeResolver implements WorkflowAssigneeResolver
             ->role($role)
             ->whereHas('userTenantRoles', function (Builder $query) use ($instance): void {
                 /** @var Builder<UserTenantRole> $query */
-                $query->where('tenant_id', $instance->tenant_id);
+                $query->where($query->getModel()->qualifyColumn('tenant_id'), $instance->tenant_id);
 
                 if ($instance->organization_id) {
                     $query->where(function (Builder $inner) use ($instance): void {
-                        $inner->where('organization_id', $instance->organization_id)
+                        $inner->where($inner->getModel()->qualifyColumn('organization_id'), $instance->organization_id)
                             ->orWhereNull('organization_id');
                     });
                 }

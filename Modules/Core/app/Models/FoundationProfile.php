@@ -19,6 +19,9 @@ class FoundationProfile extends Model
         'profile_document_path',
     ];
 
+    /**
+     * @return BelongsTo<Tenant, $this>
+     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);

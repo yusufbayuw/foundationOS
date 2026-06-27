@@ -123,10 +123,10 @@ function dedupeRelationDocblocks(string $content): string
     $relationReturnPattern = 'BelongsTo|HasMany|HasOne|BelongsToMany|MorphMany|MorphOne|MorphTo|HasManyThrough';
 
     return preg_replace_callback(
-        '/((?:    \/\*\*\s*\R(?:     \*[^\R]*\R)+     \*\/\s*\R)+)(    public function \w+\(\): (?:'.$relationReturnPattern.')\R)/',
+        '/((?:    \/\*\*\s*\n(?:     \*[^\n]*\n)+     \*\/\s*\n)+)(    public function \w+\(\): (?:'.$relationReturnPattern.')\n)/',
         function (array $matches) use ($relationReturnPattern): string {
             preg_match_all(
-                '/    \/\*\*\s*\R(?:     \*[^\R]*\R)+     \*\/\s*\R/',
+                '/    \/\*\*\s*\n(?:     \*[^\n]*\n)+     \*\/\s*\n/',
                 $matches[1],
                 $blocks,
             );

@@ -18,7 +18,9 @@ class WorkflowSnapshotStepResolver
 
     public function materialize(WorkflowInstance $instance, int $stepId): ?WorkflowStep
     {
-        $snapshotStep = collect(data_get($instance->workflow_snapshot, 'steps', []))
+        /** @var list<array<string, mixed>> $steps */
+        $steps = data_get($instance->workflow_snapshot, 'steps', []);
+        $snapshotStep = collect($steps)
             ->first(fn (array $step): bool => (int) ($step['id'] ?? 0) === $stepId);
 
         if (is_array($snapshotStep) && $snapshotStep !== []) {

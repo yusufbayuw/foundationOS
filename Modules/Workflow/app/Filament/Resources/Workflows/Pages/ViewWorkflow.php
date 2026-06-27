@@ -2,6 +2,7 @@
 
 namespace Modules\Workflow\Filament\Resources\Workflows\Pages;
 
+use App\Support\TypedValue;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
@@ -32,7 +33,7 @@ class ViewWorkflow extends ViewRecord
                 ->visible(fn (): bool => $this->record->status->value !== WorkflowDefinitionStatus::Active->value || ! $this->record->is_active)
                 ->action(function (): void {
                     $this->record = app(WorkflowDefinitionLifecycleService::class)
-                        ->publish($this->record, auth()->id());
+                        ->publish($this->record, TypedValue::nullableInt(auth()->id()));
 
                     Notification::make()
                         ->title('Workflow berhasil dipublish.')
@@ -47,7 +48,7 @@ class ViewWorkflow extends ViewRecord
                 ->visible(fn (): bool => $this->record->status->value !== WorkflowDefinitionStatus::Archived->value)
                 ->action(function (): void {
                     $this->record = app(WorkflowDefinitionLifecycleService::class)
-                        ->archive($this->record, auth()->id());
+                        ->archive($this->record, TypedValue::nullableInt(auth()->id()));
 
                     Notification::make()
                         ->title('Workflow berhasil diarsipkan.')
@@ -61,7 +62,7 @@ class ViewWorkflow extends ViewRecord
                 ->requiresConfirmation()
                 ->action(function (): void {
                     $clone = app(WorkflowDefinitionLifecycleService::class)
-                        ->duplicateAsNewVersion($this->record, auth()->id());
+                        ->duplicateAsNewVersion($this->record, TypedValue::nullableInt(auth()->id()));
 
                     Notification::make()
                         ->title('Versi baru workflow berhasil dibuat.')

@@ -74,6 +74,9 @@ class ModuleMarketplace extends Page
             ->send();
     }
 
+    /**
+     * @return Collection<int, Module>
+     */
     public function getModulesWithStatus(): Collection
     {
         $tenant = Filament::getTenant();

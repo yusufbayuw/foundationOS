@@ -8,5 +8,8 @@ use Modules\Workflow\Models\WorkflowTransition;
 
 interface WorkflowTransitionResolver
 {
+    /**
+     * @param  array<string, mixed>  $incomingData
+     */
     public function resolve(WorkflowInstance $instance, WorkflowStep $step, string $actionName, array $incomingData): WorkflowTransition;
 }

@@ -29,7 +29,7 @@ class MoodleArchiveSemesterCohortsCommand extends Command
             ->where('is_active', false);
 
         if ($this->option('tenant')) {
-            $query->where('tenant_id', $this->option('tenant'));
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $this->option('tenant'));
         }
 
         $periods = $query->cursor();
@@ -46,7 +46,7 @@ class MoodleArchiveSemesterCohortsCommand extends Command
 
             $idnumber = "fos_semester_t{$tenant->id}_p{$period->id}";
             $mapping = MoodleEntityMapping::where('entity_type', 'semester_category')
-                ->where('entity_id', $period->id)
+                ->where('fos_entity_id', $period->id)
                 ->where('tenant_id', $period->tenant_id)
                 ->first();
 

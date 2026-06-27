@@ -76,6 +76,9 @@ class BrandingSettingsPage extends Page
             ]);
     }
 
+    /**
+     * @return list<Action>
+     */
     protected function getFormActions(): array
     {
         return [

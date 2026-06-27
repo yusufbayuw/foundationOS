@@ -32,7 +32,6 @@ use Modules\Employee\Models\KpiScore;
 use Modules\Employee\Models\LeaveRequest;
 use Modules\Enrollment\Models\ExamResult;
 use Modules\Enrollment\Models\Registration;
-use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\Budget as FinanceBudget;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\Payment;
@@ -58,6 +57,9 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants
 {
+    /**
+     * @return HasMany<Employee, $this>
+     */
     /** @use HasFactory<Factory<static>> */
     use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, Notifiable, SoftDeletes;
 
@@ -120,16 +122,25 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         ];
     }
 
+    /**
+     * @return HasMany<UserTenantRole, $this>
+     */
     public function userTenantRoles(): HasMany
     {
         return $this->hasMany(UserTenantRole::class);
     }
 
+    /**
+     * @return HasMany<UserTenantRole, $this>
+     */
     public function assignedTenantRoles(): HasMany
     {
         return $this->hasMany(UserTenantRole::class, 'assigned_by');
     }
 
+    /**
+     * @return BelongsToMany<Tenant, $this>
+     */
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class, 'user_tenant_roles')
@@ -144,6 +155,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsToMany<Organization, $this>
+     */
     public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'user_tenant_roles')
@@ -169,7 +183,10 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->exists();
     }
 
-    public function getTenants(Panel $panel): array|Collection
+    /**
+     * @return Collection<int, Tenant>
+     */
+    public function getTenants(Panel $panel): Collection
     {
         $tenantIds = $this->activeUserTenantRolesQuery()->pluck('tenant_id');
 
@@ -181,6 +198,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * Membership rows that are not expired.
+     *
+     * @return HasMany<UserTenantRole, $this>
      */
     protected function activeUserTenantRolesQuery(): HasMany
     {
@@ -209,33 +228,48 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->getTenants($panel)->first();
     }
 
+    /**
+     * @return HasMany<Tenant, $this>
+     */
     public function createdTenants(): HasMany
     {
         return $this->hasMany(Tenant::class, 'created_by');
     }
 
+    /**
+     * @return HasMany<Organization, $this>
+     */
     public function principalOrganizations(): HasMany
     {
         return $this->hasMany(Organization::class, 'principal_user_id');
     }
 
+    /**
+     * @return HasMany<Student, $this>
+     */
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
     }
 
+    /**
+     * @return HasMany<Teacher, $this>
+     */
     public function teachers(): HasMany
     {
         return $this->hasMany(Teacher::class);
     }
 
+    /**
+     * @return HasMany<Lecturer, $this>
+     */
     public function lecturers(): HasMany
     {
         return $this->hasMany(Lecturer::class);
     }
 
     /**
-     * @deprecated Query Modules\Employee\Models\Employee by user_id from the Employee module instead.
+     * @return HasMany<Employee, $this>
      */
     public function employees(): HasMany
     {
@@ -243,7 +277,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
-     * @deprecated Query Modules\Library\Models\Member by user_id from the Library module instead.
+     * @return HasMany<Member, $this>
      */
     public function libraryMembers(): HasMany
     {
@@ -251,7 +285,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     }
 
     /**
-     * @deprecated Query Modules\Finance\Models\Payment by verified_by from the Finance module instead.
+     * @return HasMany<Payment, $this>
      */
     public function verifiedPayments(): HasMany
     {
@@ -261,19 +295,13 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<JournalEntry, $this>
      */
-    /**
-     * @deprecated Query Modules\Finance\Models\JournalEntry by posted_by from the Finance module instead.
-     */
     public function postedJournalEntries(): HasMany
     {
         return $this->hasMany(JournalEntry::class, 'posted_by');
     }
 
     /**
-     * @return HasMany<Budget, $this>
-     */
-    /**
-     * @deprecated Query Modules\Finance\Models\Budget by approved_by from the Finance module instead.
+     * @return HasMany<FinanceBudget, $this>
      */
     public function approvedBudgets(): HasMany
     {
@@ -283,9 +311,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<PurchaseRequisition, $this>
      */
-    /**
-     * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by requested_by from the Procurement module instead.
-     */
     public function requestedPurchaseRequisitions(): HasMany
     {
         return $this->hasMany(PurchaseRequisition::class, 'requested_by');
@@ -294,16 +319,13 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<PurchaseRequisition, $this>
      */
-    /**
-     * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by user_id from the Procurement module instead.
-     */
     public function ownedPurchaseRequisitions(): HasMany
     {
         return $this->hasMany(PurchaseRequisition::class);
     }
 
     /**
-     * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by approved_by from the Procurement module instead.
+     * @return HasMany<PurchaseRequisition, $this>
      */
     public function approvedPurchaseRequisitions(): HasMany
     {
@@ -313,9 +335,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<RequestForQuotation, $this>
      */
-    /**
-     * @deprecated Query Modules\Procurement\Models\RequestForQuotation by created_by from the Procurement module instead.
-     */
     public function createdRequestForQuotations(): HasMany
     {
         return $this->hasMany(RequestForQuotation::class, 'created_by');
@@ -323,9 +342,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * @return HasMany<PurchaseOrder, $this>
-     */
-    /**
-     * @deprecated Query Modules\Procurement\Models\PurchaseOrder by approved_by from the Procurement module instead.
      */
     public function approvedPurchaseOrders(): HasMany
     {
@@ -335,9 +351,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<GoodsReceipt, $this>
      */
-    /**
-     * @deprecated Query Modules\Procurement\Models\GoodsReceipt by received_by from the Procurement module instead.
-     */
     public function receivedGoodsReceipts(): HasMany
     {
         return $this->hasMany(GoodsReceipt::class, 'received_by');
@@ -345,9 +358,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * @return HasMany<GoodsReceipt, $this>
-     */
-    /**
-     * @deprecated Query Modules\Procurement\Models\GoodsReceipt by inspected_by from the Procurement module instead.
      */
     public function inspectedGoodsReceipts(): HasMany
     {
@@ -357,9 +367,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<VendorBill, $this>
      */
-    /**
-     * @deprecated Query Modules\Procurement\Models\VendorBill by processed_by from the Procurement module instead.
-     */
     public function processedVendorBills(): HasMany
     {
         return $this->hasMany(VendorBill::class, 'processed_by');
@@ -367,9 +374,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * @return HasMany<Loan, $this>
-     */
-    /**
-     * @deprecated Query Modules\Library\Models\Loan by processed_by from the Library module instead.
      */
     public function processedLoans(): HasMany
     {
@@ -379,9 +383,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<Loan, $this>
      */
-    /**
-     * @deprecated Query Modules\Library\Models\Loan by returned_by from the Library module instead.
-     */
     public function returnedLoans(): HasMany
     {
         return $this->hasMany(Loan::class, 'returned_by');
@@ -389,9 +390,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * @return HasMany<AttendanceLog, $this>
-     */
-    /**
-     * @deprecated Query Modules\Employee\Models\AttendanceLog by approved_by from the Employee module instead.
      */
     public function approvedAttendanceLogs(): HasMany
     {
@@ -401,9 +399,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<LeaveRequest, $this>
      */
-    /**
-     * @deprecated Query Modules\Employee\Models\LeaveRequest by supervisor_id from the Employee module instead.
-     */
     public function supervisedLeaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class, 'supervisor_id');
@@ -412,9 +407,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<LeaveRequest, $this>
      */
-    /**
-     * @deprecated Query Modules\Employee\Models\LeaveRequest by approver_id from the Employee module instead.
-     */
     public function approvedLeaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class, 'approver_id');
@@ -422,9 +414,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * @return HasMany<KpiScore, $this>
-     */
-    /**
-     * @deprecated Query Modules\Employee\Models\KpiScore by evaluator_id from the Employee module instead.
      */
     public function evaluatedKpiScores(): HasMany
     {
@@ -482,9 +471,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     /**
      * @return HasMany<Registration, $this>
      */
-    /**
-     * @deprecated Query Modules\Enrollment\Models\Registration by completed_by from the Enrollment module instead.
-     */
     public function completedRegistrations(): HasMany
     {
         return $this->hasMany(Registration::class, 'completed_by');
@@ -492,9 +478,6 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 
     /**
      * @return HasMany<ExamResult, $this>
-     */
-    /**
-     * @deprecated Query Modules\Enrollment\Models\ExamResult by examiner_id from the Enrollment module instead.
      */
     public function examinedExamResults(): HasMany
     {

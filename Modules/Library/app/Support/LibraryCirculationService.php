@@ -3,6 +3,7 @@
 namespace Modules\Library\Support;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookReservation;
@@ -83,20 +84,21 @@ class LibraryCirculationService
                 return;
             }
 
-            Fine::query()->updateOrCreate(
-                [
-                    'tenant_id' => (int) $loan->tenant_id,
-                    'loan_id' => (int) $loan->id,
-                    'fine_type' => 'late_return',
-                ],
-                [
-                    'organization_id' => $loan->organization_id,
-                    'amount' => $amount,
-                    'paid_amount' => (float) ($loan->fine_paid ?? 0),
-                    'status' => (($loan->fine_paid ?? 0) >= $amount) ? 'paid' : 'unpaid',
-                    'issued_at' => now()->toDateString(),
-                ],
-            );
+            $fineStatus = (string) ((($loan->fine_paid ?? 0) >= $amount) ? 'paid' : 'unpaid');
+
+            $fine = Fine::query()->firstOrNew([
+                'tenant_id' => (int) $loan->tenant_id,
+                'loan_id' => (int) $loan->id,
+                'fine_type' => 'late_return',
+            ]);
+
+            $fine->fill([
+                'organization_id' => $loan->organization_id !== null ? (int) $loan->organization_id : null,
+                'amount' => $amount,
+                'paid_amount' => (float) ($loan->fine_paid ?? 0),
+                'status' => $fineStatus,
+                'issued_at' => now()->toDateString(),
+            ])->save();
         });
 
         $this->refreshMemberCounters((int) $loan->member_id);
@@ -113,7 +115,10 @@ class LibraryCirculationService
         }
 
         $loanQuery = Loan::query()->where('member_id', $member->id);
-        $fineQuery = Fine::query()->whereHas('loan', fn ($query) => $query->where('member_id', $member->id));
+        $fineQuery = Fine::query()->whereHas('loan', function (Builder $query) use ($member): void {
+            /** @var Builder<Loan> $query */
+            $query->where('member_id', $member->id);
+        });
 
         $member->forceFill([
             'total_loans_count' => (int) $loanQuery->count(),
@@ -139,7 +144,7 @@ class LibraryCirculationService
         $borrowed = Loan::query()
             ->whereNull('return_date')
             ->whereIn('status', ['borrowed', 'overdue'])
-            ->whereHas('bookCopy', fn ($query) => $query->where('book_id', $book->id))
+            ->whereHas('bookCopy', fn ($query) => $query->where($query->getModel()->qualifyColumn('book_id'), $book->id))
             ->count();
 
         $book->forceFill([

@@ -9,6 +9,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -95,7 +97,7 @@ class ScheduleForm
             ]);
     }
 
-    protected static function checkConflicts(Get $get, ?string $state, $livewire): void
+    protected static function checkConflicts(Get $get, ?string $state, CreateRecord|EditRecord $livewire): void
     {
         if (empty($state)) {
             return;
@@ -120,11 +122,7 @@ class ScheduleForm
             return;
         }
 
-        $excludeId = null;
-        if (method_exists($livewire, 'getRecord')) {
-            $record = $livewire->getRecord();
-            $excludeId = $record ? $record->id : null;
-        }
+        $excludeId = $livewire instanceof EditRecord ? $livewire->getRecord()->getKey() : null;
 
         $checker = new ScheduleConflictChecker;
         $conflicts = $checker->checkConflicts($data, $excludeId);

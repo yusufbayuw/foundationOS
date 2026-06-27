@@ -12,6 +12,9 @@ use Throwable;
  */
 class AutomationRunLogger
 {
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function run(
         string $triggerEvent,
         Model $subject,
@@ -58,6 +61,9 @@ class AutomationRunLogger
         }
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     protected function normalizeResult(mixed $result): ?array
     {
         if ($result === null) {

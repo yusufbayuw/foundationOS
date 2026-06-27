@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Services\AttendanceRecapDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class AttendanceRecapPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(Request $request, SchoolClass $schoolClass, AttendanceRecapDocumentService $service)
+    public function __invoke(Request $request, SchoolClass $schoolClass, AttendanceRecapDocumentService $service): Response
     {
         $periodId = (int) $request->query('period');
         $month = (int) $request->query('month');

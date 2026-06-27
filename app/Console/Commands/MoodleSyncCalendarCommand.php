@@ -39,7 +39,7 @@ class MoodleSyncCalendarCommand extends Command
 
         $query = Schedule::query()->with(['schoolClass', 'subject'])->whereNull('deleted_at');
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $schedules = $query->limit($limit)->get();

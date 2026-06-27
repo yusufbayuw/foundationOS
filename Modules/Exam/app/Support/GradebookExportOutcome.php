@@ -17,6 +17,9 @@ readonly class GradebookExportOutcome
         public array $metadata = [],
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
     public static function success(string $targetReferenceType, int $targetReferenceId, array $metadata = []): self
     {
         return new self(
@@ -27,6 +30,9 @@ readonly class GradebookExportOutcome
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
     public static function skipped(string $message, array $metadata = []): self
     {
         return new self(
@@ -36,6 +42,9 @@ readonly class GradebookExportOutcome
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
     public static function failed(string $message, array $metadata = []): self
     {
         return new self(

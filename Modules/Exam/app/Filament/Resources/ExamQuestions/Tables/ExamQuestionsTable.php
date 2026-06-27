@@ -19,6 +19,7 @@ use Modules\Exam\Enums\QuestionDifficulty;
 use Modules\Exam\Enums\QuestionStatus;
 use Modules\Exam\Enums\QuestionType;
 use Modules\Exam\Models\ExamQuestion;
+use Modules\Exam\Models\ExamQuestionBank;
 
 class ExamQuestionsTable
 {
@@ -66,7 +67,10 @@ class ExamQuestionsTable
 
                         return $query->whereHas(
                             'examQuestionBank',
-                            fn (Builder $bankQuery) => $bankQuery->where('academic_context_type', $data['value']),
+                            function (Builder $bankQuery) use ($data): void {
+                                /** @var Builder<ExamQuestionBank> $bankQuery */
+                                $bankQuery->where('academic_context_type', $data['value']);
+                            },
                         );
                     }),
                 SelectFilter::make('type')
@@ -94,17 +98,22 @@ class ExamQuestionsTable
                 SelectFilter::make('olympiad_level')
                     ->label(FilamentUi::field('olympiad_level'))
                     ->options(fn (): array => ExamQuestion::query()
-                        ->whereNotNull('metadata_json->olympiad_level')
+                        ->whereNotNull('metadata_json')
+                        ->whereRaw("JSON_EXTRACT(metadata_json, '$.olympiad_level') IS NOT NULL")
+                        ->selectRaw("JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.olympiad_level')) as olympiad_level")
                         ->distinct()
-                        ->pluck('metadata_json->olympiad_level', 'metadata_json->olympiad_level')
-                        ->filter()
+                        ->pluck('olympiad_level', 'olympiad_level')
                         ->all())
                     ->query(function (Builder $query, array $data): Builder {
                         if (blank($data['value'] ?? null)) {
                             return $query;
                         }
 
-                        return $query->where('metadata_json->olympiad_level', $data['value']);
+                        /** @var Builder<ExamQuestion> $query */
+                        return $query->whereRaw(
+                            'JSON_UNQUOTE(JSON_EXTRACT(metadata_json, ?)) = ?',
+                            ['$.olympiad_level', (string) $data['value']],
+                        );
                     }),
             ])
             ->recordActions([

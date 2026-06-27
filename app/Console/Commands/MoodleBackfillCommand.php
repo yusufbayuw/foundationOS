@@ -108,7 +108,7 @@ class MoodleBackfillCommand extends Command
 
         $query = Course::withTrashed();
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $query->chunkById(500, function ($courses) use (&$count, $dryRun): void {
@@ -144,7 +144,7 @@ class MoodleBackfillCommand extends Command
 
         $query = ClassStudent::withTrashed()->with(['student' => fn ($student) => $student->withTrashed()]);
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $query->chunkById(500, function ($classStudents) use (&$count, $dryRun): void {

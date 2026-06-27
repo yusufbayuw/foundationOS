@@ -2,21 +2,26 @@
 
 namespace Modules\Core\Support;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Password;
 
 class UserPasswordPolicy
 {
+    /**
+     * @return list<ValidationRule|string>
+     */
     public static function rules(): array
     {
-        return [
-            'required',
-            'string',
-            Password::min(10)
-                ->letters()
-                ->mixedCase()
-                ->numbers()
-                ->symbols(),
-        ];
+        $passwordRule = Password::min(10)
+            ->letters()
+            ->mixedCase()
+            ->numbers()
+            ->symbols();
+
+        /** @var list<ValidationRule|string> $rules */
+        $rules = ['required', 'string', $passwordRule];
+
+        return $rules;
     }
 
     public static function mustChangeAfterDays(): int

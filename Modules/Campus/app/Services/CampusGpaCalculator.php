@@ -2,7 +2,9 @@
 
 namespace Modules\Campus\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Modules\Campus\Models\CollageStudent;
+use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyPlanItem;
 
 /**
@@ -17,7 +19,10 @@ class CampusGpaCalculator
     public function recalculateForStudent(int $collageStudentId): float
     {
         $items = StudyPlanItem::withoutTenantScope()
-            ->whereHas('studyPlan', fn ($q) => $q->where('collage_student_id', $collageStudentId))
+            ->whereHas('studyPlan', function (Builder $query) use ($collageStudentId): void {
+                /** @var Builder<StudyPlan> $query */
+                $query->where($query->qualifyColumn('collage_student_id'), $collageStudentId);
+            })
             ->with('studyResult')
             ->get();
 

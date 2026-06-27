@@ -18,7 +18,9 @@ class BroadcastService
      */
     public function send(Broadcast $broadcast, Collection $users): void
     {
-        $channels = $broadcast->channels ?? ['database'];
+        $channelList = is_array($broadcast->channels)
+            ? array_values(array_filter($broadcast->channels, is_string(...)))
+            : ['database'];
 
         foreach ($users as $user) {
             $this->dispatcher->dispatch(
@@ -26,7 +28,7 @@ class BroadcastService
                 category: 'broadcast',
                 subject: $broadcast->subject,
                 body: $broadcast->body,
-                channels: $channels,
+                channels: $channelList,
                 idempotencyKey: "broadcast:{$broadcast->getKey()}:user:{$user->getKey()}",
             );
         }

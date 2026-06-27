@@ -329,7 +329,7 @@ class ExamParticipantsRelationManager extends RelationManager
             $cells = str_getcsv($line);
 
             if ($header === null) {
-                $header = array_map(fn (string $col): string => strtolower(trim($col)), $cells);
+                $header = array_map(fn (?string $col): string => strtolower(trim((string) $col)), $cells);
 
                 continue;
             }
@@ -346,19 +346,23 @@ class ExamParticipantsRelationManager extends RelationManager
         return $rows;
     }
 
+    /**
+     * @param  Collection<int, ExamParticipant>  $records
+     */
     protected function exportTokensCsv(Collection $records): StreamedResponse
     {
         $filename = 'exam_participant_tokens_'.now()->format('Ymd_His').'.csv';
 
         return response()->streamDownload(function () use ($records): void {
             $handle = fopen('php://output', 'w');
+
+            if ($handle === false) {
+                return;
+            }
+
             fputcsv($handle, ['student_name', 'student_identifier', 'token', 'status']);
 
             foreach ($records as $record) {
-                if (! $record instanceof ExamParticipant) {
-                    continue;
-                }
-
                 fputcsv($handle, [
                     $record->student_name,
                     $record->student_identifier,

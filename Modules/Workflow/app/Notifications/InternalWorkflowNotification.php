@@ -17,11 +17,17 @@ class InternalWorkflowNotification extends Notification
         protected ?string $body = null,
     ) {}
 
+    /**
+     * @return list<string>
+     */
     public function via(object $notifiable): array
     {
         return ['database'];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return [

@@ -11,9 +11,9 @@ class ScheduleConflictChecker
     /**
      * Check for schedule conflicts (teacher or class overlap).
      *
-     * @param  array  $data  The schedule data containing class_id, teacher_id, day_of_week, start_time, end_time, academic_period_id
+     * @param  array<string, mixed>  $data
      * @param  int|null  $excludeId  ID of the schedule to exclude from checks (e.g., when updating)
-     * @return array List of conflict messages. Empty array if no conflicts.
+     * @return list<string>
      */
     public function checkConflicts(array $data, ?int $excludeId = null): array
     {

@@ -118,6 +118,9 @@ class StockJournalService
         });
     }
 
+    /**
+     * @param  array<int, string>  $keywords
+     */
     private function resolveCoa(
         int $tenantId,
         ?int $preferredId,

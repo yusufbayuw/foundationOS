@@ -26,9 +26,11 @@ class FilamentTranslationServiceProvider extends ServiceProvider
     {
         $manager = ComponentManager::resolve();
 
-        $autoLabel = fn (object $component) => $component->label(
-            fn () => FilamentUi::field($component->getName())
-        );
+        $autoLabel = function (TextColumn|IconColumn|ImageColumn|TextEntry|IconEntry|ImageEntry $component): void {
+            $component->label(
+                fn () => FilamentUi::field($component->getName())
+            );
+        };
 
         // Table columns
         $manager->configureUsing(TextColumn::class, $autoLabel);

@@ -26,7 +26,7 @@ class BudgetForm
                             ->label(FilamentUi::field('organization_id'))
                             ->relationship('organization', 'name', modifyQueryUsing: function ($query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
                                 }
                             })
                             ->required(),
@@ -34,7 +34,7 @@ class BudgetForm
                             ->label(FilamentUi::field('chart_of_account_id'))
                             ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
                                 }
                             })
                             ->required(),

@@ -22,8 +22,8 @@ class WorkflowHealthCheckCommand extends Command
         $workflows = Workflow::query()
             ->with(['steps', 'transitions', 'automatedActions'])
             ->where('is_active', true)
-            ->when($tenantId, fn ($query) => $query->where('tenant_id', (int) $tenantId))
-            ->when($organizationId, fn ($query) => $query->where('organization_id', (int) $organizationId))
+            ->when($tenantId, fn ($query) => $query->where($query->getModel()->qualifyColumn('tenant_id'), (int) $tenantId))
+            ->when($organizationId, fn ($query) => $query->where($query->getModel()->qualifyColumn('organization_id'), (int) $organizationId))
             ->get();
 
         if ($workflows->isEmpty()) {

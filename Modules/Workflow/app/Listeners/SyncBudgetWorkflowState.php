@@ -9,10 +9,11 @@ use Modules\Workflow\Events\WorkflowAdvanced;
 use Modules\Workflow\Events\WorkflowCancelled;
 use Modules\Workflow\Events\WorkflowReturned;
 use Modules\Workflow\Events\WorkflowStarted;
+use Modules\Workflow\Models\WorkflowInstance;
 
 class SyncBudgetWorkflowState
 {
-    public function handle(object $event): void
+    public function handle(WorkflowStarted|WorkflowReturned|WorkflowCancelled|WorkflowAdvanced $event): void
     {
         $instance = $event->instance->fresh(['subject']);
         $subject = $instance->subject;
@@ -21,26 +22,26 @@ class SyncBudgetWorkflowState
             return;
         }
 
-        match (true) {
-            $event instanceof WorkflowStarted => $this->updateBudget($subject, [
+        match ($event::class) {
+            WorkflowStarted::class => $this->updateBudget($subject, [
                 'status' => 'submitted',
                 'approved_by' => null,
                 'approved_at' => null,
             ], data_get($event, 'actor.id'), 'finance_budget_workflow_started', 'Budget approval workflow started.'),
-            $event instanceof WorkflowReturned => $this->updateBudget($subject, [
+            WorkflowReturned::class => $this->updateBudget($subject, [
                 'status' => 'revision_required',
                 'description' => trim(implode("\n\n", array_filter([$subject->description, $event->notes]))),
             ], data_get($event, 'actor.id'), 'finance_budget_workflow_returned', 'Budget returned for revision.'),
-            $event instanceof WorkflowCancelled => $this->updateBudget($subject, [
+            WorkflowCancelled::class => $this->updateBudget($subject, [
                 'status' => 'cancelled',
                 'description' => trim(implode("\n\n", array_filter([$subject->description, $event->reason]))),
             ], data_get($event, 'actor.id'), 'finance_budget_workflow_cancelled', 'Budget workflow cancelled.'),
-            $event instanceof WorkflowAdvanced => $this->syncAdvancedState($subject, $instance, $event),
+            WorkflowAdvanced::class => $this->syncAdvancedState($subject, $instance, $event),
             default => null,
         };
     }
 
-    protected function syncAdvancedState(Budget $subject, $instance, WorkflowAdvanced $event): void
+    protected function syncAdvancedState(Budget $subject, WorkflowInstance $instance, WorkflowAdvanced $event): void
     {
         if ($instance->status === WorkflowInstanceStatus::Completed) {
             $this->updateBudget($subject, [
@@ -69,6 +70,9 @@ class SyncBudgetWorkflowState
         ], $event->actor->getKey(), 'finance_budget_workflow_in_review', 'Budget workflow is in review.');
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     protected function updateBudget(Budget $budget, array $attributes, ?int $actorId, string $action, string $description): void
     {
         $budget->forceFill($attributes)->save();

@@ -112,7 +112,10 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                         fn (QuestionType $case) => [$case->value => FilamentUi::text($case->label())]
                     ))
                     ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
-                        ? $query->whereHas('examQuestion', fn (Builder $q) => $q->where('type', $data['value']))
+                        ? $query->whereHas('examQuestion', function (Builder $q) use ($data): void {
+                            /** @var Builder<ExamQuestion> $q */
+                            $q->where('type', $data['value']);
+                        })
                         : $query),
                 SelectFilter::make('difficulty')
                     ->label(FilamentUi::field('difficulty'))
@@ -120,7 +123,10 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                         fn (QuestionDifficulty $case) => [$case->value => FilamentUi::text($case->label())]
                     ))
                     ->query(fn (Builder $query, array $data): Builder => filled($data['value'] ?? null)
-                        ? $query->whereHas('examQuestion', fn (Builder $q) => $q->where('difficulty', $data['value']))
+                        ? $query->whereHas('examQuestion', function (Builder $q) use ($data): void {
+                            /** @var Builder<ExamQuestion> $q */
+                            $q->where('difficulty', $data['value']);
+                        })
                         : $query),
                 Filter::make('topic')
                     ->schema([
@@ -128,7 +134,10 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                             ->label(FilamentUi::field('topic')),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => filled($data['topic'] ?? null)
-                        ? $query->whereHas('examQuestion', fn (Builder $q) => $q->where('topic', 'like', '%'.$data['topic'].'%'))
+                        ? $query->whereHas('examQuestion', function (Builder $q) use ($data): void {
+                            /** @var Builder<ExamQuestion> $q */
+                            $q->where('topic', 'like', '%'.$data['topic'].'%');
+                        })
                         : $query),
             ])
             ->defaultSort('sort_order')
@@ -213,6 +222,9 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                 }
 
                 $question = ExamQuestion::withoutTenantScope()->findOrFail($data['exam_question_id']);
+                if (! $question instanceof ExamQuestion) {
+                    return;
+                }
                 $user = auth()->user();
 
                 if ($user === null) {

@@ -37,6 +37,12 @@ class DeliverWebhookJob implements ShouldQueue
         }
 
         $body = json_encode($delivery->payload, JSON_UNESCAPED_SLASHES);
+        if ($body === false) {
+            $delivery->update(['status' => 'failed', 'error_message' => 'Unable to encode webhook payload.']);
+
+            return;
+        }
+
         $signature = 'sha256='.hash_hmac('sha256', $body, $subscription->secret);
 
         $delivery->increment('attempt_count');
@@ -71,6 +77,9 @@ class DeliverWebhookJob implements ShouldQueue
         }
     }
 
+    /**
+     * @return list<int>
+     */
     public function backoff(): array
     {
         // Exponential backoff: 1m, 5m, 30m, 2h, 8h
@@ -80,7 +89,8 @@ class DeliverWebhookJob implements ShouldQueue
     private function maybeRelease(WebhookDelivery $delivery): void
     {
         if ($this->attempts() < $this->tries) {
-            $seconds = $this->backoff()[$this->attempts() - 1] ?? 28800;
+            $backoff = $this->backoff();
+            $seconds = $backoff[$this->attempts() - 1] ?? 28800;
             $delivery->update(['next_retry_at' => now()->addSeconds($seconds)]);
             $this->release($seconds);
         }

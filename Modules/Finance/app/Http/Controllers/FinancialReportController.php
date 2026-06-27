@@ -8,12 +8,13 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\Core\Models\Tenant;
 use Modules\Finance\Services\FinancialReportService;
+use Symfony\Component\HttpFoundation\Response;
 
 class FinancialReportController extends Controller
 {
     public function __construct(private readonly FinancialReportService $service) {}
 
-    public function profitLossPdf(Request $request)
+    public function profitLossPdf(Request $request): Response
     {
         $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
         $tenant = Tenant::findOrFail($tenantId);
@@ -29,7 +30,7 @@ class FinancialReportController extends Controller
         return $pdf->download("Laba_Rugi_{$data['period_from']}_{$data['period_to']}.pdf");
     }
 
-    public function balanceSheetPdf(Request $request)
+    public function balanceSheetPdf(Request $request): Response
     {
         $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
         $tenant = Tenant::findOrFail($tenantId);
@@ -44,7 +45,7 @@ class FinancialReportController extends Controller
         return $pdf->download("Neraca_{$data['as_of']}.pdf");
     }
 
-    public function cashFlowPdf(Request $request)
+    public function cashFlowPdf(Request $request): Response
     {
         $tenantId = (int) $request->query('tenant_id', filament()->getTenant()?->getKey() ?? 0);
         $tenant = Tenant::findOrFail($tenantId);

@@ -109,10 +109,13 @@ class TenancyAuditLeaksCommand extends Command
         return $tenantTables;
     }
 
-    /** @return list<object> */
+    /**
+     * @return list<object{id: mixed, row_tenant_id: mixed, org_tenant_id: mixed}>
+     */
     protected function checkOrganizationLeak(string $table): array
     {
-        return DB::select(
+        /** @var list<object{id: mixed, row_tenant_id: mixed, org_tenant_id: mixed}> $rows */
+        $rows = array_values(DB::select(
             "SELECT t.id, t.tenant_id AS row_tenant_id, o.tenant_id AS org_tenant_id
              FROM `{$table}` t
              INNER JOIN organizations o ON o.id = t.organization_id
@@ -120,6 +123,8 @@ class TenancyAuditLeaksCommand extends Command
                AND t.tenant_id IS NOT NULL
                AND t.tenant_id != o.tenant_id
              LIMIT 100",
-        );
+        ));
+
+        return $rows;
     }
 }

@@ -7,7 +7,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -30,6 +32,9 @@ class AutomatedActionsRelationManager extends RelationManager
         return $schema->components(static::formComponents());
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function formComponents(): array
     {
         return [
@@ -71,6 +76,9 @@ class AutomatedActionsRelationManager extends RelationManager
         return $table->columns(static::tableColumns());
     }
 
+    /**
+     * @return list<Column>
+     */
     public static function tableColumns(): array
     {
         return [

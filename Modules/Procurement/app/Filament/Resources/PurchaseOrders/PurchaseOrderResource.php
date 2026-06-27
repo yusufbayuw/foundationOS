@@ -24,11 +24,17 @@ class PurchaseOrderResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'po_number';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['po_number'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         assert($record instanceof PurchaseOrder);

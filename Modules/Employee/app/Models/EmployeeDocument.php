@@ -39,6 +39,9 @@ class EmployeeDocument extends Model
         ];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function documentTypeOptions(): array
     {
         return [

@@ -24,7 +24,7 @@ class PropertyGenerateMonthlyLeaseInvoiceCommand extends Command
         foreach ($agreements as $agreement) {
             $number = 'LEASE-'.$agreement->id.'-'.$period;
 
-            if (LeaseInvoice::withoutTenantScope()->where('invoice_number', $number)->exists()) {
+            if (LeaseInvoice::withoutTenantScope()->where('code', $number)->exists()) {
                 continue;
             }
 

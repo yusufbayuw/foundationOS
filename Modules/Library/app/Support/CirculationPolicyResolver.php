@@ -8,6 +8,9 @@ use Modules\Library\Models\Member;
 
 class CirculationPolicyResolver
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function resolveForMember(Member $member): array
     {
         $organizationPolicy = null;

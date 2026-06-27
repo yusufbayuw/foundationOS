@@ -22,7 +22,10 @@ class LaravelWorkflowFormSchemaValidator implements WorkflowFormSchemaValidator
     {
         $rules = [];
         /** @var list<array<string, mixed>> $schema */
-        $schema = $this->ruleEngine->evaluateFieldState($step->form_schema ?? [], $context);
+        $schema = $this->ruleEngine->evaluateFieldState(
+            array_values(is_array($step->form_schema ?? null) ? $step->form_schema : []),
+            $context,
+        );
         $filteredData = $formData;
 
         foreach ($schema as $field) {

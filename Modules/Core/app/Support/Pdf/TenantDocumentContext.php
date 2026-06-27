@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Support\Pdf;
 
+use App\Support\TypedValue;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
@@ -25,9 +26,16 @@ class TenantDocumentContext
 
     public static function resolve(?Tenant $tenant = null, ?Organization $organization = null): self
     {
-        $tenant ??= Tenant::query()->find(filament()->getTenant()?->getKey());
-
         if ($tenant === null) {
+            $panelTenant = filament()->getTenant();
+            if ($panelTenant instanceof Tenant) {
+                $tenant = $panelTenant;
+            } elseif ($panelTenant !== null) {
+                $tenant = Tenant::query()->find(TypedValue::int($panelTenant->getKey()));
+            }
+        }
+
+        if (! $tenant instanceof Tenant) {
             throw new \InvalidArgumentException('Tenant is required to build a document context.');
         }
 

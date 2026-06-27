@@ -69,6 +69,7 @@ class ExportCenterPage extends Page implements HasTable
             ->defaultSort('created_at', 'desc');
     }
 
+    /** @return Builder<Export> */
     protected function exportQuery(): Builder
     {
         $tenant = Filament::getTenant();

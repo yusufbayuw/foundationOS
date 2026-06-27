@@ -519,7 +519,7 @@ class LibraryImportSlimsCommand extends Command
                 'name' => $name,
                 'username' => $username,
                 'email' => $email,
-                'phone' => $memberRow->member_phone ?: null,
+                'phone' => TypedValue::string($memberRow->member_phone ?? null) ?: null,
                 'password' => Hash::make(Str::random(18).'Aa1!'),
                 'timezone' => config('app.timezone', 'UTC'),
                 'locale' => config('app.locale', 'en'),
@@ -569,7 +569,7 @@ class LibraryImportSlimsCommand extends Command
         $borrowed = Loan::query()
             ->whereNull('return_date')
             ->whereIn('status', ['borrowed', 'lent', 'on_loan'])
-            ->whereHas('bookCopy', fn ($query) => $query->where('book_id', $bookId))
+            ->whereHas('bookCopy', fn ($query) => $query->where($query->getModel()->qualifyColumn('book_id'), $bookId))
             ->count();
 
         $book->forceFill([
@@ -578,6 +578,9 @@ class LibraryImportSlimsCommand extends Command
         ])->save();
     }
 
+    /**
+     * @return list<string>
+     */
     protected function parseAuthors(string $sor): array
     {
         $value = trim($sor);
@@ -629,6 +632,8 @@ class LibraryImportSlimsCommand extends Command
         if (method_exists($model, 'restore') && method_exists($model, 'trashed') && $model->trashed()) {
             $model->restore();
         }
+
+        /** @var TModel $model */
 
         return $model;
     }
@@ -692,13 +697,8 @@ class LibraryImportSlimsCommand extends Command
         $this->emailDomain = $config['email_domain'];
         $this->defaultMemberStatus = $config['default_member_status'];
 
-        $connection = $config['connection'];
-        if (! is_array($connection)) {
-            return null;
-        }
-
         return [
-            'connection' => $connection,
+            'connection' => $config['connection'],
         ];
     }
 

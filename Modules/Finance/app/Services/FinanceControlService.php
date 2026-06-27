@@ -291,6 +291,9 @@ class FinanceControlService
         return $account;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function calculateJournalTotals(JournalEntry $entry): array
     {
         $debit = (float) $entry->lines()->sum('debit');
@@ -302,7 +305,10 @@ class FinanceControlService
         ];
     }
 
-    protected function audit(object $record, User $actor, string $action, array $newValues = []): void
+    /**
+     * @param  array<string, mixed>  $newValues
+     */
+    protected function audit(StudentInvoice|Payment|Budget|JournalEntry $record, User $actor, string $action, array $newValues = []): void
     {
         AuditLog::query()->create([
             'tenant_id' => $record->tenant_id,

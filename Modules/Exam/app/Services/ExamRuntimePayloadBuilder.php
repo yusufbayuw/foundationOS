@@ -116,7 +116,7 @@ class ExamRuntimePayloadBuilder
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     protected function mapParticipants(ExamDefinition $definition): array
     {

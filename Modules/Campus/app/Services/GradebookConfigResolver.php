@@ -53,6 +53,9 @@ class GradebookConfigResolver
         ];
     }
 
+    /**
+     * @return array<string, array{weight: float, matchers: array<int, string>}>
+     */
     public function componentsFor(int $tenantId): array
     {
         $override = $this->setting($tenantId, self::SETTING_KEY_COMPONENTS);
@@ -63,6 +66,9 @@ class GradebookConfigResolver
         return $this->defaultComponents();
     }
 
+    /**
+     * @return array<int, array{min: float, letter: string, point: float}>
+     */
     public function scaleFor(int $tenantId): array
     {
         $override = $this->setting($tenantId, self::SETTING_KEY_SCALE);
@@ -84,7 +90,9 @@ class GradebookConfigResolver
     }
 
     /**
-     * Convert numeric score (0..100) → ['letter' => ..., 'point' => ...] per tenant scale.
+     * Convert numeric score (0..100) → letter/point per tenant scale.
+     *
+     * @return array{letter: string, point: float}
      */
     public function gradeFor(int $tenantId, float $score): array
     {

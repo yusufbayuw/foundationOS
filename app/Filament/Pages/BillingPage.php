@@ -23,6 +23,7 @@ class BillingPage extends Page
 
     public ?string $snapToken = null;
 
+    /** @var array<string, float>|null */
     public ?array $currentAmounts = null;
 
     public string $currency = 'IDR';
@@ -58,13 +59,16 @@ class BillingPage extends Page
         return CurrencyFormatter::format($amount, $this->currency);
     }
 
-    /** @return Collection<int, SubscriptionLog> */
+    /**
+     * @return Collection<int, SubscriptionLog>
+     */
     public function getRecentInvoices(): Collection
     {
         $tenant = Filament::getTenant();
 
         if (! $tenant) {
-            return collect();
+            /** @var Collection<int, SubscriptionLog> */
+            return new Collection;
         }
 
         return SubscriptionLog::where('tenant_id', $tenant->getKey())

@@ -85,7 +85,25 @@ final class TypedValue
         return is_int($key) || is_string($key) ? $key : null;
     }
 
+    public static function nullableInt(mixed $value): ?int
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && is_numeric($value)) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
     /**
+     * @param  list<int>  $default
      * @return list<int>
      */
     public static function intList(mixed $value, array $default = [1, 2, 5, 10, 20, 30, 60]): array
@@ -108,6 +126,7 @@ final class TypedValue
             }
         }
 
+        /** @var list<int> $items */
         return $items;
     }
 }

@@ -323,7 +323,7 @@ class ExamDefinition extends ExamModel
     }
 
     /**
-     * Alias for analytics tab (same underlying results).
+     * @return HasMany<ExamResult, $this>
      */
     public function examAnalytics(): HasMany
     {

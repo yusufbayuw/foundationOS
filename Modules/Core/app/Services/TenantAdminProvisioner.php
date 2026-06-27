@@ -18,10 +18,11 @@ class TenantAdminProvisioner
 
         $superAdminRoleName = ShieldUtils::getSuperAdminName();
 
-        $role = Role::firstOrCreate(
-            ['name' => $superAdminRoleName, 'guard_name' => 'web'],
-            ['team_id' => $tenant->getKey()],
-        );
+        $role = Role::firstOrCreate([
+            'name' => $superAdminRoleName,
+            'guard_name' => 'web',
+            'team_id' => (int) $tenant->getKey(),
+        ]);
 
         $user->roles()->syncWithoutDetaching([
             $role->id => [

@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\School\Models\Student;
 use Modules\School\Services\ReportCardDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportCardPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(Request $request, Student $student, ReportCardDocumentService $service)
+    public function __invoke(Request $request, Student $student, ReportCardDocumentService $service): Response
     {
         $periodId = (int) $request->query('period');
 

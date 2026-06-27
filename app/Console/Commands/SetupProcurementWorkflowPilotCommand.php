@@ -59,7 +59,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
         $existing = Workflow::query()
             ->where('tenant_id', $tenant->id)
             ->where('code', 'purchase-requisition-approval')
-            ->when($organization, fn ($query) => $query->where('organization_id', $organization->id), fn ($query) => $query->whereNull('organization_id'))
+            ->when($organization, fn ($query) => $query->where($query->getModel()->qualifyColumn('organization_id'), $organization->id), fn ($query) => $query->whereNull('organization_id'))
             ->latest('version')
             ->first();
 
@@ -225,7 +225,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
             ->where('tenant_id', $tenant->id)
             ->when($organization, function ($query) use ($organization): void {
                 $query->where(function ($inner) use ($organization): void {
-                    $inner->where('organization_id', $organization->id)
+                    $inner->where($inner->getModel()->qualifyColumn('organization_id'), $organization->id)
                         ->orWhereNull('organization_id');
                 });
             })
@@ -237,6 +237,9 @@ class SetupProcurementWorkflowPilotCommand extends Command
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     protected function makeStep(Workflow $workflow, array $attributes): WorkflowStep
     {
         return WorkflowStep::query()->create([
@@ -269,6 +272,9 @@ class SetupProcurementWorkflowPilotCommand extends Command
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>  $rules
+     */
     protected function makeTransition(
         Workflow $workflow,
         WorkflowStep $fromStep,
@@ -291,6 +297,9 @@ class SetupProcurementWorkflowPilotCommand extends Command
         ]);
     }
 
+    /**
+     * @return list<array<string, list<string>|string>>
+     */
     protected function defaultApprovalActions(): array
     {
         return [

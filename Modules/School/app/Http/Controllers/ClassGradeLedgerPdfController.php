@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\School\Models\SchoolClass;
 use Modules\School\Services\ClassGradeLedgerService;
+use Symfony\Component\HttpFoundation\Response;
 
 class ClassGradeLedgerPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(Request $request, SchoolClass $schoolClass, ClassGradeLedgerService $service)
+    public function __invoke(Request $request, SchoolClass $schoolClass, ClassGradeLedgerService $service): Response
     {
         $periodId = (int) $request->query('period');
 

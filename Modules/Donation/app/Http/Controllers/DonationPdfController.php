@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\Donation\Models\Donation;
 use Modules\Donation\Services\DonationDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class DonationPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(Donation $donation, DonationDocumentService $service)
+    public function __invoke(Donation $donation, DonationDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $donation,

@@ -19,6 +19,9 @@ class Village extends Model
         'name',
     ];
 
+    /**
+     * @return BelongsTo<District, $this>
+     */
     public function district(): BelongsTo
     {
         return $this->belongsTo(District::class);

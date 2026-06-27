@@ -28,6 +28,9 @@ class CostEfficiencyReportPage extends Page
 
     public string $periodPreset = '30';
 
+    /**
+     * @var array<string, mixed>
+     */
     public array $reportData = [];
 
     public function mount(): void

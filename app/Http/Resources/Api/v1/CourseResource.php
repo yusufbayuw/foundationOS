@@ -8,6 +8,9 @@ use Modules\Campus\Models\Course;
 
 class CourseResource extends JsonResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
         /** @var Course $course */

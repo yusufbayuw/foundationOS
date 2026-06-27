@@ -43,7 +43,7 @@ class VendorForm
                             ->afterStateUpdated(fn (Set $set) => $set('city_id', null)),
                         Select::make('city_id')
                             ->label(FilamentUi::field('city_id'))
-                            ->relationship('city', 'name', fn (Builder $query, Get $get) => $query->when($get('province_id'), fn ($q, $id) => $q->where('province_id', $id))
+                            ->relationship('city', 'name', fn (Builder $query, Get $get) => $query->when($get('province_id'), fn ($q, $id) => $q->where($q->getModel()->qualifyColumn('province_id'), $id))
                             ),
                         TextInput::make('postal_code')
                             ->label(FilamentUi::field('postal_code')),

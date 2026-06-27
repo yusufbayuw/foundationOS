@@ -97,6 +97,9 @@ class MoodleReconcileCommand extends Command
         return $summary['errors'] > 0 ? self::FAILURE : self::SUCCESS;
     }
 
+    /**
+     * @param  array{user_checked: int, course_checked: int, drift_missing_in_moodle: int, drift_state_mismatch: int, remediation_enqueued: int, errors: int}  $summary
+     */
     protected function reconcileUsers(int $limit, bool $fix, array &$summary): void
     {
         $query = User::withTrashed()->orderBy('id');
@@ -167,11 +170,14 @@ class MoodleReconcileCommand extends Command
         }
     }
 
+    /**
+     * @param  array{user_checked: int, course_checked: int, drift_missing_in_moodle: int, drift_state_mismatch: int, remediation_enqueued: int, errors: int}  $summary
+     */
     protected function reconcileCourses(?int $tenantId, int $limit, bool $fix, array &$summary): void
     {
         $query = Course::withTrashed()->orderBy('id');
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
         if ($limit > 0) {
             $query->limit($limit);

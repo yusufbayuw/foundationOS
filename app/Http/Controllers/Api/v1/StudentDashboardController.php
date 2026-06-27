@@ -25,6 +25,9 @@ class StudentDashboardController extends ApiController
         return response()->json(['data' => $data]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function buildDashboard(Student $student): array
     {
         // Recent attendance (last 30 days)

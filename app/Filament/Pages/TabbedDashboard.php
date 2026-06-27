@@ -128,8 +128,9 @@ class TabbedDashboard extends Dashboard
 
     /**
      * @param  array<class-string|WidgetConfiguration>  $widgets
+     * @param  array<string, int|null>|int|null  $columns
      */
-    protected function widgetsGrid(array $widgets, int|string|array|null $columns = null): Grid
+    protected function widgetsGrid(array $widgets, array|int|null $columns = null): Grid
     {
         return Grid::make($columns ?? $this->getColumns())
             ->schema(fn (): array => $this->getWidgetsSchemaComponents($widgets));
@@ -153,7 +154,7 @@ class TabbedDashboard extends Dashboard
 
         return $user->userTenantRoles()
             ->where('tenant_id', $tenant->getKey())
-            ->whereHas('tenantRole', fn ($q) => $q->where('is_super_admin', true))
+            ->whereHas('tenantRole', fn ($q) => $q->where($q->getModel()->qualifyColumn('is_super_admin'), true))
             ->exists();
     }
 }

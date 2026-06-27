@@ -30,6 +30,10 @@ class ExamResultExportService
 
         $response = response()->streamDownload(function () use ($rows): void {
             $handle = fopen('php://output', 'w');
+            if ($handle === false) {
+                return;
+            }
+
             fputcsv($handle, array_keys($rows[0] ?? []));
 
             foreach ($rows as $row) {
@@ -55,6 +59,10 @@ class ExamResultExportService
 
         $response = response()->streamDownload(function () use ($rows): void {
             $handle = fopen('php://output', 'w');
+            if ($handle === false) {
+                return;
+            }
+
             fputcsv($handle, array_keys($rows[0] ?? []), "\t");
 
             foreach ($rows as $row) {
@@ -110,7 +118,7 @@ class ExamResultExportService
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return array<int, array<string, mixed>>
      */
     public function resultRows(ExamDefinition $exam): array
     {

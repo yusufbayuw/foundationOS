@@ -526,7 +526,7 @@ class Tenant extends Model
     }
 
     /**
-     * @deprecated Query Modules\Library\Models\BookCopy by tenant_id from the Library module instead.
+     * @return HasMany<BookCopy, $this>
      */
     public function bookCopies(): HasMany
     {
@@ -694,7 +694,7 @@ class Tenant extends Model
     }
 
     /**
-     * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by tenant_id from the Procurement module instead.
+     * @return HasMany<PurchaseRequisition, $this>
      */
     public function purchaseRequisitions(): HasMany
     {
@@ -710,7 +710,7 @@ class Tenant extends Model
     }
 
     /**
-     * @deprecated Query Modules\Procurement\Models\RequestForQuotation by tenant_id from the Procurement module instead.
+     * @return HasMany<RequestForQuotation, $this>
      */
     public function requestForQuotations(): HasMany
     {
@@ -902,6 +902,9 @@ class Tenant extends Model
     }
 
     /** @return HasMany<AcademicPeriod, $this> */
+    /**
+     * @return HasMany<AcademicPeriod, $this>
+     */
     public function academicPeriods(): HasMany
     {
         return $this->hasMany(AcademicPeriod::class);

@@ -39,7 +39,7 @@ class MoodleDetailedGradePullService
         $items = StudyPlanItem::withoutTenantScope()
             ->whereHas('studyPlan', static function (Builder $query) use ($period): void {
                 /** @var Builder<StudyPlan> $query */
-                $query->where('academic_period_id', $period->id);
+                $query->where($query->getModel()->qualifyColumn('academic_period_id'), $period->id);
             })
             ->whereIn('status', ['approved', 'enrolled', 'active', 'completed'])
             ->with(['courseOffering', 'studyPlan.collageStudent.user'])

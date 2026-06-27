@@ -26,7 +26,7 @@ class HelpdeskDashboard extends Page
     {
         $tenantId = Filament::getTenant()?->getKey();
 
-        $base = Ticket::query()->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId));
+        $base = Ticket::query()->when($tenantId, fn ($q) => $q->where($q->getModel()->qualifyColumn('tenant_id'), $tenantId));
 
         $this->openTickets = (clone $base)->whereIn('status', ['open', 'in_progress'])->count();
         $this->escalatedTickets = (clone $base)->whereNotNull('escalated_at')->count();

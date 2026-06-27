@@ -17,7 +17,7 @@ class RecomputeStudentRiskScoresCommand extends Command
         $query = Student::query()->where('status', 'active');
 
         if ($tenantId = $this->option('tenant')) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
 
         $count = 0;

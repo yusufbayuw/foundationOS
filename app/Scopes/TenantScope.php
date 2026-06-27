@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Scope;
  * without tenant context throw MissingTenantContextException. Real Artisan/queue
  * console (non-test) stays fail-open for cross-tenant commands.
  */
+/**
+ * @implements Scope<Model>
+ */
 class TenantScope implements Scope
 {
     public const NAME = 'tenant';

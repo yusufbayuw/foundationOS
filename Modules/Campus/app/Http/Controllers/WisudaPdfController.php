@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Campus\Models\Wisuda;
 use Modules\Campus\Services\WisudaDocumentService;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
+use Symfony\Component\HttpFoundation\Response;
 
 class WisudaPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(Wisuda $wisuda, WisudaDocumentService $service)
+    public function __invoke(Wisuda $wisuda, WisudaDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $wisuda,

@@ -3,6 +3,7 @@
 namespace Modules\Workflow\Livewire;
 
 use App\Support\CurrentTenant;
+use App\Support\TypedValue;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -104,6 +105,9 @@ class WorkflowCanvas extends Component
         })->values()->all();
     }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function addStep(array $payload = []): void
     {
         $this->steps[] = [
@@ -130,6 +134,9 @@ class WorkflowCanvas extends Component
         $this->dispatch('workflow-canvas:state-updated', steps: $this->steps, transitions: $this->transitions);
     }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function updateStep(string $uuid, array $payload): void
     {
         foreach ($this->steps as $i => $step) {
@@ -159,6 +166,9 @@ class WorkflowCanvas extends Component
         $this->dispatch('workflow-canvas:state-updated', steps: $this->steps, transitions: $this->transitions);
     }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function addTransition(array $payload): void
     {
         $this->transitions[] = [
@@ -174,6 +184,9 @@ class WorkflowCanvas extends Component
         $this->dispatch('workflow-canvas:state-updated', steps: $this->steps, transitions: $this->transitions);
     }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function updateTransition(int $index, array $payload): void
     {
         if (isset($this->transitions[$index])) {
@@ -221,9 +234,9 @@ class WorkflowCanvas extends Component
 
     public function saveDraft(): void
     {
-        $tenantId = app(CurrentTenant::class)->id();
+        $tenantId = TypedValue::int(app(CurrentTenant::class)->id());
 
-        if (! $tenantId) {
+        if ($tenantId <= 0) {
             Notification::make()->danger()->title('No tenant context')->send();
 
             return;
@@ -252,7 +265,7 @@ class WorkflowCanvas extends Component
         $workflow = Workflow::findOrFail($this->workflowId);
 
         try {
-            app(WorkflowDefinitionLifecycleService::class)->publish($workflow, auth()->id());
+            app(WorkflowDefinitionLifecycleService::class)->publish($workflow, TypedValue::nullableInt(auth()->id()));
             $this->workflowStatus = 'active';
 
             Notification::make()
@@ -293,9 +306,9 @@ class WorkflowCanvas extends Component
 
     public function importFromJson(): void
     {
-        $tenantId = app(CurrentTenant::class)->id();
+        $tenantId = TypedValue::int(app(CurrentTenant::class)->id());
 
-        if (! $tenantId) {
+        if ($tenantId <= 0) {
             Notification::make()->danger()->title('No tenant context')->send();
 
             return;
@@ -359,7 +372,7 @@ class WorkflowCanvas extends Component
 
                 // If active, create a new draft version first
                 if ($workflow->status === WorkflowDefinitionStatus::Active) {
-                    $workflow = app(WorkflowDefinitionLifecycleService::class)->duplicateAsNewVersion($workflow, auth()->id());
+                    $workflow = app(WorkflowDefinitionLifecycleService::class)->duplicateAsNewVersion($workflow, TypedValue::nullableInt(auth()->id()));
                     $this->workflowId = $workflow->id;
                     $this->workflowStatus = 'draft';
                 }

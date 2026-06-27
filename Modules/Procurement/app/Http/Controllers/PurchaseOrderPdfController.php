@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use Modules\Core\Http\Controllers\Concerns\RendersTenantPdf;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Services\PurchaseOrderDocumentService;
+use Symfony\Component\HttpFoundation\Response;
 
 class PurchaseOrderPdfController extends Controller
 {
     use RendersTenantPdf;
 
-    public function __invoke(PurchaseOrder $purchaseOrder, PurchaseOrderDocumentService $service)
+    public function __invoke(PurchaseOrder $purchaseOrder, PurchaseOrderDocumentService $service): Response
     {
         return $this->downloadTenantPdf(
             $purchaseOrder,

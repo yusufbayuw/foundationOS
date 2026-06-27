@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
@@ -107,6 +108,9 @@ class StudentForm
             ]);
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function basicInformationFields(): array
     {
         return [
@@ -129,6 +133,9 @@ class StudentForm
         ];
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function enrollmentFields(): array
     {
         return [
@@ -163,6 +170,9 @@ class StudentForm
         ];
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function academicAndHealthFields(): array
     {
         return [
@@ -188,6 +198,9 @@ class StudentForm
         ];
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function fatherInformationFields(): array
     {
         return [
@@ -212,6 +225,9 @@ class StudentForm
         ];
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function motherInformationFields(): array
     {
         return [
@@ -236,6 +252,9 @@ class StudentForm
         ];
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function guardianInformationFields(): array
     {
         return [
@@ -257,6 +276,9 @@ class StudentForm
         ];
     }
 
+    /**
+     * @return list<Component>
+     */
     public static function residenceAndTransportFields(): array
     {
         return [

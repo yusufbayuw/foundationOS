@@ -26,7 +26,7 @@ class BookReservationForm
                     Select::make('organization_id')
                         ->relationship('organization', 'name', modifyQueryUsing: function (Builder $query): void {
                             if (Filament::getTenant()) {
-                                $query->where('tenant_id', Filament::getTenant()->getKey());
+                                $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
                             }
                         })
                         ->nullable(),

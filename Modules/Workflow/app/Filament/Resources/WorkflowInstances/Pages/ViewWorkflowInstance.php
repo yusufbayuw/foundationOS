@@ -10,6 +10,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Component;
 use Illuminate\Support\Arr;
 use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
@@ -112,12 +113,17 @@ class ViewWorkflowInstance extends ViewRecord
         return $actions;
     }
 
+    /**
+     * @return list<Component>
+     */
     protected function buildDynamicFormSchema(WorkflowInstance $record): array
     {
         /** @var RuleEngine $ruleEngine */
         $ruleEngine = app(RuleEngine::class);
+        /** @var list<array<string, mixed>> $formSchema */
+        $formSchema = array_values(is_array($record->currentStep->form_schema ?? null) ? $record->currentStep->form_schema : []);
         $evaluatedSchema = $ruleEngine->evaluateFieldState(
-            $record->currentStep->form_schema ?? [],
+            $formSchema,
             WorkflowContextData::fromInstance($record),
         );
 
@@ -139,15 +145,17 @@ class ViewWorkflowInstance extends ViewRecord
                 default => TextInput::make($name),
             };
 
-            if (($field['type'] ?? null) === 'file' && ! empty($field['accepted_types']) && is_array($field['accepted_types'])) {
-                $component->acceptedFileTypes(array_map(
-                    fn (string $type): string => str_contains($type, '/') ? $type : '.'.ltrim($type, '.'),
-                    $field['accepted_types'],
-                ));
-            }
+            if ($component instanceof FileUpload) {
+                if (! empty($field['accepted_types']) && is_array($field['accepted_types'])) {
+                    $component->acceptedFileTypes(array_map(
+                        fn (string $type): string => str_contains($type, '/') ? $type : '.'.ltrim($type, '.'),
+                        $field['accepted_types'],
+                    ));
+                }
 
-            if (($field['type'] ?? null) === 'file' && ! empty($field['max_size_kb'])) {
-                $component->maxSize((int) $field['max_size_kb']);
+                if (! empty($field['max_size_kb'])) {
+                    $component->maxSize((int) $field['max_size_kb']);
+                }
             }
 
             $schema[] = $component
@@ -167,6 +175,9 @@ class ViewWorkflowInstance extends ViewRecord
         return $schema;
     }
 
+    /**
+     * @return list<string>
+     */
     protected function getAvailableActionNames(WorkflowInstance $record): array
     {
         $configured = collect($record->currentStep->action_schema ?? [])
@@ -175,17 +186,24 @@ class ViewWorkflowInstance extends ViewRecord
             ->values()
             ->all();
 
-        $transitionActions = collect(data_get($record->workflow_snapshot, 'transitions', []))
+        /** @var list<array<string, mixed>> $transitions */
+        $transitions = data_get($record->workflow_snapshot, 'transitions', []);
+
+        $transitionActions = collect($transitions)
             ->where('from_step_id', $record->current_step_id)
             ->pluck('action_name')
             ->all();
 
-        return collect(array_merge($configured, $transitionActions))
+        /** @var list<string> $names */
+        $names = collect(array_merge($configured, $transitionActions))
             ->push('cancel')
             ->filter()
             ->unique()
             ->values()
+            ->map(fn (mixed $name): string => (string) $name)
             ->all();
+
+        return $names;
     }
 
     protected function resolveActionColor(WorkflowInstance $record, string $actionName): string
@@ -230,9 +248,15 @@ class ViewWorkflowInstance extends ViewRecord
             ->isNotEmpty();
     }
 
+    /**
+     * @return array<int|string, string>
+     */
     protected function getReturnTargetOptions(WorkflowInstance $record): array
     {
-        return collect(data_get($record->workflow_snapshot, 'steps', []))
+        /** @var list<array<string, mixed>> $steps */
+        $steps = data_get($record->workflow_snapshot, 'steps', []);
+
+        return collect($steps)
             ->filter(fn (array $step): bool => ($step['id'] ?? null) !== $record->current_step_id && ! ($step['is_terminal'] ?? false))
             ->sortBy('sort_order')
             ->mapWithKeys(fn (array $step): array => [(string) $step['id'] => (string) ($step['name'] ?? $step['code'] ?? $step['id'])])

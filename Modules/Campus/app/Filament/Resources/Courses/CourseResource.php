@@ -26,11 +26,17 @@ class CourseResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['code', 'name'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         return static::detailStatus($record->status ?? null);

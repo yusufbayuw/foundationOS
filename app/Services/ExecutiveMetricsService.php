@@ -109,7 +109,7 @@ class ExecutiveMetricsService
             ->where('tenant_id', $tenantId)
             ->whereHas('journalEntry', static function (Builder $query): void {
                 /** @var Builder<JournalEntry> $query */
-                $query->where('is_posted', true)
+                $query->where($query->getModel()->qualifyColumn('is_posted'), true)
                     ->whereYear('date', now()->year)
                     ->whereMonth('date', now()->month);
             })

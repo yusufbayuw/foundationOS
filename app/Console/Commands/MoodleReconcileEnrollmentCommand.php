@@ -48,10 +48,10 @@ class MoodleReconcileEnrollmentCommand extends Command
         $query = MoodleClassCourseMapping::query()
             ->where('is_active', true);
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $query->where($query->getModel()->qualifyColumn('tenant_id'), $tenantId);
         }
         if ($classId !== null) {
-            $query->where('class_id', $classId);
+            $query->where($query->getModel()->qualifyColumn('class_id'), $classId);
         }
 
         $mappings = $query->get();

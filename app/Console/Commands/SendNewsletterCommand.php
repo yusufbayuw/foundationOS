@@ -36,7 +36,7 @@ class SendNewsletterCommand extends Command
             }
 
             $users = User::query()
-                ->whereHas('userTenantRoles', fn ($q) => $q->where('tenant_id', $tenant->getKey()))
+                ->whereHas('userTenantRoles', fn ($q) => $q->where($q->getModel()->qualifyColumn('tenant_id'), $tenant->getKey()))
                 ->get();
 
             $broadcastService->send($broadcast, Collection::make($users));

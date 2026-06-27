@@ -83,16 +83,15 @@ class ApplicationModuleCatalog
     }
 
     /**
-     * @return list<string> PascalCase module names used in navigation cache keys.
+     * @return list<string>
      */
     public function enabledNavigationModuleNames(): array
     {
-        return Module::query()
+        return array_values(Module::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->pluck('code')
             ->map(fn (string $code): string => Str::studly($code))
-            ->values()
-            ->all();
+            ->all());
     }
 }

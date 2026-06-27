@@ -62,6 +62,9 @@ class ExamQuestion extends ExamModel
         return $this->hasMany(ExamQuestionOption::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return Attribute<?string, never>
+     */
     protected function olympiadSubject(): Attribute
     {
         return Attribute::make(
@@ -74,6 +77,9 @@ class ExamQuestion extends ExamModel
         );
     }
 
+    /**
+     * @return Attribute<?string, never>
+     */
     protected function olympiadLevel(): Attribute
     {
         return Attribute::make(
@@ -86,6 +92,9 @@ class ExamQuestion extends ExamModel
         );
     }
 
+    /**
+     * @return Attribute<?array<int, string>, never>
+     */
     protected function skillCodes(): Attribute
     {
         return Attribute::make(
@@ -98,6 +107,9 @@ class ExamQuestion extends ExamModel
         );
     }
 
+    /**
+     * @return Attribute<?int, never>
+     */
     protected function estimatedTimeSeconds(): Attribute
     {
         return Attribute::make(

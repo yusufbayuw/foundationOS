@@ -10,7 +10,7 @@ class WarehouseResolver
     {
         $warehouse = Warehouse::withoutTenantScope()
             ->where('tenant_id', $tenantId)
-            ->when($organizationId, fn ($q) => $q->where('organization_id', $organizationId))
+            ->when($organizationId, fn ($q) => $q->where($q->getModel()->qualifyColumn('organization_id'), $organizationId))
             ->where('is_default', true)
             ->where('is_active', true)
             ->first();

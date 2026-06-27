@@ -9,10 +9,11 @@ use Modules\Workflow\Events\WorkflowAdvanced;
 use Modules\Workflow\Events\WorkflowCancelled;
 use Modules\Workflow\Events\WorkflowReturned;
 use Modules\Workflow\Events\WorkflowStarted;
+use Modules\Workflow\Models\WorkflowInstance;
 
 class SyncWorkflowSubjectState
 {
-    public function handle(object $event): void
+    public function handle(WorkflowStarted|WorkflowReturned|WorkflowCancelled|WorkflowAdvanced $event): void
     {
         $instance = $event->instance->fresh(['subject']);
         $subject = $instance->subject;
@@ -21,27 +22,27 @@ class SyncWorkflowSubjectState
             return;
         }
 
-        match (true) {
-            $event instanceof WorkflowStarted => $subject->forceFill([
+        match ($event::class) {
+            WorkflowStarted::class => $subject->forceFill([
                 'status' => 'submitted',
                 'ready_for_sourcing' => false,
             ])->save(),
-            $event instanceof WorkflowReturned => $subject->forceFill([
+            WorkflowReturned::class => $subject->forceFill([
                 'status' => 'revision_required',
                 'ready_for_sourcing' => false,
                 'notes' => trim(implode("\n\n", array_filter([$subject->notes, $event->notes]))),
             ])->save(),
-            $event instanceof WorkflowCancelled => $subject->forceFill([
+            WorkflowCancelled::class => $subject->forceFill([
                 'status' => 'cancelled',
                 'ready_for_sourcing' => false,
                 'notes' => trim(implode("\n\n", array_filter([$subject->notes, $event->reason]))),
             ])->save(),
-            $event instanceof WorkflowAdvanced => $this->syncAdvancedState($subject, $instance, $event),
+            WorkflowAdvanced::class => $this->syncAdvancedState($subject, $instance, $event),
             default => null,
         };
     }
 
-    protected function syncAdvancedState(PurchaseRequisition $subject, $instance, WorkflowAdvanced $event): void
+    protected function syncAdvancedState(PurchaseRequisition $subject, WorkflowInstance $instance, WorkflowAdvanced $event): void
     {
         if ($instance->status === WorkflowInstanceStatus::Completed) {
             $subject->forceFill([

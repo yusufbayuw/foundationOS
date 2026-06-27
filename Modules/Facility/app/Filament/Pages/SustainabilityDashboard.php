@@ -23,7 +23,7 @@ class SustainabilityDashboard extends Page
         $tenantId = Filament::getTenant()?->getKey();
 
         $this->totalCarbonKg = UtilityReading::query()
-            ->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))
+            ->when($tenantId, fn ($q) => $q->where($q->getModel()->qualifyColumn('tenant_id'), $tenantId))
             ->get()
             ->sum(fn (UtilityReading $reading) => (float) ($reading->reading_value ?? 0) * (float) ($reading->emission_factor ?? 0));
     }

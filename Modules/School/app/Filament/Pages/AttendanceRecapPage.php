@@ -8,6 +8,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Support\FilamentUi;
 use Modules\School\Models\SchoolClass;
@@ -79,7 +80,7 @@ class AttendanceRecapPage extends Page implements HasForms
                     ->live(),
                 Select::make('year')
                     ->label(FilamentUi::text('Tahun'))
-                    ->options(collect(range(date('Y') - 5, date('Y') + 1))
+                    ->options(collect(range((int) date('Y') - 5, (int) date('Y') + 1))
                         ->mapWithKeys(fn (int $year): array => [(string) $year => (string) $year])
                         ->all())
                     ->required()
@@ -88,7 +89,8 @@ class AttendanceRecapPage extends Page implements HasForms
             ->columns(4);
     }
 
-    public function getRecapData()
+    /** @return Collection<int, mixed> */
+    public function getRecapData(): Collection
     {
         if (! $this->academic_period_id || ! $this->class_id || ! $this->month || ! $this->year) {
             return collect();

@@ -30,11 +30,17 @@ class BookResource extends LocalizedResource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    /**
+     * @return array<int, string>
+     */
     protected static function globalSearchAttributes(): array
     {
         return ['title', 'isbn', 'isbn13'];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected static function globalSearchResultDetails(Model $record): array
     {
         return static::detailStatus($record->status ?? null);

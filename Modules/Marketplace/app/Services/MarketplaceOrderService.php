@@ -8,6 +8,7 @@ use Modules\Marketplace\Models\Seller;
 
 class MarketplaceOrderService
 {
+    /** @return Builder<MarketplaceOrder> */
     public function ordersForSeller(Seller $seller): Builder
     {
         return MarketplaceOrder::query()

@@ -32,11 +32,17 @@ trait CachesChartData
     }
 
     /**
-     * @param  callable(): array  $resolver
+     * @param  \Closure(): array<string, mixed>  $resolver
+     * @return array<string, mixed>
      */
     protected function rememberChart(string $suffix, callable $resolver): array
     {
-        return Cache::remember($this->chartCacheKey($suffix), now()->addMinutes(5), $resolver);
+        /** @var array<string, mixed> */
+        return Cache::remember(
+            $this->chartCacheKey($suffix),
+            now()->addMinutes(5),
+            static fn (): array => $resolver(),
+        );
     }
 
     /**

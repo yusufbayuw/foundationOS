@@ -11,6 +11,9 @@ class ManualUploadEsignProvider implements EsignProvider
         return 'manual';
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function requestSignature(string $documentPath, array $context = []): array
     {
         return [

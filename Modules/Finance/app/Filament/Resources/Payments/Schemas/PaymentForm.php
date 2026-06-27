@@ -28,7 +28,7 @@ class PaymentForm
                             ->label(FilamentUi::field('student_invoice_id'))
                             ->relationship('studentInvoice', 'invoice_number', modifyQueryUsing: function ($query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
                                 }
                             })
                             ->required(),
@@ -36,7 +36,7 @@ class PaymentForm
                             ->label(FilamentUi::field('chart_of_account_id'))
                             ->relationship('chartOfAccount', 'name', modifyQueryUsing: function ($query): void {
                                 if (Filament::getTenant()) {
-                                    $query->where('tenant_id', Filament::getTenant()->getKey());
+                                    $query->where($query->getModel()->qualifyColumn('tenant_id'), Filament::getTenant()->getKey());
                                 }
                             })
                             ->required(),

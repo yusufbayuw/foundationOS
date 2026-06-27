@@ -27,8 +27,8 @@ class WorkflowRetrySlaCommand extends Command
             ->where('status', 'running')
             ->whereNotNull('due_at')
             ->when(! $allDue, fn ($builder) => $builder->where('due_at', '<=', now()))
-            ->when($tenantId, fn ($builder) => $builder->where('tenant_id', $tenantId))
-            ->when($organizationId, fn ($builder) => $builder->where('organization_id', $organizationId))
+            ->when($tenantId, fn ($builder) => $builder->where($builder->getModel()->qualifyColumn('tenant_id'), $tenantId))
+            ->when($organizationId, fn ($builder) => $builder->where($builder->getModel()->qualifyColumn('organization_id'), $organizationId))
             ->orderBy('due_at')
             ->limit($limit);
 

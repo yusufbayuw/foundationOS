@@ -2,8 +2,10 @@
 
 namespace Modules\Campus\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Campus\Models\CollageStudent;
+use Modules\Campus\Models\StudyPlan;
 use Modules\Campus\Models\StudyPlanItem;
 
 class TranscriptDocumentService
@@ -48,7 +50,10 @@ class TranscriptDocumentService
     {
         return StudyPlanItem::query()
             ->where('tenant_id', $student->tenant_id)
-            ->whereHas('studyPlan', fn ($query) => $query->where('collage_student_id', $student->getKey()))
+            ->whereHas('studyPlan', function (Builder $query) use ($student): void {
+                /** @var Builder<StudyPlan> $query */
+                $query->where($query->qualifyColumn('collage_student_id'), $student->getKey());
+            })
             ->whereHas('studyResult', fn ($query) => $query->whereNotNull('published_at'))
             ->with([
                 'course',

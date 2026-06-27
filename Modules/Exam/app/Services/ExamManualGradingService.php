@@ -17,6 +17,9 @@ class ExamManualGradingService
         protected ExamGradebookEventDispatcher $gradebookEvents,
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $rubric
+     */
     public function gradeEssay(
         ExamAnswer $answer,
         User $grader,
