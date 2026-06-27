@@ -20,14 +20,14 @@ class AssignTicketToAgent
             ? TicketCategory::query()->find($ticket->ticket_category_id)
             : null;
 
-        $assigneeId = $category?->default_assignee_user_id
+        $assigneeId = $category->default_assignee_user_id
             ?? $this->leastLoadedAgentId($ticket->tenant_id, $category?->getKey());
 
         if (! $assigneeId) {
             return;
         }
 
-        $slaDue = now()->addHours($category?->resolution_hours ?? 24);
+        $slaDue = now()->addHours($category->resolution_hours ?? 24);
 
         $ticket->update([
             'assigned_to_user_id' => $assigneeId,

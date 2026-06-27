@@ -27,7 +27,7 @@ class CheckGracePeriodCommand extends Command
             ->whereNotNull('subscription_plan_id')
             ->with('subscriptionPlan')
             ->each(function (Tenant $tenant) use (&$pastDue): void {
-                $graceDays = $tenant->subscriptionPlan?->grace_period_days ?? 7;
+                $graceDays = $tenant->subscriptionPlan->grace_period_days ?? 7;
                 $tenant->update([
                     'status' => 'past_due',
                     'grace_period_ends_at' => now()->addDays($graceDays),
@@ -55,7 +55,7 @@ class CheckGracePeriodCommand extends Command
             ->whereNotNull('trial_ends_at')
             ->where('trial_ends_at', '<', $now)
             ->each(function (Tenant $tenant) use (&$pastDue): void {
-                $graceDays = $tenant->subscriptionPlan?->grace_period_days ?? 3;
+                $graceDays = $tenant->subscriptionPlan->grace_period_days ?? 3;
                 $tenant->update([
                     'status' => 'past_due',
                     'grace_period_ends_at' => now()->addDays($graceDays),

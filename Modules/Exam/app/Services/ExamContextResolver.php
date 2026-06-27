@@ -20,7 +20,7 @@ class ExamContextResolver
     public function resolveDefinitionContext(ExamDefinition $definition): array
     {
         return [
-            'exam_academic_context' => $definition->exam_academic_context?->value ?? $definition->exam_academic_context,
+            'exam_academic_context' => $definition->exam_academic_context->value,
             'context_reference_type' => $definition->context_reference_type,
             'context_reference_id' => $definition->context_reference_id,
             'context_reference_uuid' => $definition->context_reference_uuid,
@@ -72,12 +72,12 @@ class ExamContextResolver
         }
 
         return match (true) {
-            $model instanceof Student => $model->user?->name ?? $model->nis ?? (string) $id,
+            $model instanceof Student => $model->user->name ?? $model->nis ?? (string) $id,
             $model instanceof CollageStudent => $model->full_name ?? (string) $id,
             $model instanceof SchoolClass => $model->name ?? (string) $id,
             $model instanceof Subject => $model->name ?? (string) $id,
-            $model instanceof CourseOffering => trim(($model->class_code ?? '').' '.($model->course?->name ?? '')),
-            default => method_exists($model, 'getAttribute') ? (string) ($model->getAttribute('name') ?? $id) : (string) $id,
+            $model instanceof CourseOffering => trim(($model->class_code ?? '').' '.($model->course->name ?? '')),
+            default => (string) ($model->getAttribute('name') ?? $id),
         };
     }
 

@@ -12,7 +12,7 @@ class ProcurementController extends Controller
      */
     public function index()
     {
-        return view('procurement::index');
+        return $this->moduleView('procurement::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class ProcurementController extends Controller
      */
     public function create()
     {
-        return view('procurement::create');
+        return $this->moduleView('procurement::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class ProcurementController extends Controller
      */
     public function show($id)
     {
-        return view('procurement::show');
+        return $this->moduleView('procurement::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class ProcurementController extends Controller
      */
     public function edit($id)
     {
-        return view('procurement::edit');
+        return $this->moduleView('procurement::edit');
     }
 
     /**

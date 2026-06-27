@@ -66,6 +66,6 @@ class ExamDefinitionQuestion extends Pivot
             return (float) $this->score_override;
         }
 
-        return (float) ($this->examQuestion?->score ?? 0);
+        return (float) ($this->examQuestion->score ?? 0);
     }
 }

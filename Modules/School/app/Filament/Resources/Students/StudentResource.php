@@ -37,8 +37,10 @@ class StudentResource extends LocalizedResource
         return ['nis', 'nisn', 'user.name'];
     }
 
-    protected static function globalSearchResultDetails(Student $record): array
+    protected static function globalSearchResultDetails(Model $record): array
     {
+        assert($record instanceof Student);
+
         return array_merge(
             static::detailStatus($record->status),
             [FilamentUi::field('nis') => $record->nis ?? '-'],
@@ -53,7 +55,7 @@ class StudentResource extends LocalizedResource
             return null;
         }
 
-        return $record->user?->name
+        return $record->user->name
             ?? ($record->nis ? 'NIS: '.$record->nis : null)
             ?? 'Siswa #'.$record->getKey();
     }

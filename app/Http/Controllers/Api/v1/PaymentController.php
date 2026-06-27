@@ -36,10 +36,20 @@ class PaymentController extends ApiController
 
         $tenantId = $this->currentTenant->id();
 
-        $payment = Payment::create(array_merge($validator->validated(), [
+        $validated = $validator->validated();
+
+        $payment = Payment::query()->create([
+            'student_invoice_id' => $validated['student_invoice_id'],
+            'chart_of_account_id' => $validated['chart_of_account_id'],
+            'payment_number' => $validated['payment_number'],
+            'payment_date' => $validated['payment_date'],
+            'amount' => $validated['amount'],
+            'payment_method' => $validated['payment_method'] ?? null,
+            'payment_channel' => $validated['payment_channel'] ?? null,
+            'reference_number' => $validated['reference_number'] ?? null,
             'tenant_id' => $tenantId,
-            'status' => $validator->validated()['status'] ?? 'pending',
-        ]));
+            'status' => $validated['status'] ?? 'pending',
+        ]);
 
         if ($tenantId && $payment->status === 'verified') {
             $this->webhooks->dispatch((int) $tenantId, 'payment.verified', [
@@ -54,7 +64,7 @@ class PaymentController extends ApiController
         return $this->success([
             'id' => $payment->id,
             'payment_number' => $payment->payment_number,
-            'payment_date' => $payment->payment_date?->toDateString(),
+            'payment_date' => $payment->payment_date->toDateString(),
             'amount' => $payment->amount,
             'status' => $payment->status,
             'created_at' => $payment->created_at?->toIso8601String(),

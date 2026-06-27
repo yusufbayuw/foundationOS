@@ -37,7 +37,6 @@ class ExamAnalyticsService
             ExamAcademicContext::School => $this->schoolSections($exam, $results),
             ExamAcademicContext::Campus => $this->campusSections($exam, $results),
             ExamAcademicContext::Standalone => $this->standaloneSections($exam, $results),
-            default => [],
         };
 
         return [
@@ -53,8 +52,8 @@ class ExamAnalyticsService
      */
     protected function schoolSections(ExamDefinition $exam, Collection $results): array
     {
-        $classLabel = $exam->schoolClass?->name ?? '-';
-        $subjectLabel = $exam->schoolSubject?->name ?? '-';
+        $classLabel = $exam->schoolClass->name ?? '-';
+        $subjectLabel = $exam->schoolSubject->name ?? '-';
         $average = round((float) $results->avg('score'), 2);
         $topicStats = $this->topicPerformance($exam);
         $remedial = $this->remedialRecommendations($exam, $results);
@@ -82,9 +81,9 @@ class ExamAnalyticsService
      */
     protected function campusSections(ExamDefinition $exam, Collection $results): array
     {
-        $courseLabel = $exam->campusCourse?->name ?? '-';
-        $programLabel = $exam->campusStudyProgram?->name ?? '-';
-        $facultyLabel = $exam->campusFaculty?->name ?? '-';
+        $courseLabel = $exam->campusCourse->name ?? '-';
+        $programLabel = $exam->campusStudyProgram->name ?? '-';
+        $facultyLabel = $exam->campusFaculty->name ?? '-';
         $topicStats = $this->topicPerformance($exam);
         $subCloStats = $this->subtopicPerformance($exam);
 
@@ -164,7 +163,7 @@ class ExamAnalyticsService
         $lines = [];
 
         foreach ($results->sortByDesc('score') as $result) {
-            $name = $result->examParticipant?->student_name ?? '-';
+            $name = $result->examParticipant->student_name ?? '-';
             $lines[$name] = ($result->score ?? 0).' ('.($result->percentage ?? 0).'%)';
         }
 
@@ -181,7 +180,7 @@ class ExamAnalyticsService
         $rank = 1;
 
         foreach ($results as $result) {
-            $name = $result->examParticipant?->student_name ?? '-';
+            $name = $result->examParticipant->student_name ?? '-';
             $lines['#'.$rank.' '.$name] = ($result->score ?? 0).' pts';
             $rank++;
         }
@@ -200,7 +199,7 @@ class ExamAnalyticsService
             ->get();
 
         return $answers
-            ->groupBy(fn (ExamAnswer $answer): string => $answer->examQuestion?->topic ?? 'Unknown')
+            ->groupBy(fn (ExamAnswer $answer): string => $answer->examQuestion->topic ?? 'Unknown')
             ->mapWithKeys(fn (Collection $group, string $topic): array => [
                 $topic => (string) round((float) $group->avg(fn (ExamAnswer $a) => $a->effectiveScore() ?? 0), 2).' avg',
             ])
@@ -218,7 +217,7 @@ class ExamAnalyticsService
             ->get();
 
         return $answers
-            ->groupBy(fn (ExamAnswer $answer): string => $answer->examQuestion?->subtopic ?? 'General')
+            ->groupBy(fn (ExamAnswer $answer): string => $answer->examQuestion->subtopic ?? 'General')
             ->mapWithKeys(fn (Collection $group, string $subtopic): array => [
                 $subtopic => (string) round((float) $group->avg(fn (ExamAnswer $a) => $a->effectiveScore() ?? 0), 2).' avg',
             ])
@@ -256,7 +255,7 @@ class ExamAnalyticsService
         $lines = [];
 
         foreach ($results->where('score', '<', $passing) as $result) {
-            $name = $result->examParticipant?->student_name ?? '-';
+            $name = $result->examParticipant->student_name ?? '-';
             $lines[$name] = 'Remedial — score '.($result->score ?? 0);
         }
 
@@ -273,7 +272,7 @@ class ExamAnalyticsService
         $lines = [];
 
         foreach ($results as $result) {
-            $name = $result->examParticipant?->student_name ?? '-';
+            $name = $result->examParticipant->student_name ?? '-';
             $score = (float) ($result->score ?? 0);
 
             if ($score < $passing) {

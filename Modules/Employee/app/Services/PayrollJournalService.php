@@ -69,7 +69,7 @@ class PayrollJournalService
             JournalEntryLine::query()->create([
                 'tenant_id' => $slip->tenant_id,
                 'journal_entry_id' => $journal->id,
-                'chart_of_account_id' => $salaryExpenseCoa?->id,
+                'chart_of_account_id' => $salaryExpenseCoa->id,
                 'description' => 'Beban Gaji — '.$slip->employee->full_name,
                 'debit' => $slip->total_earnings,
                 'credit' => 0,
@@ -104,7 +104,7 @@ class PayrollJournalService
             JournalEntryLine::query()->create([
                 'tenant_id' => $slip->tenant_id,
                 'journal_entry_id' => $journal->id,
-                'chart_of_account_id' => $cashCoa?->id,
+                'chart_of_account_id' => $cashCoa->id,
                 'description' => 'Kas/Bank Pembayaran Gaji — '.$slip->employee->full_name,
                 'debit' => 0,
                 'credit' => max(0, $netCredit),

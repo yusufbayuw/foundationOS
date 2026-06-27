@@ -22,7 +22,7 @@ class EmployeeResource extends JsonResource
             'phone' => $employee->phone,
             'employment_type' => $employee->employment_type,
             'employment_status' => $employee->employment_status,
-            'join_date' => $employee->join_date?->toDateString(),
+            'join_date' => $employee->join_date->toDateString(),
             'end_date' => $employee->end_date?->toDateString(),
             'organization_id' => $employee->organization_id,
             'department_id' => $employee->department_id,

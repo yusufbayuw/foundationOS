@@ -13,6 +13,6 @@ class GlobalResourceGuard
     {
         $user = auth()->user();
 
-        return $user && method_exists($user, 'isGlobalSuperAdmin') && $user->isGlobalSuperAdmin();
+        return (bool) ($user?->isGlobalSuperAdmin());
     }
 }

@@ -20,6 +20,12 @@ trait ConfiguresGlobalSearch
      */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
+        $modelClass = static::getModel();
+
+        if (! ($record instanceof $modelClass)) {
+            return [];
+        }
+
         return static::globalSearchResultDetails($record);
     }
 

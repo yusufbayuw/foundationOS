@@ -24,11 +24,9 @@ class ExamDefinitionQuestionQuery
         if (! $includeCrossContext || ! $user->isGlobalSuperAdmin()) {
             $context = $definition->exam_academic_context;
 
-            if ($context !== null) {
-                $query->whereHas('examQuestionBank', function (Builder $bankQuery) use ($context): void {
-                    $bankQuery->where('academic_context_type', $context->value);
-                });
-            }
+            $query->whereHas('examQuestionBank', function (Builder $bankQuery) use ($context): void {
+                $bankQuery->where('academic_context_type', $context->value);
+            });
         }
 
         if (filled($filters['type'] ?? null)) {

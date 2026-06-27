@@ -31,8 +31,10 @@ class JournalEntryResource extends LocalizedResource
         return ['entry_number', 'description'];
     }
 
-    protected static function globalSearchResultDetails(JournalEntry $record): array
+    protected static function globalSearchResultDetails(Model $record): array
     {
+        assert($record instanceof JournalEntry);
+
         return [
             FilamentUi::field('is_posted') => $record->is_posted ? 'yes' : 'no',
         ];

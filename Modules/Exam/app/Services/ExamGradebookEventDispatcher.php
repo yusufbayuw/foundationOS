@@ -28,10 +28,6 @@ class ExamGradebookEventDispatcher
     {
         $result->loadMissing('examDefinition', 'examParticipant');
 
-        if ($result->exam_participant_id === null) {
-            return;
-        }
-
         event(new ExamResultSynced(
             examId: (string) $result->exam_definition_id,
             resultId: (string) $result->id,
@@ -50,10 +46,6 @@ class ExamGradebookEventDispatcher
     public function graded(ExamResult $result, array $context = []): void
     {
         $result->loadMissing('examDefinition', 'examParticipant');
-
-        if ($result->exam_participant_id === null) {
-            return;
-        }
 
         event(new ExamResultGraded(
             examId: (string) $result->exam_definition_id,
@@ -78,9 +70,9 @@ class ExamGradebookEventDispatcher
 
         return [
             'tenant_id' => $definition->tenant_id,
-            'exam_academic_context' => $definition->exam_academic_context?->value,
+            'exam_academic_context' => $definition->exam_academic_context->value,
             'school_assessment_id' => $definition->school_assessment_id,
-            'grade_sync_mode' => $definition->grade_sync_mode?->value,
+            'grade_sync_mode' => $definition->grade_sync_mode->value,
             'grade_sync_target' => $definition->grade_sync_target,
         ];
     }

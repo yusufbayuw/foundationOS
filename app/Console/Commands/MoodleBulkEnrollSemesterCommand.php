@@ -59,7 +59,7 @@ class MoodleBulkEnrollSemesterCommand extends Command
         $query->with(['studyPlan.collageStudent'])
             ->chunkById(200, function ($items) use ($outbox, &$enqueued, &$skipped): void {
                 foreach ($items as $item) {
-                    $userId = (int) ($item->studyPlan?->collageStudent?->user_id ?? 0);
+                    $userId = (int) ($item->studyPlan->collageStudent->user_id ?? 0);
 
                     if ($userId <= 0 || ! $item->course_offering_id) {
                         $skipped++;

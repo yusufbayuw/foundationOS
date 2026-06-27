@@ -36,7 +36,7 @@ class StockValuationService
             ->where('stock_item_id', $stockItem->getKey())
             ->first();
 
-        $unitCost = (float) ($level?->average_unit_cost ?? 0);
+        $unitCost = (float) ($level->average_unit_cost ?? 0);
 
         return [
             'unit_cost' => $unitCost,

@@ -12,7 +12,7 @@ class EnrollmentController extends Controller
      */
     public function index()
     {
-        return view('enrollment::index');
+        return $this->moduleView('enrollment::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class EnrollmentController extends Controller
      */
     public function create()
     {
-        return view('enrollment::create');
+        return $this->moduleView('enrollment::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class EnrollmentController extends Controller
      */
     public function show($id)
     {
-        return view('enrollment::show');
+        return $this->moduleView('enrollment::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class EnrollmentController extends Controller
      */
     public function edit($id)
     {
-        return view('enrollment::edit');
+        return $this->moduleView('enrollment::edit');
     }
 
     /**

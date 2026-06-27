@@ -105,7 +105,7 @@ class VendorBillAutoCreationService
                 return [
                     'purchase_order_item_id' => (int) $gr->purchase_order_item_id,
                     'quantity' => (int) $gr->quantity_accepted,
-                    'unit_price' => (float) ($poItem?->unit_price ?? $gr->unit_price),
+                    'unit_price' => (float) ($poItem->unit_price ?? $gr->unit_price),
                     'description' => $poItem?->description,
                     'unit_of_measure' => $poItem?->unit_of_measure,
                 ];

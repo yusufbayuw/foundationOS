@@ -79,7 +79,9 @@ class AttendanceRecapPage extends Page implements HasForms
                     ->live(),
                 Select::make('year')
                     ->label(FilamentUi::text('Tahun'))
-                    ->options(array_combine(range(date('Y') - 5, date('Y') + 1), range(date('Y') - 5, date('Y') + 1)))
+                    ->options(collect(range(date('Y') - 5, date('Y') + 1))
+                        ->mapWithKeys(fn (int $year): array => [(string) $year => (string) $year])
+                        ->all())
                     ->required()
                     ->live(),
             ])

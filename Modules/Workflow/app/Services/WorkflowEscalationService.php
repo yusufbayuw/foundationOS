@@ -28,7 +28,7 @@ class WorkflowEscalationService
                 return $codes === [] || in_array($instance->workflow?->code, $codes, true);
             });
 
-        $assignedUser = $delegation?->toUser ?? $assignee;
+        $assignedUser = $delegation->toUser ?? $assignee;
         $meta = [];
 
         if ($delegation !== null) {

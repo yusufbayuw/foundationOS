@@ -12,7 +12,7 @@ class SchoolController extends Controller
      */
     public function index()
     {
-        return view('school::index');
+        return $this->moduleView('school::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class SchoolController extends Controller
      */
     public function create()
     {
-        return view('school::create');
+        return $this->moduleView('school::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class SchoolController extends Controller
      */
     public function show($id)
     {
-        return view('school::show');
+        return $this->moduleView('school::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class SchoolController extends Controller
      */
     public function edit($id)
     {
-        return view('school::edit');
+        return $this->moduleView('school::edit');
     }
 
     /**

@@ -99,7 +99,7 @@ class WorkflowAutomatedActionRunner
             ],
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'request_id' => request()?->headers->get('X-Request-Id'),
+            'request_id' => request()->headers->get('X-Request-Id'),
             'status' => 'success',
             'error_message' => null,
         ]);
@@ -154,7 +154,7 @@ class WorkflowAutomatedActionRunner
             ],
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'request_id' => request()?->headers->get('X-Request-Id'),
+            'request_id' => request()->headers->get('X-Request-Id'),
             'status' => 'failed',
             'error_message' => $exception->getMessage(),
         ]);

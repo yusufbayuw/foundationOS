@@ -121,7 +121,7 @@ class ExamDefinitionForm
                         Select::make('school_teacher_reference')
                             ->label(FilamentUi::field('school_teacher_reference'))
                             ->relationship('schoolTeacher', 'id')
-                            ->getOptionLabelFromRecordUsing(fn (Teacher $record): string => $record->user?->name ?? $record->nip ?? (string) $record->id)
+                            ->getOptionLabelFromRecordUsing(fn (Teacher $record): string => $record->user->name ?? $record->nip ?? (string) $record->id)
                             ->searchable()
                             ->preload(),
                     ]),

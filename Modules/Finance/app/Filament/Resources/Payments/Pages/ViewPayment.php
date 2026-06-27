@@ -39,11 +39,11 @@ class ViewPayment extends ViewRecord
                 ->form([
                     Textarea::make('notes')->label(FilamentUi::text('Verification Notes'))->rows(3),
                 ])
-                ->action(function (array $data): void {
+                ->action(function (array $data) use ($record): void {
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->verifyPayment($this->getRecord(), $user, $data['notes'] ?? null);
+                        app(FinanceControlService::class)->verifyPayment($record, $user, $data['notes'] ?? null);
                         Notification::make()->title('Payment verified and journal posted.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {
@@ -59,11 +59,11 @@ class ViewPayment extends ViewRecord
                 ->form([
                     Textarea::make('notes')->label(FilamentUi::text('Rejection Notes'))->rows(3)->required(),
                 ])
-                ->action(function (array $data): void {
+                ->action(function (array $data) use ($record): void {
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->rejectPayment($this->getRecord(), $user, $data['notes'] ?? null);
+                        app(FinanceControlService::class)->rejectPayment($record, $user, $data['notes'] ?? null);
                         Notification::make()->title('Payment rejected.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {

@@ -3,6 +3,7 @@
 namespace Modules\Library\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -224,18 +225,22 @@ class PublicOpacController extends Controller
             });
         }
 
-        $featuredCategories = (clone $summaryQuery)
-            ->whereNotNull('book_category_id')
-            ->selectRaw('book_category_id, COUNT(*) as aggregate')
-            ->groupBy('book_category_id')
-            ->orderByDesc('aggregate')
-            ->with('category')
-            ->limit(5)
-            ->get()
-            ->map(fn (Book $book): array => [
-                'name' => $book->category?->name ?? 'Tanpa Kategori',
+        $featuredCategories = (function () use ($summaryQuery) {
+            /** @var Collection<int, Book> $featuredRows */
+            $featuredRows = (clone $summaryQuery)
+                ->whereNotNull('book_category_id')
+                ->selectRaw('book_category_id, COUNT(*) as aggregate')
+                ->groupBy('book_category_id')
+                ->orderByDesc('aggregate')
+                ->with('category')
+                ->limit(5)
+                ->get();
+
+            return $featuredRows->map(fn (Book $book): array => [
+                'name' => $book->category->name ?? 'Tanpa Kategori',
                 'total' => (int) ($book->getAttribute('aggregate') ?? 0),
             ]);
+        })();
 
         $organizations = $organizationModel === null
             ? $tenantModel->organizations()
@@ -254,10 +259,13 @@ class PublicOpacController extends Controller
             ->sortBy('name')
             ->values();
 
-        $publisherOptions = (clone $filterQuery)
-            ->with('publisher')
-            ->get()
-            ->flatMap(function (Book $book): array {
+        $publisherOptions = (function () use ($filterQuery) {
+            /** @var Collection<int, Book> $publisherRows */
+            $publisherRows = (clone $filterQuery)
+                ->with('publisher')
+                ->get();
+
+            return $publisherRows->flatMap(function (Book $book): array {
                 $names = [];
                 $publisherRelation = $book->getRelationValue('publisher');
 
@@ -273,9 +281,10 @@ class PublicOpacController extends Controller
 
                 return $names;
             })
-            ->unique()
-            ->sort()
-            ->values();
+                ->unique()
+                ->sort()
+                ->values();
+        })();
 
         return view('library::opac.index', [
             'tenant' => $tenantModel,
@@ -638,7 +647,7 @@ class PublicOpacController extends Controller
         $policy = $policyResolver->resolveForMember($loan->member);
         abort_if((int) $loan->extension_count >= (int) $policy['max_extensions'], 422, 'Batas perpanjangan untuk loan ini sudah tercapai.');
 
-        $baseDate = $loan->due_date && $loan->due_date->isFuture()
+        $baseDate = $loan->due_date->isFuture()
             ? $loan->due_date->copy()
             : now();
 
@@ -707,7 +716,7 @@ class PublicOpacController extends Controller
         if ($loan->member_id) {
             $circulationService->refreshMemberCounters((int) $loan->member_id);
         }
-        if ($loan->bookCopy?->book_id) {
+        if ($loan->bookCopy->book_id) {
             $circulationService->refreshBookAvailability((int) $loan->bookCopy->book_id);
         }
 

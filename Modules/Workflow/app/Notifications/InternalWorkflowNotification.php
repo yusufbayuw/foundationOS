@@ -30,7 +30,7 @@ class InternalWorkflowNotification extends Notification
             'workflow_instance_id' => $this->instance->getKey(),
             'workflow_id' => $this->instance->workflow_id,
             'subject_label' => $this->instance->subject_label,
-            'status' => $this->instance->status?->value ?? $this->instance->status,
+            'status' => $this->instance->status->value,
         ];
     }
 

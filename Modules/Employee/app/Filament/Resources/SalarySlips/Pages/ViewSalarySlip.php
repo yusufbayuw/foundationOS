@@ -57,7 +57,10 @@ class ViewSalarySlip extends ViewRecord
                         'paid_at' => $data['paid_at'],
                         'paid_via' => $data['paid_via'],
                     ]);
-                    app(PayrollJournalService::class)->postForSlip($slip->fresh());
+                    $refreshedSlip = $slip->fresh();
+                    if ($refreshedSlip instanceof SalarySlip) {
+                        app(PayrollJournalService::class)->postForSlip($refreshedSlip);
+                    }
                     Notification::make()->title(FilamentUi::text('Salary slip marked as paid.'))->success()->send();
                     $this->record = $this->getRecord()->fresh();
                 }),

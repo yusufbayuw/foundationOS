@@ -34,7 +34,7 @@ class ExamAcademicContextService
             'academic_context_type' => $context->value,
             'academic_context_label' => $context->label(),
             'organization_label' => $definition->organization?->name,
-            'academic_year_label' => $definition->academicYear?->name
+            'academic_year_label' => $definition->academicYear->name
                 ?? $definition->campusAcademicYear?->name,
         ];
 
@@ -59,7 +59,7 @@ class ExamAcademicContextService
                 'subject_reference' => ExamRuntimeEntityRef::forModel($definition->schoolSubject),
                 'subject_label' => $definition->schoolSubject?->name,
                 'teacher_reference' => ExamRuntimeEntityRef::forModel($teacher),
-                'teacher_name' => $teacher?->user?->name ?? $teacher?->nip,
+                'teacher_name' => $teacher->user->name ?? $teacher->nip,
             ],
         ];
     }
@@ -71,8 +71,8 @@ class ExamAcademicContextService
     {
         $offering = $definition->campusClass;
         $lecturer = $definition->campusLecturer;
-        $classCode = $offering?->class_code ?? '';
-        $courseName = $offering?->course?->name ?? '';
+        $classCode = $offering->class_code ?? '';
+        $courseName = $offering->course->name ?? '';
 
         return [
             'campus_context' => [

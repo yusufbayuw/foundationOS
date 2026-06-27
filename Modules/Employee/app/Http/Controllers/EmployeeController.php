@@ -12,7 +12,7 @@ class EmployeeController extends Controller
      */
     public function index()
     {
-        return view('employee::index');
+        return $this->moduleView('employee::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class EmployeeController extends Controller
      */
     public function create()
     {
-        return view('employee::create');
+        return $this->moduleView('employee::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class EmployeeController extends Controller
      */
     public function show($id)
     {
-        return view('employee::show');
+        return $this->moduleView('employee::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class EmployeeController extends Controller
      */
     public function edit($id)
     {
-        return view('employee::edit');
+        return $this->moduleView('employee::edit');
     }
 
     /**

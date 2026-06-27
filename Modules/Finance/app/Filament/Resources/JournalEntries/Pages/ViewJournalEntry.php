@@ -32,11 +32,11 @@ class ViewJournalEntry extends ViewRecord
                 ->form([
                     Textarea::make('notes')->label(FilamentUi::text('Posting Notes'))->rows(3),
                 ])
-                ->action(function (array $data): void {
+                ->action(function (array $data) use ($record): void {
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->postJournalEntry($this->getRecord(), $user, $data['notes'] ?? null);
+                        app(FinanceControlService::class)->postJournalEntry($record, $user, $data['notes'] ?? null);
                         Notification::make()->title('Journal entry posted.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {
@@ -52,11 +52,11 @@ class ViewJournalEntry extends ViewRecord
                 ->form([
                     Textarea::make('reason')->label(FilamentUi::text('Reversal Reason'))->rows(3)->required(),
                 ])
-                ->action(function (array $data): void {
+                ->action(function (array $data) use ($record): void {
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->reverseJournalEntry($this->getRecord(), $user, $data['reason']);
+                        app(FinanceControlService::class)->reverseJournalEntry($record, $user, $data['reason']);
                         Notification::make()->title('Journal entry reversed.')->success()->send();
                         $this->record = $this->getRecord()->fresh();
                     } catch (Throwable $exception) {

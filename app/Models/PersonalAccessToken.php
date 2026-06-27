@@ -34,8 +34,13 @@ class PersonalAccessToken extends SanctumToken
 
     public function hasScope(string $scope): bool
     {
-        $scopes = $this->scopes ?? [];
+        /** @var array<int, string>|null $scopes */
+        $scopes = $this->scopes;
 
-        return empty($scopes) || in_array($scope, $scopes, true) || in_array('*', $scopes, true);
+        if ($scopes === null || $scopes === []) {
+            return true;
+        }
+
+        return in_array($scope, $scopes, true) || in_array('*', $scopes, true);
     }
 }

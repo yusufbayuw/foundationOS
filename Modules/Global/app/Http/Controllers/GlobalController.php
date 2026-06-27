@@ -12,7 +12,7 @@ class GlobalController extends Controller
      */
     public function index()
     {
-        return view('global::index');
+        return $this->moduleView('global::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class GlobalController extends Controller
      */
     public function create()
     {
-        return view('global::create');
+        return $this->moduleView('global::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class GlobalController extends Controller
      */
     public function show($id)
     {
-        return view('global::show');
+        return $this->moduleView('global::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class GlobalController extends Controller
      */
     public function edit($id)
     {
-        return view('global::edit');
+        return $this->moduleView('global::edit');
     }
 
     /**

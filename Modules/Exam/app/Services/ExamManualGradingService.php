@@ -83,7 +83,7 @@ class ExamManualGradingService
         }
 
         $definition = $attempt->examDefinition;
-        $maxScore = (float) ($definition?->max_score ?? 0);
+        $maxScore = (float) ($definition->max_score ?? 0);
         $score = (float) ($attempt->score ?? 0);
         $percentage = $maxScore > 0 ? round(($score / $maxScore) * 100, 2) : null;
         $passing = $definition?->passing_score;

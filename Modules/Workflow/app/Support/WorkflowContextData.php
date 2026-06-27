@@ -18,7 +18,7 @@ class WorkflowContextData
                     'instance_id' => $instance->getKey(),
                     'workflow_id' => $instance->workflow_id,
                     'workflow_version' => $instance->workflow_version,
-                    'status' => $instance->status?->value ?? $instance->status,
+                    'status' => $instance->status->value,
                     'current_step_id' => $instance->current_step_id,
                     'tenant_id' => $instance->tenant_id,
                     'organization_id' => $instance->organization_id,

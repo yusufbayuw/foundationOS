@@ -62,7 +62,7 @@ class MoodleSyncCalendarCommand extends Command
             $moodleCourseId = $syncService->resolveMoodleCourseIdForClass((int) $schedule->tenant_id, (int) $schedule->class_id);
             $startAt = $this->resolveScheduleStart($schedule);
             $duration = (int) ($schedule->duration_minutes ?? 0) * 60;
-            $name = trim(($schedule->subject?->name ?? 'Class Schedule').' - '.($schedule->schoolClass?->name ?? 'Class'));
+            $name = trim(($schedule->subject->name ?? 'Class Schedule').' - '.($schedule->schoolClass->name ?? 'Class'));
 
             $response = $client->call('core_calendar_create_calendar_events', [
                 'events' => [[
@@ -115,10 +115,7 @@ class MoodleSyncCalendarCommand extends Command
             ? Carbon::parse($schedule->effective_date)->toDateString()
             : now()->toDateString();
 
-        $time = '08:00:00';
-        if ($schedule->start_time) {
-            $time = Carbon::parse($schedule->start_time)->format('H:i:s');
-        }
+        $time = Carbon::parse($schedule->start_time)->format('H:i:s');
 
         return Carbon::parse("{$date} {$time}", config('app.timezone', 'Asia/Jakarta'));
     }

@@ -24,7 +24,7 @@ class CertificateVerificationController extends Controller
             'valid' => true,
             'certificate_number' => $certificate->certificate_number,
             'participant' => $certificate->enrollment?->participant_name,
-            'issued_at' => $certificate->issued_at?->toIso8601String(),
+            'issued_at' => $certificate->issued_at->toIso8601String(),
         ]);
     }
 }

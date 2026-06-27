@@ -4,6 +4,7 @@ namespace Modules\Employee\Filament\Resources\Employees;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Concerns\ConfiguresGlobalSearch;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\Employees\Pages\CreateEmployee;
@@ -28,8 +29,10 @@ class EmployeeResource extends LocalizedResource
         return ['employee_number', 'full_name', 'email'];
     }
 
-    protected static function globalSearchResultDetails(Employee $record): array
+    protected static function globalSearchResultDetails(Model $record): array
     {
+        assert($record instanceof Employee);
+
         return static::detailStatus($record->employment_status);
     }
 

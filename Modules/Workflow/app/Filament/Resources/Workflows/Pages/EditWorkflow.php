@@ -16,7 +16,7 @@ class EditWorkflow extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if ($this->record->status?->value === 'active') {
+        if ($this->record->status->value === 'active') {
             throw ValidationException::withMessages([
                 'status' => 'Workflow aktif bersifat immutable. Buat versi baru untuk perubahan berikutnya.',
             ]);

@@ -70,9 +70,12 @@ class MoodleReconcileEnrollmentCommand extends Command
                 continue;
             }
 
+            /** @var array<int, array{id: int, idnumber?: string, roles?: array<int, array{shortname: string}>}> $enrollmentPayload */
+            $enrollmentPayload = $payload;
+
             $drifts = $reconciler->reconcileMapping(
                 $mapping,
-                is_array($payload) ? $payload : [],
+                $enrollmentPayload,
                 dryRun: $dryRun,
             );
 

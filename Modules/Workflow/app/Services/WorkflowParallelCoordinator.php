@@ -34,8 +34,7 @@ class WorkflowParallelCoordinator
         $gateway = $step->gateway_type;
         $quorum = $step->quorum_strategy;
 
-        $gatewayIsParallel = $gateway instanceof WorkflowGatewayType
-            && $gateway !== WorkflowGatewayType::None;
+        $gatewayIsParallel = $gateway !== WorkflowGatewayType::None;
 
         return $gatewayIsParallel || $quorum instanceof WorkflowQuorumStrategy;
     }

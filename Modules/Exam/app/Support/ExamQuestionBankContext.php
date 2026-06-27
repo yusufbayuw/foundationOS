@@ -35,12 +35,10 @@ class ExamQuestionBankContext
             return;
         }
 
-        if ($context === ExamAcademicContext::Standalone) {
-            if (blank($bank->standalone_subject) && blank($bank->standalone_level)) {
-                throw new \InvalidArgumentException(
-                    'Standalone question bank requires standalone subject or level.',
-                );
-            }
+        if (blank($bank->standalone_subject) && blank($bank->standalone_level)) {
+            throw new \InvalidArgumentException(
+                'Standalone question bank requires standalone subject or level.',
+            );
         }
     }
 }

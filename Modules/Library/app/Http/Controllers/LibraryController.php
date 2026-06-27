@@ -12,7 +12,7 @@ class LibraryController extends Controller
      */
     public function index()
     {
-        return view('library::index');
+        return $this->moduleView('library::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class LibraryController extends Controller
      */
     public function create()
     {
-        return view('library::create');
+        return $this->moduleView('library::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class LibraryController extends Controller
      */
     public function show($id)
     {
-        return view('library::show');
+        return $this->moduleView('library::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class LibraryController extends Controller
      */
     public function edit($id)
     {
-        return view('library::edit');
+        return $this->moduleView('library::edit');
     }
 
     /**

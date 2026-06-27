@@ -14,7 +14,7 @@ class RegistrationFeeInstallmentService
      */
     public function createInstallments(Student $student, TuitionType $tuitionType, array $options = ['installments' => 3]): int
     {
-        $installments = max(1, (int) ($options['installments'] ?? 3));
+        $installments = max(1, (int) ($options['installments']));
         $start = Carbon::parse($options['start_month'] ?? now()->format('Y-m').'-01');
         $amountPerInstallment = round((float) $tuitionType->amount / $installments, 2);
         $created = 0;

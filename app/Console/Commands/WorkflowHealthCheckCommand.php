@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Modules\Workflow\Contracts\WorkflowDynamicAssigneeResolver;
+use Modules\Workflow\Enums\WorkflowAssigneeType;
 use Modules\Workflow\Models\Workflow;
 
 class WorkflowHealthCheckCommand extends Command
@@ -62,7 +63,7 @@ class WorkflowHealthCheckCommand extends Command
             }
 
             foreach ($workflow->steps as $step) {
-                if ($step->assignee_type === 'resolver') {
+                if ($step->assignee_type === WorkflowAssigneeType::Resolver) {
                     $resolverClass = (string) (data_get($step->assignee_config, 'resolver_class') ?: $step->assignee_value);
                     $allowedResolvers = (array) config('workflow.allowed_assignee_resolvers', []);
 

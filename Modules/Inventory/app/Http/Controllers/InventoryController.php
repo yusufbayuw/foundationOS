@@ -12,7 +12,7 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        return view('inventory::index');
+        return $this->moduleView('inventory::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class InventoryController extends Controller
      */
     public function create()
     {
-        return view('inventory::create');
+        return $this->moduleView('inventory::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class InventoryController extends Controller
      */
     public function show($id)
     {
-        return view('inventory::show');
+        return $this->moduleView('inventory::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class InventoryController extends Controller
      */
     public function edit($id)
     {
-        return view('inventory::edit');
+        return $this->moduleView('inventory::edit');
     }
 
     /**

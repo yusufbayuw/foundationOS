@@ -57,8 +57,8 @@ class TranscriptDocumentService
             ])
             ->get()
             ->sortBy([
-                fn (StudyPlanItem $item) => $item->studyPlan?->academicPeriod?->start_date ?? '',
-                fn (StudyPlanItem $item) => $item->course?->code ?? '',
+                fn (StudyPlanItem $item) => $item->studyPlan->academicPeriod->start_date ?? '',
+                fn (StudyPlanItem $item) => $item->course->code ?? '',
             ])
             ->values();
     }

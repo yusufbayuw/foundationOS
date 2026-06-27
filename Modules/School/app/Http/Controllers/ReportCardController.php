@@ -3,6 +3,7 @@
 namespace Modules\School\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Support\TypedValue;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Modules\School\Services\ReportCardService;
@@ -18,7 +19,7 @@ class ReportCardController extends Controller
             abort(404);
         }
 
-        $data = $service->generate($studentId, $periodId);
+        $data = $service->generate(TypedValue::int($studentId), TypedValue::int($periodId));
 
         $pdf = Pdf::loadView('school::report-card-pdf', ['data' => $data]);
 

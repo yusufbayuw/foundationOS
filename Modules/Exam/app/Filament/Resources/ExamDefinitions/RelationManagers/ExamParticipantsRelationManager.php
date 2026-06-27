@@ -363,7 +363,7 @@ class ExamParticipantsRelationManager extends RelationManager
                     $record->student_name,
                     $record->student_identifier,
                     $record->activeToken?->token,
-                    $record->status?->value,
+                    $record->status->value,
                 ]);
             }
 

@@ -162,10 +162,10 @@ class SetupBudgetWorkflowCommand extends Command
             [[
                 $workflow->id,
                 $tenant->name,
-                $organization?->name ?? '-',
+                $organization->name ?? '-',
                 $workflow->version,
                 $finance->name,
-                $executive?->name ?? '-',
+                $executive->name ?? '-',
             ]]
         );
 
@@ -200,7 +200,7 @@ class SetupBudgetWorkflowCommand extends Command
             ->exists();
 
         if (! $isValid) {
-            $scope = $organization?->name ?? 'tenant-wide scope';
+            $scope = $organization->name ?? 'tenant-wide scope';
             $this->fail("User [{$user->email}] is not a member of tenant [{$tenant->name}] for scope [{$scope}].");
         }
     }

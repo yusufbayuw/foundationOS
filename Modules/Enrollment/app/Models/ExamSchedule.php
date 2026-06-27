@@ -65,6 +65,6 @@ class ExamSchedule extends Model
 
     public function isPrintable(): bool
     {
-        return (bool) $this->is_active && $this->date !== null;
+        return (bool) $this->is_active;
     }
 }

@@ -62,7 +62,7 @@ class PurchaseOrderAutoCreationService
                 'status' => 'draft',
                 'notes' => sprintf('Auto-generated from RFQ %s (vendor %s).',
                     $rfq->rfq_number,
-                    $rfqVendor->vendor?->name ?? '#'.$rfqVendor->vendor_id,
+                    $rfqVendor->vendor->name ?? '#'.$rfqVendor->vendor_id,
                 ),
             ]);
 

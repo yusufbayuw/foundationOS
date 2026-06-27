@@ -231,11 +231,11 @@ class ViewExamDefinition extends ViewRecord
                     try {
                         $summary = app(ExamResultSyncService::class)->sync($this->record);
 
-                        $body = FilamentUi::text('Attempts').': '.($summary['attempts_synced'] ?? 0)
-                            .' · '.FilamentUi::text('Answers').': '.($summary['answers_synced'] ?? 0)
-                            .' · '.FilamentUi::text('Results').': '.($summary['results_synced'] ?? 0);
+                        $body = FilamentUi::text('Attempts').': '.($summary['attempts_synced'])
+                            .' · '.FilamentUi::text('Answers').': '.($summary['answers_synced'])
+                            .' · '.FilamentUi::text('Results').': '.($summary['results_synced']);
 
-                        if (($summary['errors'] ?? []) !== []) {
+                        if (($summary['errors']) !== []) {
                             $body .= "\n".implode("\n", array_slice($summary['errors'], 0, 3));
                         }
 
@@ -254,16 +254,16 @@ class ViewExamDefinition extends ViewRecord
                 ->action(function (): void {
                     $summary = app(ExamGradebookExportService::class)->pushToSchoolGradebook($this->record);
 
-                    $body = FilamentUi::text('Success').': '.($summary['success'] ?? 0)
-                        .' · '.FilamentUi::text('Skipped').': '.($summary['skipped'] ?? 0)
-                        .' · '.FilamentUi::text('Failed').': '.($summary['failed'] ?? 0);
+                    $body = FilamentUi::text('Success').': '.($summary['success'])
+                        .' · '.FilamentUi::text('Skipped').': '.($summary['skipped'])
+                        .' · '.FilamentUi::text('Failed').': '.($summary['failed']);
 
-                    if (($summary['integration'] ?? '') === 'event_only') {
+                    if (($summary['integration']) === 'event_only') {
                         $body .= "\n".FilamentUi::text('Gradebook integration deferred; events dispatched.')
-                            .' ('.($summary['events_dispatched'] ?? 0).')';
+                            .' ('.($summary['events_dispatched']).')';
                     }
 
-                    if (($summary['errors'] ?? []) !== []) {
+                    if (($summary['errors']) !== []) {
                         $body .= "\n".implode("\n", array_slice($summary['errors'], 0, 3));
                     }
 
@@ -283,16 +283,16 @@ class ViewExamDefinition extends ViewRecord
                 ->action(function (): void {
                     $summary = app(ExamGradebookExportService::class)->pushToCampusGradebook($this->record);
 
-                    $body = FilamentUi::text('Success').': '.($summary['success'] ?? 0)
-                        .' · '.FilamentUi::text('Skipped').': '.($summary['skipped'] ?? 0)
-                        .' · '.FilamentUi::text('Failed').': '.($summary['failed'] ?? 0);
+                    $body = FilamentUi::text('Success').': '.($summary['success'])
+                        .' · '.FilamentUi::text('Skipped').': '.($summary['skipped'])
+                        .' · '.FilamentUi::text('Failed').': '.($summary['failed']);
 
-                    if (($summary['integration'] ?? '') === 'event_only') {
+                    if (($summary['integration']) === 'event_only') {
                         $body .= "\n".FilamentUi::text('Gradebook integration deferred; events dispatched.')
-                            .' ('.($summary['events_dispatched'] ?? 0).')';
+                            .' ('.($summary['events_dispatched']).')';
                     }
 
-                    if (($summary['errors'] ?? []) !== []) {
+                    if (($summary['errors']) !== []) {
                         $body .= "\n".implode("\n", array_slice($summary['errors'], 0, 3));
                     }
 

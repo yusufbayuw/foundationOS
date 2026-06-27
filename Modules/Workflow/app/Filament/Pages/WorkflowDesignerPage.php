@@ -42,7 +42,7 @@ class WorkflowDesignerPage extends Page
         if ($this->workflowId) {
             $workflow = Workflow::find($this->workflowId);
 
-            return ($workflow?->name ?? FilamentUi::text('Workflow')).' — '.FilamentUi::text('Workflow designer');
+            return ($workflow->name ?? FilamentUi::text('Workflow')).' — '.FilamentUi::text('Workflow designer');
         }
 
         return FilamentUi::text('New workflow').' — '.FilamentUi::text('Workflow designer');

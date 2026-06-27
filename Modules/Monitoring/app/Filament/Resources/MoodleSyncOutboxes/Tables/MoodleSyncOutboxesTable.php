@@ -112,6 +112,7 @@ class MoodleSyncOutboxesTable
                     ->label(FilamentUi::text('Retry selected'))
                     ->requiresConfirmation()
                     ->action(function (Collection $records): void {
+                        /** @var Collection<int, MoodleSyncOutbox> $records */
                         $records->each(function (MoodleSyncOutbox $record): void {
                             if (! in_array($record->status, [
                                 MoodleSyncOutbox::STATUS_FAILED,

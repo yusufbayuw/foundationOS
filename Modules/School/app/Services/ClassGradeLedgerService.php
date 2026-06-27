@@ -34,7 +34,7 @@ class ClassGradeLedgerService
             })
             ->where('tenant_id', $schoolClass->tenant_id)
             ->get()
-            ->sortBy(fn (Student $student): string => (string) ($student->user?->name ?? $student->nis ?? ''))
+            ->sortBy(fn (Student $student): string => (string) ($student->user->name ?? $student->nis ?? ''))
             ->values();
 
         $gradesByStudent = StudentGrade::query()
@@ -50,12 +50,12 @@ class ClassGradeLedgerService
 
             foreach ($assessments as $assessment) {
                 $grade = $studentGrades->firstWhere('assessment_id', $assessment->getKey());
-                $scores[$assessment->getKey()] = $grade?->score ?? $grade?->final_score;
+                $scores[$assessment->getKey()] = $grade->score ?? $grade->final_score;
             }
 
             return [
                 'student' => $student,
-                'student_name' => $student->user?->name ?? $student->nis ?? '-',
+                'student_name' => $student->user->name ?? $student->nis ?? '-',
                 'nis' => $student->nis,
                 'scores' => $scores,
             ];

@@ -37,9 +37,9 @@ class ThreeWayMatchValidator
             ->map(fn ($items) => (int) $items->sum('quantity_accepted'));
 
         foreach ($billLines as $line) {
-            $poItemId = (int) ($line['purchase_order_item_id'] ?? 0);
-            $billedQty = (int) ($line['quantity'] ?? 0);
-            $billedPrice = (float) ($line['unit_price'] ?? 0);
+            $poItemId = (int) ($line['purchase_order_item_id']);
+            $billedQty = (int) ($line['quantity']);
+            $billedPrice = (float) ($line['unit_price']);
 
             $poItem = $poItemsById->get($poItemId);
             if (! $poItem) {

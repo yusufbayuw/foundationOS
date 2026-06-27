@@ -55,7 +55,7 @@ class ExamParticipantResolver
                 'school_student_reference' => $student->id,
                 'participant_legacy_id' => $student->id,
                 'context_reference_type' => Student::class,
-                'student_name' => $student->user?->name ?? 'Student '.$student->id,
+                'student_name' => $student->user->name ?? 'Student '.$student->id,
                 'student_identifier' => $student->nis ?? $student->nisn,
                 'email' => $student->user?->email,
             ]);
@@ -220,12 +220,14 @@ class ExamParticipantResolver
         }
 
         return DB::transaction(function () use ($exam, $attributes, $issueToken): string {
-            $participant = ExamParticipant::withoutTenantScope()->create(array_merge([
+            $participant = ExamParticipant::withoutTenantScope()->make();
+            $participant->fill(array_merge([
                 'tenant_id' => $exam->tenant_id,
                 'exam_definition_id' => $exam->id,
                 'status' => ParticipantStatus::Assigned,
                 'assigned_at' => now(),
             ], $attributes));
+            $participant->save();
 
             if ($issueToken) {
                 $this->tokenService->generateToken($participant);
@@ -255,7 +257,7 @@ class ExamParticipantResolver
             return $query->clone()->where('user_reference', $attributes['user_reference'])->first();
         }
 
-        if (isset($attributes['student_identifier']) && $attributes['student_identifier'] !== null && $attributes['student_identifier'] !== '') {
+        if (isset($attributes['student_identifier']) && $attributes['student_identifier'] !== '') {
             return $query->clone()->where('student_identifier', $attributes['student_identifier'])->first();
         }
 

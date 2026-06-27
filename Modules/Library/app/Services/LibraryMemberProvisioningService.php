@@ -50,7 +50,7 @@ class LibraryMemberProvisioningService
             return Member::query()->create([
                 'tenant_id' => $applicant->tenant_id,
                 'organization_id' => $applicant->admissionPeriod?->organization_id,
-                'user_id' => $student?->user_id,
+                'user_id' => $student->user_id,
                 'member_number' => $memberNumber,
                 'member_type' => 'student',
                 'joined_at' => now()->toDateString(),

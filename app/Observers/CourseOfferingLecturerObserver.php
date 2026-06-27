@@ -58,7 +58,7 @@ class CourseOfferingLecturerObserver
                 'tenant_id' => (int) $assignment->tenant_id,
                 'course_offering_id' => (int) $assignment->course_offering_id,
                 'lecturer_id' => (int) $assignment->lecturer_id,
-                'role' => $assignment->role?->value ?? 'primary',
+                'role' => $assignment->role->value,
                 'is_active' => (bool) $assignment->is_active,
                 'removed_at' => $assignment->removed_at?->toDateTimeString(),
             ],

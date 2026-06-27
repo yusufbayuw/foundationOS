@@ -33,6 +33,7 @@ class TrainingCertificate extends Model
 
     public function isPrintable(): bool
     {
-        return $this->issued_at !== null;
+        return array_key_exists('issued_at', $this->getAttributes())
+            && $this->getAttributes()['issued_at'] !== null;
     }
 }

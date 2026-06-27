@@ -72,7 +72,7 @@ class StudyPlanItemObserver
         $version = optional($item->updated_at)->timestamp ?? now()->timestamp;
         $dedupe = "study_plan_enrollment:{$item->id}:{$action}:{$version}";
 
-        $userId = (int) ($item->studyPlan?->collageStudent?->user_id ?? 0);
+        $userId = (int) ($item->studyPlan->collageStudent->user_id ?? 0);
 
         $this->outbox->enqueue(
             MoodleOutboxService::ENTITY_STUDY_PLAN_ENROLLMENT,

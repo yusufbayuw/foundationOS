@@ -16,6 +16,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Core\Support\FilamentUi;
 use Modules\Exam\Enums\ExamStatus;
 use Modules\Exam\Enums\QuestionDifficulty;
@@ -174,13 +175,16 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
                             ->pluck('exam_question_id')
                             ->all();
 
-                        return app(ExamDefinitionQuestionQuery::class)
+                        $questions = app(ExamDefinitionQuestionQuery::class)
                             ->forPicker($definition, $user, [], $includeCross)
                             ->when($attachedIds !== [], fn (Builder $query) => $query->whereNotIn('id', $attachedIds))
                             ->with('examQuestionBank')
                             ->orderBy('question_number')
                             ->limit(200)
-                            ->get()
+                            ->get();
+
+                        /** @var Collection<int, ExamQuestion> $questions */
+                        return $questions
                             ->mapWithKeys(fn (ExamQuestion $question): array => [
                                 $question->id => trim(strip_tags((string) $question->question_text)) ?: $question->id,
                             ])

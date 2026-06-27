@@ -12,7 +12,7 @@ class FinanceController extends Controller
      */
     public function index()
     {
-        return view('finance::index');
+        return $this->moduleView('finance::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class FinanceController extends Controller
      */
     public function create()
     {
-        return view('finance::create');
+        return $this->moduleView('finance::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class FinanceController extends Controller
      */
     public function show($id)
     {
-        return view('finance::show');
+        return $this->moduleView('finance::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class FinanceController extends Controller
      */
     public function edit($id)
     {
-        return view('finance::edit');
+        return $this->moduleView('finance::edit');
     }
 
     /**

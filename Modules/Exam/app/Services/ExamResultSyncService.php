@@ -345,7 +345,7 @@ class ExamResultSyncService
     }
 
     /**
-     * @param  array<int, ExamDefinition>  $definitions
+     * @param  iterable<int, ExamDefinition>  $definitions
      * @return list<array{exam_definition_id: string, summary: array<string, mixed>|null, error: ?string}>
      */
     public function syncMany(iterable $definitions): array

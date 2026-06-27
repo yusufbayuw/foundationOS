@@ -27,7 +27,7 @@ class RegistrationDocumentService
 
     public function filename(Registration $registration): string
     {
-        $applicantNumber = $registration->applicant?->registration_number ?? (string) $registration->getKey();
+        $applicantNumber = $registration->applicant->registration_number ?? (string) $registration->getKey();
 
         return sprintf('Bukti_Daftar_Ulang_%s.pdf', str_replace(' ', '_', $applicantNumber));
     }

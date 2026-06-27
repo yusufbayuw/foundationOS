@@ -193,11 +193,11 @@ class SetupProcurementWorkflowPilotCommand extends Command
             [[
                 $workflow->id,
                 $tenant->name,
-                $organization?->name ?? 'Tenant-wide',
+                $organization->name ?? 'Tenant-wide',
                 $workflow->version,
                 $manager->name,
                 $finance->name,
-                $executive?->name ?? '-',
+                $executive->name ?? '-',
             ]]
         );
 
@@ -232,7 +232,7 @@ class SetupProcurementWorkflowPilotCommand extends Command
             ->exists();
 
         if (! $isValid) {
-            $scope = $organization?->name ?? 'tenant-wide scope';
+            $scope = $organization->name ?? 'tenant-wide scope';
             $this->fail("User [{$user->email}] is not a member of tenant [{$tenant->name}] for scope [{$scope}].");
         }
     }

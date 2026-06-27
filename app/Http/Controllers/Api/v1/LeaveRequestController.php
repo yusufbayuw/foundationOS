@@ -30,17 +30,26 @@ class LeaveRequestController extends ApiController
             return $this->error('validation_failed', 'The given data was invalid.', 422, $validator->errors()->toArray());
         }
 
-        $leaveRequest = LeaveRequest::create(array_merge($validator->validated(), [
+        $validated = $validator->validated();
+
+        $leaveRequest = LeaveRequest::query()->create([
+            'employee_id' => $validated['employee_id'],
+            'leave_type' => $validated['leave_type'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'total_days' => $validated['total_days'],
+            'reason' => $validated['reason'],
+            'substitute_employee_id' => $validated['substitute_employee_id'] ?? null,
             'tenant_id' => $this->currentTenant->id(),
             'status' => 'draft',
-        ]));
+        ]);
 
         return $this->success([
             'id' => $leaveRequest->id,
             'employee_id' => $leaveRequest->employee_id,
             'leave_type' => $leaveRequest->leave_type,
-            'start_date' => $leaveRequest->start_date?->toDateString(),
-            'end_date' => $leaveRequest->end_date?->toDateString(),
+            'start_date' => $leaveRequest->start_date->toDateString(),
+            'end_date' => $leaveRequest->end_date->toDateString(),
             'total_days' => $leaveRequest->total_days,
             'status' => $leaveRequest->status,
             'created_at' => $leaveRequest->created_at?->toIso8601String(),

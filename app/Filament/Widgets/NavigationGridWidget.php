@@ -58,10 +58,6 @@ class NavigationGridWidget extends Widget
         $groups = [];
 
         foreach (Filament::getNavigation() as $group) {
-            if (! method_exists($group, 'getItems')) {
-                continue;
-            }
-
             $label = $group->getLabel() ?? FilamentUi::text('Other');
             $items = collect($group->getItems())
                 ->filter(fn ($item): bool => $item->isVisible() && ! $item->isHidden())
@@ -110,7 +106,7 @@ class NavigationGridWidget extends Widget
      */
     public function getPinnedItems(): array
     {
-        return auth()->user()?->pinned_menus ?? [];
+        return auth()->user()->pinned_menus ?? [];
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Modules\Campus\Filament\Resources\CollageStudents;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Campus\Filament\Resources\CollageStudents\Pages\CreateCollageStudent;
 use Modules\Campus\Filament\Resources\CollageStudents\Pages\EditCollageStudent;
 use Modules\Campus\Filament\Resources\CollageStudents\Pages\ListCollageStudents;
@@ -32,8 +33,10 @@ class CollageStudentResource extends LocalizedResource
         return ['student_number', 'full_name', 'email'];
     }
 
-    protected static function globalSearchResultDetails(CollageStudent $record): array
+    protected static function globalSearchResultDetails(Model $record): array
     {
+        assert($record instanceof CollageStudent);
+
         return static::detailStatus($record->status);
     }
 

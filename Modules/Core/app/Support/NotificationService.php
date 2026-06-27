@@ -120,8 +120,8 @@ class NotificationService
         Loan $loan,
         User $borrower,
     ): void {
-        $bookTitle = $loan->bookCopy?->book?->title ?? 'Buku';
-        $dueDate = $loan->due_date?->translatedFormat('d F Y') ?? '-';
+        $bookTitle = $loan->bookCopy->book->title ?? 'Buku';
+        $dueDate = $loan->due_date->translatedFormat('d F Y');
 
         Notification::make()
             ->title('Peminjaman Terlambat')

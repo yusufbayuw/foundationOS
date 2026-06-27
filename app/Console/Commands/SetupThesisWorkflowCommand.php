@@ -257,7 +257,7 @@ class SetupThesisWorkflowCommand extends Command
             [[
                 $workflow->id,
                 $tenant->name,
-                $organization?->name ?? 'Tenant-wide',
+                $organization->name ?? 'Tenant-wide',
                 $workflow->version,
                 $advisor->name,
                 $supervisor2->name,
@@ -296,7 +296,7 @@ class SetupThesisWorkflowCommand extends Command
             ->exists();
 
         if (! $isValid) {
-            $scope = $organization?->name ?? 'tenant-wide scope';
+            $scope = $organization->name ?? 'tenant-wide scope';
             $this->fail("User [{$user->email}] is not a member of tenant [{$tenant->name}] for scope [{$scope}].");
         }
     }

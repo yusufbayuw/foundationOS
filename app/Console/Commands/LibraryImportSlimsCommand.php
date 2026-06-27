@@ -104,10 +104,6 @@ class LibraryImportSlimsCommand extends Command
 
         try {
             $connectionConfig = $tenantSlimsConfig['connection'];
-            if (! is_array($connectionConfig)) {
-                throw new \RuntimeException('SLiMS connection config is invalid.');
-            }
-
             /** @var array<string, mixed> $connectionConfig */
             $connection = $this->slimsConnection($connectionConfig);
         } catch (\RuntimeException $exception) {
@@ -190,12 +186,6 @@ class LibraryImportSlimsCommand extends Command
             }
             $book = $this->findOrMakeMappedModel('book', $tenantId, $slimsId, Book::class);
 
-            if (! $book) {
-                $summary['skipped']++;
-
-                continue;
-            }
-
             $biblioId = TypedValue::string($row->biblio_id ?? null);
             $book->fill([
                 'tenant_id' => $tenantId,
@@ -266,11 +256,6 @@ class LibraryImportSlimsCommand extends Command
             }
 
             $copy = $this->findOrMakeMappedModel('copy', $tenantId, $itemId, BookCopy::class);
-            if (! $copy) {
-                $summary['skipped']++;
-
-                continue;
-            }
 
             $copyNumber = TypedValue::string($row->item_code ?? null, "copy-{$itemId}");
             $copy->fill([
@@ -340,22 +325,12 @@ class LibraryImportSlimsCommand extends Command
             }
 
             [$user, $createdUser] = $this->resolveOrCreateUserForMember($tenantId, $row, $dryRun);
-            if (! $user) {
-                $summary['skipped']++;
-
-                continue;
-            }
 
             if (! $dryRun) {
                 $this->ensureUserTenantRole(TypedValue::int($user->id), $tenantId, $tenantRoleId);
             }
 
             $member = $this->findOrMakeMappedModel('member', $tenantId, $memberCode, Member::class);
-            if (! $member) {
-                $summary['skipped']++;
-
-                continue;
-            }
 
             $member->fill([
                 'tenant_id' => $tenantId,
@@ -449,11 +424,6 @@ class LibraryImportSlimsCommand extends Command
             }
 
             $loan = $this->findOrMakeMappedModel('loan', $tenantId, $loanId, Loan::class);
-            if (! $loan) {
-                $summary['skipped']++;
-
-                continue;
-            }
 
             $isReturned = (TypedValue::int($row->is_return ?? 0) === 1) || ! empty($row->return_date);
             $loan->fill([

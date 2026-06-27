@@ -154,8 +154,8 @@ class WorkflowInboxPage extends Page
             'step' => $assignment->instance->currentStep->name ?? '-',
             'subject' => $assignment->instance->subject_label ?: '-',
             'requester' => $assignment->instance->requester->name ?? '-',
-            'assigned_at' => $assignment->assigned_at?->format('Y-m-d H:i') ?: '-',
-            'due_at' => $dueAt?->format('Y-m-d H:i') ?: '-',
+            'assigned_at' => $assignment->assigned_at->format('Y-m-d H:i'),
+            'due_at' => $dueAt?->format('Y-m-d H:i') ?? '-',
             'sla_status' => match (true) {
                 ! $dueAt => 'No SLA',
                 $dueAt->isPast() => 'Overdue',

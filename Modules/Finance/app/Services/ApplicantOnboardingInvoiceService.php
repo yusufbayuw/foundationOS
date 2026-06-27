@@ -30,7 +30,7 @@ class ApplicantOnboardingInvoiceService
 
         $applicant = $applicant->fresh(['admissionPeriod']);
 
-        $amount = (float) ($applicant->admissionPeriod?->registration_fee ?? 0);
+        $amount = (float) ($applicant->admissionPeriod->registration_fee ?? 0);
 
         if ($amount <= 0) {
             return null;

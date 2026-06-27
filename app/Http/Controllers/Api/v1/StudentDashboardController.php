@@ -34,7 +34,7 @@ class StudentDashboardController extends ApiController
             ->limit(30)
             ->get(['attendance_date', 'status', 'entry_method'])
             ->map(fn ($a) => [
-                'date' => $a->attendance_date?->toDateString(),
+                'date' => $a->attendance_date->toDateString(),
                 'status' => $a->status,
                 'method' => $a->entry_method,
             ]);
@@ -71,7 +71,7 @@ class StudentDashboardController extends ApiController
             ->get(['invoice_number', 'due_date', 'total_amount', 'remaining_amount', 'status'])
             ->map(fn ($inv) => [
                 'invoice_number' => $inv->invoice_number,
-                'due_date' => $inv->due_date?->toDateString(),
+                'due_date' => $inv->due_date->toDateString(),
                 'total_amount' => (float) $inv->total_amount,
                 'remaining_amount' => (float) $inv->remaining_amount,
                 'status' => $inv->status,

@@ -35,7 +35,7 @@ class LibraryScopeResolver
             return $query->whereRaw('1 = 0');
         }
 
-        $query->where($query->getModel()->getTable().'.tenant_id', $tenantId);
+        $query->where('tenant_id', $tenantId);
 
         if (! $this->hasOrganizationColumn($query) || $user === null || $user->isGlobalSuperAdmin()) {
             return $query;
@@ -76,7 +76,7 @@ class LibraryScopeResolver
 
         $assignmentQuery = $user->userTenantRoles()->where('tenant_id', (int) $record->tenant_id);
 
-        if (! isset($record->organization_id) || $record->organization_id === null) {
+        if (! isset($record->organization_id)) {
             return $assignmentQuery->exists();
         }
 

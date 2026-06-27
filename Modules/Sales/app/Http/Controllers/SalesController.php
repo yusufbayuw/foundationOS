@@ -12,7 +12,7 @@ class SalesController extends Controller
      */
     public function index()
     {
-        return view('sales::index');
+        return $this->moduleView('sales::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class SalesController extends Controller
      */
     public function create()
     {
-        return view('sales::create');
+        return $this->moduleView('sales::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class SalesController extends Controller
      */
     public function show($id)
     {
-        return view('sales::show');
+        return $this->moduleView('sales::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class SalesController extends Controller
      */
     public function edit($id)
     {
-        return view('sales::edit');
+        return $this->moduleView('sales::edit');
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Integrations\Moodle\MoodleMapper;
 use App\Integrations\Moodle\MoodleOutboxService;
 use App\Integrations\Moodle\MoodleSyncService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Modules\Campus\Models\Course;
 use Modules\Core\Models\User;
 
@@ -144,7 +145,7 @@ class MoodleReconcileCommand extends Command
                 continue;
             }
 
-            $firstUser = $moodleUsers[0] ?? null;
+            $firstUser = Arr::first($moodleUsers);
             if (! is_array($firstUser)) {
                 continue;
             }

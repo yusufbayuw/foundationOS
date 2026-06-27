@@ -32,7 +32,7 @@ class AuditTrailRecorder
             'new_values' => self::filterValues($newValues),
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'request_id' => request()?->headers->get('X-Request-Id'),
+            'request_id' => request()->headers->get('X-Request-Id'),
             'status' => 'success',
             'error_message' => null,
         ]);

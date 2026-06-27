@@ -100,15 +100,15 @@ class LeaveRequest extends Model implements ProvidesWorkflowContext, StartsWorkf
             'employee_id' => $this->employee_id,
             'leave_type' => $this->leave_type,
             'total_days' => $this->total_days,
-            'start_date' => $this->start_date?->toDateString(),
-            'end_date' => $this->end_date?->toDateString(),
+            'start_date' => $this->start_date->toDateString(),
+            'end_date' => $this->end_date->toDateString(),
             'status' => $this->status,
         ];
     }
 
     public function workflowSubjectLabel(): string
     {
-        return 'Cuti #'.$this->getKey().' — '.($this->employee?->full_name ?? '');
+        return 'Cuti #'.$this->getKey().' — '.($this->employee->full_name ?? '');
     }
 
     public function workflowSubjectType(): string

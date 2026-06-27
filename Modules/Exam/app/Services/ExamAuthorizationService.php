@@ -34,11 +34,11 @@ class ExamAuthorizationService
             return false;
         }
 
-        if ($this->hasUnrestrictedExamAccess($user)) {
+        if ($user instanceof User && $this->hasUnrestrictedExamAccess($user)) {
             return true;
         }
 
-        return $this->passesContextualScope($user, $exam);
+        return $user instanceof User && $this->passesContextualScope($user, $exam);
     }
 
     public function canViewAny(AuthUser $user): bool
@@ -57,7 +57,7 @@ class ExamAuthorizationService
             return false;
         }
 
-        if ($this->hasUnrestrictedExamAccess($user)) {
+        if ($user instanceof User && $this->hasUnrestrictedExamAccess($user)) {
             return true;
         }
 
@@ -78,7 +78,7 @@ class ExamAuthorizationService
             return $query;
         }
 
-        if ($this->hasUnrestrictedExamAccess($user)) {
+        if ($user instanceof User && $this->hasUnrestrictedExamAccess($user)) {
             return $query;
         }
 

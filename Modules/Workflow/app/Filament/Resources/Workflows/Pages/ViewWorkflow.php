@@ -23,13 +23,13 @@ class ViewWorkflow extends ViewRecord
     {
         return [
             EditAction::make()
-                ->visible(fn (): bool => $this->record->status?->value !== WorkflowDefinitionStatus::Active->value),
+                ->visible(fn (): bool => $this->record->status->value !== WorkflowDefinitionStatus::Active->value),
             Action::make('publish')
                 ->label(FilamentUi::text('Publish'))
                 ->icon('heroicon-o-bolt')
                 ->color('success')
                 ->requiresConfirmation()
-                ->visible(fn (): bool => $this->record->status?->value !== WorkflowDefinitionStatus::Active->value || ! $this->record->is_active)
+                ->visible(fn (): bool => $this->record->status->value !== WorkflowDefinitionStatus::Active->value || ! $this->record->is_active)
                 ->action(function (): void {
                     $this->record = app(WorkflowDefinitionLifecycleService::class)
                         ->publish($this->record, auth()->id());
@@ -44,7 +44,7 @@ class ViewWorkflow extends ViewRecord
                 ->icon('heroicon-o-archive-box')
                 ->color('gray')
                 ->requiresConfirmation()
-                ->visible(fn (): bool => $this->record->status?->value !== WorkflowDefinitionStatus::Archived->value)
+                ->visible(fn (): bool => $this->record->status->value !== WorkflowDefinitionStatus::Archived->value)
                 ->action(function (): void {
                     $this->record = app(WorkflowDefinitionLifecycleService::class)
                         ->archive($this->record, auth()->id());

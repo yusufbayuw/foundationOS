@@ -118,8 +118,8 @@ class MoodleHealthCheckCommand extends Command
         }
 
         foreach ($optionalFunctionGroups as $label => $group) {
-            $enabled = (bool) ($group['enabled'] ?? false);
-            $functions = $group['functions'] ?? [];
+            $enabled = (bool) ($group['enabled']);
+            $functions = $group['functions'];
             $mode = (string) ($group['mode'] ?? 'all');
 
             if (! $enabled) {

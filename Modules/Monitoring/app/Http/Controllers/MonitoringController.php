@@ -12,7 +12,7 @@ class MonitoringController extends Controller
      */
     public function index()
     {
-        return view('monitoring::index');
+        return $this->moduleView('monitoring::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class MonitoringController extends Controller
      */
     public function create()
     {
-        return view('monitoring::create');
+        return $this->moduleView('monitoring::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class MonitoringController extends Controller
      */
     public function show($id)
     {
-        return view('monitoring::show');
+        return $this->moduleView('monitoring::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class MonitoringController extends Controller
      */
     public function edit($id)
     {
-        return view('monitoring::edit');
+        return $this->moduleView('monitoring::edit');
     }
 
     /**

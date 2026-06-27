@@ -101,7 +101,7 @@ class StockAdjustment extends Model implements ProvidesWorkflowContext, StartsWo
             'tenant_id' => $this->tenant_id,
             'organization_id' => $this->organization_id,
             'adjustment_number' => $this->adjustment_number,
-            'reason' => $this->reason?->value,
+            'reason' => $this->reason->value,
             'total_value_impact' => (float) $this->total_value_impact,
             'status' => $this->status,
         ];

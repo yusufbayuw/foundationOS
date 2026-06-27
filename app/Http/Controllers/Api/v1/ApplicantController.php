@@ -43,11 +43,23 @@ class ApplicantController extends ApiController
             return $this->error('validation_failed', 'The given data was invalid.', 422, $validator->errors()->toArray());
         }
 
-        $applicant = Applicant::create(array_merge($validator->validated(), [
+        $validated = $validator->validated();
+
+        $applicant = Applicant::query()->create([
+            'admission_period_id' => $validated['admission_period_id'],
+            'registration_number' => $validated['registration_number'],
+            'full_name' => $validated['full_name'],
+            'birth_date' => $validated['birth_date'] ?? null,
+            'gender' => $validated['gender'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'nisn' => $validated['nisn'] ?? null,
+            'previous_school' => $validated['previous_school'] ?? null,
+            'notes' => $validated['notes'] ?? null,
             'tenant_id' => $tenantId,
-            'status' => $validator->validated()['status'] ?? 'registered',
+            'status' => $validated['status'] ?? 'registered',
             'achievement_count' => 0,
-        ]));
+        ]);
 
         if ($tenantId) {
             $this->webhooks->dispatch((int) $tenantId, 'enrollment.created', [

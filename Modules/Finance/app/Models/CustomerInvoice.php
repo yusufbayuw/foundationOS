@@ -84,7 +84,6 @@ class CustomerInvoice extends Model
     public function isOverdue(): bool
     {
         return ! in_array($this->status, ['paid', 'void', 'cancelled'])
-            && $this->due_date !== null
             && $this->due_date->isPast();
     }
 

@@ -50,9 +50,6 @@ class LogSecurityAuthEvents
         }
 
         $user = $event->user;
-        if (! $user) {
-            return;
-        }
 
         $this->logger->log(
             action: 'security.login',

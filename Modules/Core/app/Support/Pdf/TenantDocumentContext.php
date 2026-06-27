@@ -45,7 +45,7 @@ class TenantDocumentContext
             ->whereIn('key', ['brand_logo', 'primary_color', 'default_locale'])
             ->pluck('value', 'key');
 
-        $locale = auth()->user()?->preferred_locale
+        $locale = auth()->user()->preferred_locale
             ?? $branding->get('default_locale')
             ?? config('app.locale', 'id');
 
@@ -60,7 +60,7 @@ class TenantDocumentContext
             stampDataUri: self::fileToDataUri($organization?->stamp),
             signatureDataUri: self::fileToDataUri($organization?->signature),
             locale: is_string($locale) ? $locale : 'id',
-            institutionName: $organization?->name ?? $tenant->name,
+            institutionName: $organization->name ?? $tenant->name,
             address: $organization?->address,
             phone: $organization?->phone,
             email: $organization?->email,

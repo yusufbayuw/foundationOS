@@ -43,7 +43,7 @@ class ExamMvpDemoSeeder extends Seeder
         $tenant = Tenant::query()->where('code', self::DEMO_TENANT_CODE)->first();
 
         if ($tenant === null) {
-            $this->command?->warn('Exam MVP demo skipped: tenant '.self::DEMO_TENANT_CODE.' not found. Run MvpDemoSeeder first.');
+            $this->command->warn('Exam MVP demo skipped: tenant '.self::DEMO_TENANT_CODE.' not found. Run MvpDemoSeeder first.');
 
             return;
         }
@@ -123,7 +123,7 @@ class ExamMvpDemoSeeder extends Seeder
         $this->seedParticipant($standaloneExam, 'OSN Candidate 1', 'OSN-001', $admin);
         $this->seedParticipant($standaloneExam, 'OSN Candidate 2', 'OSN-002', $admin);
 
-        $this->command?->info('Exam MVP demo data seeded (banks, questions, exams, participants, tokens).');
+        $this->command->info('Exam MVP demo data seeded (banks, questions, exams, participants, tokens).');
     }
 
     protected function seedBank(

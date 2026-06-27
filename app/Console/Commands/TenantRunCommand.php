@@ -32,7 +32,7 @@ class TenantRunCommand extends Command
         }
 
         $wrappedCommand = (string) $this->argument('cmd');
-        $rawArgs = (array) ($this->argument('args') ?? []);
+        $rawArgs = (array) ($this->argument('args'));
         $parameters = $this->parseForwardedArgs($rawArgs);
 
         $this->info("[tenant:run] tenant={$tenant->id} ({$tenant->code}) → {$wrappedCommand}");

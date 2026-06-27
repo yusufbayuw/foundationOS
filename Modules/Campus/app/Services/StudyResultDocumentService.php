@@ -34,7 +34,7 @@ class StudyResultDocumentService
 
     public function filename(StudyResult $studyResult): string
     {
-        $courseCode = $studyResult->studyPlanItem?->course?->code ?? 'course';
+        $courseCode = $studyResult->studyPlanItem->course->code ?? 'course';
 
         return sprintf('StudyResult_%s_%s.pdf', $courseCode, $studyResult->getKey());
     }

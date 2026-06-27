@@ -26,7 +26,7 @@ class NotifyWorkflowAssignees
             return;
         }
 
-        $stepName = $this->snapshotStepResolver->resolveCurrent($instance)?->name
+        $stepName = $this->snapshotStepResolver->resolveCurrent($instance)->name
             ?? 'Workflow step';
 
         $assignee->notify(new InternalWorkflowNotification(

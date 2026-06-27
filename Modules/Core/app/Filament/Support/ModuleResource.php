@@ -31,7 +31,7 @@ abstract class ModuleResource extends Resource
 
         $modelClass = static::getModel();
 
-        if (! is_string($modelClass) || ! class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             return false;
         }
 

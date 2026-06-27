@@ -71,9 +71,7 @@ class ReportCardService
         }
 
         foreach ($subjects as $id => &$subjectData) {
-            if ($subjectData['count'] > 0) {
-                $subjectData['average'] = round($subjectData['total_score'] / $subjectData['count'], 2);
-            }
+            $subjectData['average'] = round($subjectData['total_score'] / $subjectData['count'], 2);
             $totalScore += $subjectData['average'];
             $subjectCount++;
         }

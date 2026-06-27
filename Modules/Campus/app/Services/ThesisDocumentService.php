@@ -29,7 +29,7 @@ class ThesisDocumentService
 
     public function filename(Thesis $thesis): string
     {
-        $npm = $thesis->collageStudent?->student_number ?? (string) $thesis->getKey();
+        $npm = $thesis->collageStudent->student_number ?? (string) $thesis->getKey();
 
         return sprintf('ThesisLetter_%s.pdf', str_replace(' ', '_', $npm));
     }

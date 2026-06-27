@@ -70,7 +70,7 @@ class ScheduleConflictChecker
 
             if ($classConflict) {
                 $subjectName = $classConflict->subject ? $classConflict->subject->name : 'Mata Pelajaran';
-                $teacherName = $classConflict->teacher?->user?->name ?? 'Guru';
+                $teacherName = $classConflict->teacher->user->name ?? 'Guru';
                 $startTime = Carbon::parse($classConflict->start_time)->format('H:i');
                 $endTime = Carbon::parse($classConflict->end_time)->format('H:i');
 

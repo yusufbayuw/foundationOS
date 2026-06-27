@@ -51,7 +51,13 @@ class SyncExamResultsCommand extends Command
                 ['Metric', 'Count'],
                 collect($summary)
                     ->except('errors')
-                    ->map(fn ($value, $key) => [$key, (string) $value])
+                    ->map(function (mixed $value, string $key): array {
+                        if (is_array($value)) {
+                            return [$key, implode(', ', $value)];
+                        }
+
+                        return [$key, (string) $value];
+                    })
                     ->values()
                     ->all(),
             );

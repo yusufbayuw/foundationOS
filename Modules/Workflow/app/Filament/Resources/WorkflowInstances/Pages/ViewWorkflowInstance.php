@@ -117,7 +117,7 @@ class ViewWorkflowInstance extends ViewRecord
         /** @var RuleEngine $ruleEngine */
         $ruleEngine = app(RuleEngine::class);
         $evaluatedSchema = $ruleEngine->evaluateFieldState(
-            $record->currentStep?->form_schema ?? [],
+            $record->currentStep->form_schema ?? [],
             WorkflowContextData::fromInstance($record),
         );
 
@@ -169,7 +169,7 @@ class ViewWorkflowInstance extends ViewRecord
 
     protected function getAvailableActionNames(WorkflowInstance $record): array
     {
-        $configured = collect($record->currentStep?->action_schema ?? [])
+        $configured = collect($record->currentStep->action_schema ?? [])
             ->pluck('name')
             ->filter()
             ->values()
@@ -190,7 +190,7 @@ class ViewWorkflowInstance extends ViewRecord
 
     protected function resolveActionColor(WorkflowInstance $record, string $actionName): string
     {
-        $configured = collect($record->currentStep?->action_schema ?? [])
+        $configured = collect($record->currentStep->action_schema ?? [])
             ->firstWhere('name', $actionName);
 
         $style = collect((array) ($configured['style'] ?? []));

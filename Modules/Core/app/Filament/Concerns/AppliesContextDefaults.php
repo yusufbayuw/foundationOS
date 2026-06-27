@@ -23,11 +23,6 @@ trait AppliesContextDefaults
             }
         }
 
-        if (method_exists(parent::class, 'mutateFormDataBeforeCreate')) {
-            /** @phpstan-ignore-next-line */
-            return parent::mutateFormDataBeforeCreate($data);
-        }
-
-        return $data;
+        return parent::mutateFormDataBeforeCreate($data);
     }
 }

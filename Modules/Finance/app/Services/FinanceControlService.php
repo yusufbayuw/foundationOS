@@ -279,7 +279,7 @@ class FinanceControlService
             ->where('key', 'default_receivable_account_id')
             ->first();
 
-        $accountId = (int) ($setting?->value ?? 0);
+        $accountId = (int) ($setting->value ?? 0);
         $account = ChartOfAccount::query()
             ->where('tenant_id', $payment->tenant_id)
             ->find($accountId);
@@ -316,7 +316,7 @@ class FinanceControlService
             'new_values' => $newValues,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'request_id' => request()?->headers->get('X-Request-Id'),
+            'request_id' => request()->headers->get('X-Request-Id'),
             'status' => 'success',
             'error_message' => null,
         ]);

@@ -42,7 +42,7 @@ class CreateAssignmentsForCurrentStep
         foreach ($users as $user) {
             $assignment = $this->escalationService->createAssignmentWithDelegation($instance, $step, $user);
             $assignment->forceFill([
-                'assignment_role' => $step->assignee_type?->value ?? $assignment->assignment_role,
+                'assignment_role' => $step->assignee_type->value ?? $assignment->assignment_role,
                 'due_at' => $instance->due_at ?? $assignment->due_at,
                 'meta' => array_merge($assignment->meta ?? [], [
                     'user_name' => $user->name,

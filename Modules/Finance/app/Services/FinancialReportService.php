@@ -163,8 +163,8 @@ class FinancialReportService
 
                 return (object) [
                     'id' => $coa?->id,
-                    'code' => (string) ($coa?->code ?? ''),
-                    'name' => (string) ($coa?->name ?? 'Unknown'),
+                    'code' => (string) ($coa->code ?? ''),
+                    'name' => (string) ($coa->name ?? 'Unknown'),
                     'balance' => round($balance, 2),
                 ];
             })
@@ -183,8 +183,8 @@ class FinancialReportService
 
                 return (object) [
                     'id' => $coa?->id,
-                    'code' => $coa?->code ?? '',
-                    'name' => $coa?->name ?? 'Unknown',
+                    'code' => $coa->code ?? '',
+                    'name' => $coa->name ?? 'Unknown',
                     'balance' => round(
                         $group->sum(fn ($l) => (float) $l->debit) - $group->sum(fn ($l) => (float) $l->credit),
                         2,

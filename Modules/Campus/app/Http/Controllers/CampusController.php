@@ -12,7 +12,7 @@ class CampusController extends Controller
      */
     public function index()
     {
-        return view('campus::index');
+        return $this->moduleView('campus::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class CampusController extends Controller
      */
     public function create()
     {
-        return view('campus::create');
+        return $this->moduleView('campus::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class CampusController extends Controller
      */
     public function show($id)
     {
-        return view('campus::show');
+        return $this->moduleView('campus::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class CampusController extends Controller
      */
     public function edit($id)
     {
-        return view('campus::edit');
+        return $this->moduleView('campus::edit');
     }
 
     /**

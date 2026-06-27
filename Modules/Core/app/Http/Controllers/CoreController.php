@@ -12,7 +12,7 @@ class CoreController extends Controller
      */
     public function index()
     {
-        return view('core::index');
+        return $this->moduleView('core::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class CoreController extends Controller
      */
     public function create()
     {
-        return view('core::create');
+        return $this->moduleView('core::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class CoreController extends Controller
      */
     public function show($id)
     {
-        return view('core::show');
+        return $this->moduleView('core::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class CoreController extends Controller
      */
     public function edit($id)
     {
-        return view('core::edit');
+        return $this->moduleView('core::edit');
     }
 
     /**

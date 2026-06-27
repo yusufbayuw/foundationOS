@@ -65,18 +65,18 @@ class WorkflowCanvas extends Component
         $this->workflowCode = $workflow->code;
         $this->workflowName = $workflow->name;
         $this->workflowDescription = $workflow->description ?? '';
-        $this->workflowStatus = $workflow->status?->value ?? 'draft';
+        $this->workflowStatus = $workflow->status->value;
 
         $this->steps = $workflow->steps->map(fn (WorkflowStep $step) => [
             'uuid' => $step->uuid,
             'code' => $step->code,
             'name' => $step->name,
             'description' => $step->description ?? '',
-            'step_type' => $step->step_type?->value ?? 'task',
-            'gateway_type' => $step->gateway_type?->value ?? 'none',
+            'step_type' => $step->step_type->value,
+            'gateway_type' => $step->gateway_type->value,
             'quorum_strategy' => $step->quorum_strategy?->value,
             'quorum_value' => $step->quorum_value,
-            'assignee_type' => $step->assignee_type?->value ?? 'user',
+            'assignee_type' => $step->assignee_type->value,
             'assignee_value' => $step->assignee_value ?? '',
             'assignee_config' => $step->assignee_config ?? [],
             'form_schema' => $step->form_schema ?? [],

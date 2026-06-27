@@ -35,11 +35,11 @@ class ViewStudentInvoice extends ViewRecord
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
                 ->visible(fn (): bool => $record->status === 'draft')
-                ->action(function (): void {
+                ->action(function () use ($record): void {
                     try {
                         /** @var User $user */
                         $user = auth()->user();
-                        app(FinanceControlService::class)->markInvoiceIssued($this->getRecord(), $user);
+                        app(FinanceControlService::class)->markInvoiceIssued($record, $user);
 
                         Notification::make()->title('Invoice marked as issued.')->success()->send();
                         $this->record = $this->getRecord()->fresh();

@@ -57,7 +57,7 @@ class PdfDocumentRenderer
     }
 
     /**
-     * @param  list<array{view: string, data: array<string, mixed>, filename: string}>  $documents
+     * @param  list<array{view: string, data: array<string, mixed>, filename: string, paper?: string, orientation?: string}>  $documents
      */
     public function downloadZip(array $documents, TenantDocumentContext $context, string $zipFilename): SymfonyResponse
     {
@@ -73,8 +73,8 @@ class PdfDocumentRenderer
                 $document['view'],
                 $document['data'],
                 $context,
-                $document['paper'] ?? 'a4',
-                $document['orientation'] ?? 'portrait',
+                $document['paper'],
+                $document['orientation'],
             );
 
             $zip->addFromString(

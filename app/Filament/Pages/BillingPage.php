@@ -78,7 +78,7 @@ class BillingPage extends Page
     {
         $tenant = Filament::getTenant();
 
-        if (! $tenant) {
+        if (! ($tenant instanceof Tenant)) {
             return;
         }
 
@@ -104,7 +104,7 @@ class BillingPage extends Page
     {
         $tenant = Filament::getTenant();
 
-        if (! $tenant) {
+        if (! ($tenant instanceof Tenant)) {
             return;
         }
 
