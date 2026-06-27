@@ -4,14 +4,20 @@ namespace Modules\Workflow\Support;
 
 class JsonLogicEvaluator
 {
-    public static function apply(mixed $logic, array $data = []): mixed
+    private const MAX_DEPTH = 32;
+
+    public static function apply(mixed $logic, array $data = [], int $depth = 0): mixed
     {
+        if ($depth > self::MAX_DEPTH) {
+            return false;
+        }
+
         if ($logic === null || is_scalar($logic)) {
             return $logic;
         }
 
         if (is_array($logic) && array_is_list($logic)) {
-            return array_map(fn ($item) => static::apply($item, $data), $logic);
+            return array_map(fn ($item) => static::apply($item, $data, $depth + 1), $logic);
         }
 
         if (! is_array($logic)) {
@@ -28,19 +34,19 @@ class JsonLogicEvaluator
 
         return match ($operator) {
             'var' => static::resolveVar($values, $data),
-            'and' => static::applyAnd($values, $data),
-            'or' => static::applyOr($values, $data),
-            '!' => ! static::truthy(static::apply($values[0] ?? null, $data)),
-            '==' => static::apply($values[0] ?? null, $data) == static::apply($values[1] ?? null, $data),
-            '===' => static::apply($values[0] ?? null, $data) === static::apply($values[1] ?? null, $data),
-            '!=' => static::apply($values[0] ?? null, $data) != static::apply($values[1] ?? null, $data),
-            '!==' => static::apply($values[0] ?? null, $data) !== static::apply($values[1] ?? null, $data),
-            '>' => static::apply($values[0] ?? null, $data) > static::apply($values[1] ?? null, $data),
-            '>=' => static::apply($values[0] ?? null, $data) >= static::apply($values[1] ?? null, $data),
-            '<' => static::apply($values[0] ?? null, $data) < static::apply($values[1] ?? null, $data),
-            '<=' => static::apply($values[0] ?? null, $data) <= static::apply($values[1] ?? null, $data),
-            'in' => static::applyIn($values, $data),
-            '+' => array_sum(array_map(fn ($item) => (float) static::apply($item, $data), $values)),
+            'and' => static::applyAnd($values, $data, $depth + 1),
+            'or' => static::applyOr($values, $data, $depth + 1),
+            '!' => ! static::truthy(static::apply($values[0] ?? null, $data, $depth + 1)),
+            '==' => static::apply($values[0] ?? null, $data, $depth + 1) == static::apply($values[1] ?? null, $data, $depth + 1),
+            '===' => static::apply($values[0] ?? null, $data, $depth + 1) === static::apply($values[1] ?? null, $data, $depth + 1),
+            '!=' => static::apply($values[0] ?? null, $data, $depth + 1) != static::apply($values[1] ?? null, $data, $depth + 1),
+            '!==' => static::apply($values[0] ?? null, $data, $depth + 1) !== static::apply($values[1] ?? null, $data, $depth + 1),
+            '>' => static::apply($values[0] ?? null, $data, $depth + 1) > static::apply($values[1] ?? null, $data, $depth + 1),
+            '>=' => static::apply($values[0] ?? null, $data, $depth + 1) >= static::apply($values[1] ?? null, $data, $depth + 1),
+            '<' => static::apply($values[0] ?? null, $data, $depth + 1) < static::apply($values[1] ?? null, $data, $depth + 1),
+            '<=' => static::apply($values[0] ?? null, $data, $depth + 1) <= static::apply($values[1] ?? null, $data, $depth + 1),
+            'in' => static::applyIn($values, $data, $depth + 1),
+            '+' => array_sum(array_map(fn ($item) => (float) static::apply($item, $data, $depth + 1), $values)),
             default => false,
         };
     }
@@ -70,10 +76,10 @@ class JsonLogicEvaluator
         return $current;
     }
 
-    protected static function applyAnd(array $values, array $data): bool
+    protected static function applyAnd(array $values, array $data, int $depth): bool
     {
         foreach ($values as $value) {
-            if (! static::truthy(static::apply($value, $data))) {
+            if (! static::truthy(static::apply($value, $data, $depth))) {
                 return false;
             }
         }
@@ -81,10 +87,10 @@ class JsonLogicEvaluator
         return true;
     }
 
-    protected static function applyOr(array $values, array $data): bool
+    protected static function applyOr(array $values, array $data, int $depth): bool
     {
         foreach ($values as $value) {
-            if (static::truthy(static::apply($value, $data))) {
+            if (static::truthy(static::apply($value, $data, $depth))) {
                 return true;
             }
         }
@@ -92,10 +98,10 @@ class JsonLogicEvaluator
         return false;
     }
 
-    protected static function applyIn(array $values, array $data): bool
+    protected static function applyIn(array $values, array $data, int $depth): bool
     {
-        $needle = static::apply($values[0] ?? null, $data);
-        $haystack = static::apply($values[1] ?? [], $data);
+        $needle = static::apply($values[0] ?? null, $data, $depth);
+        $haystack = static::apply($values[1] ?? [], $data, $depth);
 
         if (is_array($haystack)) {
             return in_array($needle, $haystack, true);
