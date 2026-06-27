@@ -17,6 +17,9 @@ FoundationOS is a **modular ERP for educational institutions** delivered as a si
 | Admin UI resources | **257** classes extending `ModuleResource` | grep `extends ModuleResource` |
 | Database tables | **434** cataloged | `storage/app/entity-catalog.json` |
 | Filament panels | **3** (`admin`, `platform`, `parent`) | `app/Providers/Filament/*PanelProvider.php` |
+| PHPUnit suites | **10** named suites | `phpunit.xml` |
+| Tests | **895+** | `php artisan test --compact` |
+| Coverage gate | **80%** on critical integration paths | `phpunit.coverage.xml`, CI |
 | API surface | `/api/v1`, `/api/v2` + module routes | `routes/api.php`, `Modules/*/routes/` |
 | Primary admin path | `/admin` (tenant-scoped Filament) | `AdminPanelProvider.php:43-44` |
 | Queue default | `database` (env override to `redis` in prod guide) | `config/queue.php:16`, `SETUP.md` |
@@ -549,6 +552,51 @@ flowchart TB
 
 ---
 
+## Testing Architecture
+
+```mermaid
+flowchart LR
+    subgraph Suites[PHPUnit Named Suites]
+        U[Unit]
+        F[Feature]
+        W[Workflow]
+        T[Tenant]
+        P[Policy]
+        PM[Permission]
+        R[Regression]
+        Q[Queue]
+        PW[ParallelWorkflow]
+        IE[ImportExport]
+    end
+
+    subgraph Gates[CI Quality Gates]
+        Pint[Laravel Pint]
+        Stan[PHPStan L10]
+        Cov[Coverage 80%]
+    end
+
+    Suites --> Gates
+```
+
+| Layer | Evidence |
+|-------|----------|
+| Suite config | `phpunit.xml`, `phpunit.coverage.xml` |
+| Regression registry | `tests/Regression/KnownBugRegistry.php` |
+| Workflow security | `WorkflowActionGuard`, `WorkflowSecurityTest` |
+| CI | `.github/workflows/tests.yml` |
+
+---
+
+## Security Controls (Workflow)
+
+| Control | Implementation |
+|---------|----------------|
+| Advance action allowlist | `Modules/Workflow/app/Support/WorkflowActionGuard.php` |
+| Automation job allowlist | `config/workflow.php` → `allowed_automation_jobs` |
+| JSON Logic depth cap | `JsonLogicEvaluator::MAX_DEPTH = 32` |
+
+---
+
 ## Layer → Evidence Index
 
 | Layer | Primary evidence files |
@@ -569,6 +617,10 @@ flowchart TB
 
 | Document | Scope |
 |----------|-------|
+| `docs/FINAL_CLEANUP_REPORT.md` | Final cleanup audit report |
+| `docs/REFACTOR_LOG.md` | Chronological refactor history |
+| `docs/TECHNICAL_DEBT_LOG.md` | Tracked technical debt |
+| `docs/refactor/foundationos-refactor-audit.md` | Module boundary analysis |
 | `USE_CASES.md` | Actors, use cases, actor–use case matrix |
 | `SEQUENCE_DIAGRAMS.md` | Message-level flows (auth, API, workflow, webhooks) |
 | `ACTIVITY_DIAGRAMS.md` | Business process decisions and rollbacks |

@@ -61,11 +61,6 @@ Complete application API route list (`php artisan route:list` bootstrap, URI pre
 | GET | `api/v1/classes` | — | Api | api, throttle:api, auth:sanctum, resolve.api.tenant | `App\Http\Controllers\Api\v1\SchoolClassController@index` |
 | GET | `api/v1/college-students/{id}` | — | Api | api, throttle:api, auth:sanctum, resolve.api.tenant | `App\Http\Controllers\Api\v1\CollegeStudentController@show` |
 | GET | `api/v1/college-students` | — | Api | api, throttle:api, auth:sanctum, resolve.api.tenant | `App\Http\Controllers\Api\v1\CollegeStudentController@index` |
-| DELETE | `api/v1/cores/{core}` | api.core.destroy | Core | api, auth:sanctum | `Modules\Core\Http\Controllers\CoreController@destroy` |
-| GET | `api/v1/cores/{core}` | api.core.show | Core | api, auth:sanctum | `Modules\Core\Http\Controllers\CoreController@show` |
-| PUT|PATCH | `api/v1/cores/{core}` | api.core.update | Core | api, auth:sanctum | `Modules\Core\Http\Controllers\CoreController@update` |
-| GET | `api/v1/cores` | api.core.index | Core | api, auth:sanctum | `Modules\Core\Http\Controllers\CoreController@index` |
-| POST | `api/v1/cores` | api.core.store | Core | api, auth:sanctum | `Modules\Core\Http\Controllers\CoreController@store` |
 | GET | `api/v1/courses/{id}` | — | Api | api, throttle:api, auth:sanctum, resolve.api.tenant | `App\Http\Controllers\Api\v1\CourseController@show` |
 | GET | `api/v1/courses` | — | Api | api, throttle:api, auth:sanctum, resolve.api.tenant | `App\Http\Controllers\Api\v1\CourseController@index` |
 | DELETE | `api/v1/devices/{token}` | — | Api | api, throttle:api, auth:sanctum, resolve.api.tenant | `App\Http\Controllers\Api\v1\DeviceController@destroy` |

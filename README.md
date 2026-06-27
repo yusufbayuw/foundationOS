@@ -207,9 +207,17 @@ foundationOS/
 │  ├─ views/                     # Blade templates (jika diperlukan)
 │  └─ css/js/                    # Frontend assets
 ├─ storage/                      # File uploads, logs, cache
-├─ tests/                        # PHPUnit tests
-│  ├─ Feature/
-│  └─ Unit/
+├─ tests/                        # PHPUnit tests (10 named suites)
+│  ├─ Unit/                      # Pure unit tests
+│  ├─ Feature/                   # General integration tests
+│  ├─ Workflow/                  # Workflow engine & designer
+│  ├─ Tenant/                    # Multi-tenancy isolation
+│  ├─ Policy/                    # Shield policy authorization
+│  ├─ Permission/                # Spatie team permissions
+│  ├─ Regression/                # Known-bug regression tests
+│  ├─ Queue/                     # Jobs & tenant context
+│  ├─ ParallelWorkflow/          # Parallel gateway/join
+│  └─ ImportExport/              # CSV import & report export
 ├─ scripts/                      # One-off PHP utilities
 ├─ bootstrap/                    # Bootstrap files
 ├─ public/                       # Document root
@@ -454,27 +462,46 @@ php artisan pail                    # Live logs
 
 ### Testing
 
-FoundationOS menggunakan **PHPUnit v12** untuk semua testing:
+FoundationOS menggunakan **PHPUnit v12** dengan **10 named test suites**:
 
 ```bash
 # Run all tests
 php artisan test --compact
 
+# Run a named suite
+php artisan test --compact --testsuite=Workflow
+php artisan test --compact --testsuite=Regression
+php artisan test --compact --testsuite=Tenant
+
 # Run specific file
-php artisan test --compact tests/Feature/CoreTenancyFoundationTest.php
+php artisan test --compact tests/Tenant/CoreTenancyFoundationTest.php
 
 # Run with filter
 php artisan test --compact --filter=testWorkflowDefinition
 
-# Generate code coverage
-php artisan test --coverage
+# Coverage gate (80% minimum on critical paths)
+composer test:coverage-check
 ```
 
+**Suite map:**
+
+| Suite | Directory | Focus |
+|-------|-----------|-------|
+| Unit | `tests/Unit` | Pure logic (JsonLogic, guards) |
+| Feature | `tests/Feature` | General integration |
+| Workflow | `tests/Workflow` | Engine, designer, security |
+| Tenant | `tests/Tenant` | Tenancy isolation |
+| Policy | `tests/Policy` | Authorization policies |
+| Permission | `tests/Permission` | Shield / Spatie teams |
+| Regression | `tests/Regression` | Known-bug registry |
+| Queue | `tests/Queue` | Jobs, webhooks, outbox |
+| ParallelWorkflow | `tests/ParallelWorkflow` | Gateway/join |
+| ImportExport | `tests/ImportExport` | CSV import/export |
+
 **Testing conventions**:
-- Feature tests di `tests/Feature/`
-- Unit tests di `tests/Unit/`
-- Use factories untuk test data
-- Always use `RefreshDatabase` trait
+- Feature tests use `RefreshDatabase` or `LazilyRefreshDatabase`
+- Use factories for test data; authenticate before Filament tests
+- Every production bug fix requires a regression test in `tests/Regression/` registered in `KnownBugRegistry`
 
 ### Code Formatting
 
@@ -483,6 +510,9 @@ FoundationOS menggunakan **Laravel Pint** untuk style consistency:
 ```bash
 # Auto-format modified PHP files
 vendor/bin/pint --dirty --format agent
+
+# Static analysis (level 10)
+vendor/bin/phpstan analyse --memory-limit=1G
 
 # Format specific file
 vendor/bin/pint resources/views/app.blade.php --format agent

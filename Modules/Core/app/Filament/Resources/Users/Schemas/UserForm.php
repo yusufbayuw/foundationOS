@@ -7,6 +7,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Support\FilamentUi;
+use Modules\Core\Support\UserPasswordPolicy;
 
 class UserForm
 {
@@ -39,7 +40,9 @@ class UserForm
                         TextInput::make('password')
                             ->label(FilamentUi::field('password'))
                             ->password()
-                            ->required(),
+                            ->rules(UserPasswordPolicy::rules())
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->dehydrated(fn (?string $state): bool => filled($state)),
                         DateTimePicker::make('email_verified_at'),
                         DateTimePicker::make('last_login_at'),
                         TextInput::make('last_login_ip')

@@ -47,7 +47,6 @@ use Modules\Finance\Models\StudentInvoiceItem;
 use Modules\Finance\Models\TuitionType;
 use Modules\Library\Models\Book;
 use Modules\Library\Models\BookCategory;
-use Modules\Library\Models\BookCopy;
 use Modules\Library\Models\BookReservation;
 use Modules\Library\Models\Fine;
 use Modules\Library\Models\LibraryPolicy;
@@ -61,9 +60,7 @@ use Modules\Procurement\Models\ProcurementCategory;
 use Modules\Procurement\Models\ProcurementItem;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\PurchaseOrderItem;
-use Modules\Procurement\Models\PurchaseRequisition;
 use Modules\Procurement\Models\PurchaseRequisitionItem;
-use Modules\Procurement\Models\RequestForQuotation;
 use Modules\Procurement\Models\RfqItem;
 use Modules\Procurement\Models\RfqVendor;
 use Modules\Procurement\Models\Vendor;
@@ -394,14 +391,6 @@ class Tenant extends Model
         return $this->hasMany(Book::class);
     }
 
-    /**
-     * @deprecated Query Modules\Library\Models\BookCopy by tenant_id from the Library module instead.
-     */
-    public function bookCopies(): HasMany
-    {
-        return $this->hasMany(BookCopy::class);
-    }
-
     public function members(): HasMany
     {
         return $this->hasMany(Member::class);
@@ -502,25 +491,9 @@ class Tenant extends Model
         return $this->hasMany(ProcurementItem::class);
     }
 
-    /**
-     * @deprecated Query Modules\Procurement\Models\PurchaseRequisition by tenant_id from the Procurement module instead.
-     */
-    public function purchaseRequisitions(): HasMany
-    {
-        return $this->hasMany(PurchaseRequisition::class);
-    }
-
     public function purchaseRequisitionItems(): HasMany
     {
         return $this->hasMany(PurchaseRequisitionItem::class);
-    }
-
-    /**
-     * @deprecated Query Modules\Procurement\Models\RequestForQuotation by tenant_id from the Procurement module instead.
-     */
-    public function requestForQuotations(): HasMany
-    {
-        return $this->hasMany(RequestForQuotation::class);
     }
 
     public function rfqItems(): HasMany
