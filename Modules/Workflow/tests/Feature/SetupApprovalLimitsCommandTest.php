@@ -4,6 +4,7 @@ namespace Modules\Workflow\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Testing\PendingCommand;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -26,7 +27,7 @@ class SetupApprovalLimitsCommandTest extends TestCase
         $direktur = $this->createUserInTenant($tenant, $organization, 'direktur@example.com');
         $komisaris = $this->createUserInTenant($tenant, $organization, 'komisaris@example.com');
 
-        $this->artisan('fos:workflow:setup-approval-limits', [
+        $this->pendingArtisan('fos:workflow:setup-approval-limits', [
             'tenant' => $tenant->id,
             '--manager' => $manager->id,
             '--direktur' => $direktur->id,
@@ -66,7 +67,7 @@ class SetupApprovalLimitsCommandTest extends TestCase
 
         [$otherTenant, $otherOrg, $komisaris] = $this->makeTenantContext('komisaris@other.com');
 
-        $command = $this->artisan('fos:workflow:setup-approval-limits', [
+        $command = $this->pendingArtisan('fos:workflow:setup-approval-limits', [
             'tenant' => $tenant->id,
             '--manager' => $manager->id,
             '--direktur' => $direktur->id,
@@ -155,5 +156,19 @@ class SetupApprovalLimitsCommandTest extends TestCase
         ]);
 
         return [$tenant, $organization, $user];
+    }
+
+    /**
+     * @param  array<string, mixed>  $parameters
+     */
+    protected function pendingArtisan(string $command, array $parameters = []): PendingCommand
+    {
+        $result = $this->artisan($command, $parameters);
+
+        if ($result instanceof PendingCommand) {
+            return $result;
+        }
+
+        $this->fail('Expected PendingCommand from artisan(), received an exit code.');
     }
 }

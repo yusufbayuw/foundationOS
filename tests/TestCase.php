@@ -17,14 +17,8 @@ abstract class TestCase extends BaseTestCase
     /**
      * @param  array<string, mixed>  $parameters
      */
-    public function artisan($command, $parameters = []): PendingCommand
+    public function artisan($command, $parameters = []): PendingCommand|int
     {
-        $result = parent::artisan($command, $parameters);
-
-        if (! $result instanceof PendingCommand) {
-            throw new \RuntimeException('Expected PendingCommand from artisan().');
-        }
-
-        return $result;
+        return parent::artisan($command, $parameters);
     }
 }
