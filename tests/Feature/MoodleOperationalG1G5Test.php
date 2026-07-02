@@ -11,6 +11,7 @@ use App\Integrations\Moodle\MoodleSyncService;
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Mockery;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
@@ -90,6 +91,10 @@ class MoodleOperationalG1G5Test extends TestCase
         ]);
 
         app()->detectEnvironment(fn (): string => 'production');
+
+        Http::fake([
+            'moodle.example.test/*' => Http::response(['sitename' => 'Test'], 200),
+        ]);
 
         $this->artisan('fos:moodle:health-check')
             ->assertFailed();
