@@ -47,22 +47,22 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
 
         // Core resources (read-only)
         Route::get('organizations', [OrganizationController::class, 'index']);
-        Route::get('organizations/{id}', [OrganizationController::class, 'show']);
+        Route::get('organizations/{organization}', [OrganizationController::class, 'show']);
 
         Route::get('students', [StudentController::class, 'index']);
-        Route::get('students/{id}', [StudentController::class, 'show']);
+        Route::get('students/{student}', [StudentController::class, 'show']);
 
         Route::get('college-students', [CollegeStudentController::class, 'index']);
-        Route::get('college-students/{id}', [CollegeStudentController::class, 'show']);
+        Route::get('college-students/{collegeStudent}', [CollegeStudentController::class, 'show']);
 
         Route::get('classes', [SchoolClassController::class, 'index']);
-        Route::get('classes/{id}', [SchoolClassController::class, 'show']);
+        Route::get('classes/{class}', [SchoolClassController::class, 'show']);
 
         Route::get('courses', [CourseController::class, 'index']);
-        Route::get('courses/{id}', [CourseController::class, 'show']);
+        Route::get('courses/{course}', [CourseController::class, 'show']);
 
         Route::get('employees', [EmployeeController::class, 'index']);
-        Route::get('employees/{id}', [EmployeeController::class, 'show']);
+        Route::get('employees/{employee}', [EmployeeController::class, 'show']);
 
         // Write endpoints (idempotency key supported)
         Route::middleware(['idempotency'])->group(function () {
@@ -74,7 +74,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         // Mobile-first endpoints
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
-        Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
+        Route::get('students/{student}/dashboard', [StudentDashboardController::class, 'show']);
     });
 });
 
@@ -86,22 +86,22 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
         Route::get('tenants/current', [AuthController::class, 'currentTenant']);
 
         Route::get('organizations', [OrganizationController::class, 'index']);
-        Route::get('organizations/{id}', [OrganizationController::class, 'show']);
+        Route::get('organizations/{organization}', [OrganizationController::class, 'show']);
 
         Route::get('students', [StudentController::class, 'index']);
-        Route::get('students/{id}', [StudentController::class, 'show']);
+        Route::get('students/{student}', [StudentController::class, 'show']);
 
         Route::get('college-students', [CollegeStudentController::class, 'index']);
-        Route::get('college-students/{id}', [CollegeStudentController::class, 'show']);
+        Route::get('college-students/{collegeStudent}', [CollegeStudentController::class, 'show']);
 
         Route::get('classes', [SchoolClassController::class, 'index']);
-        Route::get('classes/{id}', [SchoolClassController::class, 'show']);
+        Route::get('classes/{class}', [SchoolClassController::class, 'show']);
 
         Route::get('courses', [CourseController::class, 'index']);
-        Route::get('courses/{id}', [CourseController::class, 'show']);
+        Route::get('courses/{course}', [CourseController::class, 'show']);
 
         Route::get('employees', [EmployeeController::class, 'index']);
-        Route::get('employees/{id}', [EmployeeController::class, 'show']);
+        Route::get('employees/{employee}', [EmployeeController::class, 'show']);
 
         Route::middleware(['idempotency'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
@@ -111,6 +111,6 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
 
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
-        Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
+        Route::get('students/{student}/dashboard', [StudentDashboardController::class, 'show']);
     });
 });

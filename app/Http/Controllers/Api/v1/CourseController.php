@@ -29,10 +29,11 @@ class CourseController extends ApiController
         return $this->collectionResponse($query, $request, CourseResource::class);
     }
 
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, Course $course): JsonResponse
     {
         $includes = $this->resolveIncludes($request, self::ALLOWED_INCLUDES);
-        $course = Course::with($includes)->findOrFail($id);
+        $this->abortIfCrossTenant($course);
+        $course->load($includes);
 
         return $this->success(new CourseResource($course));
     }

@@ -29,10 +29,11 @@ class StudentController extends ApiController
         return $this->collectionResponse($query, $request, StudentResource::class);
     }
 
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, Student $student): JsonResponse
     {
         $includes = $this->resolveIncludes($request, self::ALLOWED_INCLUDES);
-        $student = Student::with($includes)->findOrFail($id);
+        $this->abortIfCrossTenant($student);
+        $student->load($includes);
 
         return $this->success(new StudentResource($student));
     }

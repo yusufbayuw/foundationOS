@@ -29,10 +29,11 @@ class EmployeeController extends ApiController
         return $this->collectionResponse($query, $request, EmployeeResource::class);
     }
 
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, Employee $employee): JsonResponse
     {
         $includes = $this->resolveIncludes($request, self::ALLOWED_INCLUDES);
-        $employee = Employee::with($includes)->findOrFail($id);
+        $this->abortIfCrossTenant($employee);
+        $employee->load($includes);
 
         return $this->success(new EmployeeResource($employee));
     }
