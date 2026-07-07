@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Requests\Api\V1\StorePaymentRequest;
 use App\Services\WebhookDispatcher;
 use App\Support\CurrentTenant;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Modules\Finance\Models\Payment;
 
 class PaymentController extends ApiController
@@ -16,29 +15,15 @@ class PaymentController extends ApiController
         private readonly CurrentTenant $currentTenant,
     ) {}
 
-    public function store(Request $request): JsonResponse
+    public function store(StorePaymentRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'student_invoice_id' => ['required', 'integer'],
-            'chart_of_account_id' => ['required', 'integer'],
-            'payment_number' => ['required', 'string', 'max:50'],
-            'payment_date' => ['required', 'date'],
-            'amount' => ['required', 'numeric', 'min:0'],
-            'payment_method' => ['nullable', 'string', 'max:50'],
-            'payment_channel' => ['nullable', 'string', 'max:50'],
-            'reference_number' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'in:pending,verified,rejected'],
-        ]);
-
-        if ($validator->fails()) {
-            return $this->error('validation_failed', 'The given data was invalid.', 422, $validator->errors()->toArray());
-        }
+        $validated = $request->validated();
 
         $tenantId = $this->currentTenant->id();
 
-        $payment = Payment::create(array_merge($validator->validated(), [
+        $payment = Payment::create(array_merge($validated, [
             'tenant_id' => $tenantId,
-            'status' => $validator->validated()['status'] ?? 'pending',
+            'status' => $validated['status'] ?? 'pending',
         ]));
 
         if ($tenantId && $payment->status === 'verified') {
