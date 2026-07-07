@@ -2,28 +2,21 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Requests\Api\V1\StoreDeviceRequest;
 use App\Models\Device;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class DeviceController extends ApiController
 {
-    public function store(Request $request): JsonResponse
+    public function store(StoreDeviceRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'token' => ['required', 'string', 'max:500'],
-            'platform' => ['required', 'in:android,ios,web'],
-        ]);
-
-        if ($validator->fails()) {
-            return $this->error('validation_failed', 'The given data was invalid.', 422, $validator->errors()->toArray());
-        }
+        $validated = $request->validated();
 
         $device = Device::updateOrCreate(
-            ['user_id' => $request->user()->getKey(), 'token' => $validator->validated()['token']],
+            ['user_id' => $request->user()->getKey(), 'token' => $validated['token']],
             [
-                'platform' => $validator->validated()['platform'],
+                'platform' => $validated['platform'],
                 'is_active' => true,
                 'last_used_at' => now(),
             ],

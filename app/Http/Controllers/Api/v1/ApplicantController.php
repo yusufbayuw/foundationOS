@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Requests\Api\V1\StoreApplicantRequest;
 use App\Services\WebhookDispatcher;
 use App\Support\CurrentTenant;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Modules\Enrollment\Models\Applicant;
 
 class ApplicantController extends ApiController
@@ -17,35 +15,14 @@ class ApplicantController extends ApiController
         private readonly CurrentTenant $currentTenant,
     ) {}
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreApplicantRequest $request): JsonResponse
     {
         $tenantId = $this->currentTenant->id();
+        $validated = $request->validated();
 
-        $validator = Validator::make($request->all(), [
-            'admission_period_id' => [
-                'required',
-                'integer',
-                Rule::exists('admission_periods', 'id')->where('tenant_id', $tenantId),
-            ],
-            'registration_number' => ['required', 'string', 'max:50'],
-            'full_name' => ['required', 'string', 'max:255'],
-            'birth_date' => ['nullable', 'date'],
-            'gender' => ['nullable', 'in:male,female'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email'],
-            'nisn' => ['nullable', 'string', 'max:20'],
-            'previous_school' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'string'],
-            'notes' => ['nullable', 'string'],
-        ]);
-
-        if ($validator->fails()) {
-            return $this->error('validation_failed', 'The given data was invalid.', 422, $validator->errors()->toArray());
-        }
-
-        $applicant = Applicant::create(array_merge($validator->validated(), [
+        $applicant = Applicant::create(array_merge($validated, [
             'tenant_id' => $tenantId,
-            'status' => $validator->validated()['status'] ?? 'registered',
+            'status' => $validated['status'] ?? 'registered',
             'achievement_count' => 0,
         ]));
 
