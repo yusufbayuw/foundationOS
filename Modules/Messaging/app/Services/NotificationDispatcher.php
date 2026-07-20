@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Notification;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Messaging\Contracts\WhatsAppProvider;
+use Modules\Messaging\Jobs\SendPushNotificationJob;
 use Modules\Messaging\Models\NotificationDelivery;
 use Modules\Messaging\Notifications\GenericDatabaseNotification;
 
@@ -61,6 +62,7 @@ class NotificationDispatcher
                 'database' => $this->sendDatabase($user, $subject, $body),
                 'mail' => $this->sendMail($user, $subject, $body),
                 'whatsapp' => $this->sendWhatsApp($user, $body),
+                'push' => $this->sendPush($user, $subject, $body, $delivery),
                 default => null,
             };
         }
@@ -85,6 +87,20 @@ class NotificationDispatcher
         if ($user->phone) {
             $this->whatsApp->sendMessage($user->phone, $body);
         }
+    }
+
+    protected function sendPush(User $user, string $subject, string $body, NotificationDelivery $delivery): void
+    {
+        SendPushNotificationJob::dispatch(
+            userId: $user->getKey(),
+            title: $subject,
+            body: $body,
+            data: [
+                'notification_delivery_id' => (string) $delivery->getKey(),
+                'category' => (string) $delivery->code,
+            ],
+            notificationDeliveryId: $delivery->getKey(),
+        );
     }
 
     protected function channelEnabled(string $channel, int|string|null $tenantId): bool

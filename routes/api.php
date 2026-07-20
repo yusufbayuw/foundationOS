@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\OpenApiController;
 use App\Http\Controllers\Api\v1\ApplicantController;
+use App\Http\Controllers\Api\v1\AppNotificationController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
@@ -74,6 +75,8 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         // Mobile-first endpoints
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
+        Route::get('app/notifications', [AppNotificationController::class, 'index']);
+        Route::post('app/notifications/{notification}/read', [AppNotificationController::class, 'read']);
         Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
     });
 });
