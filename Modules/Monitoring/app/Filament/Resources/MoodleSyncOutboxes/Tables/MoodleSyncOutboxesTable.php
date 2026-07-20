@@ -3,6 +3,7 @@
 namespace Modules\Monitoring\Filament\Resources\MoodleSyncOutboxes\Tables;
 
 use App\Jobs\ProcessMoodleSyncOutboxJob;
+use App\Jobs\RetryMoodleSyncOutboxBatchJob;
 use App\Models\MoodleSyncOutbox;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -111,31 +112,31 @@ class MoodleSyncOutboxesTable
                 BulkAction::make('retrySelected')
                     ->label(FilamentUi::text('Retry selected'))
                     ->requiresConfirmation()
-                    ->action(function (Collection $records): void {
-                        $records->each(function (MoodleSyncOutbox $record): void {
-                            if (! in_array($record->status, [
-                                MoodleSyncOutbox::STATUS_FAILED,
-                                MoodleSyncOutbox::STATUS_SKIPPED,
-                            ], true)) {
-                                return;
-                            }
-
-                            $record->forceFill([
-                                'status' => MoodleSyncOutbox::STATUS_PENDING,
-                                'attempts' => 0,
-                                'next_retry_at' => null,
-                                'last_error' => null,
-                                'synced_at' => null,
-                            ])->save();
-
-                            ProcessMoodleSyncOutboxJob::dispatch($record->id);
-                        });
-
-                        Notification::make()
-                            ->title(FilamentUi::text('Moodle sync queued'))
-                            ->success()
-                            ->send();
-                    }),
+                    ->action(fn (Collection $records) => self::queueRetryBatch($records)),
             ]);
+    }
+
+    public static function queueRetryBatch(Collection $records): void
+    {
+        $ids = $records
+            ->filter(fn (MoodleSyncOutbox $record): bool => in_array($record->status, [
+                MoodleSyncOutbox::STATUS_FAILED,
+                MoodleSyncOutbox::STATUS_SKIPPED,
+            ], true))
+            ->pluck('id')
+            ->map(fn (int $id): int => $id)
+            ->take(max(1, (int) config('moodle.batch_limit', 100)))
+            ->values()
+            ->all();
+
+        if ($ids !== []) {
+            RetryMoodleSyncOutboxBatchJob::dispatch($ids)
+                ->onQueue((string) config('moodle.queue', 'moodle-sync'));
+        }
+
+        Notification::make()
+            ->title(FilamentUi::text('Retry batch queued'))
+            ->success()
+            ->send();
     }
 }
