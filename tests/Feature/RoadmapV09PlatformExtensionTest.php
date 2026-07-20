@@ -108,6 +108,9 @@ class RoadmapV09PlatformExtensionTest extends TestCase
             'X-Hub-Signature-256' => $signature,
         ])->assertOk()->assertJsonPath('verified', true);
 
+        $this->postJson('/api/webhooks/whatsapp/meta', $payload)
+            ->assertForbidden();
+
         $this->postJson('/api/webhooks/whatsapp/meta', $payload, [
             'X-Hub-Signature-256' => 'sha256=bad',
         ])->assertForbidden();

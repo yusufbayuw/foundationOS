@@ -9,7 +9,9 @@ Route::get('/', function () {
 });
 
 // Midtrans webhook — excluded from CSRF via TrustHosts / bootstrap/app.php
-Route::post('/billing/webhook', [BillingController::class, 'webhook'])->name('billing.webhook');
+Route::post('/billing/webhook', [BillingController::class, 'webhook'])
+    ->middleware('throttle:webhooks')
+    ->name('billing.webhook');
 Route::get('/billing/finish/{tenant}', [BillingController::class, 'finish'])->name('billing.finish');
 
 Route::middleware('auth')->group(function () {
