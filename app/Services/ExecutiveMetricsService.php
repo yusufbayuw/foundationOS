@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Modules\Core\Models\Tenant;
 use Modules\Employee\Models\SalarySlip;
@@ -72,11 +73,22 @@ class ExecutiveMetricsService
 
     protected function outstandingAp(int $tenantId): float
     {
-        return (float) VendorBill::query()
+        return (float) $this->selectOutstandingAmount($tenantId)
+            ->value('outstanding');
+    }
+
+    /**
+     * Selects the outstanding AP balance with a static SQL expression.
+     *
+     * No user input is interpolated into the raw SQL; tenant and status values
+     * are passed through Laravel's query builder bindings.
+     */
+    protected function selectOutstandingAmount(int $tenantId): Builder
+    {
+        return VendorBill::query()
             ->where('tenant_id', $tenantId)
             ->whereIn('payment_status', ['unpaid', 'partial'])
-            ->selectRaw('COALESCE(SUM(total_amount - amount_paid), 0) as outstanding')
-            ->value('outstanding');
+            ->selectRaw('COALESCE(SUM(total_amount - amount_paid), 0) as outstanding');
     }
 
     protected function outstandingAr(int $tenantId): float

@@ -25,23 +25,13 @@ class MoodleOpsReportCommand extends Command
             ->orderBy('created_at')
             ->value('created_at');
 
-        $failedByEntity = MoodleSyncOutbox::query()
-            ->selectRaw('entity_type, COUNT(*) AS total')
-            ->where('status', MoodleSyncOutbox::STATUS_FAILED)
-            ->groupBy('entity_type')
-            ->pluck('total', 'entity_type')
-            ->toArray();
+        $failedByEntity = $this->countFailedOutboxByEntity();
 
         $pullLast24h = MoodleLearningMetric::query()
             ->where('pulled_at', '>=', now()->subDay())
             ->count();
 
-        $pullByMetric = MoodleLearningMetric::query()
-            ->selectRaw('metric_type, COUNT(*) AS total')
-            ->where('pulled_at', '>=', now()->subDay())
-            ->groupBy('metric_type')
-            ->pluck('total', 'metric_type')
-            ->toArray();
+        $pullByMetric = $this->countLearningPullsByMetricType();
 
         $report = [
             'outbox' => [
@@ -93,5 +83,33 @@ class MoodleOpsReportCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    protected function countFailedOutboxByEntity(): array
+    {
+        return MoodleSyncOutbox::query()
+            ->select('entity_type')
+            ->selectRaw('COUNT(*) AS total')
+            ->where('status', MoodleSyncOutbox::STATUS_FAILED)
+            ->groupBy('entity_type')
+            ->pluck('total', 'entity_type')
+            ->toArray();
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    protected function countLearningPullsByMetricType(): array
+    {
+        return MoodleLearningMetric::query()
+            ->select('metric_type')
+            ->selectRaw('COUNT(*) AS total')
+            ->where('pulled_at', '>=', now()->subDay())
+            ->groupBy('metric_type')
+            ->pluck('total', 'metric_type')
+            ->toArray();
     }
 }
