@@ -20,9 +20,12 @@ use App\Support\CurrentTenant;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -75,6 +78,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('api', function (Request $request): Limit {
+            $token = $request->user()?->currentAccessToken();
+            $key = $token?->id ?? $request->ip();
+
+            return Limit::perMinute(60)->by($key);
+        });
+
+        RateLimiter::for('webhooks', fn (Request $request): Limit => Limit::perMinute(30)->by($request->ip()));
+
         User::observe(UserObserver::class);
         AcademicPeriod::observe(AcademicPeriodObserver::class);
         Course::observe(CourseObserver::class);
