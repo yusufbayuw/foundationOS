@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\OpenApiController;
+use App\Http\Controllers\Api\v1\AppEventController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -41,6 +42,9 @@ Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'sho
     ->name('letters.verify');
 
 Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
+    Route::get('app/events', [AppEventController::class, 'index']);
+    Route::get('app/events/{event}', [AppEventController::class, 'show']);
+
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::get('tenants/current', [AuthController::class, 'currentTenant']);
