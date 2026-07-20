@@ -3,9 +3,14 @@
         "laravel-boost": {
             "command": "php",
             "args": [
+                "-d",
+                "memory_limit=-1",
                 "artisan",
                 "boost:mcp"
-            ]
+            ],
+            "env": {
+                "APP_ENV": "local"
+            }
         }
     }
 }
