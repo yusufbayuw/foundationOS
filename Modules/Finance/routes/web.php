@@ -2,13 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\CustomerInvoicePdfController;
-use Modules\Finance\Http\Controllers\FinanceController;
 use Modules\Finance\Http\Controllers\FinancialReportController;
 use Modules\Finance\Http\Controllers\PaymentPdfController;
 use Modules\Finance\Http\Controllers\StudentInvoicePdfController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('finances', FinanceController::class)->names('finance');
 
     Route::get('/finance/student-invoices/{studentInvoice}/pdf', StudentInvoicePdfController::class)
         ->name('finance.student-invoices.pdf');

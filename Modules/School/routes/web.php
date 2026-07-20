@@ -6,11 +6,9 @@ use Modules\School\Http\Controllers\ClassGradeLedgerPdfController;
 use Modules\School\Http\Controllers\ReportCardBulkPdfController;
 use Modules\School\Http\Controllers\ReportCardController;
 use Modules\School\Http\Controllers\ReportCardPdfController;
-use Modules\School\Http\Controllers\SchoolController;
 use Modules\School\Http\Controllers\StudentAchievementPdfController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('schools', SchoolController::class)->names('school');
 
     Route::get('school/report-card/download', [ReportCardController::class, 'download'])
         ->name('school.report-card.download');
