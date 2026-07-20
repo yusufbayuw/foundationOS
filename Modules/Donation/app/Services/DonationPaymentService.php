@@ -3,6 +3,7 @@
 namespace Modules\Donation\Services;
 
 use Modules\Donation\Models\Donation;
+use Spatie\Activitylog\Enums\ActivityEvent;
 
 class DonationPaymentService
 {
@@ -36,9 +37,23 @@ class DonationPaymentService
                 'payment_reference' => $payload['transaction_id'] ?? $orderId,
             ])->save();
 
-            $this->journalService->postForPaidDonation($donation->fresh());
+            $freshDonation = $donation->fresh();
+
+            activity()
+                ->performedOn($freshDonation)
+                ->event(ActivityEvent::Updated)
+                ->withProperties(['payment_status' => 'paid', 'webhook_order_id' => $orderId])
+                ->log('Donation payment webhook marked donation as paid');
+
+            $this->journalService->postForPaidDonation($freshDonation);
         } elseif (in_array($status, ['deny', 'cancel', 'expire', 'failure', 'failed'], true)) {
             $donation->forceFill(['payment_status' => 'failed'])->save();
+
+            activity()
+                ->performedOn($donation->fresh())
+                ->event(ActivityEvent::Updated)
+                ->withProperties(['payment_status' => 'failed', 'webhook_order_id' => $orderId])
+                ->log('Donation payment webhook marked donation as failed');
         }
 
         return $donation->fresh();

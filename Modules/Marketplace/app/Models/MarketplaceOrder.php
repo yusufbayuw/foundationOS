@@ -5,10 +5,20 @@ namespace Modules\Marketplace\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class MarketplaceOrder extends Model
 {
-    use BelongsToTenant;
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['code', 'status', 'name'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
+    use BelongsToTenant, LogsActivity;
 
     protected $table = 'marketplace_orders';
 

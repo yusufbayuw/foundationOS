@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\BillingWebhookRequest;
 use App\Services\Billing\MidtransWebhookException;
 use App\Services\BillingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Throwable;
 
 class BillingController extends Controller
 {
     public function __construct(private readonly BillingService $billingService) {}
 
-    public function webhook(Request $request): JsonResponse
+    public function webhook(BillingWebhookRequest $request): JsonResponse
     {
         try {
-            $this->billingService->handleWebhookNotification($request->all());
+            $this->billingService->handleWebhookNotification($request->validated());
         } catch (MidtransWebhookException $e) {
             report($e);
 

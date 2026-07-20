@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Models\Device;
+
 class StoreDeviceRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('create', Device::class) ?? false;
     }
 
     /**

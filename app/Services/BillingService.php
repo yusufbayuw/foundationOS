@@ -10,6 +10,7 @@ use Midtrans\Snap;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
+use Spatie\Activitylog\Enums\ActivityEvent;
 
 class BillingService
 {
@@ -177,6 +178,8 @@ class BillingService
                 $webhookKey,
             ]));
 
+            $oldPaymentStatus = $invoice->payment_status;
+
             $invoice->update([
                 'payment_status' => $paymentStatus,
                 'payment_method' => $notification['payment_type'] ?? $invoice->payment_method,
@@ -187,6 +190,18 @@ class BillingService
                     'processed_midtrans_webhook_keys' => $processedWebhookKeys,
                 ]),
             ]);
+
+            if (in_array($paymentStatus, ['paid', 'failed'], true) && $paymentStatus !== $oldPaymentStatus) {
+                activity()
+                    ->performedOn($invoice)
+                    ->event(ActivityEvent::Updated)
+                    ->withProperties([
+                        'old_payment_status' => $oldPaymentStatus,
+                        'payment_status' => $paymentStatus,
+                        'webhook_order_id' => $orderId,
+                    ])
+                    ->log("Billing payment webhook marked invoice as {$paymentStatus}");
+            }
 
             if ($paymentStatus === 'paid' && ! $wasPaid) {
                 $this->activateTenantSubscription($invoice->tenant, $invoice);

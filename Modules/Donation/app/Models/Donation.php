@@ -6,10 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Finance\Models\JournalEntry;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Donation extends Model
 {
-    use BelongsToTenant;
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['donation_number', 'amount', 'payment_status', 'payment_reference', 'paid_at'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
+    use BelongsToTenant, LogsActivity;
 
     protected $fillable = [
         'tenant_id',

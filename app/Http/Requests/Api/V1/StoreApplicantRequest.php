@@ -4,12 +4,13 @@ namespace App\Http\Requests\Api\V1;
 
 use App\Support\CurrentTenant;
 use Illuminate\Validation\Rule;
+use Modules\Enrollment\Models\Applicant;
 
 class StoreApplicantRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('create', Applicant::class) ?? false;
     }
 
     /**

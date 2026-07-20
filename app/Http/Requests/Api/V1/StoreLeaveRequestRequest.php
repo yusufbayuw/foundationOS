@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use Modules\Employee\Models\LeaveRequest;
+
 class StoreLeaveRequestRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('create', LeaveRequest::class) ?? false;
     }
 
     /**
