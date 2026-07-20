@@ -30,39 +30,11 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <button wire:click="saveDraft"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                <x-heroicon-o-arrow-down-tray class="h-4 w-4" />
-                Save Draft
-            </button>
-
-            @if ($workflowStatus === 'draft')
-                <button wire:click="publish"
-                    class="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-primary-700">
-                    <x-heroicon-o-rocket-launch class="h-4 w-4" />
-                    Publish
-                </button>
-            @endif
-
-            <button wire:click="openImportModal"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                <x-heroicon-o-arrow-down-on-square class="h-4 w-4" />
-                Import JSON
-            </button>
-
-            @if ($workflowId)
-                <button wire:click="exportJson"
-                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
-                    <x-heroicon-o-arrow-up-tray class="h-4 w-4" />
-                    Export JSON
-                </button>
-            @endif
-
-            <button wire:click="addStep"
-                class="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-primary-400 bg-primary-50 px-3 py-1.5 text-sm font-medium text-primary-700 hover:bg-primary-100">
-                <x-heroicon-o-plus class="h-4 w-4" />
-                Add Step
-            </button>
+            {{ $this->saveDraftAction() }}
+            {{ $this->publishAction() }}
+            {{ $this->importJsonAction() }}
+            {{ $this->exportJsonAction() }}
+            {{ $this->addStepAction() }}
         </div>
     </div>
 
@@ -178,11 +150,9 @@
                                     Terminal
                                 </label>
                             </div>
-                            <button
-                                wire:click="deleteStep('{{ $selectedStep['uuid'] }}')"
-                                class="mt-1 w-full rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-100">
-                                Delete Step
-                            </button>
+                            <div class="mt-1">
+                                {{ $this->deleteStepAction()(['uuid' => $selectedStep['uuid']]) }}
+                            </div>
                         </div>
                     </div>
                 @endif
@@ -205,6 +175,8 @@
             </div>
         </div>
     </div>
+
+    <x-filament-actions::modals />
 </div>
 
 @push('scripts')

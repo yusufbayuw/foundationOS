@@ -3,7 +3,13 @@
 namespace Modules\Workflow\Livewire;
 
 use App\Support\CurrentTenant;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -16,8 +22,11 @@ use Modules\Workflow\Models\WorkflowTransition;
 use Modules\Workflow\Services\WorkflowDefinitionLifecycleService;
 use Modules\Workflow\Services\WorkflowDefinitionPorter;
 
-class WorkflowCanvas extends Component
+class WorkflowCanvas extends Component implements HasActions, HasSchemas
 {
+    use InteractsWithActions;
+    use InteractsWithSchemas;
+
     public ?int $workflowId = null;
 
     /** @var array<int, array<string, mixed>> */
@@ -31,10 +40,6 @@ class WorkflowCanvas extends Component
     public ?int $selectedTransitionIndex = null;
 
     public bool $isDirty = false;
-
-    public bool $showImportModal = false;
-
-    public string $importPayload = '';
 
     // Workflow metadata
     public string $workflowCode = '';
@@ -219,6 +224,83 @@ class WorkflowCanvas extends Component
         $this->selectedStepUuid = null;
     }
 
+    public function saveDraftAction(): Action
+    {
+        return Action::make('saveDraftAction')
+            ->label('Save Draft')
+            ->outlined()
+            ->action(function (): void {
+                $this->saveDraft();
+            });
+    }
+
+    public function publishAction(): Action
+    {
+        return Action::make('publishAction')
+            ->label('Publish')
+            ->color('primary')
+            ->requiresConfirmation()
+            ->visible(fn (): bool => $this->workflowStatus === 'draft')
+            ->action(function (): void {
+                $this->publish();
+            });
+    }
+
+    public function importJsonAction(): Action
+    {
+        return Action::make('importJsonAction')
+            ->label('Import JSON')
+            ->outlined()
+            ->schema([
+                Textarea::make('payload')
+                    ->label('Workflow JSON')
+                    ->required()
+                    ->rows(14),
+            ])
+            ->action(function (array $data): void {
+                $this->importJsonPayload((string) $data['payload']);
+            });
+    }
+
+    public function exportJsonAction(): Action
+    {
+        return Action::make('exportJsonAction')
+            ->label('Export JSON')
+            ->outlined()
+            ->visible(fn (): bool => filled($this->workflowId))
+            ->action(function (): void {
+                $this->exportJson();
+            });
+    }
+
+    public function addStepAction(): Action
+    {
+        return Action::make('addStepAction')
+            ->label('Add Step')
+            ->outlined()
+            ->color('primary')
+            ->action(function (): void {
+                $this->addStep();
+            });
+    }
+
+    public function deleteStepAction(): Action
+    {
+        return Action::make('deleteStepAction')
+            ->label('Delete Step')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->action(function (array $arguments): void {
+                $uuid = $arguments['uuid'] ?? null;
+
+                if (! is_string($uuid)) {
+                    return;
+                }
+
+                $this->deleteStep($uuid);
+            });
+    }
+
     public function saveDraft(): void
     {
         $tenantId = app(CurrentTenant::class)->id();
@@ -280,18 +362,7 @@ class WorkflowCanvas extends Component
         $this->dispatch('workflow-canvas:download-json', payload: $payload, filename: "workflow_{$workflow->code}_v{$workflow->version}.json");
     }
 
-    public function openImportModal(): void
-    {
-        $this->showImportModal = true;
-    }
-
-    public function closeImportModal(): void
-    {
-        $this->showImportModal = false;
-        $this->importPayload = '';
-    }
-
-    public function importFromJson(): void
+    public function importJsonPayload(string $payload): void
     {
         $tenantId = app(CurrentTenant::class)->id();
 
@@ -301,7 +372,7 @@ class WorkflowCanvas extends Component
             return;
         }
 
-        $decoded = json_decode($this->importPayload, true);
+        $decoded = json_decode($payload, true);
 
         if (! is_array($decoded)) {
             Notification::make()
@@ -341,7 +412,6 @@ class WorkflowCanvas extends Component
         $this->workflowId = $workflow->id;
         $this->loadWorkflow($workflow->id);
         $this->isDirty = false;
-        $this->closeImportModal();
 
         Notification::make()
             ->success()
