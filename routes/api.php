@@ -18,6 +18,9 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use Modules\Donation\Http\Controllers\Api\V1\CampaignController as DonationCampaignController;
+use Modules\Donation\Http\Controllers\Api\V1\DonationController as DonationApiController;
+use Modules\Donation\Http\Controllers\DonationPdfController;
 use Modules\EOffice\Http\Controllers\LetterVerificationController;
 use Modules\Messaging\Http\Controllers\WhatsAppWebhookController;
 
@@ -75,6 +78,12 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
         Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
+
+        Route::get('donation/campaigns', [DonationCampaignController::class, 'index']);
+        Route::get('donation/campaigns/{campaign}', [DonationCampaignController::class, 'show']);
+        Route::post('donation/checkout', [DonationApiController::class, 'store']);
+        Route::get('donation/my-donations', [DonationApiController::class, 'mine']);
+        Route::get('donation/donations/{donation}/receipt.pdf', DonationPdfController::class);
     });
 });
 
