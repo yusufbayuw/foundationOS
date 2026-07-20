@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\OpenApiController;
 use App\Http\Controllers\Api\v1\ApplicantController;
+use App\Http\Controllers\Api\v1\Auth\PasskeyController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
@@ -41,8 +42,13 @@ Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'sho
     ->name('letters.verify');
 
 Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
+    Route::post('auth/passkeys/options/login', [PasskeyController::class, 'loginOptions']);
+    Route::post('auth/passkeys/login', [PasskeyController::class, 'login']);
+
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('auth/passkeys/options/register', [PasskeyController::class, 'registerOptions']);
+        Route::post('auth/passkeys/register', [PasskeyController::class, 'register']);
         Route::get('tenants/current', [AuthController::class, 'currentTenant']);
 
         // Core resources (read-only)
