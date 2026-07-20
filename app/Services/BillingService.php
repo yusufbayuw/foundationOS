@@ -58,8 +58,12 @@ class BillingService
         ];
     }
 
-    public function createSnapPayment(Tenant $tenant, SubscriptionLog $invoice): string
+    public function createSnapPayment(Tenant $tenant, SubscriptionLog $invoice, ?int $actorId = null): string
     {
+        if ($invoice->invoice_url && (($invoice->metadata ?? [])['snap_token'] ?? null)) {
+            return (string) (($invoice->metadata ?? [])['snap_token']);
+        }
+
         $adminUser = $tenant->users()->first();
 
         $params = [
@@ -77,11 +81,25 @@ class BillingService
             ],
         ];
 
+        $invoice->update([
+            'metadata' => array_merge($invoice->metadata ?? [], [
+                'payment_session_status' => 'preparing',
+                'payment_session_requested_at' => now()->toISOString(),
+                'payment_session_requested_by' => $actorId,
+            ]),
+        ]);
+
         $snapToken = Snap::getSnapToken($params);
 
         $invoice->update([
             'invoice_url' => "https://app.midtrans.com/snap/v2/vtweb/{$snapToken}",
-            'metadata' => array_merge($invoice->metadata ?? [], ['snap_token' => $snapToken]),
+            'processed_by' => $actorId,
+            'metadata' => array_merge($invoice->metadata ?? [], [
+                'snap_token' => $snapToken,
+                'payment_session_status' => 'ready',
+                'payment_session_ready_at' => now()->toISOString(),
+                'payment_session_error' => null,
+            ]),
         ]);
 
         return $snapToken;
