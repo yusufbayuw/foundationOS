@@ -2,6 +2,7 @@
 
 namespace Modules\MerchOrder\Filament\Resources\MerchOrders\Schemas;
 
+use App\Enums\ShopOrderStatus;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -18,9 +19,11 @@ class MerchOrderForm
                 TextInput::make('code')->label(FilamentUi::field('code')),
                 TextInput::make('name')->label(FilamentUi::field('name'))->required(),
                 Select::make('status')->label(FilamentUi::field('status'))->options([
-                    'active' => FilamentUi::text('Active'),
-                    'inactive' => FilamentUi::text('Inactive'),
-                ])->default('active'),
+                    ...ShopOrderStatus::options(),
+                ])->default(ShopOrderStatus::PendingPayment->value),
+                Textarea::make('rejection_reason')
+                    ->label('Rejection reason')
+                    ->columnSpanFull(),
                 Textarea::make('description')->label(FilamentUi::field('description'))->columnSpanFull(),
             ])->columns(2),
         ]);

@@ -2,6 +2,7 @@
 
 namespace Modules\Marketplace\Filament\Resources\MarketplaceOrders\Schemas;
 
+use App\Enums\ShopOrderStatus;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -20,9 +21,13 @@ class MarketplaceOrderForm
                 TenantField::organizationSelect(),
                 TextInput::make('code'),
                 TextInput::make('name'),
-                TextInput::make('status')
+                Select::make('status')
+                    ->options(ShopOrderStatus::options())
                     ->required()
-                    ->default('active'),
+                    ->default(ShopOrderStatus::PendingPayment->value),
+                Textarea::make('rejection_reason')
+                    ->label('Rejection reason')
+                    ->columnSpanFull(),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 Textarea::make('meta')
