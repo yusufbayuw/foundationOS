@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
 use App\Http\Controllers\Api\v1\DeviceController;
 use App\Http\Controllers\Api\v1\EmployeeController;
+use App\Http\Controllers\Api\v1\JobPostingController;
 use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
@@ -75,6 +76,8 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
         Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
+        Route::get('app/jobs', [JobPostingController::class, 'index']);
+        Route::get('app/jobs/{jobPosting}', [JobPostingController::class, 'show']);
     });
 });
 
