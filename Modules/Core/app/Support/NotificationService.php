@@ -9,6 +9,7 @@ use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Models\StudentInvoice;
 use Modules\Library\Models\Loan;
+use Modules\Library\Models\Member;
 use Modules\Workflow\Models\WorkflowInstance;
 
 /**
@@ -111,6 +112,32 @@ class NotificationService
             ->icon('heroicon-o-x-circle')
             ->danger()
             ->sendToDatabase($requester);
+    }
+
+    /**
+     * Notify a user when their library membership is approved.
+     */
+    public static function memberApproved(Member $member, User $recipient): void
+    {
+        Notification::make()
+            ->title('Keanggotaan Disetujui')
+            ->body("Keanggotaan perpustakaan {$member->member_number} telah disetujui.")
+            ->icon('heroicon-o-check-circle')
+            ->success()
+            ->sendToDatabase($recipient);
+    }
+
+    /**
+     * Notify a user when their library membership is rejected.
+     */
+    public static function memberRejected(Member $member, User $recipient, string $reason): void
+    {
+        Notification::make()
+            ->title('Keanggotaan Ditolak')
+            ->body("Keanggotaan perpustakaan {$member->member_number} ditolak. Alasan: {$reason}")
+            ->icon('heroicon-o-x-circle')
+            ->danger()
+            ->sendToDatabase($recipient);
     }
 
     /**
