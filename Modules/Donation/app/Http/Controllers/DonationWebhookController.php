@@ -2,6 +2,7 @@
 
 namespace Modules\Donation\Http\Controllers;
 
+use App\Services\Billing\MidtransWebhookException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -15,7 +16,14 @@ class DonationWebhookController extends Controller
 
     public function handle(Request $request): JsonResponse
     {
-        $donation = $this->paymentService->handleWebhook($request->all());
+        try {
+            $donation = $this->paymentService->handleWebhook($request->all());
+        } catch (MidtransWebhookException) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid webhook notification.',
+            ], 400);
+        }
 
         return response()->json([
             'donation_id' => $donation->getKey(),
