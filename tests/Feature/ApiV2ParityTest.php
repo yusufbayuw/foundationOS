@@ -123,7 +123,7 @@ class ApiV2ParityTest extends TestCase
             ->assertJsonStructure([
                 'paths' => [
                     '/api/v2/me',
-                    '/api/v2/students/{id}/dashboard',
+                    '/api/v2/students/{student}/dashboard',
                     '/api/v2/applicants',
                 ],
             ]);

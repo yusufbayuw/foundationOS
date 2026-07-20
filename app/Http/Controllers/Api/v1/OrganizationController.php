@@ -23,9 +23,9 @@ class OrganizationController extends ApiController
         return $this->collectionResponse($query, $request, OrganizationResource::class);
     }
 
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, Organization $organization): JsonResponse
     {
-        $organization = Organization::findOrFail($id);
+        $this->abortIfCrossTenant($organization);
 
         return $this->success(new OrganizationResource($organization));
     }

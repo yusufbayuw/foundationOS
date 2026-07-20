@@ -29,10 +29,11 @@ class SchoolClassController extends ApiController
         return $this->collectionResponse($query, $request, SchoolClassResource::class);
     }
 
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, SchoolClass $class): JsonResponse
     {
         $includes = $this->resolveIncludes($request, self::ALLOWED_INCLUDES);
-        $class = SchoolClass::with($includes)->findOrFail($id);
+        $this->abortIfCrossTenant($class);
+        $class->load($includes);
 
         return $this->success(new SchoolClassResource($class));
     }

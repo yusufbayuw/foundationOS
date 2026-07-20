@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Support\CurrentTenant;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -44,6 +46,15 @@ abstract class ApiController extends Controller
             message: $e->getMessage(),
             status: $status,
         );
+    }
+
+    protected function abortIfCrossTenant(Model $model): void
+    {
+        $tenantId = app(CurrentTenant::class)->id();
+
+        if ($tenantId !== null && (string) $model->getAttribute('tenant_id') !== (string) $tenantId) {
+            abort(404);
+        }
     }
 
     /**

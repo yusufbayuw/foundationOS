@@ -96,7 +96,7 @@ class OpenApiController extends Controller
                     ],
                 ],
             ],
-            "{$prefix}/organizations/{id}" => [
+            "{$prefix}/organizations/{organization}" => [
                 'get' => [
                     'summary' => 'Show organization',
                     'security' => [
@@ -117,14 +117,14 @@ class OpenApiController extends Controller
                     'responses' => ['200' => ['description' => 'Student collection']],
                 ],
             ],
-            "{$prefix}/students/{id}" => [
+            "{$prefix}/students/{student}" => [
                 'get' => [
                     'summary' => 'Show student',
                     'security' => [['sanctum' => ['students:read']]],
                     'responses' => ['200' => ['description' => 'Student']],
                 ],
             ],
-            "{$prefix}/students/{id}/dashboard" => [
+            "{$prefix}/students/{student}/dashboard" => [
                 'get' => [
                     'summary' => 'Student mobile dashboard',
                     'security' => [['sanctum' => ['students:read']]],
@@ -138,7 +138,7 @@ class OpenApiController extends Controller
                     'responses' => ['200' => ['description' => 'College student collection']],
                 ],
             ],
-            "{$prefix}/college-students/{id}" => [
+            "{$prefix}/college-students/{collegeStudent}" => [
                 'get' => [
                     'summary' => 'Show college student',
                     'security' => [['sanctum' => ['college_students:read']]],
@@ -152,7 +152,7 @@ class OpenApiController extends Controller
                     'responses' => ['200' => ['description' => 'Class collection']],
                 ],
             ],
-            "{$prefix}/classes/{id}" => [
+            "{$prefix}/classes/{class}" => [
                 'get' => [
                     'summary' => 'Show school class',
                     'security' => [['sanctum' => ['classes:read']]],
@@ -166,7 +166,7 @@ class OpenApiController extends Controller
                     'responses' => ['200' => ['description' => 'Course collection']],
                 ],
             ],
-            "{$prefix}/courses/{id}" => [
+            "{$prefix}/courses/{course}" => [
                 'get' => [
                     'summary' => 'Show course',
                     'security' => [['sanctum' => ['courses:read']]],
@@ -180,7 +180,7 @@ class OpenApiController extends Controller
                     'responses' => ['200' => ['description' => 'Employee collection']],
                 ],
             ],
-            "{$prefix}/employees/{id}" => [
+            "{$prefix}/employees/{employee}" => [
                 'get' => [
                     'summary' => 'Show employee',
                     'security' => [['sanctum' => ['employees:read']]],

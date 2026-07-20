@@ -14,11 +14,11 @@ class StudentDashboardController extends ApiController
 {
     private const CACHE_TTL_SECONDS = 300; // 5 minutes
 
-    public function show(Request $request, int $id): JsonResponse
+    public function show(Request $request, Student $student): JsonResponse
     {
-        $student = Student::query()->findOrFail($id);
+        $this->abortIfCrossTenant($student);
 
-        $cacheKey = "student_dashboard:{$id}:".now()->format('YmdHi');
+        $cacheKey = "student_dashboard:{$student->getKey()}:".now()->format('YmdHi');
 
         $data = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, fn () => $this->buildDashboard($student));
 
