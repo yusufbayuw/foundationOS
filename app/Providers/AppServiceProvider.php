@@ -16,6 +16,8 @@ use App\Observers\StudentObserver;
 use App\Observers\StudyPlanItemObserver;
 use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
+use App\Payments\NullPaymentGateway;
+use App\Payments\PaymentGateway;
 use App\Support\CurrentTenant;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -68,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(CurrentTenant::class);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        $this->app->bind(PaymentGateway::class, NullPaymentGateway::class);
     }
 
     /**

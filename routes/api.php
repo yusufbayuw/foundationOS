@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\OpenApiController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
+use App\Http\Controllers\Api\v1\CheckoutController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
 use App\Http\Controllers\Api\v1\DeviceController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Api\v1\EmployeeController;
 use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
+use App\Http\Controllers\Api\v1\PaymentWebhookController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
@@ -27,6 +29,9 @@ RateLimiter::for('api', function (Request $request) {
 
     return Limit::perMinute(60)->by($key);
 });
+
+Route::post('/v1/payments/webhook', PaymentWebhookController::class)
+    ->name('api.v1.payments.webhook');
 
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->name('webhooks.whatsapp');
@@ -68,6 +73,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::middleware(['idempotency'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
+            Route::post('checkout/merch-orders', [CheckoutController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
 
@@ -106,6 +112,7 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
         Route::middleware(['idempotency'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
+            Route::post('checkout/merch-orders', [CheckoutController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
 

@@ -23,12 +23,19 @@ class MerchOrder extends Model
         'name',
         'status',
         'description',
+        'total_amount',
+        'payment_reference',
+        'paid_at',
+        'ready_for_pickup_at',
         'meta',
     ];
 
     protected function casts(): array
     {
         return [
+            'total_amount' => 'decimal:2',
+            'paid_at' => 'datetime',
+            'ready_for_pickup_at' => 'datetime',
             'meta' => 'array',
         ];
     }
@@ -36,6 +43,18 @@ class MerchOrder extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function markReadyForPickup(): bool
+    {
+        if ((string) $this->status !== 'paid') {
+            return false;
+        }
+
+        return $this->forceFill([
+            'status' => 'ready_for_pickup',
+            'ready_for_pickup_at' => now(),
+        ])->save();
     }
 
     public function isPrintable(): bool
