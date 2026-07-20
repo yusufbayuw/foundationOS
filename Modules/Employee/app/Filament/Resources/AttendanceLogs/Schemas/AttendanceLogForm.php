@@ -81,20 +81,7 @@ class AttendanceLogForm
                         Grid::make(3)
                             ->columnSpanFull()
                             ->extraAttributes([
-                                'x-data' => '{
-                                    getLocation(latField, lngField, accField) {
-                                        if (!navigator.geolocation) { alert("Geolocation not supported."); return; }
-                                        navigator.geolocation.getCurrentPosition(
-                                            pos => {
-                                                $wire.set(latField, pos.coords.latitude.toFixed(7));
-                                                $wire.set(lngField, pos.coords.longitude.toFixed(7));
-                                                $wire.set(accField, Math.round(pos.coords.accuracy));
-                                            },
-                                            err => alert("Location error: " + err.message),
-                                            { enableHighAccuracy: true, timeout: 10000 }
-                                        );
-                                    }
-                                }',
+                                'x-data' => self::geolocationCaptureScript(),
                             ])
                             ->schema([
                                 TextInput::make('location_check_in.lat')
@@ -177,5 +164,38 @@ class AttendanceLogForm
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    private static function geolocationCaptureScript(): string
+    {
+        return <<<'JS'
+            {
+                notifyGeolocationError(message) {
+                    new FilamentNotification()
+                        .title('Location unavailable')
+                        .body(message)
+                        .danger()
+                        .send();
+                },
+
+                getLocation(latField, lngField, accField) {
+                    if (!navigator.geolocation) {
+                        this.notifyGeolocationError('Geolocation is not supported by this browser.');
+
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            $wire.set(latField, pos.coords.latitude.toFixed(7));
+                            $wire.set(lngField, pos.coords.longitude.toFixed(7));
+                            $wire.set(accField, Math.round(pos.coords.accuracy));
+                        },
+                        err => this.notifyGeolocationError(`Location error: ${err.message}`),
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                }
+            }
+            JS;
     }
 }
