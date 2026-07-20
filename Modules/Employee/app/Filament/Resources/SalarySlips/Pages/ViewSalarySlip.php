@@ -12,7 +12,7 @@ use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Resources\SalarySlips\SalarySlipResource;
 use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Services\PayrollCalculationService;
-use Modules\Employee\Services\PayrollJournalService;
+use Modules\Employee\Services\SalarySlipPaymentService;
 
 class ViewSalarySlip extends ViewRecord
 {
@@ -51,13 +51,11 @@ class ViewSalarySlip extends ViewRecord
                         ->required(),
                 ])
                 ->action(function (array $data): void {
-                    $slip = $this->getRecord();
-                    $slip->update([
-                        'status' => 'paid',
-                        'paid_at' => $data['paid_at'],
-                        'paid_via' => $data['paid_via'],
-                    ]);
-                    app(PayrollJournalService::class)->postForSlip($slip->fresh());
+                    app(SalarySlipPaymentService::class)->markAsPaid(
+                        $this->getRecord(),
+                        $data['paid_at'],
+                        $data['paid_via'],
+                    );
                     Notification::make()->title(FilamentUi::text('Salary slip marked as paid.'))->success()->send();
                     $this->record = $this->getRecord()->fresh();
                 }),
