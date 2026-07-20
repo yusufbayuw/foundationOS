@@ -28,7 +28,10 @@ RateLimiter::for('api', function (Request $request) {
     return Limit::perMinute(60)->by($key);
 });
 
+RateLimiter::for('webhooks', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
+    ->middleware('throttle:webhooks')
     ->name('webhooks.whatsapp');
 
 Route::get('/openapi.json', [OpenApiController::class, 'v1'])

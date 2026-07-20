@@ -127,6 +127,38 @@ class BillingWebhookSecurityTest extends TestCase
         $this->assertSame('past_due', $this->tenant->fresh()->status);
     }
 
+    public function test_missing_signature_is_rejected_without_changing_invoice_or_tenant(): void
+    {
+        $payload = $this->payload([
+            'transaction_status' => 'settlement',
+            'transaction_id' => 'txn-missing-signature',
+        ], sign: false);
+
+        $response = $this->postJson(route('billing.webhook'), $payload);
+
+        $response->assertStatus(400)
+            ->assertJson(['status' => 'error', 'message' => 'Invalid webhook notification.']);
+
+        $this->assertSame('pending', $this->invoice->fresh()->payment_status);
+        $this->assertSame('past_due', $this->tenant->fresh()->status);
+    }
+
+    public function test_valid_webhook_request_is_processed(): void
+    {
+        $payload = $this->payload([
+            'transaction_status' => 'settlement',
+            'transaction_id' => 'txn-valid-route',
+        ]);
+
+        $response = $this->postJson(route('billing.webhook'), $payload);
+
+        $response->assertOk()
+            ->assertJson(['status' => 'ok']);
+
+        $this->assertSame('paid', $this->invoice->fresh()->payment_status);
+        $this->assertSame('active', $this->tenant->fresh()->status);
+    }
+
     public function test_amount_mismatch_is_rejected_and_does_not_activate_tenant(): void
     {
         app(BillingService::class)->handleWebhookNotification($this->payload([
