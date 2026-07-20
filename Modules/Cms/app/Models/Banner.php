@@ -19,9 +19,16 @@ class Banner extends Model
     protected $fillable = [
         'tenant_id',
         'organization_id',
+        'site_id',
         'code',
         'name',
         'status',
+        'title_id',
+        'title_en',
+        'image_path',
+        'link_url',
+        'sort_order',
+        'is_active',
         'description',
         'meta',
     ];
@@ -30,6 +37,7 @@ class Banner extends Model
     {
         return [
             'meta' => 'array',
+            'is_active' => 'boolean',
         ];
     }
 

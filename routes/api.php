@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\OpenApiController;
+use App\Http\Controllers\Api\v1\AppHomeController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -75,6 +76,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
         Route::get('students/{id}/dashboard', [StudentDashboardController::class, 'show']);
+        Route::get('app/home', [AppHomeController::class, 'show']);
     });
 });
 
