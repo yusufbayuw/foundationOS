@@ -81,6 +81,7 @@
             "Modules\\Consulting\\": "Modules/Consulting/app/",
             "Modules\\Property\\": "Modules/Property/app/",
             "Modules\\Marketplace\\": "Modules/Marketplace/app/",
+            "Modules\\Voucher\\": "Modules/Voucher/app/",
             "Modules\\Transport\\": "Modules/Transport/app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"

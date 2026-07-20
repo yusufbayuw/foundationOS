@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Modules\EOffice\Http\Controllers\LetterVerificationController;
 use Modules\Messaging\Http\Controllers\WhatsAppWebhookController;
+use Modules\Voucher\Http\Controllers\VoucherController;
 
 RateLimiter::for('api', function (Request $request) {
     $token = $request->user()?->currentAccessToken();
@@ -70,6 +71,11 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
+
+        Route::get('app/vouchers', [VoucherController::class, 'index']);
+        Route::get('app/vouchers/{voucher}', [VoucherController::class, 'show']);
+        Route::post('app/vouchers/{voucher}/claim', [VoucherController::class, 'claim']);
+        Route::post('app/vouchers/claims/{claim}/redeem', [VoucherController::class, 'redeem']);
 
         // Mobile-first endpoints
         Route::post('devices', [DeviceController::class, 'store']);

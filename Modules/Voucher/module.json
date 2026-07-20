@@ -1,0 +1,11 @@
+{
+    "name": "Voucher",
+    "alias": "voucher",
+    "description": "Voucher domain for tenant-scoped voucher campaigns and claims.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Voucher\\Providers\\VoucherServiceProvider"
+    ],
+    "files": []
+}

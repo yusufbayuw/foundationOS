@@ -1,0 +1,47 @@
+<?php
+
+namespace Modules\Voucher\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\User;
+use Modules\Voucher\Database\Factories\VoucherClaimFactory;
+
+class VoucherClaim extends Model
+{
+    /** @use HasFactory<VoucherClaimFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'voucher_id',
+        'user_id',
+        'claim_code',
+        'status',
+        'claimed_at',
+        'used_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'claimed_at' => 'datetime',
+            'used_at' => 'datetime',
+        ];
+    }
+
+    protected static function newFactory(): VoucherClaimFactory
+    {
+        return VoucherClaimFactory::new();
+    }
+
+    public function voucher(): BelongsTo
+    {
+        return $this->belongsTo(Voucher::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+}
