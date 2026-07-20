@@ -2,7 +2,7 @@
 
 namespace Modules\Monitoring\Filament\Resources\MoodleSyncOutboxes\Tables;
 
-use App\Jobs\ProcessMoodleSyncOutboxJob;
+use App\Integrations\Moodle\MoodleOutboxRetryService;
 use App\Models\MoodleSyncOutbox;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -90,16 +90,8 @@ class MoodleSyncOutboxesTable
                         MoodleSyncOutbox::STATUS_SKIPPED,
                     ], true))
                     ->requiresConfirmation()
-                    ->action(function (MoodleSyncOutbox $record): void {
-                        $record->forceFill([
-                            'status' => MoodleSyncOutbox::STATUS_PENDING,
-                            'attempts' => 0,
-                            'next_retry_at' => null,
-                            'last_error' => null,
-                            'synced_at' => null,
-                        ])->save();
-
-                        ProcessMoodleSyncOutboxJob::dispatch($record->id);
+                    ->action(function (MoodleSyncOutbox $record, MoodleOutboxRetryService $retryService): void {
+                        $retryService->retry($record);
 
                         Notification::make()
                             ->title(FilamentUi::text('Moodle sync queued'))
@@ -111,25 +103,8 @@ class MoodleSyncOutboxesTable
                 BulkAction::make('retrySelected')
                     ->label(FilamentUi::text('Retry selected'))
                     ->requiresConfirmation()
-                    ->action(function (Collection $records): void {
-                        $records->each(function (MoodleSyncOutbox $record): void {
-                            if (! in_array($record->status, [
-                                MoodleSyncOutbox::STATUS_FAILED,
-                                MoodleSyncOutbox::STATUS_SKIPPED,
-                            ], true)) {
-                                return;
-                            }
-
-                            $record->forceFill([
-                                'status' => MoodleSyncOutbox::STATUS_PENDING,
-                                'attempts' => 0,
-                                'next_retry_at' => null,
-                                'last_error' => null,
-                                'synced_at' => null,
-                            ])->save();
-
-                            ProcessMoodleSyncOutboxJob::dispatch($record->id);
-                        });
+                    ->action(function (Collection $records, MoodleOutboxRetryService $retryService): void {
+                        $retryService->retryMany($records);
 
                         Notification::make()
                             ->title(FilamentUi::text('Moodle sync queued'))
