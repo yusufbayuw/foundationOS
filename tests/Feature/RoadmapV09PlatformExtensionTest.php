@@ -14,8 +14,11 @@ use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
+use Modules\Messaging\Contracts\MessageGateway;
 use Modules\Messaging\Contracts\WhatsAppProvider;
+use Modules\Messaging\Models\NotificationTemplate;
 use Modules\Messaging\Services\NotificationDispatcher;
+use Modules\Messaging\Services\OtpService;
 use Modules\Monitoring\Models\WebhookDelivery;
 use Modules\Monitoring\Models\WebhookSubscription;
 use Modules\Workflow\Enums\WorkflowAssigneeType;
@@ -38,16 +41,26 @@ class RoadmapV09PlatformExtensionTest extends TestCase
     {
         [$tenant, $organization] = $this->makeTenantWithOrganization();
         $user = $this->makeTenantUser($tenant, $organization, ['phone' => '+628123456789']);
-        $provider = new class implements WhatsAppProvider
+        $provider = new class implements MessageGateway, WhatsAppProvider
         {
             /** @var list<array{to: string, body: string}> */
             public array $messages = [];
 
-            public function sendMessage(string $to, string $body, array $variables = []): bool
+            public function sendWhatsApp(string $to, string $body, array $variables = []): bool
             {
                 $this->messages[] = compact('to', 'body');
 
                 return true;
+            }
+
+            public function sendSms(string $to, string $body, array $variables = []): bool
+            {
+                return true;
+            }
+
+            public function sendMessage(string $to, string $body, array $variables = []): bool
+            {
+                return $this->sendWhatsApp($to, $body, $variables);
             }
 
             public function sendTemplate(string $to, string $templateName, array $variables = []): bool
@@ -62,6 +75,7 @@ class RoadmapV09PlatformExtensionTest extends TestCase
         };
 
         $this->app->instance(WhatsAppProvider::class, $provider);
+        $this->app->instance(MessageGateway::class, $provider);
         TenantSetting::withoutTenantScope()->create([
             'tenant_id' => $tenant->id,
             'group' => 'integrations',
@@ -111,6 +125,136 @@ class RoadmapV09PlatformExtensionTest extends TestCase
         $this->postJson('/api/webhooks/whatsapp/meta', $payload, [
             'X-Hub-Signature-256' => 'sha256=bad',
         ])->assertForbidden();
+    }
+
+    public function test_outbound_otp_uses_notification_template_for_whatsapp_and_sms(): void
+    {
+        [$tenant, $organization] = $this->makeTenantWithOrganization();
+        $user = $this->makeTenantUser($tenant, $organization, ['phone' => '+628123456789']);
+        $gateway = new class implements MessageGateway
+        {
+            /** @var list<array{channel: string, to: string, body: string, variables: array<string, mixed>}> */
+            public array $messages = [];
+
+            public function sendWhatsApp(string $to, string $body, array $variables = []): bool
+            {
+                $this->messages[] = ['channel' => 'whatsapp', 'to' => $to, 'body' => $body, 'variables' => $variables];
+
+                return true;
+            }
+
+            public function sendSms(string $to, string $body, array $variables = []): bool
+            {
+                $this->messages[] = ['channel' => 'sms', 'to' => $to, 'body' => $body, 'variables' => $variables];
+
+                return true;
+            }
+        };
+
+        $this->app->instance(MessageGateway::class, $gateway);
+        $this->app->instance(WhatsAppProvider::class, new class($gateway) implements WhatsAppProvider
+        {
+            public function __construct(private MessageGateway $gateway) {}
+
+            public function sendMessage(string $to, string $body, array $variables = []): bool
+            {
+                return $this->gateway->sendWhatsApp($to, $body, $variables);
+            }
+
+            public function sendTemplate(string $to, string $templateName, array $variables = []): bool
+            {
+                return true;
+            }
+
+            public function sendMedia(string $to, string $mediaUrl, ?string $caption = null): bool
+            {
+                return true;
+            }
+        });
+
+        config(['messaging.channels.whatsapp' => true, 'messaging.channels.sms' => true]);
+        NotificationTemplate::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'code' => OtpService::TemplateOtp,
+            'name' => 'OTP Login',
+            'channel' => 'all',
+            'category' => 'security',
+            'version' => 1,
+            'status' => 'active',
+            'description' => 'Fallback {{ otp }}',
+            'body_template' => 'Kode OTP FoundationOS: {{ otp }}',
+        ]);
+
+        $delivery = app(OtpService::class)->sendOtp($user, '123456', ['whatsapp', 'sms']);
+
+        $this->assertSame('sent', $delivery->status);
+        $this->assertCount(2, $gateway->messages);
+        $this->assertSame(['whatsapp', 'sms'], array_column($gateway->messages, 'channel'));
+        $this->assertSame('Kode OTP FoundationOS: 123456', $gateway->messages[0]['body']);
+        $this->assertSame('123456', $gateway->messages[1]['variables']['otp']);
+    }
+
+    public function test_disabled_provider_does_not_send_outbound_otp(): void
+    {
+        [$tenant, $organization] = $this->makeTenantWithOrganization();
+        $user = $this->makeTenantUser($tenant, $organization, ['phone' => '+628123456789']);
+        $gateway = new class implements MessageGateway
+        {
+            public int $sent = 0;
+
+            public function sendWhatsApp(string $to, string $body, array $variables = []): bool
+            {
+                $this->sent++;
+
+                return true;
+            }
+
+            public function sendSms(string $to, string $body, array $variables = []): bool
+            {
+                $this->sent++;
+
+                return true;
+            }
+        };
+
+        $this->app->instance(MessageGateway::class, $gateway);
+        config(['messaging.channels.whatsapp' => false, 'messaging.channels.sms' => false]);
+
+        $delivery = app(OtpService::class)->sendOtp($user, '987654', ['whatsapp', 'sms'], idempotencyKey: 'otp-disabled');
+
+        $this->assertSame('sent', $delivery->status);
+        $this->assertSame([], $delivery->meta['channels']);
+        $this->assertSame(0, $gateway->sent);
+    }
+
+    public function test_whatsapp_webhook_rejects_invalid_provider_signature(): void
+    {
+        config(['messaging.webhooks.whatsapp.providers.meta.secret' => 'provider-secret']);
+
+        $this->postJson('/api/webhooks/whatsapp/meta', ['id' => 'evt-invalid'], [
+            'X-Hub-Signature-256' => 'sha256=invalid',
+        ])->assertForbidden();
+    }
+
+    public function test_whatsapp_webhook_is_idempotent_by_webhook_id(): void
+    {
+        config(['messaging.webhooks.whatsapp.providers.meta.secret' => 'provider-secret']);
+        $payload = ['id' => 'evt-123', 'from' => '+628123456789'];
+        $body = json_encode($payload, JSON_THROW_ON_ERROR);
+        $signature = 'sha256='.hash_hmac('sha256', $body, 'provider-secret');
+        $headers = [
+            'X-Hub-Signature-256' => $signature,
+            'X-Webhook-Id' => 'evt-123',
+        ];
+
+        $this->postJson('/api/webhooks/whatsapp/meta', $payload, $headers)
+            ->assertOk()
+            ->assertJsonPath('duplicate', false);
+
+        $this->postJson('/api/webhooks/whatsapp/meta', $payload, $headers)
+            ->assertOk()
+            ->assertJsonPath('duplicate', true);
     }
 
     public function test_webhook_delivery_signs_payload_and_schedules_retry(): void

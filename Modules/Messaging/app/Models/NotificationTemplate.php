@@ -27,8 +27,12 @@ class NotificationTemplate extends Model
         'organization_id',
         'code',
         'name',
+        'channel',
+        'category',
+        'version',
         'status',
         'description',
+        'body_template',
         'meta',
     ];
 
