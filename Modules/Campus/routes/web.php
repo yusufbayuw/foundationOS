@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Campus\Http\Controllers\CampusController;
 use Modules\Campus\Http\Controllers\CollageStudentPdfController;
 use Modules\Campus\Http\Controllers\StudyPlanPdfController;
 use Modules\Campus\Http\Controllers\StudyResultPdfController;
@@ -10,7 +9,6 @@ use Modules\Campus\Http\Controllers\WisudaPdfController;
 use Modules\Campus\Http\Controllers\YudisiumPdfController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('campuses', CampusController::class)->names('campus');
 
     Route::get('/campus/transcript/{collageStudent}/pdf', CollageStudentPdfController::class)
         ->name('campus.transcript.pdf');

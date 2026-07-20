@@ -3,9 +3,9 @@
 namespace Modules\Enrollment\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Core\Models\Tenant;
+use Modules\Enrollment\Http\Requests\InquiryRequest;
 use Modules\Enrollment\Services\LeadInquiryService;
 
 class InquiryController extends Controller
@@ -14,18 +14,9 @@ class InquiryController extends Controller
         private readonly LeadInquiryService $leadInquiryService,
     ) {}
 
-    public function store(Request $request): JsonResponse
+    public function store(InquiryRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'tenant_code' => ['required', 'string'],
-            'full_name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'source_detail' => ['nullable', 'string', 'max:255'],
-            'utm_source' => ['nullable', 'string', 'max:100'],
-            'utm_medium' => ['nullable', 'string', 'max:100'],
-            'utm_campaign' => ['nullable', 'string', 'max:100'],
-        ]);
+        $validated = $request->validated();
 
         $tenant = Tenant::query()->where('code', $validated['tenant_code'])->firstOrFail();
 

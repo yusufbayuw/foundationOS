@@ -2,14 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Procurement\Http\Controllers\GoodsReceiptPdfController;
-use Modules\Procurement\Http\Controllers\ProcurementController;
 use Modules\Procurement\Http\Controllers\PurchaseOrderPdfController;
 use Modules\Procurement\Http\Controllers\PurchaseRequisitionPdfController;
 use Modules\Procurement\Http\Controllers\RequestForQuotationPdfController;
 use Modules\Procurement\Http\Controllers\VendorBillPdfController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('procurements', ProcurementController::class)->names('procurement');
 
     Route::get('/procurement/purchase-requisitions/{purchaseRequisition}/pdf', PurchaseRequisitionPdfController::class)
         ->name('procurement.purchase-requisitions.pdf');
