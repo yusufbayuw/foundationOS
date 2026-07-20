@@ -68,6 +68,11 @@ class MerchOrderPolicy
         return $authUser->can('Replicate:MerchOrder');
     }
 
+    public function export(AuthUser $authUser): bool
+    {
+        return $authUser->can('Export:MerchOrder');
+    }
+
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:MerchOrder');

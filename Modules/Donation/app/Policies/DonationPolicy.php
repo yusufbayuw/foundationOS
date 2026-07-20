@@ -68,6 +68,11 @@ class DonationPolicy
         return $authUser->can('Replicate:Donation');
     }
 
+    public function export(AuthUser $authUser): bool
+    {
+        return $authUser->can('Export:Donation');
+    }
+
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder:Donation');

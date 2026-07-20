@@ -5,9 +5,12 @@ namespace Modules\Donation\Filament\Resources\Donations\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Donation\Filament\Exports\DonationExporter;
+use Modules\Donation\Models\Donation;
 
 class DonationsTable
 {
@@ -41,6 +44,13 @@ class DonationsTable
             ])
             ->filters([
                 //
+            ])
+
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(DonationExporter::class)
+                    ->visible(fn (): bool => auth()->user()?->can('export', Donation::class) ?? false)
+                    ->authorize(fn (): bool => auth()->user()?->can('export', Donation::class) ?? false),
             ])
             ->recordActions([
                 ViewAction::make(),
