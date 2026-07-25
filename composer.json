@@ -83,7 +83,8 @@
             "Modules\\Marketplace\\": "Modules/Marketplace/app/",
             "Modules\\Transport\\": "Modules/Transport/app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Modules\\Voucher\\": "Modules/Voucher/app/"
         }
     },
     "autoload-dev": {

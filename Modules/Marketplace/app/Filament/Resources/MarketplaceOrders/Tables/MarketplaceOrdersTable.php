@@ -5,9 +5,12 @@ namespace Modules\Marketplace\Filament\Resources\MarketplaceOrders\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Modules\Marketplace\Filament\Exports\MarketplaceOrderExporter;
+use Modules\Marketplace\Models\MarketplaceOrder;
 
 class MarketplaceOrdersTable
 {
@@ -43,6 +46,13 @@ class MarketplaceOrdersTable
             ])
             ->filters([
                 //
+            ])
+
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(MarketplaceOrderExporter::class)
+                    ->visible(fn (): bool => auth()->user()?->can('export', MarketplaceOrder::class) ?? false)
+                    ->authorize(fn (): bool => auth()->user()?->can('export', MarketplaceOrder::class) ?? false),
             ])
             ->recordActions([
                 ViewAction::make(),

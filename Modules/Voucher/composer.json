@@ -1,0 +1,10 @@
+{
+    "name": "modules/voucher",
+    "description": "Voucher module",
+    "type": "laravel-module",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Voucher\\": "app/"
+        }
+    }
+}

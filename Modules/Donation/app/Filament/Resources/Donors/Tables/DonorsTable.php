@@ -6,6 +6,7 @@ use App\Filament\Imports\DonorImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
@@ -15,6 +16,8 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
+use Modules\Donation\Filament\Exports\DonorExporter;
+use Modules\Donation\Models\Donor;
 
 class DonorsTable
 {
@@ -44,6 +47,13 @@ class DonorsTable
             ])
             ->filters([
                 TrashedFilter::make(),
+            ])
+
+            ->headerActions([
+                ExportAction::make()
+                    ->exporter(DonorExporter::class)
+                    ->visible(fn (): bool => auth()->user()?->can('export', Donor::class) ?? false)
+                    ->authorize(fn (): bool => auth()->user()?->can('export', Donor::class) ?? false),
             ])
             ->recordActions([
                 ViewAction::make(),
