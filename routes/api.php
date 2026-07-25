@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\v1\AppHomeController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\Auth\OtpController;
 use App\Http\Controllers\Api\v1\Auth\PasswordOtpController;
+use App\Http\Controllers\Api\v1\AppNotificationController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CheckoutController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -150,7 +151,6 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::get('events/{event}', [AppEventController::class, 'show'])->name('events.show');
             Route::get('jobs', [AppJobController::class, 'index'])->name('jobs.index');
             Route::get('jobs/{jobPosting}', [AppJobController::class, 'show'])->name('jobs.show');
-            Route::get('notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
         });
 
         Route::get('app/shop/cart', [ShopCartController::class, 'show']);
@@ -167,6 +167,8 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('donation/donations/{donation}/receipt.pdf', DonationPdfController::class);
         Route::get('app/endowments/leaderboard', EndowmentLeaderboardController::class);
         Route::get('app/home', [AppHomeController::class, 'show']);
+        Route::get('app/notifications', [AppNotificationController::class, 'index']);
+        Route::post('app/notifications/{notification}/read', [AppNotificationController::class, 'read']);
     });
 });
 

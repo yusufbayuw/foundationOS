@@ -8,6 +8,7 @@ use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
 use Modules\Messaging\Contracts\MessageGateway;
 use Modules\Messaging\Contracts\WhatsAppProvider;
+use Modules\Messaging\Jobs\SendPushNotificationJob;
 use Modules\Messaging\Models\NotificationDelivery;
 use Modules\Messaging\Models\NotificationTemplate;
 use Modules\Messaging\Notifications\GenericDatabaseNotification;
@@ -87,6 +88,7 @@ class NotificationDispatcher
                 'mail' => $this->sendMail($user, $subject, $body),
                 'whatsapp' => $this->sendWhatsApp($user, $body, $variables),
                 'sms' => $this->sendSms($user, $body, $variables),
+                'push' => $this->sendPush($user, $subject, $body, $delivery),
                 default => null,
             };
         }
@@ -120,6 +122,20 @@ class NotificationDispatcher
         if ($user->phone) {
             $this->messageGateway->sendSms($user->phone, $body, $variables);
         }
+    }
+
+    protected function sendPush(User $user, string $subject, string $body, NotificationDelivery $delivery): void
+    {
+        SendPushNotificationJob::dispatch(
+            userId: $user->getKey(),
+            title: $subject,
+            body: $body,
+            data: [
+                'notification_delivery_id' => (string) $delivery->getKey(),
+                'category' => (string) $delivery->code,
+            ],
+            notificationDeliveryId: $delivery->getKey(),
+        );
     }
 
     protected function channelEnabled(string $channel, int|string|null $tenantId): bool
