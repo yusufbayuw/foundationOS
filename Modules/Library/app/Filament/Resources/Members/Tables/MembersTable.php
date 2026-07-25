@@ -15,6 +15,8 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
+use Modules\Library\Filament\Resources\Members\Actions\ApproveAction;
+use Modules\Library\Filament\Resources\Members\Actions\RejectAction;
 
 class MembersTable
 {
@@ -95,13 +97,14 @@ class MembersTable
                 TrashedFilter::make(),
                 SelectFilter::make('status')
                     ->options([
-                        'active' => 'Active',
-                        'inactive' => 'Inactive',
-                        'suspended' => 'Suspended',
-                        'expired' => 'Expired',
+                        'pending' => 'Pending',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
                     ]),
             ])
             ->recordActions([
+                ApproveAction::make(),
+                RejectAction::make(),
                 ViewAction::make(),
                 EditAction::make(),
             ])

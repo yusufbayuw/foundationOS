@@ -10,11 +10,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use Modules\Library\Database\Factories\MemberFactory;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 class Member extends Model
 {
+    /** @use HasFactory<MemberFactory> */
     use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
+
+    protected static function newFactory(): MemberFactory
+    {
+        return MemberFactory::new();
+    }
 
     protected $fillable = [
         'tenant_id',
@@ -23,6 +30,11 @@ class Member extends Model
         'member_number',
         'member_type',
         'member_type_id',
+        'membership_proof',
+        'profile_data',
+        'verified_at',
+        'verified_by',
+        'rejection_reason',
         'joined_at',
         'expires_at',
         'max_books',
@@ -51,6 +63,8 @@ class Member extends Model
             'total_fines' => 'decimal:2',
             'unpaid_fines' => 'decimal:2',
             'suspension_until' => 'date',
+            'profile_data' => 'array',
+            'verified_at' => 'datetime',
         ];
     }
 
@@ -62,6 +76,11 @@ class Member extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function verifiedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public function loans(): HasMany
