@@ -1,6 +1,20 @@
 <?php
 
 use App\Http\Controllers\Api\OpenApiController;
+use App\Http\Controllers\Api\V1\App\DonationController as AppDonationController;
+use App\Http\Controllers\Api\V1\App\EventController as AppEventController;
+use App\Http\Controllers\Api\V1\App\JobController as AppJobController;
+use App\Http\Controllers\Api\V1\App\NotificationController as AppNotificationController;
+use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
+use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
+use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
+use App\Http\Controllers\Api\V1\App\DonationController as AppDonationController;
+use App\Http\Controllers\Api\V1\App\EventController as AppEventController;
+use App\Http\Controllers\Api\V1\App\JobController as AppJobController;
+use App\Http\Controllers\Api\V1\App\NotificationController as AppNotificationController;
+use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
+use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
+use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -86,6 +100,28 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
         Route::get('students/{student}/dashboard', [StudentDashboardController::class, 'show']);
+
+        Route::prefix('app')->name('app.')->group(function (): void {
+            Route::get('profile', [AppProfileController::class, 'show'])->name('profile.show');
+            Route::put('profile', [AppProfileController::class, 'update'])->name('profile.update');
+            Route::get('donations', [AppDonationController::class, 'index'])->name('donations.index');
+            Route::get('donations/me', [AppDonationController::class, 'mine'])->name('donations.mine');
+            Route::get('donations/{campaign}', [AppDonationController::class, 'show'])->name('donations.show');
+            Route::post('donations/{campaign}/checkout', [AppDonationController::class, 'checkout'])->name('donations.checkout');
+            Route::get('shop/products', [AppShopController::class, 'products'])->name('shop.products.index');
+            Route::get('shop/products/{product}', [AppShopController::class, 'product'])->name('shop.products.show');
+            Route::post('shop/cart/items', [AppShopController::class, 'addCartItem'])->name('shop.cart.items.store');
+            Route::post('shop/checkout', [AppShopController::class, 'checkout'])->name('shop.checkout');
+            Route::get('shop/orders/me', [AppShopController::class, 'orders'])->name('shop.orders.mine');
+            Route::get('events', [AppEventController::class, 'index'])->name('events.index');
+            Route::get('events/{event}', [AppEventController::class, 'show'])->name('events.show');
+            Route::get('jobs', [AppJobController::class, 'index'])->name('jobs.index');
+            Route::get('jobs/{jobPosting}', [AppJobController::class, 'show'])->name('jobs.show');
+            Route::get('vouchers', [AppVoucherController::class, 'index'])->name('vouchers.index');
+            Route::post('vouchers/{voucher}/claim', [AppVoucherController::class, 'claim'])->name('vouchers.claim');
+            Route::post('vouchers/claims/{claim}/redeem', [AppVoucherController::class, 'redeem'])->name('vouchers.claims.redeem');
+            Route::get('notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
+        });
     });
 });
 

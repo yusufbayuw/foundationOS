@@ -7,6 +7,22 @@ use App\Listeners\LogTenantSwitchAudit;
 use App\Models\Permission;
 use App\Models\PersonalAccessToken;
 use App\Models\Role;
+use App\Models\Voucher;
+use App\Models\VoucherClaim;
+use App\Policies\VoucherClaimPolicy;
+use App\Policies\VoucherPolicy;
+use Modules\Alumni\Models\JobPosting;
+use Modules\Alumni\Policies\JobPostingPolicy;
+use Modules\Donation\Models\Campaign;
+use Modules\Donation\Models\Donation;
+use Modules\Donation\Policies\CampaignPolicy;
+use Modules\Donation\Policies\DonationPolicy;
+use Modules\Event\Models\Event as AppEvent;
+use Modules\Event\Policies\EventPolicy;
+use Modules\Marketplace\Models\MarketplaceProduct;
+use Modules\Marketplace\Policies\MarketplaceProductPolicy;
+use Modules\MerchOrder\Models\MerchOrder;
+use Modules\MerchOrder\Policies\MerchOrderPolicy;
 use App\Observers\AcademicPeriodObserver;
 use App\Observers\ClassStudentObserver;
 use App\Observers\CourseObserver;
@@ -99,6 +115,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('viewPulse', fn (?User $user = null): bool => $user instanceof User && $user->isGlobalSuperAdmin());
+
+        Gate::policy(Campaign::class, CampaignPolicy::class);
+        Gate::policy(Donation::class, DonationPolicy::class);
+        Gate::policy(MarketplaceProduct::class, MarketplaceProductPolicy::class);
+        Gate::policy(MerchOrder::class, MerchOrderPolicy::class);
+        Gate::policy(AppEvent::class, EventPolicy::class);
+        Gate::policy(JobPosting::class, JobPostingPolicy::class);
+        Gate::policy(Voucher::class, VoucherPolicy::class);
+        Gate::policy(VoucherClaim::class, VoucherClaimPolicy::class);
 
         Relation::enforceMorphMap([
             'user' => User::class,
