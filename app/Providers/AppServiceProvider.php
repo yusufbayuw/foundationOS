@@ -34,6 +34,8 @@ use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
 use App\Services\Auth\LogOtpMessenger;
 use App\Services\Auth\OtpMessenger;
+use App\Payments\NullPaymentGateway;
+use App\Payments\PaymentGateway;
 use App\Support\CurrentTenant;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -87,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(OtpMessenger::class, LogOtpMessenger::class);
         $this->app->singleton(CurrentTenant::class);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+        $this->app->bind(PaymentGateway::class, NullPaymentGateway::class);
     }
 
     /**

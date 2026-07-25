@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\Auth\OtpController;
 use App\Http\Controllers\Api\v1\Auth\PasswordOtpController;
 use App\Http\Controllers\Api\v1\AuthController;
+use App\Http\Controllers\Api\v1\CheckoutController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
 use App\Http\Controllers\Api\v1\DeviceController;
@@ -20,7 +21,7 @@ use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\Public\PublicCatalogController;
-use App\Http\Controllers\Api\v1\Public\PublicCatalogController;
+use App\Http\Controllers\Api\v1\PaymentWebhookController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\ShopCartController;
 use App\Http\Controllers\Api\v1\Shop\MyOrderController;
@@ -59,6 +60,9 @@ RateLimiter::for('otp:request', function (Request $request) {
 RateLimiter::for('otp:verify', function (Request $request) {
     return Limit::perMinute(5)->by(strtolower((string) $request->input('identifier', $request->ip())).'|'.$request->ip());
 });
+
+Route::post('/v1/payments/webhook', PaymentWebhookController::class)
+    ->name('api.v1.payments.webhook');
 
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->middleware('throttle:webhooks')
@@ -114,6 +118,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::middleware(['idempotency', 'throttle:checkout'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
+            Route::post('checkout/merch-orders', [CheckoutController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
 
@@ -180,6 +185,7 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
         Route::middleware(['idempotency', 'throttle:checkout'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
+            Route::post('checkout/merch-orders', [CheckoutController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
 

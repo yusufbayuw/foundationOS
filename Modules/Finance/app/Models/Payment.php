@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\User;
+use Modules\MerchOrder\Models\MerchOrder;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -26,6 +27,7 @@ class Payment extends Model
     protected $fillable = [
         'tenant_id',
         'student_invoice_id',
+        'merch_order_id',
         'chart_of_account_id',
         'verified_by',
         'payment_number',
@@ -34,6 +36,8 @@ class Payment extends Model
         'payment_method',
         'payment_channel',
         'reference_number',
+        'payment_reference',
+        'gateway_payload',
         'account_number',
         'account_holder',
         'bank_name',
@@ -53,12 +57,18 @@ class Payment extends Model
             'verified_at' => 'datetime',
             'is_reconciled' => 'boolean',
             'reconciliation_date' => 'date',
+            'gateway_payload' => 'array',
         ];
     }
 
     public function studentInvoice(): BelongsTo
     {
         return $this->belongsTo(StudentInvoice::class);
+    }
+
+    public function merchOrder(): BelongsTo
+    {
+        return $this->belongsTo(MerchOrder::class);
     }
 
     public function chartOfAccount(): BelongsTo
