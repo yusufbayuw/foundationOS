@@ -25,6 +25,8 @@ use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
+use App\Http\Controllers\Api\v1\ShopCartController;
+use App\Http\Controllers\Api\v1\ShopCartController;
 use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
 use App\Http\Controllers\Api\v2\VersionController as V2VersionController;
@@ -110,8 +112,6 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::post('donations/{campaign}/checkout', [AppDonationController::class, 'checkout'])->name('donations.checkout');
             Route::get('shop/products', [AppShopController::class, 'products'])->name('shop.products.index');
             Route::get('shop/products/{product}', [AppShopController::class, 'product'])->name('shop.products.show');
-            Route::post('shop/cart/items', [AppShopController::class, 'addCartItem'])->name('shop.cart.items.store');
-            Route::post('shop/checkout', [AppShopController::class, 'checkout'])->name('shop.checkout');
             Route::get('shop/orders/me', [AppShopController::class, 'orders'])->name('shop.orders.mine');
             Route::get('events', [AppEventController::class, 'index'])->name('events.index');
             Route::get('events/{event}', [AppEventController::class, 'show'])->name('events.show');
@@ -122,6 +122,12 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::post('vouchers/claims/{claim}/redeem', [AppVoucherController::class, 'redeem'])->name('vouchers.claims.redeem');
             Route::get('notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
         });
+
+        Route::get('app/shop/cart', [ShopCartController::class, 'show']);
+        Route::post('app/shop/cart/items', [ShopCartController::class, 'storeItem']);
+        Route::patch('app/shop/cart/items/{item}', [ShopCartController::class, 'updateItem']);
+        Route::delete('app/shop/cart/items/{item}', [ShopCartController::class, 'destroyItem']);
+        Route::post('app/shop/checkout', [ShopCartController::class, 'checkout']);
     });
 });
 
