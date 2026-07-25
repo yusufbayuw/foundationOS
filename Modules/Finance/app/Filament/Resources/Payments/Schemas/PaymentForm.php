@@ -5,6 +5,7 @@ namespace Modules\Finance\Filament\Resources\Payments\Schemas;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -67,8 +68,12 @@ class PaymentForm
                             ->label(FilamentUi::field('account_holder')),
                         TextInput::make('bank_name')
                             ->label(FilamentUi::field('bank_name')),
-                        TextInput::make('proof_file')
-                            ->label(FilamentUi::field('proof_file')),
+                        FileUpload::make('proof_file')
+                            ->label(FilamentUi::field('proof_file'))
+                            ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                            ->maxSize(5120)
+                            ->visibility('private')
+                            ->directory('payment-proofs'),
                     ]),
 
                 Section::make(FilamentUi::text('Verification'))

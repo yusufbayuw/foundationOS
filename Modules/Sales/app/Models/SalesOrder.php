@@ -7,10 +7,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class SalesOrder extends Model
 {
-    use BelongsToTenant, SoftDeletes;
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['order_number', 'status', 'total_amount', 'confirmed_at'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
+    use BelongsToTenant, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',

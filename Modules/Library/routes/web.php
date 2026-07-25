@@ -22,7 +22,7 @@ Route::prefix('opac/{tenant}')->name('library.opac.')->group(function () {
         ->middleware(['auth', 'verified'])
         ->name('circulation.index');
     Route::post('/circulation/checkout', [PublicOpacController::class, 'checkout'])
-        ->middleware(['auth', 'verified'])
+        ->middleware(['auth', 'verified', 'idempotency', 'throttle:checkout'])
         ->name('circulation.checkout');
     Route::post('/circulation/return', [PublicOpacController::class, 'quickReturn'])
         ->middleware(['auth', 'verified'])
@@ -43,7 +43,7 @@ Route::prefix('opac/{tenant}')->name('library.opac.')->group(function () {
             ->middleware(['auth', 'verified'])
             ->name('circulation.index');
         Route::post('/circulation/checkout', [PublicOpacController::class, 'organizationCheckout'])
-            ->middleware(['auth', 'verified'])
+            ->middleware(['auth', 'verified', 'idempotency', 'throttle:checkout'])
             ->name('circulation.checkout');
         Route::post('/circulation/return', [PublicOpacController::class, 'organizationQuickReturn'])
             ->middleware(['auth', 'verified'])

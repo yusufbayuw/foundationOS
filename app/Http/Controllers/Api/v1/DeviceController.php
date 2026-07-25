@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Requests\Api\V1\DestroyDeviceRequest;
 use App\Http\Requests\Api\V1\StoreDeviceRequest;
 use App\Models\Device;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class DeviceController extends ApiController
 {
@@ -30,7 +30,7 @@ class DeviceController extends ApiController
         ], 201);
     }
 
-    public function destroy(Request $request, string $token): JsonResponse
+    public function destroy(DestroyDeviceRequest $request, string $token): JsonResponse
     {
         Device::where('user_id', $request->user()->getKey())
             ->where('token', $token)

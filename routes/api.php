@@ -29,6 +29,14 @@ RateLimiter::for('api', function (Request $request) {
 });
 
 RateLimiter::for('webhooks', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+RateLimiter::for('otp', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+RateLimiter::for('checkout', function (Request $request) {
+    return Limit::perMinute(20)->by(($request->user()?->getKey() ?? 'guest').'|'.$request->ip());
+});
+RateLimiter::for('voucher-claim', function (Request $request) {
+    return Limit::perMinute(10)->by(($request->user()?->getKey() ?? 'guest').'|'.$request->ip());
+});
 
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->middleware('throttle:webhooks')
@@ -68,7 +76,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('employees/{employee}', [EmployeeController::class, 'show']);
 
         // Write endpoints (idempotency key supported)
-        Route::middleware(['idempotency'])->group(function () {
+        Route::middleware(['idempotency', 'throttle:checkout'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
@@ -106,7 +114,7 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
         Route::get('employees', [EmployeeController::class, 'index']);
         Route::get('employees/{employee}', [EmployeeController::class, 'show']);
 
-        Route::middleware(['idempotency'])->group(function () {
+        Route::middleware(['idempotency', 'throttle:checkout'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);

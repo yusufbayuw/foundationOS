@@ -9,10 +9,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class MerchOrder extends Model
 {
-    use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['code', 'status', 'name'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
+
+    use BelongsToTenant, HasAuditTrail, HasFactory, LogsActivity, SoftDeletes;
 
     protected $table = 'merch_orders';
 
