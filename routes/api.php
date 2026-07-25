@@ -8,13 +8,6 @@ use App\Http\Controllers\Api\V1\App\NotificationController as AppNotificationCon
 use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
 use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
 use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
-use App\Http\Controllers\Api\V1\App\DonationController as AppDonationController;
-use App\Http\Controllers\Api\V1\App\EventController as AppEventController;
-use App\Http\Controllers\Api\V1\App\JobController as AppJobController;
-use App\Http\Controllers\Api\V1\App\NotificationController as AppNotificationController;
-use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
-use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
-use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -26,7 +19,7 @@ use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\ShopCartController;
-use App\Http\Controllers\Api\v1\ShopCartController;
+use App\Http\Controllers\Api\v1\Shop\MyOrderController;
 use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
 use App\Http\Controllers\Api\v2\VersionController as V2VersionController;
@@ -112,7 +105,6 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::post('donations/{campaign}/checkout', [AppDonationController::class, 'checkout'])->name('donations.checkout');
             Route::get('shop/products', [AppShopController::class, 'products'])->name('shop.products.index');
             Route::get('shop/products/{product}', [AppShopController::class, 'product'])->name('shop.products.show');
-            Route::get('shop/orders/me', [AppShopController::class, 'orders'])->name('shop.orders.mine');
             Route::get('events', [AppEventController::class, 'index'])->name('events.index');
             Route::get('events/{event}', [AppEventController::class, 'show'])->name('events.show');
             Route::get('jobs', [AppJobController::class, 'index'])->name('jobs.index');
@@ -128,6 +120,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::patch('app/shop/cart/items/{item}', [ShopCartController::class, 'updateItem']);
         Route::delete('app/shop/cart/items/{item}', [ShopCartController::class, 'destroyItem']);
         Route::post('app/shop/checkout', [ShopCartController::class, 'checkout']);
+        Route::get('app/shop/orders/me', MyOrderController::class);
     });
 });
 
