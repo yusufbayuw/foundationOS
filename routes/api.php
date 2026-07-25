@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\App\NotificationController as AppNotificationCon
 use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
 use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
 use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
+use App\Http\Controllers\Api\v1\App\EndowmentLeaderboardController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\Auth\OtpController;
 use App\Http\Controllers\Api\v1\Auth\PasswordOtpController;
@@ -159,6 +160,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::post('donation/checkout', [DonationApiController::class, 'store']);
         Route::get('donation/my-donations', [DonationApiController::class, 'mine']);
         Route::get('donation/donations/{donation}/receipt.pdf', DonationPdfController::class);
+        Route::get('app/endowments/leaderboard', EndowmentLeaderboardController::class);
     });
 });
 
