@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
 use App\Http\Controllers\Api\v1\DeviceController;
 use App\Http\Controllers\Api\v1\EmployeeController;
+use App\Http\Controllers\Api\v1\JobPostingController;
 use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
@@ -155,8 +156,6 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::get('shop/products/{product}', [AppShopController::class, 'product'])->name('shop.products.show');
             Route::get('events', [AppEventController::class, 'index'])->name('events.index');
             Route::get('events/{event}', [AppEventController::class, 'show'])->name('events.show');
-            Route::get('jobs', [AppJobController::class, 'index'])->name('jobs.index');
-            Route::get('jobs/{jobPosting}', [AppJobController::class, 'show'])->name('jobs.show');
         });
 
         Route::get('app/shop/cart', [ShopCartController::class, 'show']);
@@ -175,6 +174,8 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('app/home', [AppHomeController::class, 'show']);
         Route::get('app/notifications', [AppNotificationController::class, 'index']);
         Route::post('app/notifications/{notification}/read', [AppNotificationController::class, 'read']);
+        Route::get('app/jobs', [JobPostingController::class, 'index']);
+        Route::get('app/jobs/{jobPosting}', [JobPostingController::class, 'show']);
     });
 });
 
