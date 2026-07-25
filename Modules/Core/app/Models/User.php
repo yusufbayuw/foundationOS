@@ -3,6 +3,7 @@
 namespace Modules\Core\Models;
 
 use App\Models\Device;
+use App\Models\UserPasskey;
 use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
@@ -106,6 +107,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function members(): HasMany
     {
         return $this->hasMany(Member::class);
+    }
+
+    public function passkeys(): HasMany
+    {
+        return $this->hasMany(UserPasskey::class);
     }
 
     public function userTenantRoles(): HasMany

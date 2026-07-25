@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\Auth\OtpController;
 use App\Http\Controllers\Api\v1\Auth\PasswordOtpController;
 use App\Http\Controllers\Api\v1\AppNotificationController;
+use App\Http\Controllers\Api\v1\Auth\PasskeyController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CheckoutController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
@@ -97,8 +98,13 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
     Route::get('app/events', [AppEventController::class, 'index']);
     Route::get('app/events/{event}', [AppEventController::class, 'show']);
 
+    Route::post('auth/passkeys/options/login', [PasskeyController::class, 'loginOptions']);
+    Route::post('auth/passkeys/login', [PasskeyController::class, 'login']);
+
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('auth/passkeys/options/register', [PasskeyController::class, 'registerOptions']);
+        Route::post('auth/passkeys/register', [PasskeyController::class, 'register']);
         Route::get('tenants/current', [AuthController::class, 'currentTenant']);
 
         // Core resources (read-only)
