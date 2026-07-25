@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
 use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
 use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
 use App\Http\Controllers\Api\v1\ApplicantController;
+use App\Http\Controllers\Api\v1\Auth\OtpController;
+use App\Http\Controllers\Api\v1\Auth\PasswordOtpController;
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CollegeStudentController;
 use App\Http\Controllers\Api\v1\CourseController;
@@ -47,6 +49,14 @@ RateLimiter::for('voucher-claim', function (Request $request) {
     return Limit::perMinute(10)->by(($request->user()?->getKey() ?? 'guest').'|'.$request->ip());
 });
 
+RateLimiter::for('otp:request', function (Request $request) {
+    return Limit::perMinute(1)->by(strtolower((string) $request->input('identifier', $request->ip())));
+});
+
+RateLimiter::for('otp:verify', function (Request $request) {
+    return Limit::perMinute(5)->by(strtolower((string) $request->input('identifier', $request->ip())).'|'.$request->ip());
+});
+
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->middleware('throttle:webhooks')
     ->name('webhooks.whatsapp');
@@ -61,6 +71,11 @@ Route::get('/letters/verify/{token}', [LetterVerificationController::class, 'sho
     ->name('letters.verify');
 
 Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
+    Route::post('auth/otp/request', [OtpController::class, 'request'])->middleware('throttle:otp:request');
+    Route::post('auth/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:otp:verify');
+    Route::post('auth/password/forgot', [PasswordOtpController::class, 'forgot'])->middleware('throttle:otp:request');
+    Route::post('auth/password/reset-with-otp', [PasswordOtpController::class, 'reset'])->middleware('throttle:otp:verify');
+
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::get('tenants/current', [AuthController::class, 'currentTenant']);

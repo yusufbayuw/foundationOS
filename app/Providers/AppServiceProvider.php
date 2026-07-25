@@ -32,6 +32,8 @@ use App\Observers\StudentObserver;
 use App\Observers\StudyPlanItemObserver;
 use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
+use App\Services\Auth\LogOtpMessenger;
+use App\Services\Auth\OtpMessenger;
 use App\Support\CurrentTenant;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -82,6 +84,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(OtpMessenger::class, LogOtpMessenger::class);
         $this->app->singleton(CurrentTenant::class);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
     }
