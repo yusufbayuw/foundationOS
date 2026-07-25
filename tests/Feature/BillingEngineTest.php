@@ -2,10 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\BillingPage;
+use App\Jobs\CreateBillingSnapPaymentJob;
 use App\Services\BillingService;
+use App\Support\CurrentTenant;
+use Exception;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
@@ -73,6 +80,55 @@ class BillingEngineTest extends TestCase
         ])->all();
 
         DB::table('user_tenant_roles')->insert($rows);
+    }
+
+    private function createPendingInvoice(array $attributes = []): SubscriptionLog
+    {
+        return SubscriptionLog::query()->create(array_merge([
+            'tenant_id' => $this->tenant->id,
+            'action' => 'monthly_invoice',
+            'new_plan_id' => $this->plan->id,
+            'amount' => 100000,
+            'currency' => 'IDR',
+            'payment_status' => 'pending',
+            'invoice_number' => 'INV-TEST-'.Str::upper(Str::random(8)),
+            'period_start' => now()->startOfMonth(),
+            'period_end' => now()->endOfMonth(),
+            'metadata' => [],
+        ], $attributes));
+    }
+
+    private function actingAsTenantUser(): User
+    {
+        $user = User::factory()->create();
+        $role = TenantRole::firstOrCreate(
+            ['tenant_id' => $this->tenant->id, 'slug' => 'member'],
+            ['name' => 'Member', 'permissions' => [], 'is_super_admin' => false]
+        );
+
+        DB::table('user_tenant_roles')->insert([
+            'user_id' => $user->id,
+            'tenant_id' => $this->tenant->id,
+            'tenant_role_id' => $role->id,
+            'is_primary' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Filament::setCurrentPanel('admin');
+        Filament::setTenant($this->tenant);
+        app(CurrentTenant::class)->set($this->tenant);
+        $this->actingAs($user);
+
+        return $user;
+    }
+
+    protected function tearDown(): void
+    {
+        Filament::setTenant(null);
+        app(CurrentTenant::class)->forget();
+
+        parent::tearDown();
     }
 
     public function test_calculate_monthly_amount_with_base_plan_only(): void
@@ -219,5 +275,101 @@ class BillingEngineTest extends TestCase
             'tenant_id' => $freeTenant->id,
             'action' => 'monthly_invoice',
         ]);
+    }
+
+    public function test_pay_invoice_dispatches_snap_payment_job(): void
+    {
+        Bus::fake();
+        $user = $this->actingAsTenantUser();
+        $invoice = $this->createPendingInvoice();
+
+        Livewire::test(BillingPage::class)
+            ->call('payInvoice', $invoice->id);
+
+        Bus::assertDispatched(CreateBillingSnapPaymentJob::class, fn (CreateBillingSnapPaymentJob $job): bool => $job->tenantId === $this->tenant->id
+            && $job->subscriptionLogId === $invoice->id
+            && $job->actorId === $user->id);
+
+        $this->assertSame('queued', $invoice->fresh()->metadata['payment_session_status']);
+    }
+
+    public function test_snap_payment_job_stores_ready_payment_session(): void
+    {
+        $user = User::factory()->create();
+        $invoice = $this->createPendingInvoice();
+
+        $this->mock(BillingService::class, function ($mock) use ($invoice, $user): void {
+            $mock->shouldReceive('createSnapPayment')
+                ->once()
+                ->andReturnUsing(function (Tenant $tenant, SubscriptionLog $subscriptionLog, ?int $actorId) use ($invoice, $user): string {
+                    $this->assertSame($this->tenant->id, $tenant->id);
+                    $this->assertSame($invoice->id, $subscriptionLog->id);
+                    $this->assertSame($user->id, $actorId);
+
+                    $subscriptionLog->update([
+                        'invoice_url' => 'https://app.midtrans.com/snap/v2/vtweb/snap-token-123',
+                        'processed_by' => $actorId,
+                        'metadata' => array_merge($subscriptionLog->metadata ?? [], [
+                            'snap_token' => 'snap-token-123',
+                            'payment_session_status' => 'ready',
+                        ]),
+                    ]);
+
+                    return 'snap-token-123';
+                });
+        });
+
+        new CreateBillingSnapPaymentJob($this->tenant->id, $invoice->id, $user->id)
+            ->handle(app(BillingService::class));
+
+        $invoice->refresh();
+
+        $this->assertSame('https://app.midtrans.com/snap/v2/vtweb/snap-token-123', $invoice->invoice_url);
+        $this->assertSame('snap-token-123', $invoice->metadata['snap_token']);
+        $this->assertSame('ready', $invoice->metadata['payment_session_status']);
+        $this->assertSame($user->id, $invoice->processed_by);
+    }
+
+    public function test_snap_payment_job_records_gateway_failure(): void
+    {
+        $invoice = $this->createPendingInvoice();
+
+        $this->mock(BillingService::class, function ($mock): void {
+            $mock->shouldReceive('createSnapPayment')
+                ->once()
+                ->andThrow(new Exception('Midtrans timeout'));
+        });
+
+        try {
+            new CreateBillingSnapPaymentJob($this->tenant->id, $invoice->id, null)
+                ->handle(app(BillingService::class));
+
+            $this->fail('Expected the payment gateway exception to be rethrown.');
+        } catch (Exception $exception) {
+            $this->assertSame('Midtrans timeout', $exception->getMessage());
+        }
+
+        $this->assertSame('failed', $invoice->fresh()->metadata['payment_session_status']);
+        $this->assertSame('Midtrans timeout', $invoice->fresh()->metadata['payment_session_error']);
+    }
+
+    public function test_snap_payment_job_is_idempotent_for_existing_payment_session(): void
+    {
+        $invoice = $this->createPendingInvoice([
+            'invoice_url' => 'https://app.midtrans.com/snap/v2/vtweb/existing-token',
+            'metadata' => [
+                'snap_token' => 'existing-token',
+                'payment_session_status' => 'ready',
+            ],
+        ]);
+
+        $this->mock(BillingService::class, function ($mock): void {
+            $mock->shouldNotReceive('createSnapPayment');
+        });
+
+        new CreateBillingSnapPaymentJob($this->tenant->id, $invoice->id, null)
+            ->handle(app(BillingService::class));
+
+        $this->assertSame('existing-token', $invoice->fresh()->metadata['snap_token']);
     }
 }

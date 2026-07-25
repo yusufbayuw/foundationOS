@@ -106,6 +106,7 @@
 
         @php $invoices = $this->getRecentInvoices(); @endphp
 
+        <div wire:poll.10s>
         @if ($invoices->isEmpty())
             <p class="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">{{ __('Belum ada invoice.') }}</p>
         @else
@@ -131,20 +132,37 @@
                                     {{ \Modules\Core\Support\CurrencyFormatter::format((float) $invoice->amount, $invoice->currency ?: $this->currency) }}
                                 </td>
                                 <td class="py-2">
-                                    <x-filament::badge
-                                        :color="match($invoice->payment_status) {
-                                            'paid' => 'success',
-                                            'pending' => 'warning',
-                                            'failed' => 'danger',
-                                            default => 'gray',
-                                        }"
-                                    >
-                                        {{ ucfirst($invoice->payment_status ?? 'unknown') }}
-                                    </x-filament::badge>
+                                    <div class="flex flex-col gap-1">
+                                        <x-filament::badge
+                                            :color="match($invoice->payment_status) {
+                                                'paid' => 'success',
+                                                'pending' => 'warning',
+                                                'failed' => 'danger',
+                                                default => 'gray',
+                                            }"
+                                        >
+                                            {{ ucfirst($invoice->payment_status ?? 'unknown') }}
+                                        </x-filament::badge>
+
+                                        @if (data_get($invoice->metadata, 'payment_session_status') === 'queued' || data_get($invoice->metadata, 'payment_session_status') === 'preparing')
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Preparing payment session…') }}</span>
+                                        @elseif (data_get($invoice->metadata, 'payment_session_status') === 'ready')
+                                            <span class="text-xs text-success-600 dark:text-success-400">{{ __('Payment ready') }}</span>
+                                        @elseif (data_get($invoice->metadata, 'payment_session_status') === 'failed')
+                                            <span class="text-xs text-danger-600 dark:text-danger-400">{{ __('Payment session failed') }}</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="py-2 text-right">
                                     @if (in_array($invoice->payment_status, ['pending', 'failed']))
-                                        {{ ($this->payInvoiceAction)(['invoice' => $invoice->getKey()]) }}
+                                        <x-filament::button
+                                            wire:click="payInvoice({{ $invoice->id }})"
+                                            size="xs"
+                                            :color="data_get($invoice->metadata, 'payment_session_status') === 'ready' ? 'success' : 'primary'"
+                                            :icon="data_get($invoice->metadata, 'payment_session_status') === 'ready' ? 'heroicon-o-arrow-top-right-on-square' : 'heroicon-o-credit-card'"
+                                        >
+                                            {{ data_get($invoice->metadata, 'payment_session_status') === 'ready' ? __('Open Payment') : \Modules\Core\Support\FilamentUi::text('Pay') }}
+                                        </x-filament::button>
                                     @elseif ($invoice->payment_status === 'paid')
                                         <span class="text-success-600 dark:text-success-400 text-xs">✓ Paid</span>
                                     @endif
@@ -155,6 +173,7 @@
                 </table>
             </div>
         @endif
+        </div>
     </x-filament::section>
 
     {{-- Midtrans Snap Script --}}

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Jobs\CreateBillingSnapPaymentJob;
 use App\Services\BillingService;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
@@ -9,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Support\CurrencyFormatter;
 use Modules\Core\Support\FilamentUi;
@@ -133,22 +135,33 @@ class BillingPage extends Page
             return;
         }
 
-        try {
-            $billing = app(BillingService::class);
-            $this->snapToken = $billing->createSnapPayment($tenant, $invoice);
+        if ($invoice->invoice_url && (($invoice->metadata ?? [])['snap_token'] ?? null)) {
+            $this->snapToken = (string) (($invoice->metadata ?? [])['snap_token']);
             $this->dispatch('open-midtrans-snap', token: $this->snapToken);
 
             Notification::make()
                 ->title(FilamentUi::text('Payment session ready'))
                 ->success()
                 ->send();
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title(FilamentUi::text('Payment error'))
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
+
+            return;
         }
+
+        $invoice->update([
+            'metadata' => array_merge($invoice->metadata ?? [], [
+                'payment_session_status' => 'queued',
+                'payment_session_requested_at' => now()->toISOString(),
+                'payment_session_requested_by' => Auth::id(),
+            ]),
+        ]);
+
+        CreateBillingSnapPaymentJob::dispatch((int) $tenant->getKey(), (int) $invoice->getKey(), Auth::id());
+
+        Notification::make()
+            ->title(FilamentUi::text('Payment session is being prepared'))
+            ->body(FilamentUi::text('Refresh will reveal the payment button when the Snap token is ready.'))
+            ->success()
+            ->send();
     }
 
     public function generateInvoice(): void
