@@ -101,14 +101,7 @@
     <x-filament::section>
         <x-slot name="heading">{{ \Modules\Core\Support\FilamentUi::text('Invoice History') }}</x-slot>
         <x-slot name="headerEnd">
-            <x-filament::button
-                wire:click="generateInvoice"
-                size="sm"
-                color="gray"
-                icon="heroicon-o-document-plus"
-            >
-                {{ \Modules\Core\Support\FilamentUi::text('Generate Invoice') }}
-            </x-filament::button>
+            {{ $this->generateInvoiceAction }}
         </x-slot>
 
         @php $invoices = $this->getRecentInvoices(); @endphp
@@ -151,14 +144,7 @@
                                 </td>
                                 <td class="py-2 text-right">
                                     @if (in_array($invoice->payment_status, ['pending', 'failed']))
-                                        <x-filament::button
-                                            wire:click="payInvoice({{ $invoice->id }})"
-                                            size="xs"
-                                            color="primary"
-                                            icon="heroicon-o-credit-card"
-                                        >
-                                            {{ \Modules\Core\Support\FilamentUi::text('Pay') }}
-                                        </x-filament::button>
+                                        {{ ($this->payInvoiceAction)(['invoice' => $invoice->getKey()]) }}
                                     @elseif ($invoice->payment_status === 'paid')
                                         <span class="text-success-600 dark:text-success-400 text-xs">✓ Paid</span>
                                     @endif
@@ -198,4 +184,5 @@
         });
     </script>
     @endscript
+    <x-filament-actions::modals />
 </x-filament-panels::page>

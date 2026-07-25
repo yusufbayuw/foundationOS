@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Services\BillingService;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -72,6 +73,43 @@ class BillingPage extends Page
             ->get();
     }
 
+    public function generateInvoiceAction(): Action
+    {
+        return Action::make('generateInvoice')
+            ->label(FilamentUi::text('Generate Invoice'))
+            ->icon('heroicon-o-document-plus')
+            ->color('gray')
+            ->size('sm')
+            ->requiresConfirmation()
+            ->action(function (): void {
+                $this->generateInvoice();
+            });
+    }
+
+    public function payInvoiceAction(): Action
+    {
+        return Action::make('payInvoice')
+            ->label(FilamentUi::text('Pay'))
+            ->icon('heroicon-o-credit-card')
+            ->color('primary')
+            ->size('xs')
+            ->action(function (array $arguments): void {
+                $invoiceId = (int) ($arguments['invoice'] ?? 0);
+
+                if ($invoiceId <= 0) {
+                    Notification::make()
+                        ->title(FilamentUi::text('Payment error'))
+                        ->body(FilamentUi::text('Invoice not found.'))
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                $this->payInvoice($invoiceId);
+            });
+    }
+
     public function payInvoice(int $invoiceId): void
     {
         $tenant = Filament::getTenant();
@@ -83,12 +121,27 @@ class BillingPage extends Page
         $invoice = SubscriptionLog::where('tenant_id', $tenant->getKey())
             ->where('id', $invoiceId)
             ->whereIn('payment_status', ['pending', 'failed'])
-            ->firstOrFail();
+            ->first();
+
+        if (! $invoice) {
+            Notification::make()
+                ->title(FilamentUi::text('Payment error'))
+                ->body(FilamentUi::text('Invoice not found.'))
+                ->danger()
+                ->send();
+
+            return;
+        }
 
         try {
             $billing = app(BillingService::class);
             $this->snapToken = $billing->createSnapPayment($tenant, $invoice);
             $this->dispatch('open-midtrans-snap', token: $this->snapToken);
+
+            Notification::make()
+                ->title(FilamentUi::text('Payment session ready'))
+                ->success()
+                ->send();
         } catch (\Exception $e) {
             Notification::make()
                 ->title(FilamentUi::text('Payment error'))
