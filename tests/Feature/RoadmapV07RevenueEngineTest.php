@@ -126,8 +126,19 @@ class RoadmapV07RevenueEngineTest extends TestCase
             'payment_status' => 'pending',
         ]);
 
+        config(['midtrans.server_key' => 'roadmap-donation-secret']);
         $service = app(DonationPaymentService::class);
-        $payload = ['order_id' => 'DON-WH-1', 'transaction_status' => 'settlement', 'transaction_id' => 'TX-1'];
+        $payload = [
+            'order_id' => 'DON-WH-1',
+            'status_code' => '200',
+            'gross_amount' => '100000.00',
+            'transaction_status' => 'settlement',
+            'transaction_id' => 'TX-1',
+        ];
+        $payload['signature_key'] = hash(
+            'sha512',
+            $payload['order_id'].$payload['status_code'].$payload['gross_amount'].config('midtrans.server_key'),
+        );
 
         $first = $service->handleWebhook($payload);
         $second = $service->handleWebhook($payload);
