@@ -51,6 +51,7 @@
             "Modules\\School\\": "Modules/School/app/",
             "Modules\\Workflow\\": "Modules/Workflow/app/",
             "Modules\\Alumni\\": "Modules/Alumni/app/",
+            "Modules\\Member\\": "Modules/Member/app/",
             "Modules\\Asset\\": "Modules/Asset/app/",
             "Modules\\Boarding\\": "Modules/Boarding/app/",
             "Modules\\Cafeteria\\": "Modules/Cafeteria/app/",

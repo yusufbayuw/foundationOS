@@ -43,5 +43,6 @@
     "Printing": true,
     "Consulting": true,
     "Property": true,
-    "Marketplace": true
+    "Marketplace": true,
+    "Member": true
 }

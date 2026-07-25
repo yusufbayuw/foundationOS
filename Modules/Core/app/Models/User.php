@@ -25,6 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Modules\Campus\Models\FeederLog;
 use Modules\Campus\Models\Lecturer;
 use Modules\Campus\Models\StudyPlan;
+use Modules\Member\Models\Member;
 use Modules\Monitoring\Models\AuditLog;
 use Modules\Monitoring\Models\FileUpload;
 use Modules\School\Models\Attendance;
@@ -99,6 +100,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'password' => 'hashed',
             'pinned_menus' => 'array',
         ];
+    }
+
+    public function members(): HasMany
+    {
+        return $this->hasMany(Member::class);
     }
 
     public function userTenantRoles(): HasMany
