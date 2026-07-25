@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\v1\EmployeeController;
 use App\Http\Controllers\Api\v1\LeaveRequestController;
 use App\Http\Controllers\Api\v1\OrganizationController;
 use App\Http\Controllers\Api\v1\PaymentController;
+use App\Http\Controllers\Api\v1\Public\PublicCatalogController;
+use App\Http\Controllers\Api\v1\Public\PublicCatalogController;
 use App\Http\Controllers\Api\v1\SchoolClassController;
 use App\Http\Controllers\Api\v1\ShopCartController;
 use App\Http\Controllers\Api\v1\Shop\MyOrderController;
@@ -76,6 +78,14 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
     Route::post('auth/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:otp:verify');
     Route::post('auth/password/forgot', [PasswordOtpController::class, 'forgot'])->middleware('throttle:otp:request');
     Route::post('auth/password/reset-with-otp', [PasswordOtpController::class, 'reset'])->middleware('throttle:otp:verify');
+
+    Route::prefix('app/public')->name('app.public.')->group(function () {
+        Route::get('campaigns', [PublicCatalogController::class, 'campaigns'])->name('campaigns.index');
+        Route::get('events', [PublicCatalogController::class, 'events'])->name('events.index');
+        Route::get('job-postings', [PublicCatalogController::class, 'jobPostings'])->name('job-postings.index');
+        Route::get('products', [PublicCatalogController::class, 'products'])->name('products.index');
+        Route::get('cms/homepage', [PublicCatalogController::class, 'homepage'])->name('cms.homepage');
+    });
 
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
