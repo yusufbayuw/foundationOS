@@ -92,12 +92,12 @@ class MerchOrder extends Model
 
     public function markReadyForPickup(): bool
     {
-        if ((string) $this->status !== 'paid') {
+        if ($this->status !== ShopOrderStatus::Paid) {
             return false;
         }
 
         return $this->forceFill([
-            'status' => 'ready_for_pickup',
+            'status' => ShopOrderStatus::ReadyForPickup,
             'ready_for_pickup_at' => now(),
         ])->save();
     }
@@ -110,11 +110,6 @@ class MerchOrder extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function markReadyForPickup(): void
-    {
-        $this->transitionTo(ShopOrderStatus::ReadyForPickup);
     }
 
     public function markPickedUp(): void

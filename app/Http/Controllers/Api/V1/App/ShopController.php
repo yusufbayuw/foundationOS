@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\App;
 use App\Http\Controllers\Api\v1\ApiController;
 use App\Http\Resources\Api\V1\App\OrderResource;
 use App\Http\Resources\Api\V1\App\ProductResource;
+use App\Support\CurrentTenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -43,7 +44,7 @@ class ShopController extends ApiController
         $this->authorize('create', MerchOrder::class);
 
         $order = MerchOrder::create([
-            'tenant_id' => app(\App\Support\CurrentTenant::class)->id(),
+            'tenant_id' => app(CurrentTenant::class)->id(),
             'code' => 'ORD-'.Str::upper(Str::random(10)),
             'name' => 'App checkout '.$request->user()->id,
             'status' => 'pending',

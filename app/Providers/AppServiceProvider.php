@@ -9,20 +9,6 @@ use App\Models\PersonalAccessToken;
 use App\Models\Role;
 use App\Models\Voucher;
 use App\Models\VoucherClaim;
-use App\Policies\VoucherClaimPolicy;
-use App\Policies\VoucherPolicy;
-use Modules\Alumni\Models\JobPosting;
-use Modules\Alumni\Policies\JobPostingPolicy;
-use Modules\Donation\Models\Campaign;
-use Modules\Donation\Models\Donation;
-use Modules\Donation\Policies\CampaignPolicy;
-use Modules\Donation\Policies\DonationPolicy;
-use Modules\Event\Models\Event as AppEvent;
-use Modules\Event\Policies\EventPolicy;
-use Modules\Marketplace\Models\MarketplaceProduct;
-use Modules\Marketplace\Policies\MarketplaceProductPolicy;
-use Modules\MerchOrder\Models\MerchOrder;
-use Modules\MerchOrder\Policies\MerchOrderPolicy;
 use App\Observers\AcademicPeriodObserver;
 use App\Observers\ClassStudentObserver;
 use App\Observers\CourseObserver;
@@ -32,10 +18,12 @@ use App\Observers\StudentObserver;
 use App\Observers\StudyPlanItemObserver;
 use App\Observers\StudyPlanObserver;
 use App\Observers\UserObserver;
-use App\Services\Auth\LogOtpMessenger;
-use App\Services\Auth\OtpMessenger;
 use App\Payments\NullPaymentGateway;
 use App\Payments\PaymentGateway;
+use App\Policies\VoucherClaimPolicy;
+use App\Policies\VoucherPolicy;
+use App\Services\Auth\LogOtpMessenger;
+use App\Services\Auth\OtpMessenger;
 use App\Support\CurrentTenant;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -49,6 +37,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use Modules\Alumni\Models\JobPosting;
+use Modules\Alumni\Policies\JobPostingPolicy;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -60,7 +50,13 @@ use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Donation\Models\Campaign;
+use Modules\Donation\Models\Donation;
+use Modules\Donation\Policies\CampaignPolicy;
+use Modules\Donation\Policies\DonationPolicy;
 use Modules\Enrollment\Models\Applicant;
+use Modules\Event\Models\Event as AppEvent;
+use Modules\Event\Policies\EventPolicy;
 use Modules\Finance\Models\Budget;
 use Modules\Finance\Models\CustomerInvoice;
 use Modules\Finance\Models\JournalEntry;
@@ -72,6 +68,11 @@ use Modules\Inventory\Models\StockItem;
 use Modules\Inventory\Models\StockMove;
 use Modules\Inventory\Models\Warehouse;
 use Modules\Library\Models\Book;
+use Modules\Marketplace\Models\MarketplaceOrder;
+use Modules\Marketplace\Models\MarketplaceProduct;
+use Modules\Marketplace\Policies\MarketplaceProductPolicy;
+use Modules\MerchOrder\Models\MerchOrder;
+use Modules\MerchOrder\Policies\MerchOrderPolicy;
 use Modules\Monitoring\Listeners\LogSecurityAuthEvents;
 use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\GoodsReceiptItem;
@@ -163,6 +164,8 @@ class AppServiceProvider extends ServiceProvider
             'journal_entry' => JournalEntry::class,
             'budget' => Budget::class,
             'customer_invoice' => CustomerInvoice::class,
+            'marketplace_order' => MarketplaceOrder::class,
+            'merch_order' => MerchOrder::class,
             'warehouse' => Warehouse::class,
             'stock_item' => StockItem::class,
             'stock_move' => StockMove::class,

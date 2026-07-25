@@ -6,6 +6,7 @@ enum ShopOrderStatus: string
 {
     case PendingPayment = 'pending_payment';
     case Paid = 'paid';
+    case PaymentFailed = 'payment_failed';
     case ReadyForPickup = 'ready_for_pickup';
     case PickedUp = 'picked_up';
     case Rejected = 'rejected';
@@ -16,6 +17,7 @@ enum ShopOrderStatus: string
         return match ($this) {
             self::PendingPayment => 'Pending payment',
             self::Paid => 'Paid',
+            self::PaymentFailed => 'Payment failed',
             self::ReadyForPickup => 'Ready for pickup',
             self::PickedUp => 'Picked up',
             self::Rejected => 'Rejected',
@@ -44,10 +46,10 @@ enum ShopOrderStatus: string
     public function allowedTransitions(): array
     {
         return match ($this) {
-            self::PendingPayment => [self::Paid, self::Rejected, self::Cancelled],
+            self::PendingPayment => [self::Paid, self::PaymentFailed, self::Rejected, self::Cancelled],
             self::Paid => [self::ReadyForPickup, self::Rejected, self::Cancelled],
             self::ReadyForPickup => [self::PickedUp, self::Cancelled],
-            self::PickedUp, self::Rejected, self::Cancelled => [],
+            self::PaymentFailed, self::PickedUp, self::Rejected, self::Cancelled => [],
         };
     }
 }

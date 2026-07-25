@@ -16,7 +16,7 @@ class AttendanceLogFormGeolocationNotificationTest extends TestCase
         $this->assertStringContainsString('new FilamentNotification()', $script);
         $this->assertStringContainsString(".title('Location unavailable')", $script);
         $this->assertStringContainsString('.danger()', $script);
-        $this->assertStringContainsString(".body(message)", $script);
+        $this->assertStringContainsString('.body(message)', $script);
         $this->assertStringContainsString("this.notifyGeolocationError('Geolocation is not supported by this browser.')", $script);
         $this->assertStringContainsString('err => this.notifyGeolocationError(`Location error: ${err.message}`)', $script);
     }

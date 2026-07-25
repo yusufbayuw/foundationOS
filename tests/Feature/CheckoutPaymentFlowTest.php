@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ShopOrderStatus;
 use App\Models\PersonalAccessToken;
 use App\Payments\PaymentGateway;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -56,7 +57,7 @@ class CheckoutPaymentFlowTest extends TestCase
         ]);
 
         $response->assertOk()->assertJsonPath('data.status', 'paid');
-        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertSame(ShopOrderStatus::Paid, $order->fresh()->status);
         $this->assertNotNull($order->fresh()->paid_at);
         $this->assertSame('verified', Payment::withoutTenantScope()->where('payment_reference', 'gw-paid-001')->first()->status);
     }
@@ -71,7 +72,7 @@ class CheckoutPaymentFlowTest extends TestCase
         ]);
 
         $response->assertOk()->assertJsonPath('data.status', 'payment_failed');
-        $this->assertSame('payment_failed', $order->fresh()->status);
+        $this->assertSame(ShopOrderStatus::PaymentFailed, $order->fresh()->status);
         $this->assertSame('failed', Payment::withoutTenantScope()->where('payment_reference', 'gw-failed-001')->first()->status);
     }
 
@@ -90,7 +91,7 @@ class CheckoutPaymentFlowTest extends TestCase
             'status' => 'paid',
         ])->assertOk();
 
-        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertSame(ShopOrderStatus::Paid, $order->fresh()->status);
         $this->assertSame($firstPaidAt, $order->fresh()->paid_at?->toIso8601String());
         $this->assertSame(1, Payment::withoutTenantScope()->where('payment_reference', 'gw-idempotent-001')->count());
     }
@@ -101,7 +102,7 @@ class CheckoutPaymentFlowTest extends TestCase
         $this->postJson('/api/v1/payments/webhook', ['payment_reference' => 'gw-ready-001', 'status' => 'paid'])->assertOk();
 
         $this->assertTrue($order->fresh()->markReadyForPickup());
-        $this->assertSame('ready_for_pickup', $order->fresh()->status);
+        $this->assertSame(ShopOrderStatus::ReadyForPickup, $order->fresh()->status);
         $this->assertNotNull($order->fresh()->ready_for_pickup_at);
     }
 
