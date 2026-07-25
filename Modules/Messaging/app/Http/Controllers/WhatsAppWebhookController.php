@@ -5,33 +5,37 @@ namespace Modules\Messaging\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Cache;
 
 class WhatsAppWebhookController extends Controller
 {
     public function handle(Request $request, string $provider): JsonResponse
     {
-        $verified = $this->verifyProviderSignature($request);
+        $secret = $this->secretFor($provider);
+
+        if ($secret !== '') {
+            $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $secret);
+            $provided = (string) $request->header('X-Hub-Signature-256', '');
+
+            abort_unless(hash_equals($expected, $provided), 403);
+        }
+
+        $webhookId = (string) ($request->header('X-Webhook-Id') ?: $request->input('id', ''));
+        $idempotencyKey = $webhookId !== '' ? "whatsapp:webhook:{$provider}:{$webhookId}" : null;
+        $duplicate = $idempotencyKey !== null && ! Cache::add($idempotencyKey, true, now()->addDay());
 
         return response()->json([
             'received' => true,
             'provider' => $provider,
-            'verified' => $verified,
+            'verified' => $secret !== '',
+            'duplicate' => $duplicate,
         ]);
     }
 
-    private function verifyProviderSignature(Request $request): bool
+    protected function secretFor(string $provider): string
     {
-        $secret = (string) config('messaging.webhooks.whatsapp_secret', '');
-
-        if ($secret === '') {
-            return false;
-        }
-
-        $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $secret);
-        $provided = (string) $request->header('X-Hub-Signature-256', '');
-
-        abort_unless(hash_equals($expected, $provided), 403);
-
-        return true;
+        return (string) (config("messaging.webhooks.whatsapp.providers.{$provider}.secret")
+            ?? config("messaging.webhooks.whatsapp.providers.{$provider}")
+            ?? config('messaging.webhooks.whatsapp_secret', ''));
     }
 }

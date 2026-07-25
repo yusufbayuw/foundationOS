@@ -12,5 +12,12 @@ return [
 
     'webhooks' => [
         'whatsapp_secret' => env('FOS_WHATSAPP_WEBHOOK_SECRET'),
+        'whatsapp' => [
+            'providers' => [
+                'local' => [
+                    'secret' => env('FOS_WHATSAPP_LOCAL_WEBHOOK_SECRET'),
+                ],
+            ],
+        ],
     ],
 ];
