@@ -1,7 +1,7 @@
 {
     "name": "Voucher",
     "alias": "voucher",
-    "description": "",
+    "description": "Voucher domain for tenant-scoped voucher campaigns and claims.",
     "keywords": [],
     "priority": 0,
     "providers": [

@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Modules\EOffice\Http\Controllers\LetterVerificationController;
 use Modules\Messaging\Http\Controllers\WhatsAppWebhookController;
+use Modules\Voucher\Http\Controllers\VoucherController;
 
 RateLimiter::for('api', function (Request $request) {
     $token = $request->user()?->currentAccessToken();
@@ -106,6 +107,11 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
 
+        Route::get('app/vouchers', [VoucherController::class, 'index']);
+        Route::get('app/vouchers/{voucher}', [VoucherController::class, 'show']);
+        Route::post('app/vouchers/{voucher}/claim', [VoucherController::class, 'claim']);
+        Route::post('app/vouchers/claims/{claim}/redeem', [VoucherController::class, 'redeem']);
+
         // Mobile-first endpoints
         Route::post('devices', [DeviceController::class, 'store']);
         Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
@@ -124,9 +130,6 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
             Route::get('events/{event}', [AppEventController::class, 'show'])->name('events.show');
             Route::get('jobs', [AppJobController::class, 'index'])->name('jobs.index');
             Route::get('jobs/{jobPosting}', [AppJobController::class, 'show'])->name('jobs.show');
-            Route::get('vouchers', [AppVoucherController::class, 'index'])->name('vouchers.index');
-            Route::post('vouchers/{voucher}/claim', [AppVoucherController::class, 'claim'])->name('vouchers.claim');
-            Route::post('vouchers/claims/{claim}/redeem', [AppVoucherController::class, 'redeem'])->name('vouchers.claims.redeem');
             Route::get('notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
         });
 

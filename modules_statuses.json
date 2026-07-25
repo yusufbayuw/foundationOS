@@ -44,5 +44,6 @@
     "Consulting": true,
     "Property": true,
     "Marketplace": true,
-    "Member": true
+    "Member": true,
+    "Voucher": true
 }
