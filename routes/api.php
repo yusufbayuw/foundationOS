@@ -28,9 +28,6 @@ use App\Http\Controllers\Api\v1\Shop\MyOrderController;
 use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
 use App\Http\Controllers\Api\v2\VersionController as V2VersionController;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Modules\EOffice\Http\Controllers\LetterVerificationController;
 use Modules\Messaging\Http\Controllers\WhatsAppWebhookController;
@@ -63,7 +60,6 @@ RateLimiter::for('otp:verify', function (Request $request) {
 
 Route::post('/v1/payments/webhook', PaymentWebhookController::class)
     ->name('api.v1.payments.webhook');
-
 Route::post('/webhooks/whatsapp/{provider}', [WhatsAppWebhookController::class, 'handle'])
     ->middleware('throttle:webhooks')
     ->name('webhooks.whatsapp');
