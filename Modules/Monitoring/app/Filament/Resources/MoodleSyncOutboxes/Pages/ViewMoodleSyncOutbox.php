@@ -2,7 +2,7 @@
 
 namespace Modules\Monitoring\Filament\Resources\MoodleSyncOutboxes\Pages;
 
-use App\Jobs\ProcessMoodleSyncOutboxJob;
+use App\Integrations\Moodle\MoodleOutboxRetryService;
 use App\Models\MoodleSyncOutbox;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -24,16 +24,8 @@ class ViewMoodleSyncOutbox extends ViewRecord
                     MoodleSyncOutbox::STATUS_SKIPPED,
                 ], true))
                 ->requiresConfirmation()
-                ->action(function (MoodleSyncOutbox $record): void {
-                    $record->forceFill([
-                        'status' => MoodleSyncOutbox::STATUS_PENDING,
-                        'attempts' => 0,
-                        'next_retry_at' => null,
-                        'last_error' => null,
-                        'synced_at' => null,
-                    ])->save();
-
-                    ProcessMoodleSyncOutboxJob::dispatch($record->id);
+                ->action(function (MoodleSyncOutbox $record, MoodleOutboxRetryService $retryService): void {
+                    $retryService->retry($record);
 
                     Notification::make()
                         ->title(FilamentUi::text('Moodle sync queued'))
