@@ -147,7 +147,7 @@ class WorkflowDesignerTest extends TestCase
             ->set('transitions', [
                 ['from_uuid' => $startUuid, 'to_uuid' => $endUuid, 'action_name' => 'proceed', 'priority' => 0, 'is_default' => true, 'condition_rules' => []],
             ])
-            ->call('saveDraft');
+            ->callAction('saveDraftAction');
 
         $workflow = Workflow::where('code', 'livewire_test_wf')
             ->where('tenant_id', $this->tenant->id)
@@ -212,6 +212,40 @@ class WorkflowDesignerTest extends TestCase
         $this->assertCount($originalStepCount, $active->steps);
     }
 
+    public function test_publish_action_keeps_draft_when_configuration_is_invalid(): void
+    {
+        $workflow = Workflow::create([
+            'tenant_id' => $this->tenant->id,
+            'code' => 'invalid_publish_wf',
+            'name' => 'Invalid Publish Workflow',
+            'version' => 1,
+            'status' => WorkflowDefinitionStatus::Draft,
+            'is_active' => false,
+        ]);
+
+        WorkflowStep::create([
+            'workflow_id' => $workflow->id,
+            'uuid' => (string) Str::uuid(),
+            'code' => 'only_step',
+            'name' => 'Only Step',
+            'step_type' => 'task',
+            'gateway_type' => 'none',
+            'assignee_type' => 'user',
+            'is_initial' => false,
+            'is_terminal' => false,
+            'sort_order' => 1,
+        ]);
+
+        Livewire::test(WorkflowCanvas::class, ['workflowId' => $workflow->id])
+            ->callAction('publishAction')
+            ->assertSet('workflowStatus', 'draft');
+
+        $workflow->refresh();
+
+        $this->assertSame(WorkflowDefinitionStatus::Draft, $workflow->status);
+        $this->assertFalse($workflow->is_active);
+    }
+
     // ─── addStep / deleteStep ────────────────────────────────────────────────
 
     public function test_add_step_appends_to_steps_array(): void
@@ -235,7 +269,9 @@ class WorkflowDesignerTest extends TestCase
             ->set('transitions', [
                 ['from_uuid' => $uuid1, 'to_uuid' => $uuid2, 'action_name' => 'proceed', 'priority' => 0, 'is_default' => true, 'condition_rules' => []],
             ])
-            ->call('deleteStep', $uuid1)
+            ->mountAction('deleteStepAction', ['uuid' => $uuid1])
+            ->assertCount('steps', 2)
+            ->callMountedAction()
             ->assertCount('steps', 1)
             ->assertCount('transitions', 0);
     }

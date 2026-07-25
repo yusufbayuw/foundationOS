@@ -35,9 +35,7 @@ class WorkflowDesignerImportJsonTest extends TestCase
         $json = json_encode($payload, JSON_THROW_ON_ERROR);
 
         Livewire::test(WorkflowCanvas::class)
-            ->set('importPayload', $json)
-            ->call('importFromJson')
-            ->assertSet('showImportModal', false);
+            ->callAction('importJsonAction', ['payload' => $json]);
 
         $imported = Workflow::query()
             ->where('code', 'import_source_wf')
@@ -48,5 +46,16 @@ class WorkflowDesignerImportJsonTest extends TestCase
 
         $this->assertNotNull($imported);
         $this->assertCount(2, $imported->steps);
+    }
+
+    public function test_import_json_action_rejects_invalid_json(): void
+    {
+        Livewire::test(WorkflowCanvas::class)
+            ->callAction('importJsonAction', ['payload' => '{not valid json']);
+
+        $this->assertDatabaseMissing('workflows', [
+            'tenant_id' => $this->designerTenant->id,
+            'code' => 'not valid json',
+        ]);
     }
 }
