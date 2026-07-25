@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
 use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
 use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
 use App\Http\Controllers\Api\v1\App\EndowmentLeaderboardController;
+use App\Http\Controllers\Api\v1\AppEventController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\Auth\OtpController;
 use App\Http\Controllers\Api\v1\Auth\PasswordOtpController;
@@ -90,6 +91,9 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('products', [PublicCatalogController::class, 'products'])->name('products.index');
         Route::get('cms/homepage', [PublicCatalogController::class, 'homepage'])->name('cms.homepage');
     });
+
+    Route::get('app/events', [AppEventController::class, 'index']);
+    Route::get('app/events/{event}', [AppEventController::class, 'show']);
 
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);

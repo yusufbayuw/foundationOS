@@ -22,7 +22,14 @@ class EventFactory extends Factory
             'name' => fake()->words(3, true),
             'status' => 'active',
             'description' => fake()->sentence(),
-            'meta' => [],
+            'meta' => [
+                'start_at' => now()->addWeek()->toIso8601String(),
+                'end_at' => now()->addWeek()->addHours(2)->toIso8601String(),
+                'location' => fake()->city(),
+                'dresscode' => null,
+                'registration_url' => null,
+                'cover_image' => null,
+            ],
         ];
     }
 }
