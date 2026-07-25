@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
 use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
 use App\Http\Controllers\Api\V1\App\VoucherController as AppVoucherController;
 use App\Http\Controllers\Api\v1\App\EndowmentLeaderboardController;
-use App\Http\Controllers\Api\v1\AppEventController;
+use App\Http\Controllers\Api\v1\AppEventController as LegacyAppEventController;
 use App\Http\Controllers\Api\v1\AppHomeController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\Auth\OtpController;
@@ -96,8 +96,8 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('cms/homepage', [PublicCatalogController::class, 'homepage'])->name('cms.homepage');
     });
 
-    Route::get('app/events', [AppEventController::class, 'index']);
-    Route::get('app/events/{event}', [AppEventController::class, 'show']);
+    Route::get('app/events', [LegacyAppEventController::class, 'index']);
+    Route::get('app/events/{event}', [LegacyAppEventController::class, 'show']);
 
     Route::post('auth/passkeys/options/login', [PasskeyController::class, 'loginOptions']);
     Route::post('auth/passkeys/login', [PasskeyController::class, 'login']);
