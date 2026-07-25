@@ -14,6 +14,11 @@ use RuntimeException;
 /**
  * Posts a journal entry when a salary slip is marked as paid.
  *
+ * This intentionally remains synchronous because it posts one salary slip into
+ * one bounded journal entry: a salary expense line, optional deduction lines,
+ * and a cash/bank line. The payment transaction should fail immediately if
+ * required accounts are missing.
+ *
  * Journal pattern (per Indonesian PSAK):
  *   Dr  Beban Gaji (Expense)        = total_earnings
  *   Cr  Hutang BPJS / Pajak (Liab)  = each deduction component with coa_id

@@ -12,6 +12,10 @@ use Modules\Employee\Models\SalarySlipComponent;
 /**
  * Calculates payroll for one employee in a given period.
  *
+ * This intentionally remains synchronous because it processes one employee
+ * slip, aggregates one attendance range, and writes a bounded set of payroll
+ * component lines for immediate Filament feedback.
+ *
  * Component calculation_type:
  *   fixed      → use component.amount directly
  *   percentage → (component.percentage / 100) × basic_salary

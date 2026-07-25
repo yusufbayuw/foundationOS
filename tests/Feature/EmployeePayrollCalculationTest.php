@@ -14,6 +14,7 @@ use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Models\SalarySlipComponent;
 use Modules\Employee\Services\PayrollCalculationService;
 use Modules\Employee\Services\PayrollJournalService;
+use Modules\Employee\Services\SalarySlipPaymentService;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
@@ -173,13 +174,13 @@ class EmployeePayrollCalculationTest extends TestCase
         ]);
 
         $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
-        $slip->update([
-            'status' => 'paid',
-            'paid_at' => '2026-05-31 10:00:00',
-            'paid_via' => 'bank',
-        ]);
+        $slip->update(['status' => 'approved']);
 
-        $journal = app(PayrollJournalService::class)->postForSlip($slip->fresh());
+        $journal = app(SalarySlipPaymentService::class)->markAsPaid(
+            $slip->fresh(),
+            '2026-05-31 10:00:00',
+            'bank',
+        );
 
         $this->assertTrue((bool) $journal->is_balanced);
         $this->assertFalse((bool) $journal->is_posted);
@@ -207,6 +208,34 @@ class EmployeePayrollCalculationTest extends TestCase
             'debit' => 0,
             'credit' => 5_250_000,
         ]);
+    }
+
+    public function test_mark_paid_rolls_back_status_metadata_and_journal_when_posting_fails(): void
+    {
+        [, , $employee] = $this->makeEmployee('payroll-payment-rollback');
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Payroll journal requires an active salary expense account');
+
+        try {
+            app(SalarySlipPaymentService::class)->markAsPaid(
+                $slip->fresh(),
+                '2026-05-31 10:00:00',
+                'bank',
+            );
+        } finally {
+            $slip->refresh();
+
+            $this->assertSame('approved', $slip->status);
+            $this->assertNull($slip->paid_at);
+            $this->assertNull($slip->paid_via);
+            $this->assertNull($slip->journal_entry_id);
+            $this->assertSame(0, JournalEntry::query()->count());
+            $this->assertSame(0, JournalEntryLine::query()->count());
+        }
     }
 
     public function test_payroll_journal_requires_salary_expense_and_cash_accounts(): void
