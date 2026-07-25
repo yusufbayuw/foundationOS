@@ -20,6 +20,10 @@ class DonationPolicy
 
     public function view(AuthUser $authUser, Donation $donation): bool
     {
+        if ($donation->donor()->where('user_id', $authUser->getKey())->exists()) {
+            return true;
+        }
+
         return $authUser->can('View:Donation');
     }
 

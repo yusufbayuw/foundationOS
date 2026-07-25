@@ -29,6 +29,9 @@ use App\Http\Controllers\Api\v1\StudentController;
 use App\Http\Controllers\Api\v1\StudentDashboardController;
 use App\Http\Controllers\Api\v2\VersionController as V2VersionController;
 use Illuminate\Support\Facades\Route;
+use Modules\Donation\Http\Controllers\Api\V1\CampaignController as DonationCampaignController;
+use Modules\Donation\Http\Controllers\Api\V1\DonationController as DonationApiController;
+use Modules\Donation\Http\Controllers\DonationPdfController;
 use Modules\EOffice\Http\Controllers\LetterVerificationController;
 use Modules\Messaging\Http\Controllers\WhatsAppWebhookController;
 use Modules\Voucher\Http\Controllers\VoucherController;
@@ -150,6 +153,12 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::delete('app/shop/cart/items/{item}', [ShopCartController::class, 'destroyItem']);
         Route::post('app/shop/checkout', [ShopCartController::class, 'checkout']);
         Route::get('app/shop/orders/me', MyOrderController::class);
+
+        Route::get('donation/campaigns', [DonationCampaignController::class, 'index']);
+        Route::get('donation/campaigns/{campaign}', [DonationCampaignController::class, 'show']);
+        Route::post('donation/checkout', [DonationApiController::class, 'store']);
+        Route::get('donation/my-donations', [DonationApiController::class, 'mine']);
+        Route::get('donation/donations/{donation}/receipt.pdf', DonationPdfController::class);
     });
 });
 
