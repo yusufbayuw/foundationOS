@@ -5,8 +5,8 @@ namespace Modules\Messaging\Providers;
 use Modules\Messaging\Contracts\MessageGateway;
 use Modules\Messaging\Contracts\PushNotificationProvider;
 use Modules\Messaging\Contracts\WhatsAppProvider;
-use Modules\Messaging\Services\Providers\LocalMessageGateway;
 use Modules\Messaging\Services\Providers\FcmPushNotificationProvider;
+use Modules\Messaging\Services\Providers\LocalMessageGateway;
 use Modules\Messaging\Services\Providers\LogWhatsAppProvider;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
