@@ -2,29 +2,30 @@ name: Translation Lint
 
 on:
   push:
-    paths:
-      - 'Modules/**/Filament/**/*.php'
-      - 'app/Filament/**/*.php'
-      - 'Modules/**/Support/FilamentUi.php'
-      - 'scripts/lint-translations.php'
-      - 'routes/web.php'
-      - 'app/Providers/Filament/AdminPanelProvider.php'
+    branches: [main]
   pull_request:
-    paths:
-      - 'Modules/**/Filament/**/*.php'
-      - 'app/Filament/**/*.php'
-      - 'Modules/**/Support/FilamentUi.php'
-      - 'scripts/lint-translations.php'
-      - 'routes/web.php'
-      - 'app/Providers/Filament/AdminPanelProvider.php'
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: translation-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-translations:
     name: Check hardcoded UI labels
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -32,6 +33,12 @@ jobs:
           php-version: '8.4'
           tools: composer:v2
           coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist

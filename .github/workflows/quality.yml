@@ -1,0 +1,142 @@
+name: Quality and Supply Chain
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  composer-validation:
+    name: Composer validation and autoload
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI repository validation"
+          php --version
+          composer --version
+
+      - name: Validate Composer manifest and lock file
+        run: composer validate --strict
+
+      - name: Validate optimized PSR-4 autoload generation
+        run: composer dump-autoload --optimize --strict-psr --no-scripts
+
+  frontend-build:
+    name: Frontend production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI frontend build"
+          node --version
+          npm --version
+
+      - name: Install locked frontend dependencies
+        run: npm ci
+
+      - name: Build production assets
+        run: npm run build
+
+  dependency-security:
+    name: Dependency security (High and Critical)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI dependency security"
+          php --version
+          composer --version
+          node --version
+          npm --version
+
+      - name: Audit Composer dependencies
+        run: composer audit --locked --ignore-severity=low --ignore-severity=medium
+
+      - name: Install locked frontend dependencies
+        run: npm ci
+
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=high
+
+  secret-scan:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI secret scan"
+
+      - name: Scan repository history and changes for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-2.0, GPL-3.0, AGPL-1.0, AGPL-3.0

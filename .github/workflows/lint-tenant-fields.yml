@@ -3,29 +3,41 @@ name: Tenant Field Lint
 on:
   push:
     branches: [main]
-    paths:
-      - 'Modules/**/Filament/**/*.php'
-      - 'scripts/lint-tenant-fields.php'
   pull_request:
     branches: [main]
-    paths:
-      - 'Modules/**/Filament/**/*.php'
-      - 'scripts/lint-tenant-fields.php'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tenant-field-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint-tenant-fields:
     name: Check tenant_id Select usage (mature modules)
     runs-on: ubuntu-latest
-    continue-on-error: true
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          tools: composer:v2
           coverage: none
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
 
       - name: Run tenant field linter
         run: php scripts/lint-tenant-fields.php
