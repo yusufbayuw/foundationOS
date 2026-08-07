@@ -6,10 +6,18 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   phpunit:
     name: PHPUnit (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     strategy:
       fail-fast: false
@@ -19,6 +27,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: SQLite testing"
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -26,6 +39,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, pcov
           tools: composer:v2
           coverage: pcov
+          ini-values: memory_limit=1G
 
       - name: Get Composer cache directory
         id: composer-cache
@@ -46,6 +60,11 @@ jobs:
           cp .env.example .env
           php artisan key:generate --ansi
 
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
+
       - name: Run tests
         run: php artisan test --compact
 
@@ -53,9 +72,15 @@ jobs:
     name: Coverage (80% minimum)
     runs-on: ubuntu-latest
     needs: phpunit
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: SQLite coverage"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -64,7 +89,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, pcov
           tools: composer:v2
           coverage: pcov
-          ini-values: pcov.directory=.
+          ini-values: memory_limit=1G, pcov.directory=.
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
@@ -74,6 +99,11 @@ jobs:
           cp .env.example .env
           php artisan key:generate --ansi
 
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
+
       - name: Run coverage
         run: |
           mkdir -p coverage
@@ -82,10 +112,18 @@ jobs:
       - name: Enforce 80% coverage threshold
         run: php scripts/check-coverage-threshold.php coverage/clover.xml 80
 
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-clover
+          path: coverage/clover.xml
+          if-no-files-found: error
+
   suites:
     name: Named suites smoke
     runs-on: ubuntu-latest
     needs: phpunit
+    timeout-minutes: 45
 
     strategy:
       fail-fast: false
@@ -105,6 +143,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: SQLite named suite (${{ matrix.suite }})"
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -112,6 +155,7 @@ jobs:
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           tools: composer:v2
           coverage: none
+          ini-values: memory_limit=1G
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
@@ -121,5 +165,98 @@ jobs:
           cp .env.example .env
           php artisan key:generate --ansi
 
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
+
       - name: Run ${{ matrix.suite }} suite
         run: php artisan test --compact --testsuite=${{ matrix.suite }}
+
+  postgresql:
+    name: PostgreSQL integration and migration smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: foundationos_testing
+          POSTGRES_USER: foundationos
+          POSTGRES_PASSWORD: foundationos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U foundationos -d foundationos_testing"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:Ai7zE5WyaUMR8UCd76n0Smu/YJZEpFQqa+xBD/pCfh4=
+      BCRYPT_ROUNDS: 4
+      CACHE_STORE: array
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: foundationos_testing
+      DB_USERNAME: foundationos
+      DB_PASSWORD: foundationos
+      MAIL_MAILER: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
+      PULSE_ENABLED: false
+      TELESCOPE_ENABLED: false
+      NIGHTWATCH_ENABLED: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: PostgreSQL integration testing"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, pdo_pgsql, pgsql
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Get Composer cache directory
+        id: composer-cache-postgresql
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache-postgresql.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
+
+      - name: Migrate empty PostgreSQL database
+        run: |
+          php artisan migrate:fresh --force
+          php artisan db:show --database=pgsql
+
+      - name: Run PostgreSQL priority suites
+        run: |
+          php artisan test --compact --testsuite=Tenant
+          php artisan test --compact --testsuite=Feature
+          php artisan test --compact --testsuite=Workflow
+          php artisan test --compact --testsuite=Queue
+          php artisan test --compact --testsuite=Regression
+          php artisan test --compact --testsuite=ImportExport

@@ -21,7 +21,7 @@ Di GitHub:
 1. Buka repo → **Pull requests** → **New pull request**
 2. Base: `main` ← Compare: branch Anda
 3. Isi judul & deskripsi → **Create pull request**
-4. Tunggu centang hijau (Pint, Larastan, PHPUnit)
+4. Tunggu centang hijau pada seluruh quality gate
 5. **Merge pull request** (squash atau merge commit, sesuai kebiasaan tim)
 6. Lokal: `git checkout main && git pull origin main`
 
@@ -37,9 +37,7 @@ Commit yang sudah ada di `main` tidak perlu di-PR ulang. Aturan ini berlaku untu
 
 ---
 
-# Branch protection (opsional, mengunci aturan di GitHub)
-
-Kalau Anda ingin GitHub **menolak** push langsung ke `main`, aktifkan branch protection.
+# Branch protection (mengunci aturan di GitHub)
 
 Configure in GitHub: **Settings → Branches → Branch protection rules → Add rule** (or edit existing rule for `main`).
 
@@ -52,21 +50,29 @@ Configure in GitHub: **Settings → Branches → Branch protection rules → Add
 | Required approvals | 1 (adjust for your team) |
 | Dismiss stale pull request approvals | Enabled |
 | Require status checks to pass | Enabled |
-| Require branches to be up to date | Enabled (recommended) |
+| Require branches to be up to date | Enabled |
+| Require conversation resolution | Enabled |
+| Allow force pushes | Disabled |
+| Allow deletions | Disabled |
 
 ## Required status checks
 
-Add these workflow names (exact names from `.github/workflows/`):
+Add these exact job names as required checks:
 
-- `Laravel Pint` (job in `static.yml`)
-- `Larastan (level 1 + baseline, all GA modules)` (job in `static.yml`)
-- `Larastan API resources (level 1, no baseline)` (job in `static.yml`)
-- `test` or the PHPUnit job name from `tests.yml` — open a recent PR on `main` to see the check names GitHub reports
-
-Also enable if you use them:
-
-- `lint-translations` (from `lint-translations.yml`)
-- `lint-tenant-fields` (from `lint-tenant-fields.yml`)
+- `Composer validation and autoload`
+- `Laravel Pint`
+- `Larastan (level 1 + baseline, all GA modules)`
+- `Larastan API resources (level 1, no baseline)`
+- `Check tenant_id Select usage (mature modules)`
+- `Check hardcoded UI labels`
+- `PHPUnit (PHP 8.4)`
+- `Named suites smoke`
+- `PostgreSQL integration and migration smoke`
+- `Coverage (80% minimum)`
+- `Frontend production build`
+- `Dependency security (High and Critical)`
+- `Secret scanning`
+- `Dependency review`
 
 ## Notes
 

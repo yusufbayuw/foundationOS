@@ -6,13 +6,26 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: static-analysis-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pint:
     name: Laravel Pint
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -20,6 +33,12 @@ jobs:
           php-version: '8.4'
           tools: composer:v2
           coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
@@ -30,9 +49,15 @@ jobs:
   phpstan:
     name: Larastan (level 1 + baseline, all GA modules)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -40,6 +65,12 @@ jobs:
           php-version: '8.4'
           tools: composer:v2
           coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
@@ -50,9 +81,15 @@ jobs:
   phpstan-api-resources:
     name: Larastan API resources (level 1, no baseline)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Show CI context
+        run: |
+          echo "Commit: $GITHUB_SHA"
+          echo "Environment: CI"
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -60,6 +97,12 @@ jobs:
           php-version: '8.4'
           tools: composer:v2
           coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Show PHP and Composer versions
+        run: |
+          php --version
+          composer --version
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
