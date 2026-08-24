@@ -14,23 +14,30 @@ class TenantAdminProvisioner
 {
     public function assignShieldSuperAdmin(User $user, Tenant $tenant): void
     {
-        setPermissionsTeamId($tenant->getKey());
+        $permissionRegistrar = app(PermissionRegistrar::class);
+        $previousTeamId = $permissionRegistrar->getPermissionsTeamId();
 
-        $superAdminRoleName = ShieldUtils::getSuperAdminName();
+        $permissionRegistrar->setPermissionsTeamId($tenant->getKey());
 
-        $role = Role::firstOrCreate(
-            ['name' => $superAdminRoleName, 'guard_name' => 'web'],
-            ['team_id' => $tenant->getKey()],
-        );
+        try {
+            $superAdminRoleName = ShieldUtils::getSuperAdminName();
 
-        $user->roles()->syncWithoutDetaching([
-            $role->id => [
-                'model_type' => $user->getMorphClass(),
+            $role = Role::firstOrCreate([
+                'name' => $superAdminRoleName,
+                'guard_name' => 'web',
                 'tenant_id' => $tenant->getKey(),
-            ],
-        ]);
+            ]);
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+            $user->roles()->syncWithoutDetaching([
+                $role->id => [
+                    'model_type' => $user->getMorphClass(),
+                    'tenant_id' => $tenant->getKey(),
+                ],
+            ]);
+        } finally {
+            $permissionRegistrar->setPermissionsTeamId($previousTeamId);
+            $permissionRegistrar->forgetCachedPermissions();
+        }
     }
 
     public function ensureTenantOwnerRole(User $user, Tenant $tenant, ?int $organizationId = null): TenantRole

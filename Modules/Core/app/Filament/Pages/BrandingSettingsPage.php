@@ -10,7 +10,9 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantSetting;
+use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
 
 class BrandingSettingsPage extends Page
@@ -40,13 +42,22 @@ class BrandingSettingsPage extends Page
         return FilamentUi::module('Core');
     }
 
+    public static function canAccess(): bool
+    {
+        $tenant = Filament::getTenant();
+        $user = Filament::auth()->user();
+
+        return $tenant instanceof Tenant
+            && $user instanceof User
+            && $user->canAccessTenant($tenant)
+            && $user->isTenantAdministrator($tenant);
+    }
+
     public function mount(): void
     {
         $tenant = Filament::getTenant();
 
-        if (! $tenant) {
-            return;
-        }
+        abort_unless($tenant instanceof Tenant && static::canAccess(), 403);
 
         $settings = TenantSetting::query()
             ->where('tenant_id', $tenant->getKey())
@@ -89,9 +100,7 @@ class BrandingSettingsPage extends Page
     {
         $tenant = Filament::getTenant();
 
-        if (! $tenant) {
-            return;
-        }
+        abort_unless($tenant instanceof Tenant && static::canAccess(), 403);
 
         $data = $this->form->getState();
 

@@ -15,6 +15,8 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -41,9 +43,9 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants, MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, MustVerifyEmailTrait, Notifiable, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -168,6 +170,18 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             ->exists();
     }
 
+    public function isTenantAdministrator(Tenant $tenant): bool
+    {
+        if ($this->isGlobalSuperAdmin()) {
+            return true;
+        }
+
+        return $this->activeUserTenantRolesQuery()
+            ->where('tenant_id', $tenant->getKey())
+            ->whereHas('tenantRole', fn ($query) => $query->where('is_super_admin', true))
+            ->exists();
+    }
+
     public function getTenants(Panel $panel): array|Collection
     {
         $tenantIds = $this->activeUserTenantRolesQuery()->pluck('tenant_id');
@@ -184,15 +198,12 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     protected function activeUserTenantRolesQuery(): HasMany
     {
         return $this->userTenantRoles()
-            ->where(function ($query): void {
-                $query->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            });
+            ->active();
     }
 
     public function getDefaultTenant(Panel $panel): ?Model
     {
-        $primaryAssignment = $this->userTenantRoles()
+        $primaryAssignment = $this->activeUserTenantRolesQuery()
             ->where('is_primary', true)
             ->with('tenant')
             ->first();
@@ -307,7 +318,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
                 return true;
             }
 
-            return $this->userTenantRoles()->exists();
+            return $this->activeUserTenantRolesQuery()->exists()
+                || ! $this->createdTenants()->exists();
         }
 
         if ($panel->getId() === 'parent') {

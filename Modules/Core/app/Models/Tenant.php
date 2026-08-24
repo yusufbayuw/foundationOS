@@ -127,6 +127,8 @@ class Tenant extends Model
         'meta_title',
         'meta_description',
         'subscription_plan_id',
+        'product_profile_code',
+        'product_profile_version',
         'grace_period_ends_at',
         'midtrans_customer_id',
         'created_by',

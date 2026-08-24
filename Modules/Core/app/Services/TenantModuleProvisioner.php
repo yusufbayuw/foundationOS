@@ -3,6 +3,7 @@
 namespace Modules\Core\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Modules\Core\Models\Module;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
@@ -31,7 +32,14 @@ class TenantModuleProvisioner
 
     public function __construct(
         protected ApplicationModuleCatalog $catalog,
+        protected ModuleDependencyGraph $dependencyGraph,
+        protected ProductProfileCatalog $productProfiles,
     ) {}
+
+    public function enableProfileForTenant(Tenant $tenant, string $profileCode): void
+    {
+        $this->enableForTenant($tenant, $this->productProfiles->moduleCodes($profileCode));
+    }
 
     /**
      * Enable modules for a tenant. When $moduleCodes is null, all active catalog modules are enabled.
@@ -42,26 +50,38 @@ class TenantModuleProvisioner
     {
         $this->catalog->sync();
 
-        $query = Module::query()->where('is_active', true);
+        $availableModules = Module::query()
+            ->where('is_active', true)
+            ->get();
 
-        if ($moduleCodes !== null) {
-            $query->whereIn('code', array_map('strtolower', $moduleCodes));
-        }
+        $requestedModuleCodes = $moduleCodes === null
+            ? $availableModules->pluck('code')->map(fn (string $code): string => Str::lower($code))->all()
+            : array_map(fn (string $code): string => Str::lower($code), $moduleCodes);
 
-        $modules = $query->get();
+        $resolvedModuleCodes = $this->dependencyGraph->resolveOrFail(
+            $availableModules,
+            $requestedModuleCodes,
+        );
+
+        $modules = $availableModules->filter(
+            fn (Module $module): bool => in_array(Str::lower($module->code), $resolvedModuleCodes, true),
+        );
 
         foreach ($modules as $module) {
-            TenantModule::query()->updateOrCreate(
-                [
-                    'tenant_id' => $tenant->getKey(),
-                    'module_id' => $module->getKey(),
-                ],
-                [
-                    'is_enabled' => true,
-                    'enabled_at' => now(),
-                    'disabled_at' => null,
-                ],
-            );
+            $tenantModule = TenantModule::withTrashed()->firstOrNew([
+                'tenant_id' => $tenant->getKey(),
+                'module_id' => $module->getKey(),
+            ]);
+
+            if ($tenantModule->trashed()) {
+                $tenantModule->restore();
+            }
+
+            $tenantModule->fill([
+                'is_enabled' => true,
+                'enabled_at' => now(),
+                'disabled_at' => null,
+            ])->save();
 
             Cache::forget("tenant_module_active:{$tenant->getKey()}:".str($module->code)->studly());
         }
