@@ -1,5 +1,7 @@
 # FoundationOS — Technical Documentation
 
+> **Catatan 24 Agustus 2026:** angka inventaris pada dokumen ini merekam baseline Juni 2026 dan sebagian sudah tertinggal dari kode. Gunakan [`docs/FOUNDATIONOS_VERTICAL_SAAS_BLUEPRINT.md`](docs/FOUNDATIONOS_VERTICAL_SAAS_BLUEPRINT.md) untuk snapshot terbaru, temuan risiko, dan rancangan restrukturisasi vertical SaaS.
+
 **Master technical reference** consolidating verified repository discovery. This document cites code, routes, migrations, and configuration; items without direct evidence are marked **belum terverifikasi**.
 
 **Verification date:** 2026-06-19 (ERD, route counts, authorization & API catalogs re-verified)  
