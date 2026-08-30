@@ -8,6 +8,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class StakeholderForm
 {
@@ -25,7 +26,7 @@ class StakeholderForm
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label(FilamentUi::text('Email address'))
                     ->email(),
                 TextInput::make('phone')
                     ->tel(),

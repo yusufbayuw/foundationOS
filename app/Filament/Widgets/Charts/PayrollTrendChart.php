@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets\Charts;
 
 use App\Filament\Widgets\Charts\Concerns\CachesChartData;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Modules\Core\Support\FilamentUi;
@@ -11,6 +12,7 @@ use Modules\Employee\Models\SalarySlip;
 class PayrollTrendChart extends ChartWidget
 {
     use CachesChartData;
+    use HasWidgetShield;
 
     protected static ?int $sort = 11;
 

@@ -86,6 +86,7 @@ class MoodleSyncOutboxesTable
                 ViewAction::make(),
                 Action::make('retry')
                     ->label(FilamentUi::text('Retry sync'))
+                    ->authorize('update')
                     ->visible(fn (MoodleSyncOutbox $record): bool => in_array($record->status, [
                         MoodleSyncOutbox::STATUS_FAILED,
                         MoodleSyncOutbox::STATUS_SKIPPED,
@@ -111,6 +112,7 @@ class MoodleSyncOutboxesTable
             ->toolbarActions([
                 BulkAction::make('retrySelected')
                     ->label(FilamentUi::text('Retry selected'))
+                    ->authorizeIndividualRecords('update')
                     ->requiresConfirmation()
                     ->action(fn (Collection $records) => self::queueRetryBatch($records)),
             ]);

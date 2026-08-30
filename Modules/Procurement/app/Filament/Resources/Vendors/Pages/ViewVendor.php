@@ -22,6 +22,7 @@ class ViewVendor extends ViewRecord
                 ->label(FilamentUi::text('Blacklist Vendor'))
                 ->icon('heroicon-o-no-symbol')
                 ->color('danger')
+                ->authorize('update')
                 ->visible(fn (): bool => ! $this->record->is_blacklisted)
                 ->form([
                     Textarea::make('blacklist_reason')
@@ -46,6 +47,7 @@ class ViewVendor extends ViewRecord
                 ->label(FilamentUi::text('Remove from Blacklist'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => $this->record->is_blacklisted)
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -65,6 +67,7 @@ class ViewVendor extends ViewRecord
                 ->label(FilamentUi::text('Deactivate'))
                 ->icon('heroicon-o-pause-circle')
                 ->color('warning')
+                ->authorize('update')
                 ->visible(fn (): bool => $this->record->is_active && ! $this->record->is_blacklisted)
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -81,6 +84,7 @@ class ViewVendor extends ViewRecord
                 ->label(FilamentUi::text('Activate'))
                 ->icon('heroicon-o-play-circle')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => ! $this->record->is_active)
                 ->requiresConfirmation()
                 ->action(function (): void {

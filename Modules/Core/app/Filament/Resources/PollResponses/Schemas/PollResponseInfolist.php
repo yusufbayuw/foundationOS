@@ -4,6 +4,7 @@ namespace Modules\Core\Filament\Resources\PollResponses\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class PollResponseInfolist
 {
@@ -12,9 +13,9 @@ class PollResponseInfolist
         return $schema
             ->components([
                 TextEntry::make('poll.id')
-                    ->label('Poll'),
+                    ->label(FilamentUi::text('Poll')),
                 TextEntry::make('user.name')
-                    ->label('User')
+                    ->label(FilamentUi::text('User'))
                     ->placeholder('-'),
                 TextEntry::make('selected_option'),
                 TextEntry::make('created_at')

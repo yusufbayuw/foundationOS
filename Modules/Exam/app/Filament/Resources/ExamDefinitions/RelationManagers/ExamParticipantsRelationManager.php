@@ -124,6 +124,8 @@ class ExamParticipantsRelationManager extends RelationManager
                 Action::make('regenerateToken')
                     ->label(FilamentUi::text('Regenerate token'))
                     ->icon('heroicon-o-arrow-path')
+                    ->authorize(fn (): bool => $this->getOwnerRecord() instanceof ExamDefinition
+                        && Gate::check('regenerateToken', $this->getOwnerRecord()))
                     ->requiresConfirmation()
                     ->visible(fn (): bool => ! $this->isReadOnly()
                         && $this->getOwnerRecord() instanceof ExamDefinition
@@ -161,6 +163,8 @@ class ExamParticipantsRelationManager extends RelationManager
                 BulkAction::make('exportTokensCsv')
                     ->label(FilamentUi::text('Export tokens CSV'))
                     ->icon('heroicon-o-arrow-down-tray')
+                    ->authorize(fn (): bool => $this->getOwnerRecord() instanceof ExamDefinition
+                        && Gate::check('regenerateToken', $this->getOwnerRecord()))
                     ->action(fn (Collection $records) => $this->exportTokensCsv($records)),
             ]);
     }
@@ -179,6 +183,7 @@ class ExamParticipantsRelationManager extends RelationManager
             $actions[] = Action::make('generateFromClass')
                 ->label(FilamentUi::text('Generate from class'))
                 ->icon('heroicon-o-user-group')
+                ->authorize(fn (): bool => Gate::check('syncParticipants', $definition))
                 ->requiresConfirmation()
                 ->visible(fn (): bool => ! $readOnly && $definition->school_class_reference !== null)
                 ->action(fn () => $this->notifyResolverResult(
@@ -191,6 +196,7 @@ class ExamParticipantsRelationManager extends RelationManager
             $actions[] = Action::make('generateFromCourseClass')
                 ->label(FilamentUi::text('Generate from course class'))
                 ->icon('heroicon-o-academic-cap')
+                ->authorize(fn (): bool => Gate::check('syncParticipants', $definition))
                 ->requiresConfirmation()
                 ->visible(fn (): bool => ! $readOnly && $definition->campus_class_reference !== null)
                 ->action(fn () => $this->notifyResolverResult(
@@ -218,6 +224,8 @@ class ExamParticipantsRelationManager extends RelationManager
             $actions[] = Action::make('importCsv')
                 ->label(FilamentUi::text('Import CSV'))
                 ->icon('heroicon-o-arrow-up-tray')
+                ->authorize(fn (): bool => $definition instanceof ExamDefinition
+                    && Gate::check('syncParticipants', $definition))
                 ->schema([
                     FileUpload::make('csv_file')
                         ->label(FilamentUi::field('csv_file'))
@@ -268,6 +276,8 @@ class ExamParticipantsRelationManager extends RelationManager
         $actions[] = Action::make('exportAllTokensCsv')
             ->label(FilamentUi::text('Export tokens CSV'))
             ->icon('heroicon-o-arrow-down-tray')
+            ->authorize(fn (): bool => $definition instanceof ExamDefinition
+                && Gate::check('regenerateToken', $definition))
             ->action(fn () => $this->exportTokensCsv(
                 $definition instanceof ExamDefinition
                     ? $definition->examParticipants()->with('activeToken')->get()
@@ -278,6 +288,7 @@ class ExamParticipantsRelationManager extends RelationManager
             $actions[] = Action::make('printTokenCards')
                 ->label(FilamentUi::text('Print token cards'))
                 ->icon('heroicon-o-printer')
+                ->authorize(fn (): bool => Gate::check('regenerateToken', $definition))
                 ->url(fn (): string => route('exam.participant-tokens.pdf', $definition))
                 ->openUrlInNewTab();
         }

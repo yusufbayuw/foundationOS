@@ -41,19 +41,19 @@
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Plan') }}</p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Plan') }}</p>
                 <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ $plan?->name ?? __('No Plan') }}
+                    {{ $plan?->name ?? \Modules\Core\Support\FilamentUi::text('No Plan') }}
                 </p>
             </div>
             <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Status') }}</p>
                 <p class="mt-1">
-                    <x-filament::badge :color="$statusColor">{{ ucfirst($status) }}</x-filament::badge>
+                    <x-filament::badge :color="$statusColor">{{ \Modules\Core\Support\FilamentUi::text(ucfirst($status)) }}</x-filament::badge>
                 </p>
             </div>
             <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-4">
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Expires') }}</p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Expires') }}</p>
                 <p class="mt-1 text-sm text-gray-900 dark:text-white">
                     {{ $tenant?->subscription_expires_at?->translatedFormat('d F Y') ?? '-' }}
                 </p>
@@ -72,19 +72,19 @@
                 <div class="space-y-1 text-sm">
                     @if ($currentAmounts['base'] > 0)
                         <div class="flex justify-between">
-                            <span>{{ __('Base plan') }}</span>
+                            <span>{{ \Modules\Core\Support\FilamentUi::text('Base plan') }}</span>
                             <span>{{ $this->formatAmount($currentAmounts['base']) }}</span>
                         </div>
                     @endif
                     @if ($currentAmounts['seats'] > 0)
                         <div class="flex justify-between">
-                            <span>{{ __('User seats') }} ({{ $currentAmounts['active_seats'] }} users)</span>
+                            <span>{{ \Modules\Core\Support\FilamentUi::text('User seats') }} ({{ $currentAmounts['active_seats'] }} pengguna)</span>
                             <span>{{ $this->formatAmount($currentAmounts['seats']) }}</span>
                         </div>
                     @endif
                     @if ($currentAmounts['modules'] > 0)
                         <div class="flex justify-between">
-                            <span>{{ __('Active modules') }} ({{ $currentAmounts['active_modules'] }} modules)</span>
+                            <span>{{ \Modules\Core\Support\FilamentUi::text('Active modules') }} ({{ $currentAmounts['active_modules'] }} modul)</span>
                             <span>{{ $this->formatAmount($currentAmounts['modules']) }}</span>
                         </div>
                     @endif
@@ -115,10 +115,10 @@
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700">
                             <th class="text-left py-2 font-medium text-gray-600 dark:text-gray-400">{{ __('Invoice') }}</th>
-                            <th class="text-left py-2 font-medium text-gray-600 dark:text-gray-400">{{ __('Period') }}</th>
-                            <th class="text-right py-2 font-medium text-gray-600 dark:text-gray-400">{{ __('Amount') }}</th>
+                            <th class="text-left py-2 font-medium text-gray-600 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Period') }}</th>
+                            <th class="text-right py-2 font-medium text-gray-600 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Amount') }}</th>
                             <th class="text-left py-2 font-medium text-gray-600 dark:text-gray-400">{{ __('Status') }}</th>
-                            <th class="text-right py-2 font-medium text-gray-600 dark:text-gray-400">{{ __('Action') }}</th>
+                            <th class="text-right py-2 font-medium text-gray-600 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Action') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
@@ -141,15 +141,15 @@
                                                 default => 'gray',
                                             }"
                                         >
-                                            {{ ucfirst($invoice->payment_status ?? 'unknown') }}
+                                            {{ \Modules\Core\Support\FilamentUi::text(ucfirst($invoice->payment_status ?? 'unknown')) }}
                                         </x-filament::badge>
 
                                         @if (data_get($invoice->metadata, 'payment_session_status') === 'queued' || data_get($invoice->metadata, 'payment_session_status') === 'preparing')
-                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Preparing payment session…') }}</span>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Preparing payment session…') }}</span>
                                         @elseif (data_get($invoice->metadata, 'payment_session_status') === 'ready')
-                                            <span class="text-xs text-success-600 dark:text-success-400">{{ __('Payment ready') }}</span>
+                                            <span class="text-xs text-success-600 dark:text-success-400">{{ \Modules\Core\Support\FilamentUi::text('Payment ready') }}</span>
                                         @elseif (data_get($invoice->metadata, 'payment_session_status') === 'failed')
-                                            <span class="text-xs text-danger-600 dark:text-danger-400">{{ __('Payment session failed') }}</span>
+                                            <span class="text-xs text-danger-600 dark:text-danger-400">{{ \Modules\Core\Support\FilamentUi::text('Payment session failed') }}</span>
                                         @endif
                                     </div>
                                 </td>
@@ -161,10 +161,10 @@
                                             :color="data_get($invoice->metadata, 'payment_session_status') === 'ready' ? 'success' : 'primary'"
                                             :icon="data_get($invoice->metadata, 'payment_session_status') === 'ready' ? 'heroicon-o-arrow-top-right-on-square' : 'heroicon-o-credit-card'"
                                         >
-                                            {{ data_get($invoice->metadata, 'payment_session_status') === 'ready' ? __('Open Payment') : \Modules\Core\Support\FilamentUi::text('Pay') }}
+                                            {{ data_get($invoice->metadata, 'payment_session_status') === 'ready' ? \Modules\Core\Support\FilamentUi::text('Open Payment') : \Modules\Core\Support\FilamentUi::text('Pay') }}
                                         </x-filament::button>
                                     @elseif ($invoice->payment_status === 'paid')
-                                        <span class="text-success-600 dark:text-success-400 text-xs">✓ Paid</span>
+                                        <span class="text-success-600 dark:text-success-400 text-xs">✓ {{ \Modules\Core\Support\FilamentUi::text('Paid') }}</span>
                                     @endif
                                 </td>
                             </tr>

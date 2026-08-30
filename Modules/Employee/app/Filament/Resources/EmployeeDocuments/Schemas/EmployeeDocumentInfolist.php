@@ -4,6 +4,7 @@ namespace Modules\Employee\Filament\Resources\EmployeeDocuments\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Models\EmployeeDocument;
 
 class EmployeeDocumentInfolist
@@ -13,9 +14,9 @@ class EmployeeDocumentInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('employee.id')
-                    ->label('Employee'),
+                    ->label(FilamentUi::text('Employee')),
                 TextEntry::make('document_type'),
                 TextEntry::make('document_number')
                     ->placeholder('-'),

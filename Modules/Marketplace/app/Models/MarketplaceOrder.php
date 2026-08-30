@@ -44,7 +44,11 @@ class MarketplaceOrder extends Model
 
     public function getCustomerNameAttribute(): ?string
     {
-        return $this->metaValue('customer_name') ?? $this->metaValue('user_name') ?? $this->name;
+        $name = $this->getAttribute('name');
+
+        return $this->metaValue('customer_name')
+            ?? $this->metaValue('user_name')
+            ?? (is_string($name) ? $name : null);
     }
 
     public function getTotalAttribute(): mixed
@@ -64,7 +68,9 @@ class MarketplaceOrder extends Model
 
     protected function metaValue(string $key): mixed
     {
-        return is_array($this->meta) ? ($this->meta[$key] ?? null) : null;
+        $meta = $this->getAttribute('meta');
+
+        return is_array($meta) ? ($meta[$key] ?? null) : null;
     }
 
     protected function casts(): array
@@ -102,10 +108,16 @@ class MarketplaceOrder extends Model
 
     public function transitionTo(ShopOrderStatus $nextStatus, ?string $rejectionReason = null): void
     {
-        if (! $this->status->canTransitionTo($nextStatus)) {
+        $currentStatus = $this->getAttribute('status');
+
+        if (! $currentStatus instanceof ShopOrderStatus) {
+            throw new InvalidArgumentException('Shop order has an invalid status.');
+        }
+
+        if (! $currentStatus->canTransitionTo($nextStatus)) {
             throw new InvalidArgumentException(sprintf(
                 'Cannot transition shop order from %s to %s.',
-                $this->status->value,
+                $currentStatus->value,
                 $nextStatus->value,
             ));
         }

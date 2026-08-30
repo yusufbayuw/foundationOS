@@ -64,7 +64,7 @@ class WorkflowCanvasEagerLoadRegressionTest extends TestCase
             'is_main' => true,
         ]);
 
-        $user = User::factory()->create();
+        $user = User::factory()->create()->promoteToGlobalSuperAdmin();
 
         $workflow = Workflow::create([
             'tenant_id' => $tenant->id,

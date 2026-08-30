@@ -4,6 +4,7 @@ namespace Modules\Workflow\Services;
 
 use App\Support\CurrentTenant;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Modules\Workflow\Exceptions\WorkflowConfigurationException;
 use UnitEnum;
@@ -15,60 +16,76 @@ class DynamicOptionsResolver
         $kind = $optionsSource['kind'] ?? 'static';
 
         return match ($kind) {
+            'static' => $this->resolveStatic($optionsSource),
             'eloquent' => $this->resolveEloquent($optionsSource, $tenantId),
             'enum' => $this->resolveEnum($optionsSource),
-            default => throw new WorkflowConfigurationException("Unknown options_source kind: [{$kind}]. Supported: eloquent, enum."),
+            default => throw new WorkflowConfigurationException("Unknown options_source kind: [{$kind}]. Supported: static, eloquent, enum."),
         };
+    }
+
+    /**
+     * @return array<int|string, string>
+     */
+    public function resolveForSelect(array $optionsSource, int|string|null $tenantId = null): array
+    {
+        return collect($this->resolve($optionsSource, $tenantId))
+            ->mapWithKeys(fn (array $option): array => [
+                $option['value'] => $option['label'],
+            ])
+            ->all();
+    }
+
+    public function resolveLabel(array $optionsSource, mixed $value, int|string|null $tenantId = null): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (($optionsSource['kind'] ?? 'static') === 'eloquent') {
+            $modelConfig = $this->resolveEloquentModelConfig($optionsSource);
+            $valueColumn = $optionsSource['value'] ?? 'id';
+            $labelColumn = $optionsSource['label'] ?? 'name';
+
+            $label = $this->buildEloquentQuery($modelConfig, $optionsSource, $tenantId)
+                ->where($valueColumn, $value)
+                ->value($labelColumn);
+
+            return $label === null ? null : (string) $label;
+        }
+
+        foreach ($this->resolve($optionsSource, $tenantId) as $option) {
+            if ((string) $option['value'] === (string) $value) {
+                return $option['label'];
+            }
+        }
+
+        return null;
     }
 
     private function resolveEloquent(array $source, int|string|null $tenantId): array
     {
-        $modelClass = $source['model'] ?? null;
-
-        if (! $modelClass) {
-            throw new WorkflowConfigurationException('options_source.model is required for kind=eloquent.');
-        }
-
-        $allowed = config('workflow-dynamic-sources.models', []);
-
-        if (! array_key_exists($modelClass, $allowed) && ! in_array($modelClass, $allowed, true)) {
-            throw new WorkflowConfigurationException("Model [{$modelClass}] is not in the dynamic sources whitelist.");
-        }
-
-        $resolvedClass = $allowed[$modelClass] ?? $modelClass;
+        $modelConfig = $this->resolveEloquentModelConfig($source);
 
         $cacheKey = $this->buildCacheKey($source, $tenantId);
         $ttl = config('workflow-dynamic-sources.cache_ttl_seconds', 300);
 
-        return Cache::remember($cacheKey, $ttl, function () use ($resolvedClass, $source, $tenantId) {
-            return $this->runEloquentQuery($resolvedClass, $source, $tenantId);
+        return Cache::remember($cacheKey, $ttl, function () use ($modelConfig, $source, $tenantId) {
+            return $this->runEloquentQuery($modelConfig, $source, $tenantId);
         });
     }
 
-    private function runEloquentQuery(string $modelClass, array $source, int|string|null $tenantId): array
+    /**
+     * @param  array{class: class-string, tenant_relation?: string, tenant_relation_column?: string, tenant_relation_scope?: string}  $modelConfig
+     */
+    private function runEloquentQuery(array $modelConfig, array $source, int|string|null $tenantId): array
     {
         $maxResults = config('workflow-dynamic-sources.max_results', 500);
         $labelColumn = $source['label'] ?? 'name';
         $valueColumn = $source['value'] ?? 'id';
         $scopeName = $source['scope'] ?? null;
-        $tenantAware = (bool) ($source['tenant_aware'] ?? true);
+        $query = $this->buildEloquentQuery($modelConfig, $source, $tenantId);
 
-        $query = $modelClass::query();
-
-        if ($tenantAware && $tenantId !== null && method_exists($modelClass, 'withoutTenantScope')) {
-            // Model uses BelongsToTenant — let the global scope apply naturally
-            // by ensuring tenant context is set; otherwise fall back to explicit filter.
-            if (! app(CurrentTenant::class)->id()) {
-                $query->where('tenant_id', $tenantId);
-            }
-        } elseif (! $tenantAware) {
-            // Bypass tenant scope for global reference tables.
-            if (method_exists($modelClass, 'withoutTenantScope')) {
-                $query = $modelClass::withoutTenantScope();
-            }
-        }
-
-        if ($scopeName && method_exists($modelClass, 'scope'.ucfirst($scopeName))) {
+        if ($scopeName && method_exists($modelConfig['class'], 'scope'.ucfirst($scopeName))) {
             $query->{$scopeName}();
         }
 
@@ -85,6 +102,114 @@ class DynamicOptionsResolver
             ->map(fn ($label, $value) => ['value' => $value, 'label' => (string) $label])
             ->values()
             ->all();
+    }
+
+    /**
+     * @return array<int, array{value: mixed, label: string}>
+     */
+    private function resolveStatic(array $source): array
+    {
+        return collect($source['options'] ?? [])
+            ->map(function (mixed $label, mixed $value): array {
+                if (is_array($label) && array_key_exists('value', $label)) {
+                    return [
+                        'value' => $label['value'],
+                        'label' => (string) ($label['label'] ?? $label['value']),
+                    ];
+                }
+
+                return ['value' => $value, 'label' => (string) $label];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array{class: class-string, tenant_relation?: string, tenant_relation_column?: string, tenant_relation_scope?: string}
+     */
+    private function resolveEloquentModelConfig(array $source): array
+    {
+        $model = $source['model'] ?? null;
+
+        if (! is_string($model) || $model === '') {
+            throw new WorkflowConfigurationException('options_source.model is required for kind=eloquent.');
+        }
+
+        $allowed = config('workflow-dynamic-sources.models', []);
+        $configured = $allowed[$model] ?? null;
+
+        if ($configured === null && in_array($model, $allowed, true)) {
+            $configured = $model;
+        }
+
+        if ($configured === null) {
+            throw new WorkflowConfigurationException("Model [{$model}] is not in the dynamic sources whitelist.");
+        }
+
+        if (is_string($configured)) {
+            return ['class' => $configured];
+        }
+
+        if (! is_array($configured) || ! is_string($configured['class'] ?? null)) {
+            throw new WorkflowConfigurationException("Model [{$model}] has an invalid dynamic source configuration.");
+        }
+
+        return $configured;
+    }
+
+    /**
+     * @param  array{class: class-string, tenant_relation?: string, tenant_relation_column?: string, tenant_relation_scope?: string}  $modelConfig
+     */
+    private function buildEloquentQuery(array $modelConfig, array $source, int|string|null $tenantId): Builder
+    {
+        $modelClass = $modelConfig['class'];
+        $tenantAware = (bool) ($source['tenant_aware'] ?? true);
+
+        if (! $tenantAware) {
+            return method_exists($modelClass, 'withoutTenantScope')
+                ? $modelClass::withoutTenantScope()
+                : $modelClass::query();
+        }
+
+        if ($tenantId === null || $tenantId === '') {
+            throw new WorkflowConfigurationException('A tenant ID is required for a tenant-aware options source.');
+        }
+
+        if (method_exists($modelClass, 'withoutTenantScope')) {
+            $currentTenantId = app(CurrentTenant::class)->id();
+
+            if ($currentTenantId !== null && (string) $currentTenantId !== (string) $tenantId) {
+                throw new WorkflowConfigurationException('The options source tenant does not match the active tenant.');
+            }
+
+            $query = $modelClass::query();
+
+            if ($currentTenantId === null) {
+                $query->where('tenant_id', $tenantId);
+            }
+
+            return $query;
+        }
+
+        $tenantRelation = $modelConfig['tenant_relation'] ?? null;
+
+        if (! is_string($tenantRelation) || $tenantRelation === '') {
+            throw new WorkflowConfigurationException("Model [{$modelClass}] cannot be safely scoped to a tenant.");
+        }
+
+        $tenantColumn = $modelConfig['tenant_relation_column'] ?? 'tenant_id';
+        $tenantScope = $modelConfig['tenant_relation_scope'] ?? null;
+
+        return $modelClass::query()->whereHas(
+            $tenantRelation,
+            function (Builder $query) use ($tenantColumn, $tenantId, $tenantScope): void {
+                if (is_string($tenantScope) && $tenantScope !== '') {
+                    $query->{$tenantScope}();
+                }
+
+                $query->where($tenantColumn, $tenantId);
+            },
+        );
     }
 
     private function resolveEnum(array $source): array

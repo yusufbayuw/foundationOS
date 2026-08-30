@@ -19,6 +19,7 @@ class ViewMoodleSyncOutbox extends ViewRecord
         return [
             Action::make('retry')
                 ->label(FilamentUi::text('Retry sync'))
+                ->authorize('update')
                 ->visible(fn (MoodleSyncOutbox $record): bool => in_array($record->status, [
                     MoodleSyncOutbox::STATUS_FAILED,
                     MoodleSyncOutbox::STATUS_SKIPPED,

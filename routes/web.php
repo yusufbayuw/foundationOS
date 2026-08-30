@@ -15,6 +15,9 @@ Route::post('/billing/webhook', [BillingController::class, 'webhook'])
 Route::get('/billing/finish/{tenant}', [BillingController::class, 'finish'])->name('billing.finish');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', fn () => redirect()->route('filament.admin.auth.email-verification.prompt'))
+        ->name('verification.notice');
+
     Route::get('/locale/{locale}', [LocaleSwitchController::class, 'switch'])
         ->where('locale', 'id|en')
         ->name('locale.switch');

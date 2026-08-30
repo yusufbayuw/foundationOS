@@ -4,6 +4,7 @@ namespace Modules\Facility\Filament\Resources\FacilityRentals\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Facility\Models\FacilityRental;
 
 class FacilityRentalInfolist
@@ -13,11 +14,11 @@ class FacilityRentalInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('room.name')
-                    ->label('Room'),
+                    ->label(FilamentUi::text('Room')),
                 TextEntry::make('customer.name')
-                    ->label('Customer')
+                    ->label(FilamentUi::text('Customer'))
                     ->placeholder('-'),
                 TextEntry::make('rental_type'),
                 TextEntry::make('starts_at')
@@ -28,7 +29,7 @@ class FacilityRentalInfolist
                     ->numeric(),
                 TextEntry::make('status'),
                 TextEntry::make('journalEntry.id')
-                    ->label('Journal entry')
+                    ->label(FilamentUi::text('Journal entry'))
                     ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->dateTime()

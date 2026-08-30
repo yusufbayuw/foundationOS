@@ -4,6 +4,7 @@ namespace Modules\Core\Filament\Resources\ParentSurveyResponses\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class ParentSurveyResponseInfolist
 {
@@ -14,7 +15,7 @@ class ParentSurveyResponseInfolist
                 TextEntry::make('parent_survey_id')
                     ->numeric(),
                 TextEntry::make('parentUser.name')
-                    ->label('Parent user'),
+                    ->label(FilamentUi::text('Parent user')),
                 TextEntry::make('answers')
                     ->placeholder('-')
                     ->columnSpanFull(),

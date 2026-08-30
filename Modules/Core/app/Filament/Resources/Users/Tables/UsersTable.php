@@ -12,6 +12,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
 
@@ -35,34 +36,48 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('avatar')
                     ->label(FilamentUi::field('avatar'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('email_verified_at')
                     ->label(FilamentUi::field('email_verified_at'))
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('last_login_at')
                     ->label(FilamentUi::field('last_login_at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('last_login_ip')
                     ->label(FilamentUi::field('last_login_ip'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('login_attempts')
                     ->label(FilamentUi::field('login_attempts'))
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('locked_until')
                     ->label(FilamentUi::field('locked_until'))
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('timezone')
                     ->label(FilamentUi::field('timezone'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('locale')
                     ->label(FilamentUi::field('locale'))
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label(FilamentUi::field('status'))
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => FilamentUi::text(Str::headline($state ?? 'unknown')))
+                    ->color(fn (?string $state): string => match ($state) {
+                        'active' => 'success',
+                        'inactive', 'suspended' => 'danger',
+                        default => 'gray',
+                    })
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->label(FilamentUi::field('created_at'))

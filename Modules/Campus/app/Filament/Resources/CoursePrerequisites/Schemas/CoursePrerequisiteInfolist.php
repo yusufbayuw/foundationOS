@@ -5,6 +5,7 @@ namespace Modules\Campus\Filament\Resources\CoursePrerequisites\Schemas;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class CoursePrerequisiteInfolist
 {
@@ -13,11 +14,11 @@ class CoursePrerequisiteInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('course.name')
-                    ->label('Course'),
+                    ->label(FilamentUi::text('Course')),
                 TextEntry::make('prerequisiteCourse.name')
-                    ->label('Prerequisite course'),
+                    ->label(FilamentUi::text('Prerequisite course')),
                 TextEntry::make('min_grade')
                     ->numeric()
                     ->placeholder('-'),

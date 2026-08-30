@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\ColorPicker;
@@ -17,6 +18,10 @@ use Modules\Core\Support\FilamentUi;
 
 class BrandingSettingsPage extends Page
 {
+    use HasPageShield {
+        canAccess as protected canAccessViaShield;
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::Swatch;
 
     protected string $view = 'core::filament.pages.branding-settings';
@@ -50,7 +55,8 @@ class BrandingSettingsPage extends Page
         return $tenant instanceof Tenant
             && $user instanceof User
             && $user->canAccessTenant($tenant)
-            && $user->isTenantAdministrator($tenant);
+            && $user->isTenantAdministrator($tenant)
+            && static::canAccessViaShield();
     }
 
     public function mount(): void
@@ -92,6 +98,7 @@ class BrandingSettingsPage extends Page
         return [
             Action::make('save')
                 ->label(FilamentUi::text('Save'))
+                ->authorize(fn (): bool => static::canAccess())
                 ->action('save'),
         ];
     }

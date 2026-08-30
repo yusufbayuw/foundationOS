@@ -5,6 +5,7 @@ namespace Modules\Consulting\Filament\Resources\EngagementInvoices\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Consulting\Models\EngagementInvoice;
+use Modules\Core\Support\FilamentUi;
 
 class EngagementInvoiceInfolist
 {
@@ -13,9 +14,9 @@ class EngagementInvoiceInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

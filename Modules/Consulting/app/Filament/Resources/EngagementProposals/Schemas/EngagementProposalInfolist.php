@@ -5,6 +5,7 @@ namespace Modules\Consulting\Filament\Resources\EngagementProposals\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Consulting\Models\EngagementProposal;
+use Modules\Core\Support\FilamentUi;
 
 class EngagementProposalInfolist
 {
@@ -13,9 +14,9 @@ class EngagementProposalInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

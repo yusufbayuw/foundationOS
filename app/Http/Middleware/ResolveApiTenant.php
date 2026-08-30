@@ -28,8 +28,19 @@ class ResolveApiTenant
             return $next($request);
         }
 
-        $this->currentTenant->set($token->tenant_id);
+        $previousTeamId = getPermissionsTeamId();
+        $user = $request->user();
 
-        return $next($request);
+        return $this->currentTenant->forTenant($token->tenant_id, function () use ($next, $previousTeamId, $request, $token, $user): Response {
+            setPermissionsTeamId($token->tenant_id);
+            $user?->unsetRelation('roles')->unsetRelation('permissions');
+
+            try {
+                return $next($request);
+            } finally {
+                setPermissionsTeamId($previousTeamId);
+                $user?->unsetRelation('roles')->unsetRelation('permissions');
+            }
+        });
     }
 }

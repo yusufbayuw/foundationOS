@@ -2,6 +2,7 @@
 
 namespace Modules\Procurement\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -11,6 +12,8 @@ use Modules\Procurement\Models\Vendor;
 
 class ProcurementStatsOverview extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 40;
 
     protected function getStats(): array

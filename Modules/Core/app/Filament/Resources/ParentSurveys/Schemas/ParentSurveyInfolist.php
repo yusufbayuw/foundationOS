@@ -5,6 +5,7 @@ namespace Modules\Core\Filament\Resources\ParentSurveys\Schemas;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class ParentSurveyInfolist
 {
@@ -13,7 +14,7 @@ class ParentSurveyInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('title'),
                 TextEntry::make('questions')
                     ->placeholder('-')

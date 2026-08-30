@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Resources\Tenants\Schemas\TenantForm;
 use Modules\Core\Filament\Resources\Tenants\Schemas\TenantInfolist;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Support\FilamentUi;
 
 class TenantResource extends Resource
 {
@@ -56,22 +57,22 @@ class TenantResource extends Resource
 
                 TextColumn::make('users_count')
                     ->counts('users')
-                    ->label('Users')
+                    ->label(FilamentUi::text('Users'))
                     ->sortable(),
 
                 TextColumn::make('tenantModules_count')
                     ->counts('tenantModules')
-                    ->label('Modules')
+                    ->label(FilamentUi::text('Modules'))
                     ->sortable(),
 
                 TextColumn::make('subscription_plan_id')
-                    ->label('Plan')
+                    ->label(FilamentUi::text('Plan'))
                     ->default('—'),
 
                 TextColumn::make('created_at')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->label('Registered'),
+                    ->label(FilamentUi::text('Registered')),
             ])
             ->recordActions([
                 ViewAction::make(),

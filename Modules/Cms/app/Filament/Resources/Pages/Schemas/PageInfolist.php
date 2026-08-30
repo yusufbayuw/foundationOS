@@ -6,6 +6,7 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Cms\Models\Page;
+use Modules\Core\Support\FilamentUi;
 
 class PageInfolist
 {
@@ -14,7 +15,7 @@ class PageInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization_id')
                     ->numeric()
                     ->placeholder('-'),
@@ -39,7 +40,7 @@ class PageInfolist
                     ->dateTime()
                     ->visible(fn (Page $record): bool => $record->trashed()),
                 TextEntry::make('site.name')
-                    ->label('Site')
+                    ->label(FilamentUi::text('Site'))
                     ->placeholder('-'),
                 TextEntry::make('slug')
                     ->placeholder('-'),

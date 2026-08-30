@@ -7,6 +7,7 @@ namespace Modules\Exam\Policies;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Modules\Exam\Enums\ExamPermission;
+use Modules\Exam\Models\ExamDefinition;
 use Modules\Exam\Models\ExamQuestionBank;
 use Modules\Exam\Services\ExamAuthorizationService;
 
@@ -61,6 +62,31 @@ class ExamQuestionBankPolicy
     public function forceDelete(AuthUser $authUser, ExamQuestionBank $examQuestionBank): bool
     {
         return $this->delete($authUser, $examQuestionBank);
+    }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:ExamQuestionBank')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value);
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:ExamQuestionBank')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value);
+    }
+
+    public function replicate(AuthUser $authUser, ExamQuestionBank $examQuestionBank): bool
+    {
+        return $authUser->can('Replicate:ExamQuestionBank')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value)
+            && app(ExamAuthorizationService::class)->examBelongsToActiveTenant($this->asExamTenantProxy($examQuestionBank));
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:ExamQuestionBank')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value);
     }
 
     public function importQuestion(AuthUser $authUser, ExamQuestionBank $examQuestionBank): bool

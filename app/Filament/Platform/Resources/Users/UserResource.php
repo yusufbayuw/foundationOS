@@ -9,6 +9,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Models\User;
+use Modules\Core\Support\FilamentUi;
 
 class UserResource extends Resource
 {
@@ -36,7 +37,7 @@ class UserResource extends Resource
 
                 TextColumn::make('tenants_count')
                     ->counts('tenants')
-                    ->label('Tenants'),
+                    ->label(FilamentUi::text('Tenants')),
 
                 TextColumn::make('status')
                     ->badge()
@@ -50,12 +51,12 @@ class UserResource extends Resource
                 TextColumn::make('last_login_at')
                     ->dateTime('d M Y H:i')
                     ->sortable()
-                    ->label('Last Login'),
+                    ->label(FilamentUi::text('Last Login')),
 
                 TextColumn::make('created_at')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->label('Registered'),
+                    ->label(FilamentUi::text('Registered')),
             ])
             ->defaultSort('created_at', 'desc');
     }

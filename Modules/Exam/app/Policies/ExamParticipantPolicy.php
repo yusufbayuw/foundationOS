@@ -70,6 +70,33 @@ class ExamParticipantPolicy
         return $this->delete($authUser, $examParticipant);
     }
 
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:ExamParticipant')
+            && $authUser->can(ExamPermission::UpdateExam->value);
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:ExamParticipant')
+            && $authUser->can(ExamPermission::UpdateExam->value);
+    }
+
+    public function replicate(AuthUser $authUser, ExamParticipant $examParticipant): bool
+    {
+        $exam = $examParticipant->examDefinition;
+
+        return $authUser->can('Replicate:ExamParticipant')
+            && $exam !== null
+            && $this->canAccessExam($authUser, $exam, ExamPermission::UpdateExam->value);
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:ExamParticipant')
+            && $authUser->can(ExamPermission::UpdateExam->value);
+    }
+
     public function regenerateToken(AuthUser $authUser, ExamParticipant $examParticipant): bool
     {
         $exam = $examParticipant->examDefinition;

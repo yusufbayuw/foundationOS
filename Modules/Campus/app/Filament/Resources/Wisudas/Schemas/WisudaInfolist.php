@@ -5,6 +5,7 @@ namespace Modules\Campus\Filament\Resources\Wisudas\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Campus\Models\Wisuda;
+use Modules\Core\Support\FilamentUi;
 
 class WisudaInfolist
 {
@@ -13,9 +14,9 @@ class WisudaInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('yudisium.id')
-                    ->label('Yudisium')
+                    ->label(FilamentUi::text('Yudisium'))
                     ->placeholder('-'),
                 TextEntry::make('name'),
                 TextEntry::make('held_at')

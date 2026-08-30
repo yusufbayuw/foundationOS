@@ -108,6 +108,7 @@ class DocumentsRelationManager extends RelationManager
                     ->label(FilamentUi::text('Verify'))
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
+                    ->authorize('update')
                     ->visible(fn (EmployeeDocument $record): bool => $record->verification_status !== 'verified')
                     ->requiresConfirmation()
                     ->action(function (EmployeeDocument $record): void {

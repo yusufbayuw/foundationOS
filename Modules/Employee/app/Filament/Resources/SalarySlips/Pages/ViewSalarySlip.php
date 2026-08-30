@@ -28,6 +28,7 @@ class ViewSalarySlip extends ViewRecord
                 ->label(FilamentUi::text('Approve Slip'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -40,6 +41,7 @@ class ViewSalarySlip extends ViewRecord
                 ->label(FilamentUi::text('Mark as Paid'))
                 ->icon('heroicon-o-banknotes')
                 ->color('primary')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'approved')
                 ->form([
                     DateTimePicker::make('paid_at')
@@ -64,6 +66,7 @@ class ViewSalarySlip extends ViewRecord
                 ->label(FilamentUi::text('Send to Employee'))
                 ->icon('heroicon-o-envelope')
                 ->color('info')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'approved')
                 ->requiresConfirmation()
                 ->modalDescription('This will mark the salary slip as sent to the employee.')
@@ -80,6 +83,7 @@ class ViewSalarySlip extends ViewRecord
                 ->label(FilamentUi::text('Calculate Payroll'))
                 ->icon('heroicon-o-calculator')
                 ->color('warning')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {

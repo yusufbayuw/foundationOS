@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
+use Modules\Core\Models\UserTenantRole;
 use Modules\Procurement\Models\Vendor;
 use Modules\Workflow\Contracts\WorkflowFormSchemaValidator;
 use Modules\Workflow\Enums\WorkflowGatewayType;
@@ -134,6 +136,92 @@ class DynamicOptionsResolverTest extends TestCase
         }
     }
 
+    public function test_resolves_static_options_in_list_and_associative_formats(): void
+    {
+        $resolver = new DynamicOptionsResolver;
+
+        $this->assertSame(
+            ['draft' => 'Draft', 'approved' => 'Approved'],
+            $resolver->resolveForSelect([
+                'kind' => 'static',
+                'options' => ['draft' => 'Draft', 'approved' => 'Approved'],
+            ]),
+        );
+        $this->assertSame(
+            ['A' => 'Excellent', 'B' => 'Good'],
+            $resolver->resolveForSelect([
+                'kind' => 'static',
+                'options' => [
+                    ['value' => 'A', 'label' => 'Excellent'],
+                    ['value' => 'B', 'label' => 'Good'],
+                ],
+            ]),
+        );
+    }
+
+    public function test_resolves_selected_eloquent_option_label_with_tenant_scope(): void
+    {
+        $vendor = Vendor::create([
+            'code' => 'V-LABEL',
+            'name' => 'Selected Vendor',
+            'tenant_id' => $this->tenantA->id,
+        ]);
+        app(CurrentTenant::class)->set($this->tenantA);
+
+        $label = (new DynamicOptionsResolver)->resolveLabel([
+            'kind' => 'eloquent',
+            'model' => Vendor::class,
+            'label' => 'name',
+            'value' => 'id',
+            'tenant_aware' => true,
+        ], $vendor->id, $this->tenantA->id);
+
+        $this->assertSame('Selected Vendor', $label);
+    }
+
+    public function test_user_options_are_scoped_to_active_tenant_memberships(): void
+    {
+        $tenantAUser = User::factory()->create(['name' => 'Tenant A User']);
+        $tenantBUser = User::factory()->create(['name' => 'Tenant B User']);
+
+        app(CurrentTenant::class)->set($this->tenantA);
+        $tenantARole = TenantRole::create([
+            'tenant_id' => $this->tenantA->id,
+            'name' => 'Member',
+            'slug' => 'member-a',
+        ]);
+        UserTenantRole::create([
+            'user_id' => $tenantAUser->id,
+            'tenant_id' => $this->tenantA->id,
+            'tenant_role_id' => $tenantARole->id,
+        ]);
+
+        app(CurrentTenant::class)->set($this->tenantB);
+        $tenantBRole = TenantRole::create([
+            'tenant_id' => $this->tenantB->id,
+            'name' => 'Member',
+            'slug' => 'member-b',
+        ]);
+        UserTenantRole::create([
+            'user_id' => $tenantBUser->id,
+            'tenant_id' => $this->tenantB->id,
+            'tenant_role_id' => $tenantBRole->id,
+        ]);
+
+        app(CurrentTenant::class)->set($this->tenantA);
+        $options = (new DynamicOptionsResolver)->resolve([
+            'kind' => 'eloquent',
+            'model' => User::class,
+            'label' => 'name',
+            'value' => 'id',
+            'tenant_aware' => true,
+        ], $this->tenantA->id);
+        $labels = array_column($options, 'label');
+
+        $this->assertContains('Tenant A User', $labels);
+        $this->assertNotContains('Tenant B User', $labels);
+    }
+
     public function test_rejects_nonexistent_enum(): void
     {
         $this->expectException(WorkflowConfigurationException::class);
@@ -229,6 +317,29 @@ class DynamicOptionsResolverTest extends TestCase
         $result = $validator->validate($step, ['vendor_id' => 1]);
 
         $this->assertArrayHasKey('vendor_id', $result);
+    }
+
+    public function test_form_schema_validator_accepts_static_options_source(): void
+    {
+        $step = new WorkflowStep([
+            'form_schema' => [[
+                'name' => 'grade',
+                'type' => 'select',
+                'required' => true,
+                'options_source' => [
+                    'kind' => 'static',
+                    'options' => [
+                        ['value' => 'A', 'label' => 'Excellent'],
+                        ['value' => 'B', 'label' => 'Good'],
+                    ],
+                ],
+            ]],
+        ]);
+        $step->id = 1;
+
+        $result = app(WorkflowFormSchemaValidator::class)->validate($step, ['grade' => 'A']);
+
+        $this->assertSame('A', $result['grade']);
     }
 
     public function test_form_schema_validator_rejects_non_whitelisted_model_in_options_source(): void

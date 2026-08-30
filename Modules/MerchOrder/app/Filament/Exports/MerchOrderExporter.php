@@ -6,6 +6,7 @@ use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Modules\Core\Support\FilamentUi;
 use Modules\MerchOrder\Models\MerchOrder;
 
 class MerchOrderExporter extends Exporter
@@ -15,12 +16,12 @@ class MerchOrderExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('code')->label('Order code'),
+            ExportColumn::make('code')->label(FilamentUi::text('Order code')),
             ExportColumn::make('customer_name')->label('User/customer'),
-            ExportColumn::make('total')->label('Total'),
-            ExportColumn::make('status')->label('Status'),
-            ExportColumn::make('pickup_status')->label('Pickup status'),
-            ExportColumn::make('pickup_date')->label('Pickup date'),
+            ExportColumn::make('total')->label(FilamentUi::text('Total')),
+            ExportColumn::make('status')->label(FilamentUi::text('Status')),
+            ExportColumn::make('pickup_status')->label(FilamentUi::text('Pickup status')),
+            ExportColumn::make('pickup_date')->label(FilamentUi::text('Pickup date')),
         ];
     }
 

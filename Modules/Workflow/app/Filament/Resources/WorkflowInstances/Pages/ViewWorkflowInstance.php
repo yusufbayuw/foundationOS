@@ -3,8 +3,11 @@
 namespace Modules\Workflow\Filament\Resources\WorkflowInstances\Pages;
 
 use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -21,6 +24,7 @@ use Modules\Workflow\Contracts\RuleEngine;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Filament\Resources\WorkflowInstances\WorkflowInstanceResource;
 use Modules\Workflow\Models\WorkflowInstance;
+use Modules\Workflow\Services\DynamicOptionsResolver;
 use Modules\Workflow\Support\WorkflowContextData;
 
 class ViewWorkflowInstance extends ViewRecord
@@ -55,6 +59,7 @@ class ViewWorkflowInstance extends ViewRecord
                 ->label(FilamentUi::text('Return To Step'))
                 ->icon('heroicon-o-arrow-uturn-left')
                 ->color('warning')
+                ->authorize(fn (): bool => $this->hasPendingAssignment($record))
                 ->form([
                     Select::make('target_step_id')
                         ->label(FilamentUi::text('Target Step'))
@@ -87,6 +92,7 @@ class ViewWorkflowInstance extends ViewRecord
             $actions[] = Action::make($actionName)
                 ->label((string) str($actionName)->headline())
                 ->color($this->resolveActionColor($record, $actionName))
+                ->authorize(fn (): bool => $this->hasPendingAssignment($record))
                 ->form($actionName === 'cancel' ? [] : $this->buildDynamicFormSchema($record))
                 ->requiresConfirmation($actionName === 'cancel' || $actionName === 'reject')
                 ->action(function (array $data) use ($record, $actionName): void {
@@ -130,11 +136,17 @@ class ViewWorkflowInstance extends ViewRecord
                 continue;
             }
 
-            $component = match ((string) ($field['type'] ?? 'text')) {
+            $type = (string) ($field['type'] ?? 'text');
+
+            $component = match ($type) {
                 'textarea' => Textarea::make($name),
                 'number' => TextInput::make($name)->numeric(),
                 'date' => DatePicker::make($name),
-                'select', 'radio' => Select::make($name)->options($field['options'] ?? [])->searchable(),
+                'datetime' => DateTimePicker::make($name),
+                'select' => $this->buildSelectComponent($name, $field, $record),
+                'multiselect' => $this->buildSelectComponent($name, $field, $record, multiple: true),
+                'radio' => Radio::make($name)->options($this->resolveSelectOptions($field, $record)),
+                'checkbox' => Checkbox::make($name),
                 'file' => FileUpload::make($name)->disk(config('workflow.default_file_disk')),
                 default => TextInput::make($name),
             };
@@ -150,14 +162,19 @@ class ViewWorkflowInstance extends ViewRecord
                 $component->maxSize((int) $field['max_size_kb']);
             }
 
-            $schema[] = $component
+            $component
                 ->label((string) ($field['label'] ?? str($name)->headline()))
-                ->placeholder((string) ($field['placeholder'] ?? ''))
                 ->helperText($field['help_text'] ?? null)
                 ->default($field['default_value'] ?? null)
                 ->disabled((bool) ($field['_disabled'] ?? false))
                 ->required((bool) ($field['_required'] ?? false))
                 ->columnSpan((string) ($field['column_span'] ?? 'full'));
+
+            if (method_exists($component, 'placeholder')) {
+                $component->placeholder((string) ($field['placeholder'] ?? ''));
+            }
+
+            $schema[] = $component;
         }
 
         $schema[] = Textarea::make('workflow_note')
@@ -165,6 +182,73 @@ class ViewWorkflowInstance extends ViewRecord
             ->placeholder(FilamentUi::text('Note for this action (optional).'));
 
         return $schema;
+    }
+
+    protected function buildSelectComponent(
+        string $name,
+        array $field,
+        WorkflowInstance $record,
+        bool $multiple = false,
+    ): Select {
+        $component = Select::make($name)
+            ->multiple($multiple)
+            ->searchable()
+            ->optionsLimit(min(50, (int) config('workflow-dynamic-sources.max_results', 500)));
+
+        $source = $this->resolveOptionsSource($field);
+
+        if (($source['kind'] ?? 'static') !== 'eloquent') {
+            return $component->options($this->resolveSelectOptions($field, $record));
+        }
+
+        $resolver = app(DynamicOptionsResolver::class);
+        $tenantId = $record->tenant_id;
+
+        $component->getSearchResultsUsing(
+            fn (string $search): array => $resolver->resolveForSelect(
+                array_merge($source, ['search' => $search]),
+                $tenantId,
+            ),
+        );
+
+        if ($multiple) {
+            return $component->getOptionLabelsUsing(
+                fn (array $values): array => collect($values)
+                    ->mapWithKeys(function (mixed $value) use ($resolver, $source, $tenantId): array {
+                        $label = $resolver->resolveLabel($source, $value, $tenantId);
+
+                        return $label === null ? [] : [$value => $label];
+                    })
+                    ->all(),
+            );
+        }
+
+        return $component->getOptionLabelUsing(
+            fn (mixed $value): ?string => $resolver->resolveLabel($source, $value, $tenantId),
+        );
+    }
+
+    /**
+     * @return array<int|string, string>
+     */
+    protected function resolveSelectOptions(array $field, WorkflowInstance $record): array
+    {
+        return app(DynamicOptionsResolver::class)->resolveForSelect(
+            $this->resolveOptionsSource($field),
+            $record->tenant_id,
+        );
+    }
+
+    protected function resolveOptionsSource(array $field): array
+    {
+        if (is_array($field['options_source'] ?? null)) {
+            return $field['options_source'];
+        }
+
+        return [
+            'kind' => 'static',
+            'options' => $field['options'] ?? [],
+        ];
     }
 
     protected function getAvailableActionNames(WorkflowInstance $record): array

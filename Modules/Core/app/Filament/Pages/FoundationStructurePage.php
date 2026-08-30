@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -11,6 +12,8 @@ use Modules\Core\Support\FilamentUi;
 
 class FoundationStructurePage extends Page
 {
+    use HasPageShield;
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::BuildingOffice2;
 
     protected static ?int $navigationSort = 5;

@@ -2,6 +2,7 @@
 
 namespace Modules\PhysicalSecurity\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -10,12 +11,15 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Str;
+use Modules\Core\Models\Tenant;
 use Modules\Core\Support\FilamentUi;
 use Modules\PhysicalSecurity\Models\Visitor;
 use Modules\PhysicalSecurity\Models\VisitorLog;
 
 class VisitorKioskPage extends Page implements HasForms
 {
+    use HasPageShield;
     use InteractsWithForms;
 
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::DeviceTablet;
@@ -51,13 +55,16 @@ class VisitorKioskPage extends Page implements HasForms
 
     public function checkIn(): void
     {
+        $tenant = Filament::getTenant();
+
+        abort_unless($tenant instanceof Tenant && static::canAccess(), 403);
+
         $data = $this->form->getState();
-        $tenantId = Filament::getTenant()?->getKey() ?? 1;
 
         $visitor = Visitor::query()->create([
-            'tenant_id' => $tenantId,
+            'tenant_id' => $tenant->getKey(),
             'name' => $data['name'],
-            'code' => 'VIS-'.now()->format('YmdHis'),
+            'code' => 'VIS-'.Str::ulid(),
             'status' => 'checked_in',
             'meta' => [
                 'id_number' => $data['id_number'] ?? null,
@@ -66,7 +73,7 @@ class VisitorKioskPage extends Page implements HasForms
         ]);
 
         VisitorLog::query()->create([
-            'tenant_id' => $tenantId,
+            'tenant_id' => $tenant->getKey(),
             'visitor_id' => $visitor->getKey(),
             'name' => $visitor->name,
             'status' => 'checked_in',

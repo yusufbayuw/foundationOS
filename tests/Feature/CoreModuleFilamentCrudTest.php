@@ -6,6 +6,8 @@ use App\Support\CurrentTenant;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Livewire\Livewire;
+use Modules\Core\Filament\Resources\Users\Pages\CreateUser;
+use Modules\Core\Filament\Resources\Users\Pages\ListUsers;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantModule;
@@ -50,6 +52,32 @@ class CoreModuleFilamentCrudTest extends TestCase
     public function test_list_students_page_renders_for_tenant(): void
     {
         $this->runFilamentListTest(ListStudents::class, ['core', 'school']);
+    }
+
+    public function test_list_users_page_renders_localized_table_for_tenant(): void
+    {
+        app()->setLocale('id');
+        ['user' => $user] = $this->bootstrapFilament(['core']);
+
+        Livewire::test(ListUsers::class)
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$user])
+            ->assertSee('Impor data')
+            ->assertSee('Unduh template')
+            ->assertSee('Aktif');
+    }
+
+    public function test_create_user_page_prioritizes_operator_inputs(): void
+    {
+        app()->setLocale('id');
+        $this->bootstrapFilament(['core']);
+
+        Livewire::test(CreateUser::class)
+            ->assertSuccessful()
+            ->assertSee('Kata sandi')
+            ->assertSee('Preferensi')
+            ->assertDontSee('Login terakhir pada')
+            ->assertDontSee('Percobaan login');
     }
 
     public function test_create_student_invoice_persists_record(): void

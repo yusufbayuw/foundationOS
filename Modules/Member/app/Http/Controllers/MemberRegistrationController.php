@@ -14,11 +14,13 @@ use Modules\Member\Models\MemberType;
 
 class MemberRegistrationController extends Controller
 {
-    public function __invoke(RegisterMemberRequest $request): JsonResponse
+    public function __invoke(RegisterMemberRequest $request, CurrentTenant $currentTenant): JsonResponse
     {
         $validated = $request->validated();
         $memberType = MemberType::where('code', $validated['member_type'])->firstOrFail();
-        $tenantId = $request->user()?->currentAccessToken()?->tenant_id ?? app(CurrentTenant::class)->id();
+        $tenantId = $currentTenant->id();
+
+        abort_if($tenantId === null, 403, 'A tenant-scoped API token is required.');
 
         $member = DB::transaction(function () use ($request, $validated, $memberType, $tenantId): Member {
             $member = Member::create([

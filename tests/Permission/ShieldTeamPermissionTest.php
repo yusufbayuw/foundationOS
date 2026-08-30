@@ -4,10 +4,13 @@ namespace Tests\Permission;
 
 use App\Models\Role;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
+use Modules\Alumni\Filament\Resources\AlumniDonations\AlumniDonationResource;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Services\TenantAdminProvisioner;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -110,6 +113,65 @@ class ShieldTeamPermissionTest extends TestCase
 
         setPermissionsTeamId($tenant->id);
         $this->assertTrue($user->can('ViewAny:Workflow'));
+    }
+
+    public function test_provisioned_super_admin_role_bypasses_permissions_only_within_its_tenant(): void
+    {
+        $tenantA = $this->makeTenant('provisioned-super-admin-a');
+        $tenantB = $this->makeTenant('provisioned-super-admin-b');
+        $user = User::factory()->create();
+
+        Permission::firstOrCreate(['name' => 'ViewAny:Budget', 'guard_name' => 'web']);
+
+        app(TenantAdminProvisioner::class)->assignShieldSuperAdmin($user, $tenantA);
+
+        setPermissionsTeamId($tenantA->id);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->assertTrue($user->fresh()->can('ViewAny:Budget'));
+
+        setPermissionsTeamId($tenantB->id);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->assertFalse($user->fresh()->can('ViewAny:Budget'));
+
+        setPermissionsTeamId(0);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->assertFalse($user->fresh()->can('ViewAny:Budget'));
+    }
+
+    public function test_generated_resource_policy_denies_by_default_and_honors_tenant_permission(): void
+    {
+        $tenant = $this->makeTenant('generated-policy');
+        $user = User::factory()->create();
+
+        Filament::setCurrentPanel('admin');
+        $this->actingAs($user);
+        Filament::setTenant($tenant);
+        setPermissionsTeamId($tenant->id);
+
+        Permission::firstOrCreate([
+            'name' => 'ViewAny:AlumniDonation',
+            'guard_name' => 'web',
+        ]);
+
+        $this->assertFalse(AlumniDonationResource::canViewAny());
+
+        $role = Role::firstOrCreate([
+            'name' => 'alumni_donation_viewer',
+            'guard_name' => 'web',
+            'tenant_id' => $tenant->id,
+        ]);
+        $role->givePermissionTo('ViewAny:AlumniDonation');
+        $user->roles()->syncWithoutDetaching([
+            $role->id => [
+                'model_type' => $user->getMorphClass(),
+                'tenant_id' => $tenant->id,
+            ],
+        ]);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->assertTrue($user->fresh()->can('ViewAny:AlumniDonation'));
+        $this->actingAs($user->fresh());
+        $this->assertTrue(AlumniDonationResource::canViewAny());
     }
 
     private function makeTenant(string $code): Tenant

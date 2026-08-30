@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Enums\ShopOrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -92,8 +93,8 @@ class ShopCartController extends Controller
 
             foreach ($cart->items->groupBy(fn (CartItem $item): string => $this->sourceFor($item)) as $source => $items) {
                 $order = $source === 'merch'
-                    ? MerchOrder::query()->create($this->orderAttributes($cart, $items, 'checked_out'))
-                    : MarketplaceOrder::query()->create($this->orderAttributes($cart, $items, 'checked_out'));
+                    ? MerchOrder::query()->create($this->orderAttributes($cart, $items, ShopOrderStatus::PendingPayment))
+                    : MarketplaceOrder::query()->create($this->orderAttributes($cart, $items, ShopOrderStatus::PendingPayment));
 
                 foreach ($items as $item) {
                     $model = $source === 'merch' ? MerchOrderItem::class : MarketplaceOrderItem::class;
@@ -178,7 +179,7 @@ class ShopCartController extends Controller
         ];
     }
 
-    private function orderAttributes(Cart $cart, mixed $items, string $status): array
+    private function orderAttributes(Cart $cart, mixed $items, ShopOrderStatus $status): array
     {
         return [
             'tenant_id' => $cart->tenant_id,

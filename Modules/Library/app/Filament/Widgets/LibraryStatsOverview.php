@@ -2,6 +2,7 @@
 
 namespace Modules\Library\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -12,6 +13,8 @@ use Modules\Library\Models\Member;
 
 class LibraryStatsOverview extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 11;
 
     protected function getStats(): array

@@ -6,6 +6,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Support\FilamentUi;
 
 class RecentTenantsWidget extends BaseWidget
 {
@@ -43,18 +44,18 @@ class RecentTenantsWidget extends BaseWidget
 
                 TextColumn::make('users_count')
                     ->counts('users')
-                    ->label('Users')
+                    ->label(FilamentUi::text('Users'))
                     ->sortable(),
 
                 TextColumn::make('tenantModules_count')
                     ->counts('tenantModules')
-                    ->label('Modules')
+                    ->label(FilamentUi::text('Modules'))
                     ->sortable(),
 
                 TextColumn::make('created_at')
                     ->dateTime('d M Y')
                     ->sortable()
-                    ->label('Registered'),
+                    ->label(FilamentUi::text('Registered')),
             ])
             ->paginated(false);
     }

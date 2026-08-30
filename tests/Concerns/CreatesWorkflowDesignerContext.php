@@ -30,7 +30,7 @@ trait CreatesWorkflowDesignerContext
             'name' => 'Designer User',
             'email' => 'designer-'.Str::random(6).'@example.com',
             'password' => 'password',
-        ]);
+        ])->promoteToGlobalSuperAdmin();
 
         $this->designerTenant = Tenant::create([
             'uuid' => (string) Str::uuid(),

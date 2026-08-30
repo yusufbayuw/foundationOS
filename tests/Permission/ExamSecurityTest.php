@@ -161,6 +161,23 @@ class ExamSecurityTest extends TestCase
         $this->assertTrue($admin->can(ExamPermission::OpenControlRoom->value));
     }
 
+    public function test_provision_refreshes_permission_catalog_before_role_sync(): void
+    {
+        $tenant = $this->createTenant('exam-cache-refresh');
+        app(PermissionRegistrar::class)->getPermissions();
+
+        app(ExamShieldProvisioner::class)->provisionForTenant($tenant);
+
+        setPermissionsTeamId($tenant->getKey());
+        $examAdmin = Role::query()
+            ->where('name', ExamRole::ExamAdmin->value)
+            ->where('tenant_id', $tenant->getKey())
+            ->firstOrFail();
+
+        $this->assertTrue($examAdmin->hasPermissionTo(ExamPermission::ViewExam->value));
+        $this->assertTrue($examAdmin->hasPermissionTo(ExamPermission::OpenControlRoom->value));
+    }
+
     /**
      * @return array{0: Tenant, 1: Tenant, 2: ExamDefinition}
      */

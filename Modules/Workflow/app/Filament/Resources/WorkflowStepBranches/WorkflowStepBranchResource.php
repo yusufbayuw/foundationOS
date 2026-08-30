@@ -18,6 +18,21 @@ class WorkflowStepBranchResource extends ModuleResource
 {
     protected static ?string $model = WorkflowStepBranch::class;
 
+    /**
+     * Cross-step branch rows are an engine-owned runtime primitive. The
+     * current coordinator only supports same-step quorum aggregation, so
+     * manual CRUD would create branch records that the engine never consumes.
+     */
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
+
     protected static ?string $recordTitleAttribute = 'status';
 
     public static function form(Schema $schema): Schema

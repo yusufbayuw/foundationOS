@@ -9,17 +9,17 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                        {{ $workflowName ?: 'New Workflow' }}
+                        {{ $workflowName ?: \Modules\Core\Support\FilamentUi::text('New Workflow') }}
                     </span>
                     <span @class([
                         'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
                         'bg-yellow-100 text-yellow-800' => $workflowStatus === 'draft',
                         'bg-green-100 text-green-800' => $workflowStatus === 'active',
                         'bg-gray-100 text-gray-600' => $workflowStatus === 'archived',
-                    ])>{{ ucfirst($workflowStatus) }}</span>
+                    ])>{{ \Modules\Core\Support\FilamentUi::text(ucfirst($workflowStatus)) }}</span>
                     @if ($isDirty)
                         <span class="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
-                            Unsaved
+                            {{ \Modules\Core\Support\FilamentUi::text('Unsaved') }}
                         </span>
                     @endif
                 </div>
@@ -54,8 +54,8 @@
                 @if (empty($steps))
                     <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-gray-400">
                         <x-heroicon-o-squares-2x2 class="mb-2 h-12 w-12" />
-                        <p class="font-medium">Click "Add Step" to start designing</p>
-                        <p class="text-xs">Drag nodes to rearrange the layout</p>
+                        <p class="font-medium">{{ \Modules\Core\Support\FilamentUi::text('Click "Add Step" to start designing') }}</p>
+                        <p class="text-xs">{{ \Modules\Core\Support\FilamentUi::text('Drag nodes to rearrange the layout') }}</p>
                     </div>
                 @endif
             </div>
@@ -68,17 +68,17 @@
                 <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Workflow</h3>
                 <div class="space-y-3">
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Name</label>
+                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Name') }}</label>
                         <input wire:model.live.debounce.500ms="workflowName" type="text"
                             class="w-full rounded-lg border-gray-300 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Code</label>
+                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Code') }}</label>
                         <input wire:model.live.debounce.500ms="workflowCode" type="text"
                             class="w-full rounded-lg border-gray-300 font-mono text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Description</label>
+                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">{{ \Modules\Core\Support\FilamentUi::text('Description') }}</label>
                         <textarea wire:model.live.debounce.500ms="workflowDescription" rows="2"
                             class="w-full rounded-lg border-gray-300 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"></textarea>
                     </div>
@@ -93,45 +93,45 @@
                 @if ($selectedStep)
                     <div class="rounded-xl border border-primary-200 bg-white p-4 shadow-sm dark:border-primary-700 dark:bg-gray-800">
                         <h3 class="mb-3 text-sm font-semibold text-primary-700 dark:text-primary-400">
-                            Step: {{ $selectedStep['name'] }}
+                            {{ \Modules\Core\Support\FilamentUi::text('Step') }}: {{ $selectedStep['name'] }}
                         </h3>
                         <div class="space-y-3">
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-gray-600">Name</label>
+                                <label class="mb-1 block text-xs font-medium text-gray-600">{{ \Modules\Core\Support\FilamentUi::text('Name') }}</label>
                                 <input type="text" value="{{ $selectedStep['name'] }}"
                                     x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {name: $event.target.value})"
                                     class="w-full rounded-lg border-gray-300 text-sm" />
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-gray-600">Code</label>
+                                <label class="mb-1 block text-xs font-medium text-gray-600">{{ \Modules\Core\Support\FilamentUi::text('Code') }}</label>
                                 <input type="text" value="{{ $selectedStep['code'] }}"
                                     x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {code: $event.target.value})"
                                     class="w-full rounded-lg border-gray-300 font-mono text-sm" />
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-gray-600">Step Type</label>
+                                <label class="mb-1 block text-xs font-medium text-gray-600">{{ \Modules\Core\Support\FilamentUi::text('Step Type') }}</label>
                                 <select x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {step_type: $event.target.value})"
                                     class="w-full rounded-lg border-gray-300 text-sm">
                                     @foreach (['start', 'task', 'approval', 'gateway', 'end'] as $type)
                                         <option value="{{ $type }}" {{ $selectedStep['step_type'] === $type ? 'selected' : '' }}>
-                                            {{ ucfirst($type) }}
+                                            {{ \Modules\Core\Support\FilamentUi::text(ucfirst($type)) }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-gray-600">Gateway Type</label>
+                                <label class="mb-1 block text-xs font-medium text-gray-600">{{ \Modules\Core\Support\FilamentUi::text('Gateway Type') }}</label>
                                 <select x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {gateway_type: $event.target.value})"
                                     class="w-full rounded-lg border-gray-300 text-sm">
                                     @foreach (['none', 'parallel_split', 'parallel_join', 'inclusive', 'exclusive'] as $gtype)
                                         <option value="{{ $gtype }}" {{ $selectedStep['gateway_type'] === $gtype ? 'selected' : '' }}>
-                                            {{ str_replace('_', ' ', ucfirst($gtype)) }}
+                                            {{ \Modules\Core\Support\FilamentUi::text(str_replace('_', ' ', ucfirst($gtype))) }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-gray-600">SLA (hours)</label>
+                                <label class="mb-1 block text-xs font-medium text-gray-600">{{ \Modules\Core\Support\FilamentUi::text('SLA (hours)') }}</label>
                                 <input type="number" value="{{ $selectedStep['sla_hours'] ?? '' }}"
                                     x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {sla_hours: $event.target.value ? parseInt($event.target.value) : null})"
                                     class="w-full rounded-lg border-gray-300 text-sm" />
@@ -141,13 +141,13 @@
                                     <input type="checkbox" {{ $selectedStep['is_initial'] ? 'checked' : '' }}
                                         x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {is_initial: $event.target.checked})"
                                         class="rounded border-gray-300" />
-                                    Initial
+                                    {{ \Modules\Core\Support\FilamentUi::text('Initial') }}
                                 </label>
                                 <label class="flex items-center gap-2 text-xs font-medium text-gray-600">
                                     <input type="checkbox" {{ $selectedStep['is_terminal'] ? 'checked' : '' }}
                                         x-on:change="$wire.updateStep('{{ $selectedStep['uuid'] }}', {is_terminal: $event.target.checked})"
                                         class="rounded border-gray-300" />
-                                    Terminal
+                                    {{ \Modules\Core\Support\FilamentUi::text('Terminal') }}
                                 </label>
                             </div>
                             <div class="mt-1">
@@ -158,18 +158,18 @@
                 @endif
             @else
                 <div class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50">
-                    Click a node in the canvas to edit its properties
+                    {{ \Modules\Core\Support\FilamentUi::text('Click a node in the canvas to edit its properties') }}
                 </div>
             @endif
 
             {{-- Steps count --}}
             <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <span>Steps</span>
+                    <span>{{ \Modules\Core\Support\FilamentUi::text('Steps') }}</span>
                     <span class="font-semibold text-gray-900 dark:text-white">{{ count($steps) }}</span>
                 </div>
                 <div class="mt-1 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <span>Transitions</span>
+                    <span>{{ \Modules\Core\Support\FilamentUi::text('Transitions') }}</span>
                     <span class="font-semibold text-gray-900 dark:text-white">{{ count($transitions) }}</span>
                 </div>
             </div>

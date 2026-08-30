@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\BillingPage;
 use App\Jobs\CreateBillingSnapPaymentJob;
+use App\Models\Role;
 use App\Services\BillingService;
 use App\Support\CurrentTenant;
 use Exception;
@@ -18,6 +19,9 @@ use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class BillingEngineTest extends TestCase
@@ -98,7 +102,7 @@ class BillingEngineTest extends TestCase
         ], $attributes));
     }
 
-    private function actingAsTenantUser(): User
+    private function actingAsBillingUser(): User
     {
         $user = User::factory()->create();
         $role = TenantRole::firstOrCreate(
@@ -115,10 +119,28 @@ class BillingEngineTest extends TestCase
             'updated_at' => now(),
         ]);
 
+        setPermissionsTeamId($this->tenant->getKey());
+        $pagePermission = Permission::findOrCreate('View:BillingPage', 'web');
+        $paymentPermission = Permission::findOrCreate('Update:SubscriptionLog', 'web');
+        $billingManager = Role::firstOrCreate([
+            'name' => 'billing_manager',
+            'guard_name' => 'web',
+            'tenant_id' => $this->tenant->getKey(),
+        ]);
+        $billingManager->givePermissionTo([$pagePermission, $paymentPermission]);
+        $user->roles()->syncWithoutDetaching([
+            $billingManager->getKey() => [
+                'model_type' => $user->getMorphClass(),
+                'tenant_id' => $this->tenant->getKey(),
+            ],
+        ]);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+
         Filament::setCurrentPanel('admin');
-        Filament::setTenant($this->tenant);
-        app(CurrentTenant::class)->set($this->tenant);
         $this->actingAs($user);
+        app(CurrentTenant::class)->set($this->tenant);
+        Filament::setTenant($this->tenant);
 
         return $user;
     }
@@ -210,7 +232,7 @@ class BillingEngineTest extends TestCase
         $invoice = $billing->generateInvoice($this->tenant);
         $grossAmount = number_format((float) $invoice->amount, 2, '.', '');
 
-        $billing->handleWebhookNotification([
+        $notification = [
             'order_id' => $invoice->invoice_number,
             'status_code' => '200',
             'gross_amount' => $grossAmount,
@@ -223,7 +245,10 @@ class BillingEngineTest extends TestCase
                 'sha512',
                 $invoice->invoice_number.'200'.$grossAmount.config('midtrans.server_key'),
             ),
-        ]);
+        ];
+
+        $billing->handleWebhookNotification($notification);
+        $billing->handleWebhookNotification($notification);
 
         $invoice->refresh();
         $this->tenant->refresh();
@@ -231,6 +256,12 @@ class BillingEngineTest extends TestCase
         $this->assertEquals('paid', $invoice->payment_status);
         $this->assertEquals('bank_transfer', $invoice->payment_method);
         $this->assertEquals('active', $this->tenant->status);
+        $this->assertSame('subscription_log', $invoice->getMorphClass());
+        $this->assertSame(1, Activity::query()
+            ->where('subject_type', 'subscription_log')
+            ->where('subject_id', $invoice->getKey())
+            ->where('event', 'updated')
+            ->count());
     }
 
     public function test_subscription_plan_calculates_correct_monthly_amount(): void
@@ -280,7 +311,7 @@ class BillingEngineTest extends TestCase
     public function test_pay_invoice_dispatches_snap_payment_job(): void
     {
         Bus::fake();
-        $user = $this->actingAsTenantUser();
+        $user = $this->actingAsBillingUser();
         $invoice = $this->createPendingInvoice();
 
         Livewire::test(BillingPage::class)
@@ -288,7 +319,8 @@ class BillingEngineTest extends TestCase
 
         Bus::assertDispatched(CreateBillingSnapPaymentJob::class, fn (CreateBillingSnapPaymentJob $job): bool => $job->tenantId === $this->tenant->id
             && $job->subscriptionLogId === $invoice->id
-            && $job->actorId === $user->id);
+            && $job->actorId === $user->id
+            && $job->uniqueId() === "billing-snap:{$this->tenant->id}:{$invoice->id}");
 
         $this->assertSame('queued', $invoice->fresh()->metadata['payment_session_status']);
     }
@@ -351,6 +383,17 @@ class BillingEngineTest extends TestCase
 
         $this->assertSame('failed', $invoice->fresh()->metadata['payment_session_status']);
         $this->assertSame('Midtrans timeout', $invoice->fresh()->metadata['payment_session_error']);
+    }
+
+    public function test_snap_payment_job_final_failure_callback_persists_status(): void
+    {
+        $invoice = $this->createPendingInvoice();
+        $job = new CreateBillingSnapPaymentJob($this->tenant->id, $invoice->id, null);
+
+        $job->failed(new Exception('Midtrans retries exhausted'));
+
+        $this->assertSame('failed', $invoice->fresh()->metadata['payment_session_status']);
+        $this->assertSame('Midtrans retries exhausted', $invoice->fresh()->metadata['payment_session_error']);
     }
 
     public function test_snap_payment_job_is_idempotent_for_existing_payment_session(): void

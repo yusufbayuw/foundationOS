@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AppApiRoutesTest extends TestCase
@@ -77,9 +78,7 @@ class AppApiRoutesTest extends TestCase
             ->assertJsonPath('data.name', 'Updated App User');
     }
 
-    /**
-     * @dataProvider protectedEndpointProvider
-     */
+    #[DataProvider('protectedEndpointProvider')]
     public function test_app_endpoints_are_registered_behind_sanctum(string $method, string $uri): void
     {
         $this->json($method, $uri)->assertUnauthorized();

@@ -76,6 +76,8 @@ class ExamShieldProvisioner
             Permission::findOrCreate($permissionName, $guard);
         }
 
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $this->syncRole(ExamRole::ExamAdmin->value, $allPermissions, $tenant);
         $this->syncRole(ExamRole::Teacher->value, $this->teacherPermissions(), $tenant);
         $this->syncRole(ExamRole::Lecturer->value, $this->lecturerPermissions(), $tenant);

@@ -2,6 +2,7 @@
 
 namespace Modules\Enrollment\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -11,6 +12,8 @@ use Modules\Enrollment\Models\Applicant;
 
 class EnrollmentStatsOverview extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 11;
 
     protected function getStats(): array

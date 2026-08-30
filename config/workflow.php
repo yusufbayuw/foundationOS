@@ -18,6 +18,8 @@ return [
     'tenant_scope_fallback' => (bool) env('WORKFLOW_TENANT_SCOPE_FALLBACK', true),
     'allowed_options_sources' => [
         'static',
+        'eloquent',
+        'enum',
     ],
     'allowed_automation_jobs' => [],
 

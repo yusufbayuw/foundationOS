@@ -16,8 +16,11 @@ use Modules\Exam\Models\ExamPublishSnapshot;
 use Modules\Exam\Models\ExamQuestionOption;
 use Modules\Exam\Models\ExamResult;
 use Modules\Exam\Models\ExamRuntimeSyncLog;
+use Modules\Member\Models\MemberProfile;
+use Modules\Member\Models\MemberProof;
 use Modules\Monitoring\Models\AutomationRun;
 use Modules\Monitoring\Models\PrintExportLog;
+use Modules\Sales\Models\Voucher as SalesVoucher;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -140,6 +143,9 @@ class ModuleFilamentResourceCoverageTest extends TestCase
             ExamQuestionOption::class,
             ExamResult::class,
             ExamRuntimeSyncLog::class,
+            MemberProfile::class,
+            MemberProof::class,
+            SalesVoucher::class,
         ];
     }
 

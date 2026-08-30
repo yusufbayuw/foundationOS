@@ -5,6 +5,7 @@ namespace Modules\Asset\Filament\Resources\AssetCategories\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Asset\Models\AssetCategory;
+use Modules\Core\Support\FilamentUi;
 
 class AssetCategoryInfolist
 {
@@ -13,9 +14,9 @@ class AssetCategoryInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

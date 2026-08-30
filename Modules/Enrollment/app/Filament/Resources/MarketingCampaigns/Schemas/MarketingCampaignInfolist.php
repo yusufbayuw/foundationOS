@@ -4,6 +4,7 @@ namespace Modules\Enrollment\Filament\Resources\MarketingCampaigns\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class MarketingCampaignInfolist
 {
@@ -12,7 +13,7 @@ class MarketingCampaignInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('code'),
                 TextEntry::make('name'),
                 TextEntry::make('spend_amount')

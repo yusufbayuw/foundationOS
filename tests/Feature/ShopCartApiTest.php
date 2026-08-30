@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ShopOrderStatus;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\PersonalAccessToken;
@@ -109,6 +110,7 @@ class ShopCartApiTest extends TestCase
         $order = MarketplaceOrder::withoutTenantScope()->firstOrFail();
 
         $this->assertSame(67500, (int) $order->meta['total']);
+        $this->assertSame(ShopOrderStatus::PendingPayment, $order->status);
     }
 
     public function test_cart_items_are_isolated_by_tenant(): void

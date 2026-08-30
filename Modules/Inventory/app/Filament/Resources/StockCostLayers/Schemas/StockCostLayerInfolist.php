@@ -4,6 +4,7 @@ namespace Modules\Inventory\Filament\Resources\StockCostLayers\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class StockCostLayerInfolist
 {
@@ -12,13 +13,13 @@ class StockCostLayerInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('warehouse.name')
-                    ->label('Warehouse'),
+                    ->label(FilamentUi::text('Warehouse')),
                 TextEntry::make('stockItem.name')
-                    ->label('Stock item'),
+                    ->label(FilamentUi::text('Stock item')),
                 TextEntry::make('stockMove.id')
-                    ->label('Stock move'),
+                    ->label(FilamentUi::text('Stock move')),
                 TextEntry::make('quantity_remaining')
                     ->numeric(),
                 TextEntry::make('unit_cost')

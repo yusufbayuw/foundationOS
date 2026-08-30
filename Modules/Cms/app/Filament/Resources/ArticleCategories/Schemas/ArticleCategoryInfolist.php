@@ -5,6 +5,7 @@ namespace Modules\Cms\Filament\Resources\ArticleCategories\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Cms\Models\ArticleCategory;
+use Modules\Core\Support\FilamentUi;
 
 class ArticleCategoryInfolist
 {
@@ -13,9 +14,9 @@ class ArticleCategoryInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

@@ -50,6 +50,7 @@ class ViewBudget extends ViewRecord
                 ->label(FilamentUi::text('Start Approval Workflow'))
                 ->icon('heroicon-o-play')
                 ->color('primary')
+                ->authorize('update')
                 ->visible(fn (): bool => in_array($record->status, ['draft', 'revision_required'], true) && ! WorkflowInstance::query()
                     ->where('subject_type', $this->record::class)
                     ->where('subject_id', $this->record->getKey())

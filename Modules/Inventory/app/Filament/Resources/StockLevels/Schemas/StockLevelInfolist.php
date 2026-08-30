@@ -4,6 +4,7 @@ namespace Modules\Inventory\Filament\Resources\StockLevels\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class StockLevelInfolist
 {
@@ -12,11 +13,11 @@ class StockLevelInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('warehouse.name')
-                    ->label('Warehouse'),
+                    ->label(FilamentUi::text('Warehouse')),
                 TextEntry::make('stockItem.name')
-                    ->label('Stock item'),
+                    ->label(FilamentUi::text('Stock item')),
                 TextEntry::make('quantity_on_hand')
                     ->numeric(),
                 TextEntry::make('quantity_reserved')

@@ -19,18 +19,28 @@ class VisitorLog extends Model
     protected $fillable = [
         'tenant_id',
         'organization_id',
+        'visitor_id',
         'code',
         'name',
         'status',
         'description',
         'meta',
+        'checked_in_at',
+        'checked_out_at',
     ];
 
     protected function casts(): array
     {
         return [
             'meta' => 'array',
+            'checked_in_at' => 'datetime',
+            'checked_out_at' => 'datetime',
         ];
+    }
+
+    public function visitor(): BelongsTo
+    {
+        return $this->belongsTo(Visitor::class);
     }
 
     public function organization(): BelongsTo

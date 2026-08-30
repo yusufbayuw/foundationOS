@@ -4,6 +4,7 @@ namespace App\Filament\Widgets\Charts;
 
 use App\Filament\Widgets\Charts\Concerns\CachesChartData;
 use App\Services\ExecutiveMetricsService;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\ChartWidget;
 use Modules\Core\Support\FilamentUi;
@@ -11,6 +12,7 @@ use Modules\Core\Support\FilamentUi;
 class OutstandingArApChart extends ChartWidget
 {
     use CachesChartData;
+    use HasWidgetShield;
 
     protected static ?int $sort = 12;
 

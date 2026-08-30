@@ -5,6 +5,7 @@ namespace Modules\Campus\Filament\Resources\MbkmActivities\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Campus\Models\MbkmActivity;
+use Modules\Core\Support\FilamentUi;
 
 class MbkmActivityInfolist
 {
@@ -13,9 +14,9 @@ class MbkmActivityInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('collageStudent.id')
-                    ->label('Collage student')
+                    ->label(FilamentUi::text('Collage student'))
                     ->placeholder('-'),
                 TextEntry::make('activity_type'),
                 TextEntry::make('title'),

@@ -4,6 +4,7 @@ namespace Modules\Finance\Filament\Resources\CustomerInvoiceItems\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Finance\Models\CustomerInvoiceItem;
 
 class CustomerInvoiceItemInfolist
@@ -13,9 +14,9 @@ class CustomerInvoiceItemInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('customerInvoice.id')
-                    ->label('Customer invoice'),
+                    ->label(FilamentUi::text('Customer invoice')),
                 TextEntry::make('description'),
                 TextEntry::make('quantity')
                     ->numeric(),
@@ -28,7 +29,7 @@ class CustomerInvoiceItemInfolist
                 TextEntry::make('line_total')
                     ->numeric(),
                 TextEntry::make('chartOfAccount.name')
-                    ->label('Chart of account')
+                    ->label(FilamentUi::text('Chart of account'))
                     ->placeholder('-'),
                 TextEntry::make('sort_order')
                     ->numeric(),

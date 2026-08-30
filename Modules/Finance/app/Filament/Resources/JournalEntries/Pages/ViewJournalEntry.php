@@ -28,6 +28,7 @@ class ViewJournalEntry extends ViewRecord
                 ->label(FilamentUi::text('Post Journal'))
                 ->icon('heroicon-o-check')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => ! $record->is_posted && ! $record->is_reversed)
                 ->form([
                     Textarea::make('notes')->label(FilamentUi::text('Posting Notes'))->rows(3),
@@ -48,6 +49,7 @@ class ViewJournalEntry extends ViewRecord
                 ->label(FilamentUi::text('Reverse Journal'))
                 ->icon('heroicon-o-arrow-uturn-left')
                 ->color('danger')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->is_posted && ! $record->is_reversed)
                 ->form([
                     Textarea::make('reason')->label(FilamentUi::text('Reversal Reason'))->rows(3)->required(),

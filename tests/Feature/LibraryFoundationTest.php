@@ -492,6 +492,7 @@ class LibraryFoundationTest extends TestCase
         $user = User::create([
             'name' => 'Library Admin',
             'email' => 'library-admin@example.com',
+            'email_verified_at' => now(),
             'password' => 'password',
         ]);
 

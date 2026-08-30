@@ -102,6 +102,7 @@ class RfqVendorsTable
                     ->label(FilamentUi::text('Award to Vendor'))
                     ->icon(Heroicon::Trophy)
                     ->color('success')
+                    ->authorize('update')
                     ->visible(fn (RfqVendor $record): bool => ! $record->is_awarded
                         && $record->requestForQuotation?->status !== 'awarded')
                     ->schema([

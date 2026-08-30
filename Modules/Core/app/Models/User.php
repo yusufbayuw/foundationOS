@@ -47,6 +47,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
 {
     use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, MustVerifyEmailTrait, Notifiable, SoftDeletes;
 
+    protected string $guard_name = 'web';
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

@@ -22,7 +22,7 @@ class MerchOrderForm
                     ...ShopOrderStatus::options(),
                 ])->default(ShopOrderStatus::PendingPayment->value),
                 Textarea::make('rejection_reason')
-                    ->label('Rejection reason')
+                    ->label(FilamentUi::text('Rejection reason'))
                     ->columnSpanFull(),
                 Textarea::make('description')->label(FilamentUi::field('description'))->columnSpanFull(),
             ])->columns(2),

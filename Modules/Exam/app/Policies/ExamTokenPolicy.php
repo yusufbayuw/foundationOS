@@ -67,6 +67,33 @@ class ExamTokenPolicy
         return $this->delete($authUser, $examToken);
     }
 
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:ExamToken')
+            && $authUser->can(ExamPermission::ManageExamToken->value);
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:ExamToken')
+            && $authUser->can(ExamPermission::ManageExamToken->value);
+    }
+
+    public function replicate(AuthUser $authUser, ExamToken $examToken): bool
+    {
+        $exam = $this->examFromToken($examToken);
+
+        return $authUser->can('Replicate:ExamToken')
+            && $exam !== null
+            && $this->canAccessExam($authUser, $exam, ExamPermission::ManageExamToken->value);
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:ExamToken')
+            && $authUser->can(ExamPermission::ManageExamToken->value);
+    }
+
     protected function examFromToken(ExamToken $examToken): ?ExamDefinition
     {
         return $examToken->examParticipant?->examDefinition;

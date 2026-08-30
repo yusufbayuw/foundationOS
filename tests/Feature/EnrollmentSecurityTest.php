@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\PersonalAccessToken;
+use App\Models\Role;
 use App\Support\CurrentTenant;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
@@ -14,6 +15,8 @@ use Modules\Enrollment\Models\AdmissionPeriod;
 use Modules\Enrollment\Models\Applicant;
 use Modules\Enrollment\Services\ApplicantPromotionService;
 use Modules\School\Models\Student;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class EnrollmentSecurityTest extends TestCase
@@ -110,6 +113,27 @@ class EnrollmentSecurityTest extends TestCase
             'subscription_plan_id' => $plan->id,
             'created_by' => $user->id,
         ]);
+
+        Permission::firstOrCreate([
+            'name' => 'Create:Applicant',
+            'guard_name' => 'web',
+        ]);
+
+        $role = Role::firstOrCreate([
+            'name' => 'enrollment_api_writer',
+            'guard_name' => 'web',
+            'tenant_id' => $tenant->id,
+        ]);
+        $role->givePermissionTo('Create:Applicant');
+
+        setPermissionsTeamId($tenant->id);
+        $user->roles()->syncWithoutDetaching([
+            $role->id => [
+                'model_type' => $user->getMorphClass(),
+                'tenant_id' => $tenant->id,
+            ],
+        ]);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $organization = Organization::create([
             'tenant_id' => $tenant->id,

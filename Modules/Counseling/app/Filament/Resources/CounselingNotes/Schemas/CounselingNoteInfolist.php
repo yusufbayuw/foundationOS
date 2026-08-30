@@ -5,6 +5,7 @@ namespace Modules\Counseling\Filament\Resources\CounselingNotes\Schemas;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Counseling\Models\CounselingNote;
 
 class CounselingNoteInfolist
@@ -14,9 +15,9 @@ class CounselingNoteInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),
@@ -39,7 +40,7 @@ class CounselingNoteInfolist
                     ->dateTime()
                     ->visible(fn (CounselingNote $record): bool => $record->trashed()),
                 TextEntry::make('counselingCase.name')
-                    ->label('Counseling case')
+                    ->label(FilamentUi::text('Counseling case'))
                     ->placeholder('-'),
                 IconEntry::make('is_confidential')
                     ->boolean(),

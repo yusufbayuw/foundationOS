@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
@@ -9,8 +10,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\DB;
-use Modules\Core\Filament\Resources\AcademicYears\AcademicYearResource;
 use Modules\Core\Filament\Resources\AcademicPeriods\AcademicPeriodResource;
+use Modules\Core\Filament\Resources\AcademicYears\AcademicYearResource;
 use Modules\Core\Filament\Resources\Organizations\OrganizationResource;
 use Modules\Core\Filament\Resources\UserTenantRoles\UserTenantRoleResource;
 use Modules\Core\Models\Tenant;
@@ -22,6 +23,10 @@ use Modules\Core\Support\FilamentUi;
 
 class SetupCenter extends Page
 {
+    use HasPageShield {
+        canAccess as protected canAccessViaShield;
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::RocketLaunch;
 
     protected static ?int $navigationSort = 1;
@@ -77,7 +82,9 @@ class SetupCenter extends Page
             return false;
         }
 
-        return $user->canAccessTenant($tenant) && $user->isTenantAdministrator($tenant);
+        return $user->canAccessTenant($tenant)
+            && $user->isTenantAdministrator($tenant)
+            && static::canAccessViaShield();
     }
 
     /**
@@ -91,9 +98,10 @@ class SetupCenter extends Page
             Action::make('selectProductProfile')
                 ->label($this->setup['profile']['code'] ? 'Perbarui profil' : 'Pilih profil produk')
                 ->icon(Heroicon::RectangleStack)
+                ->authorize(fn (): bool => static::canAccess())
                 ->schema([
                     Select::make('product_profile')
-                        ->label('Profil produk')
+                        ->label(FilamentUi::text('Profil produk'))
                         ->options(fn (ProductProfileCatalog $catalog): array => $catalog->options())
                         ->descriptions(fn (ProductProfileCatalog $catalog): array => $catalog->descriptions())
                         ->default($this->setup['profile']['code'])
@@ -128,7 +136,7 @@ class SetupCenter extends Page
                 ->url($nextStep['action_url'] ?? null)
                 ->disabled($nextStep === null),
             Action::make('manageModules')
-                ->label('Lihat modul')
+                ->label(FilamentUi::text('Lihat modul'))
                 ->icon(Heroicon::PuzzlePiece)
                 ->color('gray')
                 ->url(ModuleMarketplace::getUrl(tenant: Filament::getTenant())),

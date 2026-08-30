@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\UserPasskey;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Modules\Core\Models\User;
 use Tests\TestCase;
 
@@ -14,9 +15,9 @@ class PasskeyAuthTest extends TestCase
     public function test_registration_options_generate_challenge_without_collecting_biometrics(): void
     {
         $user = User::factory()->create();
+        Sanctum::actingAs($user, ['api:write']);
 
-        $response = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/auth/passkeys/options/register');
+        $response = $this->postJson('/api/v1/auth/passkeys/options/register');
 
         $response->assertOk()
             ->assertJsonPath('data.rp.name', config('app.name'))
@@ -29,20 +30,20 @@ class PasskeyAuthTest extends TestCase
     public function test_user_can_register_passkey_public_credential(): void
     {
         $user = User::factory()->create();
-        $challenge = $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/auth/passkeys/options/register')
+        Sanctum::actingAs($user, ['api:write']);
+
+        $challenge = $this->postJson('/api/v1/auth/passkeys/options/register')
             ->json('data.challenge');
 
         $publicKey = $this->makeKeyPair()['public'];
 
-        $this->actingAs($user, 'sanctum')
-            ->postJson('/api/v1/auth/passkeys/register', [
-                'challenge' => $challenge,
-                'credential_id' => 'credential-register-1',
-                'public_key' => trim($publicKey),
-                'sign_count' => 10,
-                'transports' => ['internal'],
-            ])
+        $this->postJson('/api/v1/auth/passkeys/register', [
+            'challenge' => $challenge,
+            'credential_id' => 'credential-register-1',
+            'public_key' => trim($publicKey),
+            'sign_count' => 10,
+            'transports' => ['internal'],
+        ])
             ->assertCreated()
             ->assertJsonPath('data.credential_id', 'credential-register-1')
             ->assertJsonPath('data.biometric_notice', 'Biometric templates never leave the device; only WebAuthn credential material is stored.');
@@ -53,6 +54,14 @@ class PasskeyAuthTest extends TestCase
             'public_key' => trim($publicKey),
             'sign_count' => 10,
         ]);
+    }
+
+    public function test_read_only_token_cannot_register_a_passkey(): void
+    {
+        Sanctum::actingAs(User::factory()->create(), ['api:read']);
+
+        $this->postJson('/api/v1/auth/passkeys/options/register')
+            ->assertForbidden();
     }
 
     public function test_user_can_login_with_valid_passkey_assertion(): void

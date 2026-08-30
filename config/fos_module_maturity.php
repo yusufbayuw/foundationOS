@@ -56,6 +56,8 @@ return [
         'Capacity',
         'Ai',
         'Consulting',
+        'Member',
+        'Voucher',
     ],
 
     /**

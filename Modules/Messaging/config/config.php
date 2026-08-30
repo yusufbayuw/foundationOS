@@ -4,26 +4,26 @@ return [
     'channels' => [
         'database' => true,
         'mail' => true,
-        'whatsapp' => env('FOS_WHATSAPP_ENABLED', false),
-        'sms' => env('FOS_SMS_ENABLED', false),
-        'push' => env('FOS_PUSH_ENABLED', false),
+        'whatsapp' => config('services.foundationos.messaging.channels.whatsapp', false),
+        'sms' => config('services.foundationos.messaging.channels.sms', false),
+        'push' => config('services.foundationos.messaging.channels.push', false),
         'telegram' => env('FOS_TELEGRAM_ENABLED', false),
     ],
 
     'push' => [
-        'provider' => env('FOS_PUSH_PROVIDER', 'fcm'),
+        'provider' => config('services.foundationos.messaging.push.provider', 'fcm'),
         'fcm' => [
-            'endpoint' => env('FOS_FCM_ENDPOINT', 'https://fcm.googleapis.com/fcm/send'),
-            'server_key' => env('FOS_FCM_SERVER_KEY'),
+            'endpoint' => config('services.foundationos.messaging.push.fcm.endpoint', 'https://fcm.googleapis.com/fcm/send'),
+            'server_key' => config('services.foundationos.messaging.push.fcm.server_key'),
         ],
     ],
 
     'webhooks' => [
-        'whatsapp_secret' => env('FOS_WHATSAPP_WEBHOOK_SECRET'),
+        'whatsapp_secret' => config('services.foundationos.messaging.webhooks.whatsapp_secret'),
         'whatsapp' => [
             'providers' => [
                 'local' => [
-                    'secret' => env('FOS_WHATSAPP_LOCAL_WEBHOOK_SECRET'),
+                    'secret' => config('services.foundationos.messaging.webhooks.whatsapp_local_secret'),
                 ],
             ],
         ],

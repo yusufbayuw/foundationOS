@@ -11,6 +11,8 @@ use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Enrollment\Models\AdmissionPeriod;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class ApiV2ParityTest extends TestCase
@@ -44,6 +46,11 @@ class ApiV2ParityTest extends TestCase
             'subscription_plan_id' => $plan->id,
             'created_by' => $this->user->id,
         ]);
+
+        setPermissionsTeamId($this->tenant->id);
+        Permission::findOrCreate('Create:Applicant', 'web');
+        $this->user->givePermissionTo('Create:Applicant');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         app(CurrentTenant::class)->set($this->tenant);
 
@@ -119,7 +126,7 @@ class ApiV2ParityTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('info.version', 'v2')
-            ->assertJsonPath('paths./api/v2/organizations.get.security.0.sanctum.0', 'organizations:read')
+            ->assertJsonPath('paths./api/v2/organizations.get.security.0.sanctum', [])
             ->assertJsonStructure([
                 'paths' => [
                     '/api/v2/me',

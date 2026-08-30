@@ -25,23 +25,26 @@ class MerchOrdersTable
             ->recordActions([
 
                 Action::make('markReadyForPickup')
-                    ->label('Mark ready for pickup')
+                    ->label(FilamentUi::text('Mark ready for pickup'))
+                    ->authorize('update')
                     ->visible(fn ($record): bool => $record->status === ShopOrderStatus::Paid)
                     ->action(function ($record): void {
                         $record->markReadyForPickup();
                     }),
                 Action::make('markPickedUp')
-                    ->label('Mark picked up')
+                    ->label(FilamentUi::text('Mark picked up'))
+                    ->authorize('update')
                     ->visible(fn ($record): bool => $record->status === ShopOrderStatus::ReadyForPickup)
                     ->action(function ($record): void {
                         $record->markPickedUp();
                     }),
                 Action::make('reject')
-                    ->label('Reject')
+                    ->label(FilamentUi::text('Reject'))
+                    ->authorize('update')
                     ->visible(fn ($record): bool => in_array($record->status, [ShopOrderStatus::PendingPayment, ShopOrderStatus::Paid], true))
                     ->schema([
                         Textarea::make('rejection_reason')
-                            ->label('Rejection reason')
+                            ->label(FilamentUi::text('Rejection reason'))
                             ->required(),
                     ])
                     ->action(function (array $data, $record): void {

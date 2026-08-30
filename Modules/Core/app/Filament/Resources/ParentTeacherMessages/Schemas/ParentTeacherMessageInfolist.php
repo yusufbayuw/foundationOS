@@ -4,6 +4,7 @@ namespace Modules\Core\Filament\Resources\ParentTeacherMessages\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class ParentTeacherMessageInfolist
 {
@@ -12,13 +13,13 @@ class ParentTeacherMessageInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('student.id')
-                    ->label('Student'),
+                    ->label(FilamentUi::text('Student')),
                 TextEntry::make('parentUser.name')
-                    ->label('Parent user'),
+                    ->label(FilamentUi::text('Parent user')),
                 TextEntry::make('teacherUser.name')
-                    ->label('Teacher user'),
+                    ->label(FilamentUi::text('Teacher user')),
                 TextEntry::make('body')
                     ->columnSpanFull(),
                 TextEntry::make('sender_user_id')

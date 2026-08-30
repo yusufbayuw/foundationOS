@@ -8,6 +8,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
+use Modules\Core\Support\FilamentUi;
 
 class MarketplaceOrderForm
 {
@@ -26,7 +27,7 @@ class MarketplaceOrderForm
                     ->required()
                     ->default(ShopOrderStatus::PendingPayment->value),
                 Textarea::make('rejection_reason')
-                    ->label('Rejection reason')
+                    ->label(FilamentUi::text('Rejection reason'))
                     ->columnSpanFull(),
                 Textarea::make('description')
                     ->columnSpanFull(),

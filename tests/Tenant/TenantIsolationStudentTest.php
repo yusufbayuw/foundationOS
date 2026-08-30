@@ -91,7 +91,7 @@ class TenantIsolationStudentTest extends TestCase
         $this->assertSame(2, Student::allTenants()->count());
     }
 
-    public function test_user_tenant_and_admin_panel_access_require_assignment_or_global_admin(): void
+    public function test_user_tenant_access_requires_assignment_while_admin_panel_allows_onboarding(): void
     {
         $assignedTenant = Tenant::factory()->create(['code' => 'assigned']);
         $foreignTenant = Tenant::factory()->create(['code' => 'foreign']);
@@ -108,7 +108,7 @@ class TenantIsolationStudentTest extends TestCase
         $this->assertTrue($tenantUser->canAccessPanel($adminPanel));
 
         $this->assertFalse($plainUser->canAccessTenant($assignedTenant));
-        $this->assertFalse($plainUser->canAccessPanel($adminPanel));
+        $this->assertTrue($plainUser->canAccessPanel($adminPanel));
         $this->assertTrue($superAdmin->canAccessPanel($adminPanel));
     }
 

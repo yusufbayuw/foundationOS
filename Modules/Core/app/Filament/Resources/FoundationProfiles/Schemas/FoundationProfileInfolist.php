@@ -4,6 +4,7 @@ namespace Modules\Core\Filament\Resources\FoundationProfiles\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class FoundationProfileInfolist
 {
@@ -12,7 +13,7 @@ class FoundationProfileInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('vision')
                     ->placeholder('-')
                     ->columnSpanFull(),

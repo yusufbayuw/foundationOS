@@ -5,6 +5,7 @@ namespace Modules\Enrollment\Filament\Resources\LeadSources\Schemas;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class LeadSourceInfolist
 {
@@ -13,7 +14,7 @@ class LeadSourceInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('code'),
                 TextEntry::make('name'),
                 IconEntry::make('is_active')

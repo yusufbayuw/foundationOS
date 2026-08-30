@@ -10,7 +10,7 @@
             <td class="meta-label">Kode</td>
             <td><strong>{{ $merchOrder->code ?? '-' }}</strong></td>
             <td class="meta-label">Status</td>
-            <td>{{ strtoupper($merchOrder->status ?? '-') }}</td>
+            <td>{{ strtoupper($merchOrder->status->label()) }}</td>
         </tr>
         <tr>
             <td class="meta-label">Nama</td>

@@ -35,6 +35,7 @@ class ViewPayment extends ViewRecord
                 ->label(FilamentUi::text('Verify Payment'))
                 ->icon('heroicon-o-check-badge')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->form([
                     Textarea::make('notes')->label(FilamentUi::text('Verification Notes'))->rows(3),
@@ -55,6 +56,7 @@ class ViewPayment extends ViewRecord
                 ->label(FilamentUi::text('Reject Payment'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->form([
                     Textarea::make('notes')->label(FilamentUi::text('Rejection Notes'))->rows(3)->required(),

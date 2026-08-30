@@ -5,13 +5,14 @@ namespace Modules\Voucher\Filament\Resources\Vouchers\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class VoucherInfolist
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Voucher')
+            Section::make(FilamentUi::text('Voucher'))
                 ->columns(2)
                 ->schema([
                     TextEntry::make('tenant.name'),

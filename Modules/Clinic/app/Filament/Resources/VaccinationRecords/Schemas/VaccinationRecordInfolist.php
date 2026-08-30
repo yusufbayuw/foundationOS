@@ -5,6 +5,7 @@ namespace Modules\Clinic\Filament\Resources\VaccinationRecords\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Clinic\Models\VaccinationRecord;
+use Modules\Core\Support\FilamentUi;
 
 class VaccinationRecordInfolist
 {
@@ -13,9 +14,9 @@ class VaccinationRecordInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

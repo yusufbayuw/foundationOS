@@ -12,6 +12,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Modules\Core\Support\FilamentUi;
 
 class StakeholdersTable
 {
@@ -30,7 +31,7 @@ class StakeholdersTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
+                    ->label(FilamentUi::text('Email address'))
                     ->searchable(),
                 TextColumn::make('phone')
                     ->searchable(),

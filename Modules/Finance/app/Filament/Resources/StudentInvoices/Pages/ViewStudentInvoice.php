@@ -34,6 +34,7 @@ class ViewStudentInvoice extends ViewRecord
                 ->label(FilamentUi::text('Mark Issued'))
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->action(function (): void {
                     try {

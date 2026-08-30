@@ -32,6 +32,7 @@ class ViewLeaveRequest extends ViewRecord
                 ->label(FilamentUi::text('Submit for Approval'))
                 ->icon('heroicon-o-paper-airplane')
                 ->color('primary')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -44,6 +45,7 @@ class ViewLeaveRequest extends ViewRecord
                 ->label(FilamentUi::text('Supervisor Approve'))
                 ->icon('heroicon-o-shield-check')
                 ->color('warning')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'pending' && $record->supervisor_approved_at === null)
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -58,6 +60,7 @@ class ViewLeaveRequest extends ViewRecord
                 ->label(FilamentUi::text('Approve'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -74,6 +77,7 @@ class ViewLeaveRequest extends ViewRecord
                 ->label(FilamentUi::text('Reject'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
+                ->authorize('update')
                 ->visible(fn (): bool => $record->status === 'pending')
                 ->form([
                     Textarea::make('rejection_reason')

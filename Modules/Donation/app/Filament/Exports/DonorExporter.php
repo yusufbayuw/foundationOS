@@ -6,6 +6,7 @@ use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Modules\Core\Support\FilamentUi;
 use Modules\Donation\Models\Donor;
 
 class DonorExporter extends Exporter
@@ -15,9 +16,9 @@ class DonorExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('name')->label('Donor name'),
-            ExportColumn::make('email')->label('Donor email'),
-            ExportColumn::make('phone')->label('Donor phone'),
+            ExportColumn::make('name')->label(FilamentUi::text('Donor name')),
+            ExportColumn::make('email')->label(FilamentUi::text('Donor email')),
+            ExportColumn::make('phone')->label(FilamentUi::text('Donor phone')),
         ];
     }
 

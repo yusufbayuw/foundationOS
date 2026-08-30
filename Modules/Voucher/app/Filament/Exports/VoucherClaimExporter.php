@@ -6,6 +6,7 @@ use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Modules\Core\Support\FilamentUi;
 use Modules\Voucher\Models\VoucherClaim;
 
 class VoucherClaimExporter extends Exporter
@@ -15,12 +16,12 @@ class VoucherClaimExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('voucher.name')->label('Voucher'),
-            ExportColumn::make('user.name')->label('User'),
-            ExportColumn::make('claim_code')->label('Claim code'),
-            ExportColumn::make('status')->label('Status'),
-            ExportColumn::make('claimed_at')->label('Claimed at'),
-            ExportColumn::make('used_at')->label('Used at'),
+            ExportColumn::make('voucher.name')->label(FilamentUi::text('Voucher')),
+            ExportColumn::make('user.name')->label(FilamentUi::text('User')),
+            ExportColumn::make('claim_code')->label(FilamentUi::text('Claim code')),
+            ExportColumn::make('status')->label(FilamentUi::text('Status')),
+            ExportColumn::make('claimed_at')->label(FilamentUi::text('Claimed at')),
+            ExportColumn::make('used_at')->label(FilamentUi::text('Used at')),
         ];
     }
 

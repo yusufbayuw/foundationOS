@@ -44,7 +44,7 @@ class RegisterTenant extends BaseRegisterTenant
                         ->schema([
                             TextInput::make('name')
                                 ->label(FilamentUi::field('name'))
-                                ->helperText('Nama yang akan tampil pada panel dan dokumen organisasi.')
+                                ->helperText(FilamentUi::text('Nama yang akan tampil pada panel dan dokumen organisasi.'))
                                 ->required()
                                 ->maxLength(255)
                                 ->live(onBlur: true)
@@ -55,7 +55,7 @@ class RegisterTenant extends BaseRegisterTenant
 
                             TextInput::make('code')
                                 ->label(FilamentUi::field('code'))
-                                ->helperText('Kode unik permanen untuk integrasi dan referensi internal.')
+                                ->helperText(FilamentUi::text('Kode unik permanen untuk integrasi dan referensi internal.'))
                                 ->required()
                                 ->maxLength(50)
                                 ->unique(Tenant::class, 'code')
@@ -67,7 +67,7 @@ class RegisterTenant extends BaseRegisterTenant
                         ->icon(Heroicon::RectangleStack)
                         ->schema([
                             Radio::make('product_profile')
-                                ->label('Jenis organisasi')
+                                ->label(FilamentUi::text('Jenis organisasi'))
                                 ->options($productProfiles->options())
                                 ->descriptions($productProfiles->descriptions())
                                 ->default($productProfiles->defaultCode())

@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Member\Models\Member;
 use Tests\TestCase;
 
 class MemberRegistrationTest extends TestCase
@@ -19,11 +20,15 @@ class MemberRegistrationTest extends TestCase
 
     private string $token;
 
+    private Tenant $tenant;
+
+    private User $user;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $user = User::create([
+        $this->user = User::create([
             'name' => 'Member User',
             'email' => 'member@example.com',
             'password' => bcrypt('password'),
@@ -35,18 +40,18 @@ class MemberRegistrationTest extends TestCase
             'included_modules' => ['core', 'member'],
         ]);
 
-        $tenant = Tenant::create([
+        $this->tenant = Tenant::create([
             'uuid' => (string) Str::uuid(),
             'code' => 'member-tenant',
             'name' => 'Member Tenant',
             'subscription_plan_id' => $plan->id,
-            'created_by' => $user->id,
+            'created_by' => $this->user->id,
         ]);
 
-        app(CurrentTenant::class)->set($tenant);
+        app(CurrentTenant::class)->set($this->tenant);
 
-        $created = $user->createToken('member-token');
-        PersonalAccessToken::find($created->accessToken->id)?->update(['tenant_id' => $tenant->id]);
+        $created = $this->user->createToken('member-token', ['api:write']);
+        PersonalAccessToken::find($created->accessToken->id)?->update(['tenant_id' => $this->tenant->id]);
         $this->token = $created->plainTextToken;
     }
 
@@ -99,7 +104,8 @@ class MemberRegistrationTest extends TestCase
             'email' => 'employee-member@example.com',
             'password' => bcrypt('password'),
         ]);
-        $created = $employeeUser->createToken('employee-member-token');
+        $created = $employeeUser->createToken('employee-member-token', ['api:write']);
+        PersonalAccessToken::find($created->accessToken->id)?->update(['tenant_id' => $this->tenant->id]);
         $employeeToken = $created->plainTextToken;
 
         $employeeResponse = $this->withToken($employeeToken)->postJson('/api/v1/members/register', [
@@ -150,5 +156,67 @@ class MemberRegistrationTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonPath('error.code', 'validation_failed');
+    }
+
+    public function test_registration_route_requires_tenant_and_write_ability_middleware(): void
+    {
+        $route = app('router')->getRoutes()->getByName('api.members.register');
+
+        $this->assertNotNull($route);
+        $middleware = $route->gatherMiddleware();
+        $this->assertContains('auth:sanctum', $middleware);
+        $this->assertContains('resolve.api.tenant', $middleware);
+        $this->assertContains('throttle:api', $middleware);
+        $this->assertContains('abilities:api:write', $middleware);
+    }
+
+    public function test_token_without_tenant_is_rejected_even_when_a_stale_tenant_context_exists(): void
+    {
+        $created = $this->user->createToken('member-token-without-tenant', ['api:write']);
+
+        $this->withToken($created->plainTextToken)
+            ->postJson('/api/v1/members/register', $this->alumniPayload())
+            ->assertForbidden();
+
+        $this->assertSame(0, Member::withoutTenantScope()->count());
+    }
+
+    public function test_token_without_write_ability_is_rejected(): void
+    {
+        $created = $this->user->createToken('member-read-only', ['api:read']);
+        PersonalAccessToken::find($created->accessToken->id)?->update(['tenant_id' => $this->tenant->id]);
+
+        $this->withToken($created->plainTextToken)
+            ->postJson('/api/v1/members/register', $this->alumniPayload())
+            ->assertForbidden();
+
+        $this->assertSame(0, Member::withoutTenantScope()->count());
+    }
+
+    public function test_registration_uses_token_tenant_instead_of_stale_context(): void
+    {
+        $otherTenant = Tenant::factory()->create();
+        app(CurrentTenant::class)->set($otherTenant);
+
+        $response = $this->withToken($this->token)
+            ->postJson('/api/v1/members/register', $this->alumniPayload())
+            ->assertCreated();
+
+        $member = Member::withoutTenantScope()->findOrFail($response->json('data.id'));
+        $this->assertSame($this->tenant->getKey(), $member->tenant_id);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function alumniPayload(): array
+    {
+        return [
+            'member_type' => 'alumni',
+            'profile' => [
+                'graduation_year' => 2020,
+                'occupation' => 'Software Engineer',
+            ],
+        ];
     }
 }

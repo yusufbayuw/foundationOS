@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Filament\Resources\Sellers\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Marketplace\Models\Seller;
 
 class SellerInfolist
@@ -13,7 +14,7 @@ class SellerInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization_id')
                     ->numeric()
                     ->placeholder('-'),

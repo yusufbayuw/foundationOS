@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Filament\Resources\MarketplaceOrders\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Marketplace\Models\MarketplaceOrder;
 
 class MarketplaceOrderInfolist
@@ -13,7 +14,7 @@ class MarketplaceOrderInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization_id')
                     ->numeric()
                     ->placeholder('-'),
@@ -38,7 +39,7 @@ class MarketplaceOrderInfolist
                     ->dateTime()
                     ->visible(fn (MarketplaceOrder $record): bool => $record->trashed()),
                 TextEntry::make('seller.name')
-                    ->label('Seller')
+                    ->label(FilamentUi::text('Seller'))
                     ->placeholder('-'),
             ]);
     }

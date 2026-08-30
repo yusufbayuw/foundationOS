@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\v1\App\EndowmentLeaderboardController;
 use App\Http\Controllers\Api\V1\App\EventController as AppEventController;
 use App\Http\Controllers\Api\V1\App\ProfileController as AppProfileController;
 use App\Http\Controllers\Api\V1\App\ShopController as AppShopController;
-use App\Http\Controllers\Api\v1\AppEventController as LegacyAppEventController;
 use App\Http\Controllers\Api\v1\AppHomeController;
 use App\Http\Controllers\Api\v1\ApplicantController;
 use App\Http\Controllers\Api\v1\AppNotificationController as LegacyAppNotificationController;
@@ -96,16 +95,15 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('cms/homepage', [PublicCatalogController::class, 'homepage'])->name('cms.homepage');
     });
 
-    Route::get('app/events', [LegacyAppEventController::class, 'index']);
-    Route::get('app/events/{event}', [LegacyAppEventController::class, 'show']);
-
     Route::post('auth/passkeys/options/login', [PasskeyController::class, 'loginOptions']);
     Route::post('auth/passkeys/login', [PasskeyController::class, 'login']);
 
     Route::middleware(['auth:sanctum', 'resolve.api.tenant'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
-        Route::post('auth/passkeys/options/register', [PasskeyController::class, 'registerOptions']);
-        Route::post('auth/passkeys/register', [PasskeyController::class, 'register']);
+        Route::post('auth/passkeys/options/register', [PasskeyController::class, 'registerOptions'])
+            ->middleware('abilities:api:write');
+        Route::post('auth/passkeys/register', [PasskeyController::class, 'register'])
+            ->middleware('abilities:api:write');
         Route::get('tenants/current', [AuthController::class, 'currentTenant']);
 
         // Core resources (read-only)
@@ -128,7 +126,7 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         Route::get('employees/{employee}', [EmployeeController::class, 'show']);
 
         // Write endpoints (idempotency key supported)
-        Route::middleware(['idempotency', 'throttle:checkout'])->group(function () {
+        Route::middleware(['abilities:api:write', 'idempotency', 'throttle:checkout'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('checkout/merch-orders', [CheckoutController::class, 'store']);
@@ -137,21 +135,29 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
 
         Route::get('app/vouchers', [VoucherController::class, 'index']);
         Route::get('app/vouchers/{voucher}', [VoucherController::class, 'show']);
-        Route::post('app/vouchers/{voucher}/claim', [VoucherController::class, 'claim']);
-        Route::post('app/vouchers/claims/{claim}/redeem', [VoucherController::class, 'redeem']);
+        Route::post('app/vouchers/{voucher}/claim', [VoucherController::class, 'claim'])
+            ->middleware('abilities:api:write');
+        Route::post('app/vouchers/claims/{claim}/redeem', [VoucherController::class, 'redeem'])
+            ->middleware('abilities:api:write');
 
         // Mobile-first endpoints
-        Route::post('devices', [DeviceController::class, 'store']);
-        Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
+        Route::post('devices', [DeviceController::class, 'store'])
+            ->middleware('abilities:api:write');
+        Route::delete('devices/{token}', [DeviceController::class, 'destroy'])
+            ->middleware('abilities:api:write');
         Route::get('students/{student}/dashboard', [StudentDashboardController::class, 'show']);
 
         Route::prefix('app')->name('app.')->group(function (): void {
             Route::get('profile', [AppProfileController::class, 'show'])->name('profile.show');
-            Route::put('profile', [AppProfileController::class, 'update'])->name('profile.update');
+            Route::put('profile', [AppProfileController::class, 'update'])
+                ->middleware('abilities:api:write')
+                ->name('profile.update');
             Route::get('donations', [AppDonationController::class, 'index'])->name('donations.index');
             Route::get('donations/me', [AppDonationController::class, 'mine'])->name('donations.mine');
             Route::get('donations/{campaign}', [AppDonationController::class, 'show'])->name('donations.show');
-            Route::post('donations/{campaign}/checkout', [AppDonationController::class, 'checkout'])->name('donations.checkout');
+            Route::post('donations/{campaign}/checkout', [AppDonationController::class, 'checkout'])
+                ->middleware('abilities:api:write')
+                ->name('donations.checkout');
             Route::get('shop/products', [AppShopController::class, 'products'])->name('shop.products.index');
             Route::get('shop/products/{product}', [AppShopController::class, 'product'])->name('shop.products.show');
             Route::get('events', [AppEventController::class, 'index'])->name('events.index');
@@ -159,21 +165,27 @@ Route::prefix('v1')->middleware(['throttle:api'])->group(function () {
         });
 
         Route::get('app/shop/cart', [ShopCartController::class, 'show']);
-        Route::post('app/shop/cart/items', [ShopCartController::class, 'storeItem']);
-        Route::patch('app/shop/cart/items/{item}', [ShopCartController::class, 'updateItem']);
-        Route::delete('app/shop/cart/items/{item}', [ShopCartController::class, 'destroyItem']);
-        Route::post('app/shop/checkout', [ShopCartController::class, 'checkout']);
+        Route::post('app/shop/cart/items', [ShopCartController::class, 'storeItem'])
+            ->middleware('abilities:api:write');
+        Route::patch('app/shop/cart/items/{item}', [ShopCartController::class, 'updateItem'])
+            ->middleware('abilities:api:write');
+        Route::delete('app/shop/cart/items/{item}', [ShopCartController::class, 'destroyItem'])
+            ->middleware('abilities:api:write');
+        Route::post('app/shop/checkout', [ShopCartController::class, 'checkout'])
+            ->middleware('abilities:api:write');
         Route::get('app/shop/orders/me', MyOrderController::class);
 
         Route::get('donation/campaigns', [DonationCampaignController::class, 'index']);
         Route::get('donation/campaigns/{campaign}', [DonationCampaignController::class, 'show']);
-        Route::post('donation/checkout', [DonationApiController::class, 'store']);
+        Route::post('donation/checkout', [DonationApiController::class, 'store'])
+            ->middleware('abilities:api:write');
         Route::get('donation/my-donations', [DonationApiController::class, 'mine']);
         Route::get('donation/donations/{donation}/receipt.pdf', DonationPdfController::class);
         Route::get('app/endowments/leaderboard', EndowmentLeaderboardController::class);
         Route::get('app/home', [AppHomeController::class, 'show']);
         Route::get('app/notifications', [LegacyAppNotificationController::class, 'index']);
-        Route::post('app/notifications/{notification}/read', [LegacyAppNotificationController::class, 'read']);
+        Route::post('app/notifications/{notification}/read', [LegacyAppNotificationController::class, 'read'])
+            ->middleware('abilities:api:write');
         Route::get('app/jobs', [JobPostingController::class, 'index']);
         Route::get('app/jobs/{jobPosting}', [JobPostingController::class, 'show']);
     });
@@ -204,15 +216,17 @@ Route::prefix('v2')->middleware(['throttle:api', 'api.version.meta:v2'])->group(
         Route::get('employees', [EmployeeController::class, 'index']);
         Route::get('employees/{employee}', [EmployeeController::class, 'show']);
 
-        Route::middleware(['idempotency', 'throttle:checkout'])->group(function () {
+        Route::middleware(['abilities:api:write', 'idempotency', 'throttle:checkout'])->group(function () {
             Route::post('applicants', [ApplicantController::class, 'store']);
             Route::post('payments', [PaymentController::class, 'store']);
             Route::post('checkout/merch-orders', [CheckoutController::class, 'store']);
             Route::post('leave-requests', [LeaveRequestController::class, 'store']);
         });
 
-        Route::post('devices', [DeviceController::class, 'store']);
-        Route::delete('devices/{token}', [DeviceController::class, 'destroy']);
+        Route::post('devices', [DeviceController::class, 'store'])
+            ->middleware('abilities:api:write');
+        Route::delete('devices/{token}', [DeviceController::class, 'destroy'])
+            ->middleware('abilities:api:write');
         Route::get('students/{student}/dashboard', [StudentDashboardController::class, 'show']);
     });
 });

@@ -4,6 +4,7 @@ namespace Modules\Messaging\Filament\Resources\NotificationDeliveries\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Messaging\Models\NotificationDelivery;
 
 class NotificationDeliveryInfolist
@@ -13,10 +14,10 @@ class NotificationDeliveryInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant')
+                    ->label(FilamentUi::text('Tenant'))
                     ->placeholder('-'),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

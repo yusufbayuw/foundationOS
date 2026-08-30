@@ -4,6 +4,7 @@ namespace Modules\Inventory\Filament\Resources\StockAdjustmentLines\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class StockAdjustmentLineInfolist
 {
@@ -12,11 +13,11 @@ class StockAdjustmentLineInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('stockAdjustment.id')
-                    ->label('Stock adjustment'),
+                    ->label(FilamentUi::text('Stock adjustment')),
                 TextEntry::make('stockItem.name')
-                    ->label('Stock item'),
+                    ->label(FilamentUi::text('Stock item')),
                 TextEntry::make('quantity_delta')
                     ->numeric(),
                 TextEntry::make('unit_cost')

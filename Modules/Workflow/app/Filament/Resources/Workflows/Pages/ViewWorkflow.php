@@ -24,6 +24,7 @@ class ViewWorkflow extends ViewRecord
                 ->label(FilamentUi::text('Publish'))
                 ->icon('heroicon-o-bolt')
                 ->color('success')
+                ->authorize('update')
                 ->requiresConfirmation()
                 ->visible(fn (): bool => $this->record->status?->value !== WorkflowDefinitionStatus::Active->value || ! $this->record->is_active)
                 ->action(function (): void {
@@ -39,6 +40,7 @@ class ViewWorkflow extends ViewRecord
                 ->label(FilamentUi::text('Archive'))
                 ->icon('heroicon-o-archive-box')
                 ->color('gray')
+                ->authorize('update')
                 ->requiresConfirmation()
                 ->visible(fn (): bool => $this->record->status?->value !== WorkflowDefinitionStatus::Archived->value)
                 ->action(function (): void {
@@ -54,6 +56,7 @@ class ViewWorkflow extends ViewRecord
                 ->label(FilamentUi::text('Duplicate as New Version'))
                 ->icon('heroicon-o-document-duplicate')
                 ->color('warning')
+                ->authorize('replicate')
                 ->requiresConfirmation()
                 ->action(function (): void {
                     $clone = app(WorkflowDefinitionLifecycleService::class)

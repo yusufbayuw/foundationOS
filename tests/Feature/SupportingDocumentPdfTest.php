@@ -366,7 +366,7 @@ class SupportingDocumentPdfTest extends TestCase
             'organization_id' => $organization->id,
             'code' => 'MER-001',
             'name' => 'Paket Seragam Baru',
-            'status' => 'active',
+            'status' => 'picked_up',
         ]);
 
         $engagementInvoice = EngagementInvoice::create([

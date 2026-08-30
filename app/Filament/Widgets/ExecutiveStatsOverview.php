@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Services\ExecutiveMetricsService;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -10,6 +11,8 @@ use Modules\Core\Support\FilamentUi;
 
 class ExecutiveStatsOverview extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 1;
 
     protected function getStats(): array

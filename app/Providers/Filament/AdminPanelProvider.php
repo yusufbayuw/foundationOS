@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->emailVerification()
             ->passwordReset()
+            ->strictAuthorization()
             ->tenantRegistration(RegisterTenant::class)
             ->profile(EditProfile::class)
             ->multiFactorAuthentication([
@@ -87,9 +88,12 @@ class AdminPanelProvider extends PanelProvider
                 return null;
             })
             ->navigationGroups(collect(Module::allEnabled())
-                ->map(fn ($module) => NavigationGroup::make()->label(FilamentUi::module($module->getName())))
+                ->map(fn ($module) => NavigationGroup::make()
+                    ->label(FilamentUi::module($module->getName()))
+                    ->collapsed())
                 ->values()
                 ->all())
+            ->sidebarCollapsibleOnDesktop()
             ->tenant(Tenant::class)
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')

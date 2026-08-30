@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Jobs\CreateBillingSnapPaymentJob;
 use App\Services\BillingService;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -11,12 +12,15 @@ use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Support\CurrencyFormatter;
 use Modules\Core\Support\FilamentUi;
 
 class BillingPage extends Page
 {
+    use HasPageShield;
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::CreditCard;
 
     protected string $view = 'billing.page';
@@ -82,6 +86,7 @@ class BillingPage extends Page
             ->icon('heroicon-o-document-plus')
             ->color('gray')
             ->size('sm')
+            ->authorize('create', SubscriptionLog::class)
             ->requiresConfirmation()
             ->action(function (): void {
                 $this->generateInvoice();
@@ -95,6 +100,7 @@ class BillingPage extends Page
             ->icon('heroicon-o-credit-card')
             ->color('primary')
             ->size('xs')
+            ->authorize(fn (): bool => Auth::user()?->can('Update:SubscriptionLog') ?? false)
             ->action(function (array $arguments): void {
                 $invoiceId = (int) ($arguments['invoice'] ?? 0);
 
@@ -114,6 +120,8 @@ class BillingPage extends Page
 
     public function payInvoice(int $invoiceId): void
     {
+        Gate::authorize('Update:SubscriptionLog');
+
         $tenant = Filament::getTenant();
 
         if (! $tenant) {
@@ -166,6 +174,8 @@ class BillingPage extends Page
 
     public function generateInvoice(): void
     {
+        Gate::authorize('create', SubscriptionLog::class);
+
         $tenant = Filament::getTenant();
 
         if (! $tenant) {

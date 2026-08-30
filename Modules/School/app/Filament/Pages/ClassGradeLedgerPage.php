@@ -2,6 +2,7 @@
 
 namespace Modules\School\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -15,6 +16,7 @@ use Modules\School\Services\ClassGradeLedgerService;
 
 class ClassGradeLedgerPage extends Page implements HasForms
 {
+    use HasPageShield;
     use InteractsWithForms;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-table-cells';

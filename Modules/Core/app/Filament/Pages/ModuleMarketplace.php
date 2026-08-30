@@ -2,6 +2,7 @@
 
 namespace Modules\Core\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -21,6 +22,10 @@ use Modules\Core\Support\FilamentUi;
 
 class ModuleMarketplace extends Page
 {
+    use HasPageShield {
+        canAccess as protected canAccessViaShield;
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::PuzzlePiece;
 
     protected string $view = 'core::filament.pages.module-marketplace';
@@ -50,7 +55,8 @@ class ModuleMarketplace extends Page
         return $tenant instanceof Tenant
             && $user instanceof User
             && $user->canAccessTenant($tenant)
-            && $user->isTenantAdministrator($tenant);
+            && $user->isTenantAdministrator($tenant)
+            && static::canAccessViaShield();
     }
 
     public function toggleModule(int $moduleId, TenantModuleProvisioner $provisioner): void

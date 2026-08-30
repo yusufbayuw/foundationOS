@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\BillingPage;
+use App\Models\Role;
 use App\Services\BillingService;
 use App\Support\CurrentTenant;
 use Filament\Facades\Filament;
@@ -12,6 +13,8 @@ use Mockery;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
 
@@ -45,6 +48,59 @@ class BillingPageActionsTest extends TestCase
         ]);
     }
 
+    public function test_billing_page_requires_its_shield_permission(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant(grantPagePermission: false);
+
+        $this->assertFalse(BillingPage::canAccess());
+
+        $this->grantBillingPagePermission($user, $tenant);
+
+        $this->assertTrue(BillingPage::canAccess());
+    }
+
+    public function test_billing_actions_require_their_shield_model_permissions(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant(grantPagePermission: false);
+
+        $this->grantBillingPagePermission($user, $tenant, grantActionPermissions: false);
+
+        Livewire::actingAs($user)
+            ->test(BillingPage::class)
+            ->assertActionHidden('generateInvoice')
+            ->assertActionHidden('payInvoice');
+    }
+
+    public function test_generate_invoice_method_cannot_bypass_action_authorization(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant(grantPagePermission: false);
+        $this->grantBillingPagePermission($user, $tenant, grantActionPermissions: false);
+
+        Livewire::actingAs($user)
+            ->test(BillingPage::class)
+            ->call('generateInvoice')
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing(SubscriptionLog::class, [
+            'tenant_id' => $tenant->getKey(),
+            'action' => 'monthly_invoice',
+        ]);
+    }
+
+    public function test_pay_invoice_method_cannot_bypass_action_authorization(): void
+    {
+        ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant(grantPagePermission: false);
+        $invoice = $this->makeInvoice($tenant);
+        $this->grantBillingPagePermission($user, $tenant, grantActionPermissions: false);
+
+        Livewire::actingAs($user)
+            ->test(BillingPage::class)
+            ->call('payInvoice', $invoice->getKey())
+            ->assertForbidden();
+
+        $this->assertSame([], $invoice->refresh()->metadata);
+    }
+
     public function test_generate_invoice_action_warns_when_current_month_is_already_billed(): void
     {
         ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant();
@@ -67,7 +123,7 @@ class BillingPageActionsTest extends TestCase
             ->count());
     }
 
-    public function test_pay_invoice_action_opens_midtrans_snap_event(): void
+    public function test_pay_invoice_action_queues_midtrans_snap_session(): void
     {
         ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant();
         $invoice = $this->makeInvoice($tenant);
@@ -81,6 +137,7 @@ class BillingPageActionsTest extends TestCase
             ->with(
                 Mockery::on(fn (Tenant $argument): bool => $argument->is($tenant)),
                 Mockery::on(fn (SubscriptionLog $argument): bool => $argument->is($invoice)),
+                $user->getKey(),
             )
             ->andReturn('snap-token-123');
         $this->app->instance(BillingService::class, $billing);
@@ -88,8 +145,10 @@ class BillingPageActionsTest extends TestCase
         Livewire::actingAs($user)
             ->test(BillingPage::class)
             ->callAction('payInvoice', arguments: ['invoice' => $invoice->id])
-            ->assertDispatched('open-midtrans-snap', token: 'snap-token-123')
+            ->assertNotDispatched('open-midtrans-snap')
             ->assertNotified();
+
+        $this->assertSame('queued', $invoice->refresh()->metadata['payment_session_status']);
     }
 
     public function test_pay_invoice_action_rejects_invoice_id_from_another_tenant(): void
@@ -115,7 +174,7 @@ class BillingPageActionsTest extends TestCase
     /**
      * @return array{tenant: Tenant, user: User}
      */
-    private function bootstrapBillingPageTenant(): array
+    private function bootstrapBillingPageTenant(bool $grantPagePermission = true): array
     {
         ['tenant' => $tenant, 'user' => $user] = $this->makeTenantContext(['core'], 'billing-page-plan');
 
@@ -133,7 +192,46 @@ class BillingPageActionsTest extends TestCase
         Filament::setTenant($tenant);
         app(CurrentTenant::class)->set($tenant);
 
+        if ($grantPagePermission) {
+            $this->grantBillingPagePermission($user, $tenant);
+        }
+
         return ['tenant' => $tenant, 'user' => $user];
+    }
+
+    private function grantBillingPagePermission(
+        User $user,
+        Tenant $tenant,
+        bool $grantActionPermissions = true,
+    ): void {
+        setPermissionsTeamId($tenant->getKey());
+        Permission::findOrCreate('View:BillingPage', 'web');
+
+        if ($grantActionPermissions) {
+            Permission::findOrCreate('Create:SubscriptionLog', 'web');
+            Permission::findOrCreate('Update:SubscriptionLog', 'web');
+        }
+
+        $role = Role::firstOrCreate([
+            'name' => 'billing_manager',
+            'guard_name' => 'web',
+            'tenant_id' => $tenant->getKey(),
+        ]);
+        $role->givePermissionTo(array_filter([
+            'View:BillingPage',
+            $grantActionPermissions ? 'Create:SubscriptionLog' : null,
+            $grantActionPermissions ? 'Update:SubscriptionLog' : null,
+        ]));
+
+        $user->roles()->syncWithoutDetaching([
+            $role->getKey() => [
+                'model_type' => $user->getMorphClass(),
+                'tenant_id' => $tenant->getKey(),
+            ],
+        ]);
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user->unsetRelation('roles')->unsetRelation('permissions');
     }
 
     /**

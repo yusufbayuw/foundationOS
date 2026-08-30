@@ -4,6 +4,7 @@ namespace Modules\KpiEnterprise\Filament\Resources\KpiTargets\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\KpiEnterprise\Models\KpiTarget;
 
 class KpiTargetInfolist
@@ -13,9 +14,9 @@ class KpiTargetInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

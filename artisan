@@ -6,6 +6,20 @@ use Symfony\Component\Console\Input\ArgvInput;
 
 define('LARAVEL_START', microtime(true));
 
+$minimumCliMemory = '256M';
+$currentMemory = ini_get('memory_limit');
+
+if ($currentMemory !== false && $currentMemory !== '-1' && ini_parse_quantity($currentMemory) < ini_parse_quantity($minimumCliMemory)) {
+    ini_set('memory_limit', $minimumCliMemory);
+    $currentMemory = ini_get('memory_limit');
+}
+
+if ($currentMemory !== false && $currentMemory !== '-1' && ini_parse_quantity($currentMemory) < ini_parse_quantity($minimumCliMemory)) {
+    fwrite(STDERR, "foundationOS requires at least {$minimumCliMemory} of memory for Artisan commands.\n");
+
+    exit(1);
+}
+
 // Register the Composer autoloader...
 require __DIR__.'/vendor/autoload.php';
 

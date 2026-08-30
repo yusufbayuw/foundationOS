@@ -303,7 +303,7 @@ class RoadmapV09PlatformExtensionTest extends TestCase
         $this->getJson('/api/openapi.json')
             ->assertOk()
             ->assertJsonPath('openapi', '3.1.0')
-            ->assertJsonPath('paths./api/v1/organizations.get.security.0.sanctum.0', 'organizations:read');
+            ->assertJsonPath('paths./api/v1/organizations.get.security.0.sanctum', []);
     }
 
     public function test_tenant_migration_export_import_has_row_count_and_checksum_parity(): void

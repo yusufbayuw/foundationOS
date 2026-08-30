@@ -9,6 +9,8 @@ use Modules\Core\Support\FilamentUi;
 
 class NavigationGridWidget extends Widget
 {
+    public const ITEMS_PER_PAGE = 24;
+
     protected string $view = 'filament.widgets.navigation-grid-widget';
 
     protected int|string|array $columnSpan = 'full';
@@ -19,21 +21,29 @@ class NavigationGridWidget extends Widget
 
     public string $activeGroup = '';
 
+    public int $itemLimit = self::ITEMS_PER_PAGE;
+
     public function getTitle(): string
     {
         return FilamentUi::text('Navigation');
     }
 
-    public function togglePin(string $label, string $url, string $icon): void
+    public function togglePin(string $url): void
     {
+        $item = $this->findNavigationItem($url);
+
+        abort_unless($item !== null, 404);
+
         /** @var User $user */
         $user = auth()->user();
-        $pinned = collect($user->pinned_menus ?? []);
+        abort_unless($user instanceof User, 403);
+
+        $pinned = collect($this->getPinnedItems());
 
         if ($pinned->contains('url', $url)) {
             $pinned = $pinned->reject(fn (array $item): bool => $item['url'] === $url);
         } else {
-            $pinned->push(['label' => $label, 'url' => $url, 'icon' => $icon]);
+            $pinned->push($item);
         }
 
         $user->update(['pinned_menus' => $pinned->values()->all()]);
@@ -43,11 +53,24 @@ class NavigationGridWidget extends Widget
     {
         $this->activeGroup = $this->activeGroup === $group ? '' : $group;
         $this->search = '';
+        $this->resetItemLimit();
     }
 
     public function updatedSearch(): void
     {
         $this->activeGroup = '';
+        $this->resetItemLimit();
+    }
+
+    public function updatedActiveGroup(): void
+    {
+        $this->search = '';
+        $this->resetItemLimit();
+    }
+
+    public function loadMore(): void
+    {
+        $this->itemLimit += self::ITEMS_PER_PAGE;
     }
 
     /**
@@ -108,9 +131,43 @@ class NavigationGridWidget extends Widget
     /**
      * @return list<array{label: string, url: string, icon: string}>
      */
+    public function getDisplayedItems(): array
+    {
+        return array_slice($this->getVisibleItems(), 0, $this->itemLimit);
+    }
+
+    public function getVisibleItemCount(): int
+    {
+        return count($this->getVisibleItems());
+    }
+
+    public function hasMoreVisibleItems(): bool
+    {
+        return $this->getVisibleItemCount() > $this->itemLimit;
+    }
+
+    /**
+     * @return list<array{label: string, url: string, icon: string}>
+     */
     public function getPinnedItems(): array
     {
-        return auth()->user()?->pinned_menus ?? [];
+        $itemsByUrl = collect($this->getGroupedItems())
+            ->flatten(1)
+            ->keyBy('url');
+
+        return collect(auth()->user()?->pinned_menus ?? [])
+            ->map(function (mixed $item) use ($itemsByUrl): ?array {
+                if (! is_array($item) || ! is_string($item['url'] ?? null)) {
+                    return null;
+                }
+
+                $navigationItem = $itemsByUrl->get($item['url']);
+
+                return is_array($navigationItem) ? $navigationItem : null;
+            })
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /**
@@ -149,5 +206,22 @@ class NavigationGridWidget extends Widget
         }
 
         return is_string($icon) && $icon !== '' ? $icon : 'heroicon-o-rectangle-stack';
+    }
+
+    /**
+     * @return array{label: string, url: string, icon: string}|null
+     */
+    private function findNavigationItem(string $url): ?array
+    {
+        $item = collect($this->getGroupedItems())
+            ->flatten(1)
+            ->first(fn (mixed $item): bool => is_array($item) && ($item['url'] ?? null) === $url);
+
+        return is_array($item) ? $item : null;
+    }
+
+    private function resetItemLimit(): void
+    {
+        $this->itemLimit = self::ITEMS_PER_PAGE;
     }
 }

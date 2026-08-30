@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Filament\Widgets;
 
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -13,6 +14,8 @@ use Modules\Finance\Models\StudentInvoice;
 
 class FinanceStatsWidget extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected static ?int $sort = 20;
 
     protected function getStats(): array

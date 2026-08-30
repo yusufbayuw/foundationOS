@@ -2,18 +2,27 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Support\CurrentTenant;
+use Illuminate\Validation\Rule;
+use Modules\Core\Models\Organization;
+use Modules\MerchOrder\Models\MerchOrder;
+
 class CheckoutOrderRequest extends ApiRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->can('create', MerchOrder::class) ?? false;
     }
 
-    /** @return array<string, array<int, string>> */
-    public function rules(): array
+    /** @return array<string, array<int, mixed>> */
+    public function rules(CurrentTenant $currentTenant): array
     {
         return [
-            'organization_id' => ['nullable', 'integer'],
+            'organization_id' => [
+                'nullable',
+                'integer',
+                Rule::exists(Organization::class, 'id')->where('tenant_id', $currentTenant->id()),
+            ],
             'code' => ['nullable', 'string', 'max:50'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

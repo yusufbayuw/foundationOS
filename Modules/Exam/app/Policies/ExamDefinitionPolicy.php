@@ -63,6 +63,18 @@ class ExamDefinitionPolicy
             && $this->canAccessExam($authUser, $examDefinition, ExamPermission::DeleteExam->value);
     }
 
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:ExamDefinition')
+            && $authUser->can(ExamPermission::DeleteExam->value);
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:ExamDefinition')
+            && $authUser->can(ExamPermission::UpdateExam->value);
+    }
+
     public function replicate(AuthUser $authUser, ExamDefinition $examDefinition): bool
     {
         return $authUser->can('Replicate:ExamDefinition')

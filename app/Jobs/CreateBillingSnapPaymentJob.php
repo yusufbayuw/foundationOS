@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Services\BillingService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -11,15 +12,18 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\Tenant;
+use RuntimeException;
 use Throwable;
 
-class CreateBillingSnapPaymentJob implements ShouldQueue
+class CreateBillingSnapPaymentJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
 
     public int $timeout = 30;
+
+    public int $uniqueFor = 300;
 
     public function __construct(
         public readonly int $tenantId,
@@ -61,6 +65,28 @@ class CreateBillingSnapPaymentJob implements ShouldQueue
         return [10, 30, 60];
     }
 
+    public function uniqueId(): string
+    {
+        return "billing-snap:{$this->tenantId}:{$this->subscriptionLogId}";
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $invoice = SubscriptionLog::query()
+            ->whereKey($this->subscriptionLogId)
+            ->where('tenant_id', $this->tenantId)
+            ->first();
+
+        if (! $invoice) {
+            return;
+        }
+
+        $this->markPaymentSessionFailed(
+            $invoice,
+            $exception ?? new RuntimeException('Payment session job failed without an exception.'),
+        );
+    }
+
     private function hasPreparedPaymentSession(SubscriptionLog $invoice): bool
     {
         return (bool) ($invoice->invoice_url && (($invoice->metadata ?? [])['snap_token'] ?? null));
@@ -75,6 +101,10 @@ class CreateBillingSnapPaymentJob implements ShouldQueue
                 ->first();
 
             if (! $lockedInvoice) {
+                return;
+            }
+
+            if ($this->hasPreparedPaymentSession($lockedInvoice)) {
                 return;
             }
 

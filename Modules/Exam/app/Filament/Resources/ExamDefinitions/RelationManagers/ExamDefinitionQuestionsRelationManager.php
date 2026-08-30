@@ -16,6 +16,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Modules\Core\Support\FilamentUi;
 use Modules\Exam\Enums\ExamStatus;
 use Modules\Exam\Enums\QuestionDifficulty;
@@ -146,6 +147,8 @@ class ExamDefinitionQuestionsRelationManager extends RelationManager
         return Action::make('addQuestion')
             ->label(FilamentUi::text('Add question'))
             ->icon('heroicon-o-plus')
+            ->authorize(fn (): bool => $this->getOwnerRecord() instanceof ExamDefinition
+                && Gate::check('update', $this->getOwnerRecord()))
             ->schema([
                 Toggle::make('include_cross_context')
                     ->label(FilamentUi::text('Include cross-context questions'))

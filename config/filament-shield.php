@@ -1,10 +1,13 @@
 <?php
 
 declare(strict_types=1);
+use App\Filament\Pages\TabbedDashboard;
+use App\Filament\Widgets\NavigationGridWidget;
 use BezhanSalleh\FilamentShield\Resources\Roles\RoleResource;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
+use Modules\Workflow\Filament\Resources\WorkflowStepBranches\WorkflowStepBranchResource;
 
 return [
 
@@ -71,7 +74,7 @@ return [
     'super_admin' => [
         'enabled' => true,
         'name' => 'super_admin',
-        'define_via_gate' => false,
+        'define_via_gate' => true,
         'intercept_gate' => 'before',
     ],
 
@@ -178,7 +181,7 @@ return [
             ],
         ],
         'exclude' => [
-            //
+            WorkflowStepBranchResource::class,
         ],
     ],
 
@@ -198,6 +201,7 @@ return [
         'prefix' => 'view',
         'exclude' => [
             Dashboard::class,
+            TabbedDashboard::class,
         ],
     ],
 
@@ -218,6 +222,7 @@ return [
         'exclude' => [
             AccountWidget::class,
             FilamentInfoWidget::class,
+            NavigationGridWidget::class,
         ],
     ],
 

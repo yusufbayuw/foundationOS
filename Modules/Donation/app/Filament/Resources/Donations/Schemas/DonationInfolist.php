@@ -4,6 +4,7 @@ namespace Modules\Donation\Filament\Resources\Donations\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Donation\Models\Donation;
 
 class DonationInfolist
@@ -13,7 +14,7 @@ class DonationInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization_id')
                     ->numeric()
                     ->placeholder('-'),

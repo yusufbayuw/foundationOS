@@ -4,6 +4,7 @@ namespace Modules\Facility\Filament\Resources\RoomEquipment\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 use Modules\Facility\Models\RoomEquipment;
 
 class RoomEquipmentInfolist
@@ -13,9 +14,9 @@ class RoomEquipmentInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

@@ -67,20 +67,25 @@ class UserIdentityAccessTest extends TestCase
         $this->assertTrue($alphaTenant->is($user->getDefaultTenant(Panel::make()->id('admin'))));
     }
 
-    public function test_user_panel_access_respects_platform_admin_and_unknown_panel_rules(): void
+    public function test_user_panel_access_respects_onboarding_platform_admin_and_unknown_panel_rules(): void
     {
-        $plainUser = User::factory()->create();
+        $onboardingUser = User::factory()->create();
+        $formerTenantOwner = User::factory()->create();
         $tenantUser = User::factory()->create();
         $superAdmin = User::factory()->superAdmin()->create();
         $platformOwner = $this->createPlatformOwner();
 
+        $this->createTenant('former-owner-tenant')->update([
+            'created_by' => $formerTenantOwner->getKey(),
+        ]);
         $this->assignUserToTenant($tenantUser, $this->createTenant('panel-tenant'));
 
-        $this->assertFalse($plainUser->canAccessPanel(Panel::make()->id('admin')));
+        $this->assertTrue($onboardingUser->canAccessPanel(Panel::make()->id('admin')));
+        $this->assertFalse($formerTenantOwner->canAccessPanel(Panel::make()->id('admin')));
         $this->assertTrue($tenantUser->canAccessPanel(Panel::make()->id('admin')));
         $this->assertTrue($superAdmin->canAccessPanel(Panel::make()->id('admin')));
 
-        $this->assertFalse($plainUser->canAccessPanel(Panel::make()->id('platform')));
+        $this->assertFalse($onboardingUser->canAccessPanel(Panel::make()->id('platform')));
         $this->assertTrue($platformOwner->canAccessPanel(Panel::make()->id('platform')));
         $this->assertFalse($platformOwner->canAccessPanel(Panel::make()->id('unknown')));
     }

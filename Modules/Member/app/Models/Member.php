@@ -7,11 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\User;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Member extends Model
 {
-    use HasFactory;
+    use BelongsToTenant, HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['status', 'verified_at', 'verified_by', 'rejection_reason'])
+            ->logOnlyDirty()
+            ->dontLogEmptyChanges();
+    }
 
     protected $fillable = [
         'tenant_id',
@@ -58,5 +69,25 @@ class Member extends Model
     public function proofs(): HasMany
     {
         return $this->hasMany(MemberProof::class);
+    }
+
+    public function approve(User $verifier): void
+    {
+        $this->forceFill([
+            'status' => 'approved',
+            'verified_at' => now(),
+            'verified_by' => $verifier->getKey(),
+            'rejection_reason' => null,
+        ])->save();
+    }
+
+    public function reject(User $verifier, string $reason): void
+    {
+        $this->forceFill([
+            'status' => 'rejected',
+            'verified_at' => now(),
+            'verified_by' => $verifier->getKey(),
+            'rejection_reason' => $reason,
+        ])->save();
     }
 }

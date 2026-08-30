@@ -38,7 +38,7 @@ class WorkflowDesignerTest extends TestCase
             'name' => 'Designer User',
             'email' => 'designer@example.com',
             'password' => 'password',
-        ]);
+        ])->promoteToGlobalSuperAdmin();
 
         $this->tenant = Tenant::create([
             'uuid' => (string) Str::uuid(),
@@ -157,6 +157,21 @@ class WorkflowDesignerTest extends TestCase
         $this->assertSame(WorkflowDefinitionStatus::Draft, $workflow->status);
         $this->assertCount(2, $workflow->steps);
         $this->assertCount(1, $workflow->transitions);
+    }
+
+    public function test_unprivileged_user_cannot_invoke_or_bypass_designer_actions(): void
+    {
+        $unprivilegedUser = User::factory()->create();
+
+        Livewire::actingAs($unprivilegedUser)
+            ->test(WorkflowCanvas::class)
+            ->assertActionHidden('saveDraftAction')
+            ->assertActionHidden('publishAction')
+            ->assertActionHidden('importJsonAction')
+            ->assertActionHidden('addStepAction')
+            ->assertActionHidden('deleteStepAction')
+            ->call('saveDraft')
+            ->assertForbidden();
     }
 
     public function test_save_draft_updates_existing_draft_in_place(): void

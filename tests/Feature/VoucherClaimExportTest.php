@@ -27,14 +27,14 @@ class VoucherClaimExportTest extends TestCase
             'code' => 'BTS-2026',
         ]);
 
-        $user = User::factory()->create([
-            'name' => 'Siti Aminah',
-            'email' => 'siti@example.test',
-        ]);
-
         $statuses = ['claimed', 'used', 'expired'];
 
         foreach ($statuses as $status) {
+            $user = User::factory()->create([
+                'name' => $status === 'used' ? 'Siti Aminah' : str($status)->headline()->toString().' User',
+                'email' => $status === 'used' ? 'siti@example.test' : $status.'@example.test',
+            ]);
+
             VoucherClaim::factory()->create([
                 'tenant_id' => $tenant->id,
                 'organization_id' => $organization->id,

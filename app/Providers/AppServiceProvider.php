@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
+use Modules\Alumni\Models\JobApplication;
 use Modules\Alumni\Models\JobPosting;
 use Modules\Alumni\Policies\JobPostingPolicy;
 use Modules\Campus\Models\CollageStudent;
@@ -48,6 +49,7 @@ use Modules\Campus\Models\StudyPlanItem;
 use Modules\Campus\Models\StudyProgram;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\Organization;
+use Modules\Core\Models\SubscriptionLog;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Donation\Models\Campaign;
@@ -68,9 +70,11 @@ use Modules\Inventory\Models\StockItem;
 use Modules\Inventory\Models\StockMove;
 use Modules\Inventory\Models\Warehouse;
 use Modules\Library\Models\Book;
+use Modules\Library\Models\Member as LibraryMember;
 use Modules\Marketplace\Models\MarketplaceOrder;
 use Modules\Marketplace\Models\MarketplaceProduct;
 use Modules\Marketplace\Policies\MarketplaceProductPolicy;
+use Modules\Member\Models\Member as DomainMember;
 use Modules\MerchOrder\Models\MerchOrder;
 use Modules\MerchOrder\Policies\MerchOrderPolicy;
 use Modules\Monitoring\Listeners\LogSecurityAuthEvents;
@@ -79,6 +83,7 @@ use Modules\Procurement\Models\GoodsReceiptItem;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Models\VendorBill;
+use Modules\Sales\Models\SalesOrder;
 use Modules\School\Models\ClassStudent;
 use Modules\School\Models\Student;
 use Modules\School\Models\StudentGrade;
@@ -148,11 +153,15 @@ class AppServiceProvider extends ServiceProvider
             'user' => User::class,
             'tenant' => Tenant::class,
             'organization' => Organization::class,
+            'alumni_job_application' => JobApplication::class,
+            'subscription_log' => SubscriptionLog::class,
             'school_student' => Student::class,
             'enrollment_applicant' => Applicant::class,
             'campus_collage_student' => CollageStudent::class,
             'campus_study_program' => StudyProgram::class,
             'library_book' => Book::class,
+            'library_member' => LibraryMember::class,
+            'donation' => Donation::class,
             'procurement_vendor' => Vendor::class,
             'purchase_order' => PurchaseOrder::class,
             'goods_receipt' => GoodsReceipt::class,
@@ -165,7 +174,9 @@ class AppServiceProvider extends ServiceProvider
             'budget' => Budget::class,
             'customer_invoice' => CustomerInvoice::class,
             'marketplace_order' => MarketplaceOrder::class,
+            'domain_member' => DomainMember::class,
             'merch_order' => MerchOrder::class,
+            'sales_order' => SalesOrder::class,
             'warehouse' => Warehouse::class,
             'stock_item' => StockItem::class,
             'stock_move' => StockMove::class,

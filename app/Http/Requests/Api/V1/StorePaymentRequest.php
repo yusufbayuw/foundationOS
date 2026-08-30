@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use App\Support\CurrentTenant;
+use Illuminate\Validation\Rule;
+use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\Payment;
+use Modules\Finance\Models\StudentInvoice;
 
 class StorePaymentRequest extends ApiRequest
 {
@@ -12,13 +16,23 @@ class StorePaymentRequest extends ApiRequest
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
-    public function rules(): array
+    public function rules(CurrentTenant $currentTenant): array
     {
+        $tenantId = $currentTenant->id();
+
         return [
-            'student_invoice_id' => ['required', 'integer'],
-            'chart_of_account_id' => ['required', 'integer'],
+            'student_invoice_id' => [
+                'required',
+                'integer',
+                Rule::exists(StudentInvoice::class, 'id')->where('tenant_id', $tenantId),
+            ],
+            'chart_of_account_id' => [
+                'required',
+                'integer',
+                Rule::exists(ChartOfAccount::class, 'id')->where('tenant_id', $tenantId),
+            ],
             'payment_number' => ['required', 'string', 'max:50'],
             'payment_date' => ['required', 'date'],
             'amount' => ['required', 'numeric', 'min:0'],

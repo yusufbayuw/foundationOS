@@ -22,7 +22,12 @@ return [
     'models' => [
         'Modules\\Core\\Models\\Organization' => Organization::class,
         'Modules\\Core\\Models\\Department' => Department::class,
-        'Modules\\Core\\Models\\User' => User::class,
+        'Modules\\Core\\Models\\User' => [
+            'class' => User::class,
+            'tenant_relation' => 'userTenantRoles',
+            'tenant_relation_column' => 'tenant_id',
+            'tenant_relation_scope' => 'active',
+        ],
         'Modules\\Procurement\\Models\\Vendor' => Vendor::class,
         'Modules\\Procurement\\Models\\ProcurementCategory' => ProcurementCategory::class,
         'Modules\\Employee\\Models\\Position' => Position::class,

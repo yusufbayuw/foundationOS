@@ -9,6 +9,8 @@ use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Event\Models\Event;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class AppEventsApiTest extends TestCase
@@ -45,6 +47,12 @@ class AppEventsApiTest extends TestCase
             'created_by' => $this->user->id,
         ]);
 
+        setPermissionsTeamId($this->tenant->id);
+        Permission::findOrCreate('ViewAny:Event', 'web');
+        Permission::findOrCreate('View:Event', 'web');
+        $this->user->givePermissionTo(['ViewAny:Event', 'View:Event']);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
         $createdToken = $this->user->createToken('event-api-token');
         $pat = PersonalAccessToken::find($createdToken->accessToken->id);
         $pat->update(['tenant_id' => $this->tenant->id]);
@@ -58,7 +66,7 @@ class AppEventsApiTest extends TestCase
             'name' => 'Public Guest Event',
         ]);
 
-        $response = $this->getJson('/api/v1/app/events');
+        $response = $this->getJson('/api/v1/app/public/events');
 
         $response->assertOk()
             ->assertJsonPath('data.0.name', 'Public Guest Event');
@@ -100,7 +108,7 @@ class AppEventsApiTest extends TestCase
             'meta' => $this->eventMeta(now()->subDay()->toIso8601String()),
         ]);
 
-        $response = $this->getJson('/api/v1/app/events?filter[active]=true&filter[upcoming]=true');
+        $response = $this->withToken($this->token)->getJson('/api/v1/app/events?filter[active]=true&filter[upcoming]=true');
 
         $response->assertOk();
         $ids = collect($response->json('data'))->pluck('id');
@@ -126,7 +134,7 @@ class AppEventsApiTest extends TestCase
             ],
         ]);
 
-        $response = $this->getJson("/api/v1/app/events/{$event->id}");
+        $response = $this->withToken($this->token)->getJson("/api/v1/app/events/{$event->id}");
 
         $response->assertOk()
             ->assertJsonStructure([

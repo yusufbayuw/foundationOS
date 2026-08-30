@@ -37,6 +37,41 @@ class DonorPolicy
         return $authUser->can('Delete:Donor');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny:Donor');
+    }
+
+    public function restore(AuthUser $authUser, Donor $donor): bool
+    {
+        return $authUser->can('Restore:Donor');
+    }
+
+    public function forceDelete(AuthUser $authUser, Donor $donor): bool
+    {
+        return $authUser->can('ForceDelete:Donor');
+    }
+
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:Donor');
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:Donor');
+    }
+
+    public function replicate(AuthUser $authUser, Donor $donor): bool
+    {
+        return $authUser->can('Replicate:Donor');
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:Donor');
+    }
+
     public function export(AuthUser $authUser): bool
     {
         return $authUser->can('Export:Donor');

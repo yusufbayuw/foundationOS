@@ -21,7 +21,7 @@
                                 </span>
                             </a>
                             <button
-                                wire:click="togglePin('{{ addslashes($item['label']) }}', '{{ $item['url'] }}', '{{ $item['icon'] }}')"
+                                wire:click.prevent='togglePin(@js($item["url"]))'
                                 class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-red-50 dark:hover:bg-red-950"
                                 title="{{ \Modules\Core\Support\FilamentUi::text('Remove from favorites') }}">
                                 <x-heroicon-s-x-mark class="w-3 h-3 text-gray-500 dark:text-gray-400" />
@@ -34,50 +34,38 @@
         @endif
 
         {{-- Search & Group Filter --}}
-        {{-- Search --}}
-        <div class="relative mb-3">
-            <x-heroicon-o-magnifying-glass class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            <input
-                type="text"
-                wire:model.live.debounce.200ms="search"
-                placeholder="{{ \Modules\Core\Support\FilamentUi::text('Search menu') }}..."
-                class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-            @if ($search)
-                <button wire:click="$set('search', '')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <x-heroicon-o-x-circle class="w-4 h-4" />
-                </button>
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row">
+            <div class="relative min-w-0 flex-1">
+                <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                    type="search"
+                    wire:model.live.debounce.200ms="search"
+                    aria-label="{{ \Modules\Core\Support\FilamentUi::text('Search menu') }}"
+                    placeholder="{{ \Modules\Core\Support\FilamentUi::text('Search menu') }}..."
+                    class="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm text-gray-800 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+                />
+            </div>
+
+            @if (! $search)
+                <x-filament::input.wrapper class="sm:w-56">
+                    <x-filament::input.select
+                        aria-label="{{ \Modules\Core\Support\FilamentUi::text('Filter by module') }}"
+                        wire:model.live="activeGroup"
+                    >
+                        <option value="">{{ \Modules\Core\Support\FilamentUi::text('All modules') }}</option>
+                        @foreach ($this->getGroupNames() as $group)
+                            <option value="{{ $group }}">{{ $group }}</option>
+                        @endforeach
+                    </x-filament::input.select>
+                </x-filament::input.wrapper>
             @endif
         </div>
 
-        {{-- Group Filter Chips --}}
-        @if (! $search)
-            <div class="flex flex-wrap gap-2 mb-5">
-                <button
-                    wire:click="setGroup('')"
-                    @class([
-                        'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
-                        'bg-primary-600 border-primary-600 text-white' => $activeGroup === '',
-                        'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600' => $activeGroup !== '',
-                    ])>
-                    {{ \Modules\Core\Support\FilamentUi::text('All') }}
-                </button>
-                @foreach ($this->getGroupNames() as $group)
-                    <button
-                        wire:click="setGroup('{{ $group }}')"
-                        @class([
-                            'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
-                            'bg-primary-600 border-primary-600 text-white' => $activeGroup === $group,
-                            'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-primary-400 hover:text-primary-600' => $activeGroup !== $group,
-                        ])>
-                        {{ $group }}
-                    </button>
-                @endforeach
-            </div>
-        @endif
-
         {{-- Grid Items --}}
-        @php $items = $this->getVisibleItems(); @endphp
+        @php
+            $items = $this->getDisplayedItems();
+            $visibleItemCount = $this->getVisibleItemCount();
+        @endphp
         @if (count($items))
             <div
                 class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"
@@ -99,7 +87,7 @@
                         </a>
                         {{-- Pin toggle --}}
                         <button
-                            wire:click.prevent="togglePin('{{ addslashes($item['label']) }}', '{{ $item['url'] }}', '{{ $item['icon'] }}')"
+                            wire:click.prevent='togglePin(@js($item["url"]))'
                             class="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                             title="{{ $this->isPinned($item['url']) ? \Modules\Core\Support\FilamentUi::text('Remove from favorites') : \Modules\Core\Support\FilamentUi::text('Add to favorites') }}">
                             @if ($this->isPinned($item['url']))
@@ -110,6 +98,27 @@
                         </button>
                     </div>
                 @endforeach
+            </div>
+
+            <div class="mt-5 flex flex-col items-center gap-3 border-t border-gray-100 pt-4 dark:border-gray-800 sm:flex-row sm:justify-between">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ \Modules\Core\Support\FilamentUi::text('Showing') }}
+                    {{ count($items) }}
+                    {{ \Modules\Core\Support\FilamentUi::text('of') }}
+                    {{ $visibleItemCount }}
+                    {{ \Modules\Core\Support\FilamentUi::text('menus') }}
+                </p>
+
+                @if ($this->hasMoreVisibleItems())
+                    <x-filament::button
+                        color="gray"
+                        icon="heroicon-o-chevron-down"
+                        size="sm"
+                        wire:click="loadMore"
+                    >
+                        {{ \Modules\Core\Support\FilamentUi::text('Show more') }}
+                    </x-filament::button>
+                @endif
             </div>
         @else
             <div class="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-gray-500">

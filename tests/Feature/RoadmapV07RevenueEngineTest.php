@@ -195,6 +195,33 @@ class RoadmapV07RevenueEngineTest extends TestCase
         $this->get('/cms/yayasan/pages/home')->assertOk();
     }
 
+    public function test_cms_sitemap_renders_valid_xml_declaration_and_published_pages(): void
+    {
+        $tenant = $this->makeTenant();
+        $site = Site::withoutTenantScope()->create([
+            'tenant_id' => $tenant->getKey(),
+            'code' => 'sitemap-site',
+            'name' => 'Sitemap Site',
+            'is_active' => true,
+        ]);
+
+        Page::withoutTenantScope()->create([
+            'tenant_id' => $tenant->getKey(),
+            'site_id' => $site->getKey(),
+            'slug' => 'published-page',
+            'title_id' => 'Published Page',
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        $response = $this->get('/cms/sitemap-site/sitemap.xml');
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'application/xml')
+            ->assertSee('<?xml version="1.0" encoding="UTF-8"?>', escape: false)
+            ->assertSee('/cms/sitemap-site/pages/published-page', escape: false);
+    }
+
     public function test_training_certificate_verification_endpoint(): void
     {
         $tenant = $this->makeTenant();

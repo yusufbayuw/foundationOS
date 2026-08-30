@@ -35,6 +35,8 @@ class OpenApiController extends Controller
                     'sanctum' => [
                         'type' => 'http',
                         'scheme' => 'bearer',
+                        'bearerFormat' => 'Sanctum personal access token',
+                        'description' => 'Use a tenant-scoped token. Mutating operations list required Sanctum abilities in x-required-abilities.',
                     ],
                 ],
                 'schemas' => [
@@ -86,7 +88,7 @@ class OpenApiController extends Controller
                 'get' => [
                     'summary' => 'List organizations for the current tenant',
                     'security' => [
-                        ['sanctum' => ['organizations:read']],
+                        ['sanctum' => []],
                     ],
                     'responses' => [
                         '200' => [
@@ -100,7 +102,7 @@ class OpenApiController extends Controller
                 'get' => [
                     'summary' => 'Show organization',
                     'security' => [
-                        ['sanctum' => ['organizations:read']],
+                        ['sanctum' => []],
                     ],
                     'responses' => [
                         '200' => [
@@ -113,98 +115,101 @@ class OpenApiController extends Controller
             "{$prefix}/students" => [
                 'get' => [
                     'summary' => 'List students',
-                    'security' => [['sanctum' => ['students:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Student collection']],
                 ],
             ],
             "{$prefix}/students/{student}" => [
                 'get' => [
                     'summary' => 'Show student',
-                    'security' => [['sanctum' => ['students:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Student']],
                 ],
             ],
             "{$prefix}/students/{student}/dashboard" => [
                 'get' => [
                     'summary' => 'Student mobile dashboard',
-                    'security' => [['sanctum' => ['students:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Dashboard payload']],
                 ],
             ],
             "{$prefix}/college-students" => [
                 'get' => [
                     'summary' => 'List college students',
-                    'security' => [['sanctum' => ['college_students:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'College student collection']],
                 ],
             ],
             "{$prefix}/college-students/{collegeStudent}" => [
                 'get' => [
                     'summary' => 'Show college student',
-                    'security' => [['sanctum' => ['college_students:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'College student']],
                 ],
             ],
             "{$prefix}/classes" => [
                 'get' => [
                     'summary' => 'List school classes',
-                    'security' => [['sanctum' => ['classes:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Class collection']],
                 ],
             ],
             "{$prefix}/classes/{class}" => [
                 'get' => [
                     'summary' => 'Show school class',
-                    'security' => [['sanctum' => ['classes:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'School class']],
                 ],
             ],
             "{$prefix}/courses" => [
                 'get' => [
                     'summary' => 'List courses',
-                    'security' => [['sanctum' => ['courses:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Course collection']],
                 ],
             ],
             "{$prefix}/courses/{course}" => [
                 'get' => [
                     'summary' => 'Show course',
-                    'security' => [['sanctum' => ['courses:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Course']],
                 ],
             ],
             "{$prefix}/employees" => [
                 'get' => [
                     'summary' => 'List employees',
-                    'security' => [['sanctum' => ['employees:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Employee collection']],
                 ],
             ],
             "{$prefix}/employees/{employee}" => [
                 'get' => [
                     'summary' => 'Show employee',
-                    'security' => [['sanctum' => ['employees:read']]],
+                    'security' => [['sanctum' => []]],
                     'responses' => ['200' => ['description' => 'Employee']],
                 ],
             ],
             "{$prefix}/applicants" => [
                 'post' => [
                     'summary' => 'Create applicant (idempotency key supported)',
-                    'security' => [['sanctum' => ['applicants:write']]],
+                    'security' => [['sanctum' => []]],
+                    'x-required-abilities' => ['api:write'],
                     'responses' => ['201' => ['description' => 'Applicant created']],
                 ],
             ],
             "{$prefix}/payments" => [
                 'post' => [
                     'summary' => 'Record payment (idempotency key supported)',
-                    'security' => [['sanctum' => ['payments:write']]],
+                    'security' => [['sanctum' => []]],
+                    'x-required-abilities' => ['api:write'],
                     'responses' => ['201' => ['description' => 'Payment recorded']],
                 ],
             ],
             "{$prefix}/leave-requests" => [
                 'post' => [
                     'summary' => 'Create leave request (idempotency key supported)',
-                    'security' => [['sanctum' => ['leave_requests:write']]],
+                    'security' => [['sanctum' => []]],
+                    'x-required-abilities' => ['api:write'],
                     'responses' => ['201' => ['description' => 'Leave request created']],
                 ],
             ],
@@ -212,6 +217,7 @@ class OpenApiController extends Controller
                 'post' => [
                     'summary' => 'Register mobile device token',
                     'security' => [['sanctum' => []]],
+                    'x-required-abilities' => ['api:write'],
                     'responses' => ['201' => ['description' => 'Device registered']],
                 ],
             ],
@@ -219,10 +225,26 @@ class OpenApiController extends Controller
                 'delete' => [
                     'summary' => 'Unregister mobile device token',
                     'security' => [['sanctum' => []]],
+                    'x-required-abilities' => ['api:write'],
                     'responses' => ['204' => ['description' => 'Device removed']],
                 ],
             ],
         ];
+
+        if ($version === 'v1') {
+            $paths["{$prefix}/members/register"] = [
+                'post' => [
+                    'summary' => 'Register a member for review',
+                    'security' => [['sanctum' => []]],
+                    'x-required-abilities' => ['api:write'],
+                    'responses' => [
+                        '201' => ['description' => 'Member registration created'],
+                        '403' => ['description' => 'Tenant scope or token ability is missing'],
+                        '422' => ['description' => 'Validation failed'],
+                    ],
+                ],
+            ];
+        }
 
         if ($version === 'v2') {
             $paths['/api/v2'] = [

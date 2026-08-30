@@ -4,6 +4,7 @@ namespace Modules\Campus\Filament\Resources\LecturerEvaluations\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Modules\Core\Support\FilamentUi;
 
 class LecturerEvaluationInfolist
 {
@@ -12,11 +13,11 @@ class LecturerEvaluationInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('lecturer.id')
-                    ->label('Lecturer'),
+                    ->label(FilamentUi::text('Lecturer')),
                 TextEntry::make('courseOffering.id')
-                    ->label('Course offering')
+                    ->label(FilamentUi::text('Course offering'))
                     ->placeholder('-'),
                 TextEntry::make('score')
                     ->numeric()

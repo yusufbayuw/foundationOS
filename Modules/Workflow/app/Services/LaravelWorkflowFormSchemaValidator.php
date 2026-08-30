@@ -75,7 +75,15 @@ class LaravelWorkflowFormSchemaValidator implements WorkflowFormSchemaValidator
         }
 
         $kind = $optionsSource['kind'] ?? null;
-        $supportedKinds = ['eloquent', 'enum'];
+        $supportedKinds = config('workflow.allowed_options_sources', ['static', 'eloquent', 'enum']);
+
+        if ($kind === 'static') {
+            if (! isset($optionsSource['options']) || ! is_array($optionsSource['options'])) {
+                throw new WorkflowConfigurationException("Step [{$stepId}]: options_source.options must be an array for kind=static.");
+            }
+
+            return;
+        }
 
         if (! in_array($kind, $supportedKinds, true)) {
             throw new WorkflowConfigurationException(

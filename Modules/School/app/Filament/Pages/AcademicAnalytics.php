@@ -3,6 +3,7 @@
 namespace Modules\School\Filament\Pages;
 
 use BackedEnum;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
@@ -11,6 +12,8 @@ use Modules\School\Services\AcademicAnalyticsService;
 
 class AcademicAnalytics extends Page
 {
+    use HasPageShield;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ChartBar;
 
     protected static ?string $navigationLabel = null;

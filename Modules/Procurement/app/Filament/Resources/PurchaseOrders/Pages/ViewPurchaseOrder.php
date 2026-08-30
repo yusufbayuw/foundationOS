@@ -33,6 +33,7 @@ class ViewPurchaseOrder extends ViewRecord
                 ->label(FilamentUi::text('Approve PO'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
+                ->authorize('update')
                 ->visible(fn (): bool => $this->record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
@@ -53,6 +54,7 @@ class ViewPurchaseOrder extends ViewRecord
                 ->label(FilamentUi::text('Reject PO'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
+                ->authorize('update')
                 ->visible(fn (): bool => $this->record->status === 'draft')
                 ->form([
                     Textarea::make('rejection_reason')

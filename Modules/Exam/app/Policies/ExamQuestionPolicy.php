@@ -64,6 +64,31 @@ class ExamQuestionPolicy
         return $this->delete($authUser, $examQuestion);
     }
 
+    public function forceDeleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('ForceDeleteAny:ExamQuestion')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value);
+    }
+
+    public function restoreAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('RestoreAny:ExamQuestion')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value);
+    }
+
+    public function replicate(AuthUser $authUser, ExamQuestion $examQuestion): bool
+    {
+        return $authUser->can('Replicate:ExamQuestion')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value)
+            && app(ExamAuthorizationService::class)->examBelongsToActiveTenant($this->asExamTenantProxy($examQuestion));
+    }
+
+    public function reorder(AuthUser $authUser): bool
+    {
+        return $authUser->can('Reorder:ExamQuestion')
+            && $authUser->can(ExamPermission::ManageQuestionBank->value);
+    }
+
     protected function asExamTenantProxy(ExamQuestion $question): ExamDefinition
     {
         $proxy = new ExamDefinition;

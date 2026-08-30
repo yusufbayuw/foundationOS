@@ -62,6 +62,7 @@ class AssignmentsRelationManager extends RelationManager
                     ->label(FilamentUi::text('Reassign'))
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
+                    ->authorize('update')
                     ->visible(fn (WorkflowAssignment $record): bool => $record->status->value === 'pending')
                     ->form([
                         Select::make('target_user_id')

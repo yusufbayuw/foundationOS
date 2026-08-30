@@ -5,6 +5,7 @@ namespace Modules\Asset\Filament\Resources\AssetInsurances\Schemas;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Modules\Asset\Models\AssetInsurance;
+use Modules\Core\Support\FilamentUi;
 
 class AssetInsuranceInfolist
 {
@@ -13,9 +14,9 @@ class AssetInsuranceInfolist
         return $schema
             ->components([
                 TextEntry::make('tenant.name')
-                    ->label('Tenant'),
+                    ->label(FilamentUi::text('Tenant')),
                 TextEntry::make('organization.name')
-                    ->label('Organization')
+                    ->label(FilamentUi::text('Organization'))
                     ->placeholder('-'),
                 TextEntry::make('code')
                     ->placeholder('-'),

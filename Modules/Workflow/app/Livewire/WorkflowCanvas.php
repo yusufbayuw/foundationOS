@@ -11,8 +11,10 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Modules\Core\Support\FilamentUi;
 use Modules\Workflow\Exceptions\WorkflowConfigurationException;
 use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Services\WorkflowCanvasService;
@@ -51,6 +53,8 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
         $this->workflowId = $workflowId;
 
         if ($workflowId) {
+            $workflow = Workflow::query()->findOrFail($workflowId);
+            Gate::authorize('view', $workflow);
             $this->loadWorkflow($workflowId);
         }
     }
@@ -189,8 +193,9 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
     public function saveDraftAction(): Action
     {
         return Action::make('saveDraftAction')
-            ->label('Save Draft')
+            ->label(FilamentUi::text('Save Draft'))
             ->outlined()
+            ->authorize(fn (): bool => $this->canMutateWorkflow())
             ->action(function (): void {
                 $this->saveDraft();
             });
@@ -199,8 +204,9 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
     public function publishAction(): Action
     {
         return Action::make('publishAction')
-            ->label('Publish')
+            ->label(FilamentUi::text('Publish'))
             ->color('primary')
+            ->authorize(fn (): bool => $this->canMutateWorkflow())
             ->requiresConfirmation()
             ->visible(fn (): bool => $this->workflowStatus === 'draft')
             ->action(function (): void {
@@ -211,11 +217,12 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
     public function importJsonAction(): Action
     {
         return Action::make('importJsonAction')
-            ->label('Import JSON')
+            ->label(FilamentUi::text('Import JSON'))
             ->outlined()
+            ->authorize('create', Workflow::class)
             ->schema([
                 Textarea::make('payload')
-                    ->label('Workflow JSON')
+                    ->label(FilamentUi::text('Workflow JSON'))
                     ->required()
                     ->rows(14),
             ])
@@ -227,8 +234,9 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
     public function exportJsonAction(): Action
     {
         return Action::make('exportJsonAction')
-            ->label('Export JSON')
+            ->label(FilamentUi::text('Export JSON'))
             ->outlined()
+            ->authorize(fn (): bool => $this->canViewWorkflow())
             ->visible(fn (): bool => filled($this->workflowId))
             ->action(function (): void {
                 $this->exportJson();
@@ -238,9 +246,10 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
     public function addStepAction(): Action
     {
         return Action::make('addStepAction')
-            ->label('Add Step')
+            ->label(FilamentUi::text('Add Step'))
             ->outlined()
             ->color('primary')
+            ->authorize(fn (): bool => $this->canMutateWorkflow())
             ->action(function (): void {
                 $this->addStep();
             });
@@ -249,8 +258,9 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
     public function deleteStepAction(): Action
     {
         return Action::make('deleteStepAction')
-            ->label('Delete Step')
+            ->label(FilamentUi::text('Delete Step'))
             ->color('danger')
+            ->authorize(fn (): bool => $this->canMutateWorkflow())
             ->requiresConfirmation()
             ->action(function (array $arguments): void {
                 $uuid = $arguments['uuid'] ?? null;
@@ -265,6 +275,8 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
 
     public function saveDraft(): void
     {
+        $this->authorizeWorkflowMutation();
+
         $tenantId = app(CurrentTenant::class)->id();
 
         if (! $tenantId) {
@@ -285,6 +297,8 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
 
     public function publish(): void
     {
+        $this->authorizeWorkflowMutation();
+
         if (! $this->workflowId) {
             $this->saveDraft();
         }
@@ -319,6 +333,7 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
         }
 
         $workflow = Workflow::findOrFail($this->workflowId);
+        Gate::authorize('view', $workflow);
         $payload = app(WorkflowCanvasService::class)->exportPayload($workflow);
 
         $this->dispatch('workflow-canvas:download-json', payload: $payload, filename: "workflow_{$workflow->code}_v{$workflow->version}.json");
@@ -326,6 +341,8 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
 
     public function importJsonPayload(string $payload): void
     {
+        Gate::authorize('create', Workflow::class);
+
         $tenantId = app(CurrentTenant::class)->id();
 
         if (! $tenantId) {
@@ -398,6 +415,39 @@ class WorkflowCanvas extends Component implements HasActions, HasSchemas
 
         $this->workflowId = $workflow->id;
         $this->workflowStatus = $workflow->status?->value ?? 'draft';
+    }
+
+    private function canMutateWorkflow(): bool
+    {
+        if (! $this->workflowId) {
+            return Gate::allows('create', Workflow::class);
+        }
+
+        $workflow = Workflow::query()->find($this->workflowId);
+
+        return $workflow instanceof Workflow && Gate::allows('update', $workflow);
+    }
+
+    private function canViewWorkflow(): bool
+    {
+        if (! $this->workflowId) {
+            return false;
+        }
+
+        $workflow = Workflow::query()->find($this->workflowId);
+
+        return $workflow instanceof Workflow && Gate::allows('view', $workflow);
+    }
+
+    private function authorizeWorkflowMutation(): void
+    {
+        if (! $this->workflowId) {
+            Gate::authorize('create', Workflow::class);
+
+            return;
+        }
+
+        Gate::authorize('update', Workflow::query()->findOrFail($this->workflowId));
     }
 
     public function render(): View
