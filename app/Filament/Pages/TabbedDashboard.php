@@ -17,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\WidgetConfiguration;
 use Modules\Campus\Filament\Widgets\CampusStatsOverview;
+use Modules\Core\Filament\Support\Navigation\ModuleVisibility;
 use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Widgets\EmployeeStatsOverview;
@@ -53,6 +54,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('School'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('School'))
                         ->icon('heroicon-o-academic-cap')
                         ->schema([
                             $this->widgetsGrid([
@@ -62,6 +64,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('Campus'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('Campus'))
                         ->icon('heroicon-o-building-library')
                         ->schema([
                             $this->widgetsGrid([
@@ -70,6 +73,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('Enrollment'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('Enrollment'))
                         ->icon('heroicon-o-clipboard-document-check')
                         ->schema([
                             $this->widgetsGrid([
@@ -78,6 +82,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('Employee'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('Employee'))
                         ->icon('heroicon-o-identification')
                         ->schema([
                             $this->widgetsGrid([
@@ -86,6 +91,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('Finance'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('Finance'))
                         ->icon('heroicon-o-banknotes')
                         ->schema([
                             $this->widgetsGrid([
@@ -108,6 +114,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('Procurement'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('Procurement'))
                         ->icon('heroicon-o-truck')
                         ->schema([
                             $this->widgetsGrid([
@@ -116,6 +123,7 @@ class TabbedDashboard extends Dashboard
                         ]),
 
                     Tab::make(FilamentUi::module('Library'))
+                        ->visible(fn (): bool => ModuleVisibility::shouldRegisterNavigation('Library'))
                         ->icon('heroicon-o-book-open')
                         ->schema([
                             $this->widgetsGrid([
