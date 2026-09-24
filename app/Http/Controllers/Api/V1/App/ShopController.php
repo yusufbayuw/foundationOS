@@ -23,5 +23,4 @@ class ShopController extends ApiController
 
         return $this->success(new ProductResource($product));
     }
-
 }
