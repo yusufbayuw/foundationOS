@@ -113,8 +113,8 @@ class TenantSetupProgress
                 'key' => 'profile',
                 'title' => 'Konfirmasi profil produk',
                 'description' => match (true) {
-                    ! $hasStoredProfile => 'Tenant lama ini belum memiliki profil produk tersimpan.',
-                    ! $hasCurrentProfile => 'Versi profil produk perlu diperbarui agar sesuai dengan katalog saat ini.',
+                    !$hasStoredProfile => 'Tenant lama ini belum memiliki profil produk tersimpan.',
+                    !$hasCurrentProfile => 'Versi profil produk perlu diperbarui agar sesuai dengan katalog saat ini.',
                     default => $this->productProfiles->label($profileCode).' versi '.$catalogProfileVersion.' aktif.',
                 },
                 'action_label' => $hasStoredProfile ? 'Perbarui profil' : 'Pilih profil',
@@ -153,7 +153,7 @@ class TenantSetupProgress
             [
                 'key' => 'modules',
                 'title' => 'Verifikasi modul produk',
-                'description' => ! $hasStoredProfile
+                'description' => !$hasStoredProfile
                     ? 'Pilih profil produk sebelum memverifikasi modul wajib.'
                     : ($missingModuleCodes === []
                     ? 'Semua modul wajib untuk profil ini sudah aktif.'
