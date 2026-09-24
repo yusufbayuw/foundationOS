@@ -22,6 +22,15 @@ return new class extends Migration
             $table->unique(['tenant_id', 'organization_id', 'code']);
             $table->timestamps();
         });
+
+        if (Schema::hasTable('classes')) {
+            Schema::table('classes', function (Blueprint $table): void {
+                $table->foreign('department_id')
+                    ->references('id')
+                    ->on('departments')
+                    ->nullOnDelete();
+            });
+        }
     }
 
     /**
@@ -29,6 +38,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasTable('classes')) {
+            Schema::table('classes', function (Blueprint $table): void {
+                $table->dropForeign(['department_id']);
+            });
+        }
+
         Schema::dropIfExists('departments');
     }
 };
