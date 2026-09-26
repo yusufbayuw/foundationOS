@@ -30,15 +30,15 @@ return new class extends Migration
             $table->decimal('average_score', 8, 2)->nullable();
             $table->unsignedInteger('achievement_count')->default(0);
             $table->json('achievement_details')->nullable();
-            $table->foreignId('program_choice_1_id')->nullable()->constrained('departments')->nullOnDelete();
-            $table->foreignId('program_choice_2_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('program_choice_1_id')->nullable();
+            $table->foreignId('program_choice_2_id')->nullable();
             $table->string('status')->default('registered');
             $table->decimal('test_score', 8, 2)->nullable();
             $table->decimal('interview_score', 8, 2)->nullable();
             $table->decimal('final_score', 8, 2)->nullable();
             $table->unsignedInteger('ranking')->nullable();
             $table->boolean('is_passed')->nullable();
-            $table->foreignId('accepted_program_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('accepted_program_id')->nullable();
             $table->date('enrollment_date')->nullable();
             $table->foreignId('converted_to_student_id')->nullable()->constrained('students')->nullOnDelete();
             $table->string('photo')->nullable();
