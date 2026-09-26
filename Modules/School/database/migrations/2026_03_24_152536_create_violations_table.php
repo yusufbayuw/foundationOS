@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
-            $table->foreignId('violation_type_id')->nullable()->constrained('violation_types')->nullOnDelete();
+            $table->foreignId('violation_type_id')->nullable();
             $table->foreignId('reported_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('handled_by')->nullable()->constrained('users')->nullOnDelete();
             $table->date('date')->nullable();
