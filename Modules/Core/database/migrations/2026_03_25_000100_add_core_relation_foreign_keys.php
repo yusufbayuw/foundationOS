@@ -8,11 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->foreign('subscription_plan_id')->references('id')->on('subscription_plans')->nullOnDelete();
-            $table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
-        });
-
         Schema::table('organizations', function (Blueprint $table) {
             $table->foreign('province_id')->references('id')->on('provinces')->nullOnDelete();
             $table->foreign('city_id')->references('id')->on('cities')->nullOnDelete();
@@ -32,9 +27,5 @@ return new class extends Migration
             $table->dropForeign(['principal_user_id']);
         });
 
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->dropForeign(['subscription_plan_id']);
-            $table->dropForeign(['created_by']);
-        });
     }
 };
