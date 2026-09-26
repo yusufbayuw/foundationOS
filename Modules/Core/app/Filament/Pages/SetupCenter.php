@@ -55,17 +55,17 @@ class SetupCenter extends Page
 
     public function getTitle(): string
     {
-        return 'Pusat Setup';
+        return (string) __('core::core.setup_center.title');
     }
 
     public function getSubheading(): ?string
     {
-        return 'Selesaikan fondasi operasional sebelum tim mulai bekerja.';
+        return (string) __('core::core.setup_center.subheading');
     }
 
     public static function getNavigationLabel(): string
     {
-        return 'Pusat Setup';
+        return (string) __('core::core.setup_center.title');
     }
 
     public static function getNavigationGroup(): ?string
@@ -96,12 +96,16 @@ class SetupCenter extends Page
 
         return [
             Action::make('selectProductProfile')
-                ->label($this->setup['profile']['code'] ? 'Perbarui profil' : 'Pilih profil produk')
+                ->label((string) __(
+                    $this->setup['profile']['code']
+                        ? 'core::core.setup_center.actions.update_profile'
+                        : 'core::core.setup_center.actions.choose_profile',
+                ))
                 ->icon(Heroicon::RectangleStack)
                 ->authorize(fn (): bool => static::canAccess())
                 ->schema([
                     Select::make('product_profile')
-                        ->label(FilamentUi::text('Profil produk'))
+                        ->label((string) __('core::core.setup_center.product_profile'))
                         ->options(fn (ProductProfileCatalog $catalog): array => $catalog->options())
                         ->descriptions(fn (ProductProfileCatalog $catalog): array => $catalog->descriptions())
                         ->default($this->setup['profile']['code'])
@@ -123,20 +127,22 @@ class SetupCenter extends Page
                     });
 
                     Notification::make()
-                        ->title('Profil produk diperbarui')
+                        ->title((string) __('core::core.setup_center.actions.profile_updated'))
                         ->success()
                         ->send();
 
                     $this->mount(app(TenantSetupProgress::class));
                 }),
             Action::make('continueSetup')
-                ->label($nextStep ? 'Lanjutkan: '.$nextStep['title'] : 'Setup selesai')
+                ->label($nextStep
+                    ? (string) __('core::core.setup_center.actions.continue', ['step' => $nextStep['title']])
+                    : (string) __('core::core.setup_center.actions.setup_complete'))
                 ->icon($nextStep['icon'] ?? Heroicon::CheckCircle)
                 ->color($nextStep ? 'primary' : 'success')
                 ->url($nextStep['action_url'] ?? null)
                 ->disabled($nextStep === null),
             Action::make('manageModules')
-                ->label(FilamentUi::text('Lihat modul'))
+                ->label((string) __('core::core.setup_center.actions.view_modules'))
                 ->icon(Heroicon::PuzzlePiece)
                 ->color('gray')
                 ->url(ModuleMarketplace::getUrl(tenant: Filament::getTenant())),
