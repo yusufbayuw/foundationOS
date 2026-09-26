@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('book_copies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
-            $table->foreignId('book_id')->constrained('books')->cascadeOnDelete();
+            $table->foreignId('book_id');
             $table->string('copy_number');
             $table->string('barcode')->nullable();
             $table->date('acquisition_date')->nullable();
