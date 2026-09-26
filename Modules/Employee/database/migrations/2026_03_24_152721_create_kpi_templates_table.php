@@ -20,10 +20,22 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
+
+        if (Schema::hasTable('kpi_scores')) {
+            Schema::table('kpi_scores', function (Blueprint $table): void {
+                $table->foreign('kpi_template_id')->references('id')->on('kpi_templates')->nullOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('kpi_scores')) {
+            Schema::table('kpi_scores', function (Blueprint $table): void {
+                $table->dropForeign(['kpi_template_id']);
+            });
+        }
+
         Schema::dropIfExists('kpi_templates');
     }
 };
