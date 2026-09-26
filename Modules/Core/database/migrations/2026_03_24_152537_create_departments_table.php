@@ -31,6 +31,14 @@ return new class extends Migration
                     ->nullOnDelete();
             });
         }
+
+        if (Schema::hasTable('applicants')) {
+            Schema::table('applicants', function (Blueprint $table): void {
+                $table->foreign('program_choice_1_id')->references('id')->on('departments')->nullOnDelete();
+                $table->foreign('program_choice_2_id')->references('id')->on('departments')->nullOnDelete();
+                $table->foreign('accepted_program_id')->references('id')->on('departments')->nullOnDelete();
+            });
+        }
     }
 
     /**
@@ -38,6 +46,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasTable('applicants')) {
+            Schema::table('applicants', function (Blueprint $table): void {
+                $table->dropForeign(['program_choice_1_id']);
+                $table->dropForeign(['program_choice_2_id']);
+                $table->dropForeign(['accepted_program_id']);
+            });
+        }
+
         if (Schema::hasTable('classes')) {
             Schema::table('classes', function (Blueprint $table): void {
                 $table->dropForeign(['department_id']);
