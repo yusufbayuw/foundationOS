@@ -2,8 +2,8 @@
 
 namespace Modules\Core\Services;
 
-use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\AcademicPeriod;
+use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\Module;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\Tenant;
@@ -29,7 +29,7 @@ class TenantSetupProgress
      *     metrics: array{organizations: int, team_members: int, active_modules: int},
      *     active_modules: list<array{code: string, name: string}>,
      *     missing_modules: list<string>,
-     *     subscription: array{status: string, plan: string|null}
+     *     subscription: array{status: string, status_label: string, plan: string|null}
      * }
      */
     public function forTenant(Tenant $tenant): array
@@ -111,54 +111,61 @@ class TenantSetupProgress
         $steps = [
             [
                 'key' => 'profile',
-                'title' => 'Konfirmasi profil produk',
+                'title' => (string) __('core::core.setup_center.steps.profile.title'),
                 'description' => match (true) {
-                    !$hasStoredProfile => 'Tenant lama ini belum memiliki profil produk tersimpan.',
-                    !$hasCurrentProfile => 'Versi profil produk perlu diperbarui agar sesuai dengan katalog saat ini.',
-                    default => $this->productProfiles->label($profileCode).' versi '.$catalogProfileVersion.' aktif.',
+                    !$hasStoredProfile => (string) __('core::core.setup_center.steps.profile.no_saved_profile'),
+                    !$hasCurrentProfile => (string) __('core::core.setup_center.steps.profile.version_outdated'),
+                    default => (string) __('core::core.setup_center.steps.profile.active', [
+                        'profile' => $this->productProfiles->label((string) $profileCode),
+                        'version' => $catalogProfileVersion,
+                    ]),
                 },
-                'action_label' => $hasStoredProfile ? 'Perbarui profil' : 'Pilih profil',
+                'action_label' => (string) __(
+                    $hasStoredProfile
+                        ? 'core::core.setup_center.steps.profile.update_action'
+                        : 'core::core.setup_center.steps.profile.choose_action',
+                ),
                 'icon' => 'heroicon-o-rectangle-stack',
                 'is_complete' => $hasCurrentProfile,
             ],
             [
                 'key' => 'branding',
-                'title' => 'Lengkapi identitas merek',
-                'description' => 'Tambahkan logo dan warna utama agar panel serta dokumen konsisten.',
-                'action_label' => 'Atur branding',
+                'title' => (string) __('core::core.setup_center.steps.branding.title'),
+                'description' => (string) __('core::core.setup_center.steps.branding.description'),
+                'action_label' => (string) __('core::core.setup_center.steps.branding.action'),
                 'icon' => 'heroicon-o-swatch',
                 'is_complete' => filled($brandingSettings->get('brand_logo'))
                     && filled($brandingSettings->get('primary_color')),
             ],
             [
                 'key' => 'organizations',
-                'title' => 'Susun unit organisasi',
+                'title' => (string) __('core::core.setup_center.steps.organizations.title'),
                 'description' => $organizationCount > 0
-                    ? "{$organizationCount} unit organisasi sudah terdaftar."
-                    : 'Buat sekolah, kampus, atau unit kerja pertama di bawah tenant.',
-                'action_label' => 'Kelola unit',
+                    ? (string) __('core::core.setup_center.steps.organizations.complete', ['count' => $organizationCount])
+                    : (string) __('core::core.setup_center.steps.organizations.empty'),
+                'action_label' => (string) __('core::core.setup_center.steps.organizations.action'),
                 'icon' => 'heroicon-o-building-office-2',
                 'is_complete' => $organizationCount > 0,
             ],
             [
                 'key' => 'team',
-                'title' => 'Undang tim inti',
+                'title' => (string) __('core::core.setup_center.steps.team.title'),
                 'description' => $teamMemberCount > 1
-                    ? "{$teamMemberCount} anggota tim sudah memiliki akses."
-                    : 'Tambahkan minimal satu rekan dan tetapkan perannya.',
-                'action_label' => 'Kelola akses',
+                    ? (string) __('core::core.setup_center.steps.team.complete', ['count' => $teamMemberCount])
+                    : (string) __('core::core.setup_center.steps.team.incomplete'),
+                'action_label' => (string) __('core::core.setup_center.steps.team.action'),
                 'icon' => 'heroicon-o-user-group',
                 'is_complete' => $teamMemberCount > 1,
             ],
             [
                 'key' => 'modules',
-                'title' => 'Verifikasi modul produk',
+                'title' => (string) __('core::core.setup_center.steps.modules.title'),
                 'description' => !$hasStoredProfile
-                    ? 'Pilih profil produk sebelum memverifikasi modul wajib.'
+                    ? (string) __('core::core.setup_center.steps.modules.choose_profile_first')
                     : ($missingModuleCodes === []
-                    ? 'Semua modul wajib untuk profil ini sudah aktif.'
-                    : count($missingModuleCodes).' modul wajib belum aktif.'),
-                'action_label' => 'Buka modul',
+                        ? (string) __('core::core.setup_center.steps.modules.complete')
+                        : (string) __('core::core.setup_center.steps.modules.missing', ['count' => count($missingModuleCodes)])),
+                'action_label' => (string) __('core::core.setup_center.steps.modules.action'),
                 'icon' => 'heroicon-o-puzzle-piece',
                 'is_complete' => $hasStoredProfile && $missingModuleCodes === [],
             ],
@@ -169,11 +176,11 @@ class TenantSetupProgress
         if (in_array('academic_year', $setupTasks, true)) {
             $steps[] = [
                 'key' => 'academic_year',
-                'title' => 'Aktifkan tahun akademik',
+                'title' => (string) __('core::core.setup_center.steps.academic_year.title'),
                 'description' => $hasActiveAcademicYear
-                    ? 'Tahun akademik aktif sudah tersedia untuk transaksi akademik.'
-                    : 'Buat dan aktifkan tahun akademik sebelum memproses penerimaan atau kelas.',
-                'action_label' => 'Kelola tahun akademik',
+                    ? (string) __('core::core.setup_center.steps.academic_year.complete')
+                    : (string) __('core::core.setup_center.steps.academic_year.incomplete'),
+                'action_label' => (string) __('core::core.setup_center.steps.academic_year.action'),
                 'icon' => 'heroicon-o-calendar-days',
                 'is_complete' => $hasActiveAcademicYear,
             ];
@@ -182,11 +189,11 @@ class TenantSetupProgress
         if (in_array('academic_period', $setupTasks, true)) {
             $steps[] = [
                 'key' => 'academic_period',
-                'title' => 'Aktifkan periode akademik',
+                'title' => (string) __('core::core.setup_center.steps.academic_period.title'),
                 'description' => $hasActiveAcademicPeriod
-                    ? 'Periode akademik aktif siap menjadi default transaksi.'
-                    : 'Buat semester atau periode aktif untuk melengkapi konteks transaksi akademik.',
-                'action_label' => 'Kelola periode akademik',
+                    ? (string) __('core::core.setup_center.steps.academic_period.complete')
+                    : (string) __('core::core.setup_center.steps.academic_period.incomplete'),
+                'action_label' => (string) __('core::core.setup_center.steps.academic_period.action'),
                 'icon' => 'heroicon-o-calendar-date-range',
                 'is_complete' => $hasActiveAcademicPeriod,
             ];
@@ -194,12 +201,14 @@ class TenantSetupProgress
 
         $completedCount = collect($steps)->where('is_complete', true)->count();
         $totalCount = count($steps);
+        $status = (string) ($tenant->status ?: 'unknown');
+        $statusKey = "core::core.setup_center.statuses.{$status}";
 
         return [
             'profile' => [
                 'code' => $profileCode,
                 'label' => $profileCode === null
-                    ? 'Profil belum dikonfirmasi'
+                    ? (string) __('core::core.setup_center.profile_not_confirmed')
                     : $this->productProfiles->label($profileCode),
                 'version' => $catalogProfileVersion,
                 'capabilities' => $profileCode === null
@@ -219,7 +228,10 @@ class TenantSetupProgress
             'active_modules' => $activeModules->all(),
             'missing_modules' => $missingModuleCodes,
             'subscription' => [
-                'status' => (string) ($tenant->status ?: 'unknown'),
+                'status' => $status,
+                'status_label' => app('translator')->has($statusKey)
+                    ? (string) __($statusKey)
+                    : str($status)->headline()->toString(),
                 'plan' => $tenant->subscriptionPlan?->name,
             ],
         ];
