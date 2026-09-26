@@ -30,10 +30,22 @@ return new class extends Migration
             $table->unique(['tenant_id', 'member_number']);
             $table->timestamps();
         });
+
+        if (Schema::hasTable('loans')) {
+            Schema::table('loans', function (Blueprint $table): void {
+                $table->foreign('member_id')->references('id')->on('members')->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('loans')) {
+            Schema::table('loans', function (Blueprint $table): void {
+                $table->dropForeign(['member_id']);
+            });
+        }
+
         Schema::dropIfExists('members');
     }
 };
