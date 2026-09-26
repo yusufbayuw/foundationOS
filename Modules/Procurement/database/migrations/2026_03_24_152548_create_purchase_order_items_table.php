@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
             $table->foreignId('purchase_order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('purchase_requisition_item_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('purchase_requisition_item_id')->nullable();
             $table->foreignId('procurement_item_id')->nullable()->constrained('procurement_items')->nullOnDelete();
             $table->text('description')->nullable();
             $table->text('specifications')->nullable();
