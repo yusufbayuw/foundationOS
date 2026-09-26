@@ -3,6 +3,7 @@
 namespace Modules\Core\Services;
 
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use LogicException;
@@ -11,6 +12,7 @@ class ProductProfileCatalog
 {
     public function __construct(
         protected Repository $config,
+        protected Translator $translator,
     ) {}
 
     /**
@@ -20,7 +22,7 @@ class ProductProfileCatalog
     {
         return collect($this->profiles())
             ->mapWithKeys(fn (array $profile, string $code): array => [
-                $code => (string) ($profile['label'] ?? Str::headline($code)),
+                $code => $this->label($code),
             ])
             ->all();
     }
@@ -32,14 +34,14 @@ class ProductProfileCatalog
     {
         return collect($this->profiles())
             ->mapWithKeys(function (array $profile, string $code): array {
-                $description = (string) ($profile['description'] ?? '');
-                $capabilities = array_values(array_filter(
-                    $profile['capabilities'] ?? [],
-                    fn (mixed $capability): bool => is_string($capability),
-                ));
+                $description = $this->description($code);
+                $capabilities = $this->capabilities($code);
 
                 if ($capabilities !== []) {
-                    $description = trim($description.' Fokus: '.implode(', ', $capabilities).'.');
+                    $description = trim($description.' '.__(
+                        'core::core.product_profiles.focus',
+                        ['capabilities' => implode(', ', $capabilities)],
+                    ));
                 }
 
                 return [$code => $description];
@@ -72,8 +74,25 @@ class ProductProfileCatalog
     public function label(string $profileCode): string
     {
         $profile = $this->profile($profileCode);
+        $key = "core::core.product_profiles.{$profileCode}.label";
+
+        if ($this->translator->has($key)) {
+            return (string) $this->translator->get($key);
+        }
 
         return (string) ($profile['label'] ?? Str::headline($profileCode));
+    }
+
+    public function description(string $profileCode): string
+    {
+        $profile = $this->profile($profileCode);
+        $key = "core::core.product_profiles.{$profileCode}.description";
+
+        if ($this->translator->has($key)) {
+            return (string) $this->translator->get($key);
+        }
+
+        return (string) ($profile['description'] ?? '');
     }
 
     /**
@@ -81,7 +100,21 @@ class ProductProfileCatalog
      */
     public function capabilities(string $profileCode): array
     {
-        return collect($this->profile($profileCode)['capabilities'] ?? [])
+        $profile = $this->profile($profileCode);
+        $key = "core::core.product_profiles.{$profileCode}.capabilities";
+
+        if ($this->translator->has($key)) {
+            $translated = $this->translator->get($key);
+
+            if (is_array($translated)) {
+                return array_values(array_filter(
+                    $translated,
+                    fn (mixed $capability): bool => is_string($capability),
+                ));
+            }
+        }
+
+        return collect($profile['capabilities'] ?? [])
             ->filter(fn (mixed $capability): bool => is_string($capability))
             ->values()
             ->all();
