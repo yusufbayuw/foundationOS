@@ -43,10 +43,22 @@ return new class extends Migration
             $table->boolean('is_reference_only')->default(false);
             $table->timestamps();
         });
+
+        if (Schema::hasTable('book_copies')) {
+            Schema::table('book_copies', function (Blueprint $table): void {
+                $table->foreign('book_id')->references('id')->on('books')->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('book_copies')) {
+            Schema::table('book_copies', function (Blueprint $table): void {
+                $table->dropForeign(['book_id']);
+            });
+        }
+
         Schema::dropIfExists('books');
     }
 };
