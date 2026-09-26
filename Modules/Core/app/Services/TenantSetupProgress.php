@@ -16,7 +16,8 @@ class TenantSetupProgress
     public function __construct(
         protected ModuleDependencyGraph $dependencyGraph,
         protected ProductProfileCatalog $productProfiles,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array{
@@ -113,8 +114,8 @@ class TenantSetupProgress
                 'key' => 'profile',
                 'title' => (string) __('core::core.setup_center.steps.profile.title'),
                 'description' => match (true) {
-                    !$hasStoredProfile => (string) __('core::core.setup_center.steps.profile.no_saved_profile'),
-                    !$hasCurrentProfile => (string) __('core::core.setup_center.steps.profile.version_outdated'),
+                    ! $hasStoredProfile => (string) __('core::core.setup_center.steps.profile.no_saved_profile'),
+                    ! $hasCurrentProfile => (string) __('core::core.setup_center.steps.profile.version_outdated'),
                     default => (string) __('core::core.setup_center.steps.profile.active', [
                         'profile' => $this->productProfiles->label((string) $profileCode),
                         'version' => $catalogProfileVersion,
@@ -160,7 +161,7 @@ class TenantSetupProgress
             [
                 'key' => 'modules',
                 'title' => (string) __('core::core.setup_center.steps.modules.title'),
-                'description' => !$hasStoredProfile
+                'description' => ! $hasStoredProfile
                     ? (string) __('core::core.setup_center.steps.modules.choose_profile_first')
                     : ($missingModuleCodes === []
                         ? (string) __('core::core.setup_center.steps.modules.complete')
