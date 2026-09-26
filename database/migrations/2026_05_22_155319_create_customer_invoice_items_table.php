@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('customer_invoice_items', function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('tenant_id')->index();
-            $table->foreignId('customer_invoice_id')->constrained('customer_invoices')->cascadeOnDelete();
+            $table->foreignId('customer_invoice_id');
             $table->string('description');
             $table->decimal('quantity', 10, 2)->default(1);
             $table->string('unit')->nullable();
