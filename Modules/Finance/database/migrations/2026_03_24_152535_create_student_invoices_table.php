@@ -33,10 +33,25 @@ return new class extends Migration
             $table->unique(['tenant_id', 'invoice_number']);
             $table->timestamps();
         });
+
+        if (Schema::hasTable('payments')) {
+            Schema::table('payments', function (Blueprint $table): void {
+                $table->foreign('student_invoice_id')
+                    ->references('id')
+                    ->on('student_invoices')
+                    ->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('payments')) {
+            Schema::table('payments', function (Blueprint $table): void {
+                $table->dropForeign(['student_invoice_id']);
+            });
+        }
+
         Schema::dropIfExists('student_invoices');
     }
 };
