@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('book_copy_id')->constrained('book_copies')->cascadeOnDelete();
-            $table->foreignId('member_id')->constrained('members')->cascadeOnDelete();
+            $table->foreignId('member_id');
             $table->foreignId('processed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('returned_by')->nullable()->constrained('users')->nullOnDelete();
             $table->date('loan_date');
