@@ -37,6 +37,15 @@ return new class extends Migration
 
             $table->index('budget_account_id');
         });
+
+        if (Schema::hasTable('purchase_order_items')) {
+            Schema::table('purchase_order_items', function (Blueprint $table): void {
+                $table->foreign('purchase_requisition_item_id')
+                    ->references('id')
+                    ->on('purchase_requisition_items')
+                    ->nullOnDelete();
+            });
+        }
     }
 
     /**
@@ -44,6 +53,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasTable('purchase_order_items')) {
+            Schema::table('purchase_order_items', function (Blueprint $table): void {
+                $table->dropForeign(['purchase_requisition_item_id']);
+            });
+        }
+
         Schema::dropIfExists('purchase_requisition_items');
     }
 };
