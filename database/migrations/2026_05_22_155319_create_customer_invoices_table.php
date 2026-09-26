@@ -39,10 +39,25 @@ return new class extends Migration
             $table->index(['tenant_id', 'status']);
             $table->index(['tenant_id', 'due_date']);
         });
+
+        if (Schema::hasTable('customer_invoice_items')) {
+            Schema::table('customer_invoice_items', function (Blueprint $table): void {
+                $table->foreign('customer_invoice_id')
+                    ->references('id')
+                    ->on('customer_invoices')
+                    ->cascadeOnDelete();
+            });
+        }
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('customer_invoice_items')) {
+            Schema::table('customer_invoice_items', function (Blueprint $table): void {
+                $table->dropForeign(['customer_invoice_id']);
+            });
+        }
+
         Schema::dropIfExists('customer_invoices');
     }
 };
