@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tenant_id')->constrained('tenants')->cascadeOnDelete();
             $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
-            $table->foreignId('kpi_template_id')->nullable()->constrained('kpi_templates')->nullOnDelete();
+            $table->foreignId('kpi_template_id')->nullable();
             $table->foreignId('evaluator_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('period_month');
             $table->string('period_year');
