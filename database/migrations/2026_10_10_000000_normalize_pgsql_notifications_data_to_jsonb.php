@@ -27,7 +27,5 @@ return new class extends Migration
     /**
      * Preserve JSONB on rollback: reverting to text breaks Filament notification queries.
      */
-    public function down(): void
-    {
-    }
+    public function down(): void {}
 };

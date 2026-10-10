@@ -16,8 +16,7 @@ class TenantSetupProgress
     public function __construct(
         protected ModuleDependencyGraph $dependencyGraph,
         protected ProductProfileCatalog $productProfiles,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{
