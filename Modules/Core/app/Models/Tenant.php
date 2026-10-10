@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -92,6 +93,15 @@ class Tenant extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        if (($field === null || $field === $this->getRouteKeyName()) && ! Str::isUuid((string) $value)) {
+            return null;
+        }
+
+        return parent::resolveRouteBinding($value, $field);
     }
 
     public function getActivitylogOptions(): LogOptions
