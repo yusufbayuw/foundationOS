@@ -370,7 +370,7 @@ class PublicOpacController extends Controller
     {
         return Tenant::query()
             ->where('code', $tenant)
-            ->orWhere('id', $tenant)
+            ->when(ctype_digit($tenant), fn (Builder $query) => $query->orWhere('id', (int) $tenant))
             ->first();
     }
 
@@ -380,7 +380,7 @@ class PublicOpacController extends Controller
             ->where('tenant_id', $tenant->id)
             ->where(function (Builder $query) use ($organization): void {
                 $query->where('code', $organization)
-                    ->orWhere('id', $organization);
+                    ->when(ctype_digit($organization), fn (Builder $inner) => $inner->orWhere('id', (int) $organization));
             })
             ->first();
     }
