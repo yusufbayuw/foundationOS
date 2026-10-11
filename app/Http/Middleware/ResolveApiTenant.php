@@ -28,6 +28,12 @@ class ResolveApiTenant
             return $next($request);
         }
 
+        $tenant = $token->tenant;
+
+        if ($tenant === null || $tenant->isLocked()) {
+            abort(403, 'Tenant subscription is unavailable.');
+        }
+
         $previousTeamId = getPermissionsTeamId();
         $user = $request->user();
 
