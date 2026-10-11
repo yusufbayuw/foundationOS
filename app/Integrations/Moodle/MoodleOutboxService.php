@@ -4,7 +4,6 @@ namespace App\Integrations\Moodle;
 
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
-use Illuminate\Database\QueryException;
 
 class MoodleOutboxService
 {
@@ -44,38 +43,28 @@ class MoodleOutboxService
             return null;
         }
 
-        try {
-            $outbox = MoodleSyncOutbox::query()->create([
+        $outbox = MoodleSyncOutbox::query()->createOrFirst(
+            ['dedupe_key' => $dedupeKey],
+            [
                 'entity_type' => $entityType,
                 'entity_id' => $entityId,
                 'tenant_id' => $tenantId,
                 'action' => $action,
                 'payload' => $payload,
-                'dedupe_key' => $dedupeKey,
                 'status' => MoodleSyncOutbox::STATUS_PENDING,
                 'attempts' => 0,
                 'next_retry_at' => null,
-            ]);
+            ],
+        );
 
-            ProcessMoodleSyncOutboxJob::dispatch((int) $outbox->id)
-                ->onQueue((string) config('moodle.queue', 'moodle-sync'))
-                ->afterCommit();
-
-            return $outbox;
-        } catch (QueryException $exception) {
-            if ($this->isDuplicateKeyException($exception)) {
-                return null;
-            }
-
-            throw $exception;
+        if (! $outbox->wasRecentlyCreated) {
+            return null;
         }
-    }
 
-    protected function isDuplicateKeyException(QueryException $exception): bool
-    {
-        $state = $exception->errorInfo[0] ?? null;
-        $code = $exception->errorInfo[1] ?? null;
+        ProcessMoodleSyncOutboxJob::dispatch((int) $outbox->id)
+            ->onQueue((string) config('moodle.queue', 'moodle-sync'))
+            ->afterCommit();
 
-        return $state === '23000' || in_array($code, [1062, 1555, 2067], true);
+        return $outbox;
     }
 }

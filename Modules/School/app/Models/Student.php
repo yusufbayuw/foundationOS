@@ -22,6 +22,15 @@ class Student extends Model
 {
     use BelongsToTenant, HasFactory, SoftDeletes;
 
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        if (($field === null || $field === $this->getRouteKeyName()) && ! ctype_digit((string) $value)) {
+            return null;
+        }
+
+        return parent::resolveRouteBinding($value, $field);
+    }
+
     protected $fillable = [
         'tenant_id',
         'organization_id',
