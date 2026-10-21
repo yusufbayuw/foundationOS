@@ -1,0 +1,40 @@
+name: One-time npm security lock refresh
+
+on:
+  push:
+    branches:
+      - fix/postgres-tenant-ci-20261010
+    paths:
+      - .github/workflows/one-time-npm-security-lock-refresh.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Refresh vulnerable npm lock entries
+        run: |
+          npm audit fix --package-lock-only --audit-level=high
+          npm ci --no-audit
+          npm audit --audit-level=high
+
+      - name: Commit repaired lock file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git diff --cached --exit-code && exit 1 || true
+          git commit -m "fix(deps): patch audited npm dependencies"
+          git push origin "HEAD:fix/postgres-tenant-ci-20261010"
