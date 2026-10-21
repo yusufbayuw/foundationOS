@@ -73,7 +73,10 @@ class ExamParticipant extends ExamModel
 
     public function activeToken(): HasOne
     {
-        return $this->hasOne(ExamToken::class)->where('is_active', true)->latestOfMany('created_at');
+        return $this->hasOne(ExamToken::class)
+            ->where('is_active', true)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
     }
 
     public function examAttemptSyncs(): HasMany
