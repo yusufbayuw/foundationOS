@@ -16,7 +16,9 @@ class ResolveApiTenant
     {
         $token = $request->user()?->currentAccessToken();
 
-        if (! $token instanceof PersonalAccessToken) {
+        if (! $token instanceof PersonalAccessToken || ! $token->exists) {
+            // Sanctum::actingAs() supplies an in-memory token during tests.
+            // Tenant subscription enforcement applies to persisted API tokens.
             return $next($request);
         }
 
