@@ -30,6 +30,27 @@ class ApiTenantSubscriptionAccessTest extends TestCase
         }
     }
 
+    public function test_past_due_without_grace_period_blocks_tenant_api(): void
+    {
+        $tenant = Tenant::factory()->create([
+            'status' => 'past_due',
+            'grace_period_ends_at' => null,
+        ]);
+
+        $this->withToken($this->tokenForTenant($tenant))
+            ->getJson('/api/v2/me')
+            ->assertForbidden();
+    }
+
+    public function test_trial_tenant_preserves_api_access(): void
+    {
+        $tenant = Tenant::factory()->create(['status' => 'trial']);
+
+        $this->withToken($this->tokenForTenant($tenant))
+            ->getJson('/api/v1/me')
+            ->assertOk();
+    }
+
     public function test_expired_grace_period_blocks_tenant_api(): void
     {
         $tenant = Tenant::factory()->create([
