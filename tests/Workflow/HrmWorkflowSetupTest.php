@@ -13,6 +13,7 @@ use Modules\Employee\Models\LeaveRequest;
 use Modules\Employee\Models\SalarySlip;
 use Modules\Workflow\Enums\WorkflowDefinitionStatus;
 use Modules\Workflow\Models\Workflow;
+use Modules\Workflow\Models\WorkflowTransition;
 use Tests\TestCase;
 
 class HrmWorkflowSetupTest extends TestCase
@@ -54,11 +55,19 @@ class HrmWorkflowSetupTest extends TestCase
             'is_initial' => true,
         ]);
 
-        $this->assertDatabaseHas('workflow_transitions', [
-            'workflow_id' => $leaveWorkflow->id,
-            'action_name' => 'approve',
-            'condition_rules' => json_encode(['>' => [['var' => 'total_days'], 3]]),
-        ]);
+        // PostgreSQL json columns do not support equality against string bindings.
+        // Assert the persisted JSON after Eloquent's array cast instead.
+        $approveTransitions = WorkflowTransition::query()
+            ->where('workflow_id', $leaveWorkflow->id)
+            ->where('action_name', 'approve')
+            ->get();
+
+        $this->assertTrue(
+            $approveTransitions->contains(
+                fn (WorkflowTransition $transition): bool => $transition->condition_rules === ['>' => [['var' => 'total_days'], 3]],
+            ),
+            'Expected the leave approval transition to have the total-days condition.',
+        );
 
         $this->assertDatabaseHas('workflow_steps', [
             'workflow_id' => $salaryWorkflow->id,
