@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Support\CurrentTenant;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use Modules\Core\Models\Tenant;
 
 class TenantRunCommand extends Command
@@ -20,9 +21,18 @@ class TenantRunCommand extends Command
         $tenantArg = (string) $this->argument('tenant');
 
         $tenant = Tenant::query()
-            ->when(ctype_digit($tenantArg), fn ($q) => $q->orWhere('id', (int) $tenantArg))
-            ->orWhere('code', $tenantArg)
-            ->orWhere('uuid', $tenantArg)
+            ->where(function ($query) use ($tenantArg): void {
+                if (ctype_digit($tenantArg)) {
+                    $query->orWhere('id', $tenantArg);
+                }
+
+                $query->orWhere('code', $tenantArg);
+
+                // PostgreSQL rejects comparing UUID columns to arbitrary strings.
+                if (Str::isUuid($tenantArg)) {
+                    $query->orWhere('uuid', $tenantArg);
+                }
+            })
             ->first();
 
         if (! $tenant) {

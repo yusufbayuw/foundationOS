@@ -28,7 +28,7 @@ class EndowmentLeaderboardController extends ApiController
             ->whereNotNull('donations.paid_at')
             ->select([
                 'donations.donor_id',
-                DB::raw("case when donors.is_anonymous = 1 then 'Anonymous' else donors.name end as donor_name"),
+                DB::raw("case when donors.is_anonymous then 'Anonymous' else donors.name end as donor_name"),
                 'donors.is_anonymous',
                 DB::raw('sum(donations.amount) as total_amount'),
                 DB::raw('count(donations.id) as donation_count'),

@@ -129,6 +129,42 @@ class JobRestoresTenantContextTest extends TestCase
         $this->assertSame(1, TenantAwareCaptureJob::$observedVendorCount);
     }
 
+    public function test_tenant_run_accepts_uuid_and_code_without_leaking_context(): void
+    {
+        $tenantA = $this->makeTenant('cli-uuid-a');
+        $tenantB = $this->makeTenant('cli-uuid-b');
+
+        Artisan::registerCommand(new TenantProbeCommand);
+        app(CurrentTenant::class)->set($tenantA);
+
+        foreach ([(string) $tenantB->uuid, $tenantB->code] as $identifier) {
+            TenantProbeCommand::$observedTenantId = null;
+
+            $exit = Artisan::call('tenant:run', [
+                'tenant' => $identifier,
+                'cmd' => 'tests:tenant-probe',
+            ]);
+
+            $this->assertSame(0, $exit);
+            $this->assertSame($tenantB->id, TenantProbeCommand::$observedTenantId);
+            $this->assertSame($tenantA->id, app(CurrentTenant::class)->id());
+        }
+    }
+
+    public function test_tenant_run_rejects_unknown_identifier_without_sql_error(): void
+    {
+        $tenant = $this->makeTenant('cli-known');
+        app(CurrentTenant::class)->set($tenant);
+
+        $exit = Artisan::call('tenant:run', [
+            'tenant' => 'not-a-real-uuid',
+            'cmd' => 'tests:tenant-probe',
+        ]);
+
+        $this->assertSame(1, $exit);
+        $this->assertSame($tenant->id, app(CurrentTenant::class)->id());
+    }
+
     public function test_tenant_run_command_executes_inside_target_tenant_context(): void
     {
         $tenantA = $this->makeTenant('cli-a');
