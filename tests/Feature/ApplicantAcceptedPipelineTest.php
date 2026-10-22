@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
@@ -181,7 +182,7 @@ class ApplicantAcceptedPipelineTest extends TestCase
         app(CurrentTenant::class)->set($otherTenant);
 
         try {
-            $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+            $this->expectException(ModelNotFoundException::class);
             app(ApplicantPromotionService::class)->promote($applicant);
         } finally {
             app(CurrentTenant::class)->forget();
@@ -203,7 +204,7 @@ class ApplicantAcceptedPipelineTest extends TestCase
             'converted_to_student_id' => $otherStudent->id,
         ])->saveQuietly();
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         app(ApplicantPromotionService::class)->promote($applicant);
     }
