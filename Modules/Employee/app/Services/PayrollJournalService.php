@@ -40,7 +40,7 @@ class PayrollJournalService
             if ($slip->journal_entry_id) {
                 $journal = $slip->journalEntry;
 
-                if (! $journal || ! $journal->is_posted || $journal->is_reversed) {
+                if ($journal === null || $journal->getAttribute('is_posted') !== true || $journal->getAttribute('is_reversed') === true) {
                     throw new RuntimeException('Existing payroll journal requires finance reconciliation before retry.');
                 }
 
