@@ -66,6 +66,14 @@ jobs:
             exit 1
           fi
 
+          # Credential file permissions are a security precondition, not a warning.
+          chmod 644 "$sandbox/pgpass"
+          if FOS_BACKUP_WRITES_QUIESCED=yes bash scripts/ops/snapshot-local-encrypted.sh > "$sandbox/insecure.log" 2>&1; then
+            echo "::error::Snapshot accepted group/world-readable database credentials"
+            exit 1
+          fi
+          chmod 600 "$sandbox/pgpass"
+
           FOS_BACKUP_WRITES_QUIESCED=yes bash scripts/ops/snapshot-local-encrypted.sh
           snapshot=$(find "$sandbox/backups" -mindepth 1 -maxdepth 1 -type d -name 'snapshot-*' -print -quit)
           test -n "$snapshot"
