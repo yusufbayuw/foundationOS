@@ -142,6 +142,45 @@ class InventoryProcurementIntegrationTest extends TestCase
         app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
     }
 
+    public function test_stock_move_rejects_warehouse_from_another_tenant(): void
+    {
+        [$tenantA, $poA, $procurementItemA] = $this->makePoWithProcurementItem('Notebook A', 2, 10_000);
+        [$tenantB] = $this->makePoWithProcurementItem('Notebook B', 1, 20_000);
+
+        app(GoodsReceiptAutoCreationService::class)->receive($poA);
+        $itemA = StockItem::withoutTenantScope()
+            ->where('tenant_id', $tenantA->id)
+            ->where('procurement_item_id', $procurementItemA->id)
+            ->firstOrFail();
+        $warehouseB = app(WarehouseResolver::class)->defaultForTenant((int) $tenantB->id);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('same tenant');
+
+        app(StockMoveService::class)->commitInbound($warehouseB, $itemA, 1, 10_000);
+    }
+
+    public function test_stock_move_rejects_non_finite_quantity_and_negative_cost(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Marker', 2, 5_000);
+        app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $item = StockItem::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('procurement_item_id', $procurementItem->id)
+            ->firstOrFail();
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+
+        foreach ([[NAN, 5_000], [1.0, -1.0]] as [$quantity, $unitCost]) {
+            try {
+                app(StockMoveService::class)->commitInbound($warehouse, $item, $quantity, $unitCost);
+                $this->fail('Invalid quantity or cost must be rejected.');
+            } catch (\RuntimeException $exception) {
+                $this->assertNotEmpty($exception->getMessage());
+            }
+        }
+    }
+
     public function test_retried_stock_adjustment_commit_does_not_post_twice(): void
     {
         [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Pencil', 5, 10_000);
