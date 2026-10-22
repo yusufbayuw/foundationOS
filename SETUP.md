@@ -296,21 +296,21 @@ REDIS_PORT=6379
 
 # Mail configuration
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.mailtrap.io
+MAIL_HOST=smtp.example.invalid
 MAIL_PORT=465
 MAIL_USERNAME=your_username
 MAIL_PASSWORD=your_password
-MAIL_ENCRYPTION=tls
+MAIL_SCHEME=smtps
 MAIL_FROM_ADDRESS=noreply@institution.edu
 MAIL_FROM_NAME="FoundationOS"
 
 # Moodle Integration (opsional)
-MOODLE_ENABLED=false
-MOODLE_URL=https://moodle.institution.edu
-MOODLE_TOKEN=your_moodle_token
+MOODLE_SYNC_ENABLED=false
+MOODLE_BASE_URL=https://moodle.institution.edu
+MOODLE_WS_TOKEN=configure-in-secret-manager
 
 # Security
-APP_KEY=base64:your_app_key_will_be_generated
+# Generate APP_KEY once for an initial install; restore the existing key for upgrades.
 ```
 
 ### 3. Generate App Key & Install Dependencies
@@ -469,12 +469,12 @@ sudo apt install -y supervisor
 sudo nano /etc/supervisor/conf.d/foundationos-queue.conf
 ```
 
-**Config content**:
+**Config content** (contoh saja; pastikan backend yang digunakan, daftar named queues, dan `--timeout` lebih kecil daripada `retry_after` yang berlaku):
 
 ```ini
 [program:foundationos-queue]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/foundationos/artisan queue:work redis --sleep=3 --tries=3 --timeout=90
+command=php /var/www/foundationos/artisan queue:work redis --sleep=3 --tries=3 --timeout=60
 autostart=true
 autorestart=true
 stopasgroup=true
