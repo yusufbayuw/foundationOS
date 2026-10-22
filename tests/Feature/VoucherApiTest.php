@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Voucher\Filament\Exports\VoucherClaimExporter;
 use Modules\Voucher\Models\Voucher;
 use Modules\Voucher\Models\VoucherClaim;
-use Modules\Voucher\Filament\Exports\VoucherClaimExporter;
 use Tests\TestCase;
 
 class VoucherApiTest extends TestCase
