@@ -48,7 +48,7 @@ class VoucherClaimService
 
     public function redeem(VoucherClaim $claim, User $user, ?string $claimCode): VoucherClaim
     {
-        return DB::transaction(function () use ($claim, $user, $claimCode): VoucherClaim {
+        $redeemed = DB::transaction(function () use ($claim, $user, $claimCode): VoucherClaim {
             $lockedClaim = VoucherClaim::query()
                 ->whereKey($claim->getKey())
                 ->lockForUpdate()
@@ -71,7 +71,8 @@ class VoucherClaimService
             if ($voucher->end_at !== null && $voucher->end_at->isPast()) {
                 $lockedClaim->update(['status' => 'expired']);
 
-                throw new RuntimeException('voucher_expired');
+                // Commit the expired state before returning the API error.
+                return $lockedClaim->refresh();
             }
 
             $lockedClaim->update([
@@ -81,6 +82,12 @@ class VoucherClaimService
 
             return $lockedClaim->refresh();
         });
+
+        if ($redeemed->status === 'expired') {
+            throw new RuntimeException('voucher_expired');
+        }
+
+        return $redeemed;
     }
 
     private function generateClaimCode(): string
