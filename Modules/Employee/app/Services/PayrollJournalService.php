@@ -24,8 +24,8 @@ use RuntimeException;
  *   Cr  Hutang BPJS / Pajak (Liab)  = each deduction component with coa_id
  *   Cr  Kas / Bank (Asset)          = net_salary
  *
- * If a component has no chart_of_account_id, its amount is absorbed into the
- * default cash/bank credit line, keeping debit = credit.
+ * Missing deduction account mappings are rejected rather than silently
+ * overstating the cash payout; a posted entry is committed with the payment.
  */
 class PayrollJournalService
 {
