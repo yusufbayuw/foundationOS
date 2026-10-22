@@ -75,6 +75,34 @@ jobs:
             exit 1
           fi
 
+      - name: Prove a failing regression test is not silently skipped
+        run: |
+          cat > tests/Regression/CIIntentionallyFailingRegressionTest.php <<'PHP'
+          <?php
+
+          use PHPUnit\Framework\TestCase;
+
+          final class CIIntentionallyFailingRegressionTest extends TestCase
+          {
+              public function test_a_regression_must_fail_the_gate(): void
+              {
+                  self::assertSame('expected', 'intentional-regression');
+              }
+          }
+          PHP
+          if php vendor/bin/phpunit -c phpunit.coverage.xml --no-coverage --filter CIIntentionallyFailingRegressionTest --colors=never > "${RUNNER_TEMP}/expected-regression-failure.log" 2>&1; then
+            echo "::error::Intentional failing regression test returned a passing status"
+            exit 1
+          fi
+          if ! grep -Fq 'CIIntentionallyFailingRegressionTest' "${RUNNER_TEMP}/expected-regression-failure.log" ||
+             ! grep -Fq 'Failed asserting' "${RUNNER_TEMP}/expected-regression-failure.log"; then
+            echo "::error::The test command failed for an unexpected reason"
+            tail -n 30 "${RUNNER_TEMP}/expected-regression-failure.log"
+            exit 1
+          fi
+          rm tests/Regression/CIIntentionallyFailingRegressionTest.php
+          echo "Intentional negative regression fixture was detected and removed."
+
       - name: Run complete tests with scoped coverage (one PHPUnit execution)
         run: |
           mkdir -p coverage
