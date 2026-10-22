@@ -183,7 +183,7 @@ class TenantContextWriteSafetyTest extends TestCase
 
         try {
             $processed = (new WithTenantContext(null))->handle(
-                new \\Modules\\Workflow\\Jobs\\CheckWorkflowSlaJob(999),
+                new \Modules\Workflow\Jobs\CheckWorkflowSlaJob(999),
                 function () use ($context): bool {
                     $this->assertNull($context->id(), 'Global job must not inherit worker tenant.');
                     $this->assertSame(0, getPermissionsTeamId());
