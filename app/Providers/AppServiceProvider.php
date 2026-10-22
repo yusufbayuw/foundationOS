@@ -25,6 +25,7 @@ use App\Policies\VoucherPolicy;
 use App\Services\Auth\LogOtpMessenger;
 use App\Services\Auth\OtpMessenger;
 use App\Support\CurrentTenant;
+use App\Support\Security\WebAuthnRpConfiguration;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
@@ -90,7 +91,6 @@ use Modules\School\Models\Student;
 use Modules\School\Models\StudentGrade;
 use Modules\School\Observers\StudentGradeObserver;
 use Modules\Workflow\Models\WorkflowInstance;
-use RuntimeException;
 use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
@@ -108,29 +108,10 @@ class AppServiceProvider extends ServiceProvider
         if (! config('passkeys.enabled', false)) {
             Passkeys::ignoreRoutes();
         } else {
-            $rpId = (string) config('passkeys.relying_party_id', '');
-            $origins = config('passkeys.allowed_origins', []);
-
-            if (! is_array($origins) || count($origins) !== 1) {
-                throw new RuntimeException('WebAuthn requires exactly one explicit trusted origin.');
-            }
-
-            $origin = (string) $origins[0];
-            $parsed = parse_url($origin);
-
-            if (
-                ! is_array($parsed)
-                || ($parsed['scheme'] ?? null) !== 'https'
-                || ($parsed['host'] ?? null) !== $rpId
-                || isset($parsed['user'], $parsed['pass'])
-                || isset($parsed['path'])
-                || isset($parsed['query'])
-                || isset($parsed['fragment'])
-                || $rpId === ''
-                || str_contains($rpId, '*')
-            ) {
-                throw new RuntimeException('Invalid WebAuthn origin / RP ID configuration.');
-            }
+            WebAuthnRpConfiguration::assertValid(
+                (string) config('passkeys.relying_party_id', ''),
+                config('passkeys.allowed_origins', []),
+            );
         }
         $this->app->bind(PaymentGateway::class, NullPaymentGateway::class);
     }
