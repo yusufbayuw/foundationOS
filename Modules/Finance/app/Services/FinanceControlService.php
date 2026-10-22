@@ -128,13 +128,21 @@ class FinanceControlService
     public function postJournalEntry(JournalEntry $entry, User $actor, ?string $notes = null): JournalEntry
     {
         return DB::transaction(function () use ($entry, $actor, $notes): JournalEntry {
-            $entry = $entry->fresh(['lines']);
+            $entry = JournalEntry::query()
+                ->whereKey($entry->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+            $entry->load('lines');
 
             if ($entry->isLockedForMutation()) {
                 throw new RuntimeException('Journal entry is already posted or reversed.');
             }
 
             $totals = $this->calculateJournalTotals($entry);
+
+            if ($entry->lines->count() < 2 || round((float) $totals['debit'], 2) <= 0) {
+                throw new RuntimeException('Journal entry requires at least two lines and a positive amount.');
+            }
 
             if (round((float) $totals['debit'], 2) !== round((float) $totals['credit'], 2)) {
                 throw new RuntimeException('Journal entry is not balanced.');
@@ -163,10 +171,53 @@ class FinanceControlService
     public function reverseJournalEntry(JournalEntry $entry, User $actor, string $reason): JournalEntry
     {
         return DB::transaction(function () use ($entry, $actor, $reason): JournalEntry {
-            $entry = $entry->fresh();
+            $entry = JournalEntry::query()
+                ->whereKey($entry->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
             if (! $entry->is_posted || $entry->is_reversed) {
                 throw new RuntimeException('Only posted and unreversed journal entries can be reversed.');
+            }
+
+            $reason = trim($reason);
+
+            if ($reason === '') {
+                throw new RuntimeException('A journal reversal reason is required.');
+            }
+
+            $lines = $entry->lines()->get();
+
+            if ($lines->count() < 2) {
+                throw new RuntimeException('Cannot reverse a journal entry without complete ledger lines.');
+            }
+
+            // Keep the original posted ledger intact. A separate posted entry
+            // neutralizes its account balances without rewriting history.
+            $reversal = JournalEntry::query()->create([
+                'tenant_id' => $entry->tenant_id,
+                'organization_id' => $entry->organization_id,
+                'posted_by' => $actor->getKey(),
+                'reversed_entry_id' => $entry->getKey(),
+                'entry_number' => 'REV-'.$entry->getKey(),
+                'date' => now()->toDateString(),
+                'description' => 'Reversal of '.$entry->entry_number.': '.$reason,
+                'total_debit' => $entry->total_credit,
+                'total_credit' => $entry->total_debit,
+                'is_balanced' => true,
+                'is_posted' => true,
+                'posted_at' => now(),
+                'is_reversed' => false,
+            ]);
+
+            foreach ($lines as $line) {
+                $reversal->lines()->create([
+                    'tenant_id' => $entry->tenant_id,
+                    'chart_of_account_id' => $line->chart_of_account_id,
+                    'description' => 'Reversal: '.($line->description ?? $entry->entry_number),
+                    'debit' => $line->credit,
+                    'credit' => $line->debit,
+                ]);
             }
 
             $entry->forceFill([
@@ -177,6 +228,13 @@ class FinanceControlService
             $this->audit($entry, $actor, 'finance_journal_reversed', [
                 'status' => 'reversed',
                 'reason' => $reason,
+                'reversal_entry_id' => $reversal->getKey(),
+            ]);
+
+            $this->audit($reversal, $actor, 'finance_journal_reversal_posted', [
+                'source_entry_id' => $entry->getKey(),
+                'total_debit' => $reversal->total_debit,
+                'total_credit' => $reversal->total_credit,
             ]);
 
             return $entry->fresh();
