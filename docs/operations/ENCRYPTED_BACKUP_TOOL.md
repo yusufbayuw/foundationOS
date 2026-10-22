@@ -49,6 +49,6 @@ An SRE must then copy the whole snapshot directory (ciphertext and integrity man
 
 ## CI verification
 
-`.github/workflows/backup-contract.yml` tests bash syntax, refuses backup without quiescence attestation, creates a ciphertext snapshot of fake files and a **mock** PostgreSQL dump, verifies decryption/manifest, and detects tampering. CI **cannot** prove a real PostgreSQL/MySQL restore, offsite durability, or production write quiescence.
+`.github/workflows/backup-contract.yml` verifies shell syntax and negative safety cases; creates encrypted snapshots of mock data; checks decryption, manifest integrity and ciphertext tamper detection. It additionally performs **real PostgreSQL 16 and MariaDB 11.4 isolated restores of disposable CI fixture databases** and separate local private/public file restoration, verifying restored data. Both named restore jobs passed in [Backup Tool Contract run 39763698453](https://github.com/yusufbayuw/foundationOS/actions/runs/39763698453) at commit `fe7ec02e56fe58e9b212ceae291a1248d03dede5`. These genuine database restore tests cover **nonproduction fixture data only**. CI **cannot** prove a restore from production-sized staging backups, offsite durability, actual scheduler/queue write quiescence, PHP session safety, credential escrow, or measured recovery objectives.
 
 No automatic cron or production activation is provided until the server topology, key management, backup frequency, privileges, storage inventory, integrity drill and Project Owner approval are established.
