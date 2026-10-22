@@ -15,7 +15,7 @@ class VoucherClaimsTable
     {
         return $table
             ->columns([
-                TextColumn::make('voucher.name')->searchable(),
+                TextColumn::make('voucher.title')->searchable(),
                 TextColumn::make('user.name')->searchable(),
                 TextColumn::make('claim_code')->searchable(),
                 TextColumn::make('status')->badge(),
