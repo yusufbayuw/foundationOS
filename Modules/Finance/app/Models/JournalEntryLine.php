@@ -32,27 +32,27 @@ class JournalEntryLine extends Model
 
     private function assertLedgerWritable(?int $originalJournalId = null): void
     {
-        $journalId = $originalJournalId ?? (int) $this->journal_entry_id;
+        $journalId = $originalJournalId ?? (int) $this->getAttribute('journal_entry_id');
 
         $journal = JournalEntry::withoutTenantScope()
-            ->where('tenant_id', $this->tenant_id)
+            ->where('tenant_id', $this->getAttribute('tenant_id'))
             ->find($journalId);
 
         if (! $journal || $journal->isLockedForMutation()) {
             throw new RuntimeException('Journal lines cannot be changed after posting or reversal.');
         }
 
-        $debitCents = (int) round((float) $this->debit * 100);
-        $creditCents = (int) round((float) $this->credit * 100);
+        $debitCents = (int) round((float) $this->getAttribute('debit') * 100);
+        $creditCents = (int) round((float) $this->getAttribute('credit') * 100);
 
         if ($debitCents < 0 || $creditCents < 0 || ($debitCents > 0 && $creditCents > 0)) {
             throw new RuntimeException('Journal line debit and credit must be non-negative and mutually exclusive.');
         }
 
-        if ($this->chart_of_account_id) {
+        if ($this->getAttribute('chart_of_account_id')) {
             $account = ChartOfAccount::withoutTenantScope()
-                ->where('tenant_id', $this->tenant_id)
-                ->find($this->chart_of_account_id);
+                ->where('tenant_id', $this->getAttribute('tenant_id'))
+                ->find($this->getAttribute('chart_of_account_id'));
 
             if (! $account || (int) $account->organization_id !== (int) $journal->organization_id) {
                 throw new RuntimeException('Journal line account must belong to the journal tenant and organization.');
