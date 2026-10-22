@@ -263,8 +263,7 @@ class FinanceControlService
                 'total_debit' => $entry->total_credit,
                 'total_credit' => $entry->total_debit,
                 'is_balanced' => true,
-                'is_posted' => true,
-                'posted_at' => now(),
+                'is_posted' => false,
                 'is_reversed' => false,
             ]);
 
@@ -277,6 +276,8 @@ class FinanceControlService
                     'credit' => $line->debit,
                 ]);
             }
+
+            $reversal = $this->postJournalEntry($reversal, $actor);
 
             $entry->forceFill([
                 'is_reversed' => true,
