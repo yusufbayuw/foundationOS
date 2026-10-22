@@ -113,6 +113,7 @@ class AppServiceProvider extends ServiceProvider
                 config('passkeys.allowed_origins', []),
             );
         }
+
         $this->app->bind(PaymentGateway::class, NullPaymentGateway::class);
     }
 
