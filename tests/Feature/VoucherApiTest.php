@@ -154,6 +154,48 @@ class VoucherApiTest extends TestCase
         $this->assertNotNull($claim->refresh()->used_at);
     }
 
+    public function test_expired_claim_is_persisted_before_redemption_error_is_returned(): void
+    {
+        $voucher = $this->makeVoucher(['end_at' => now()->subMinute()]);
+        $claim = VoucherClaim::query()->create([
+            'voucher_id' => $voucher->id,
+            'user_id' => $this->user->id,
+            'claim_code' => 'CLM-EXPIRED1',
+            'status' => 'claimed',
+            'claimed_at' => now()->subDay(),
+        ]);
+
+        $this->withToken($this->token)
+            ->postJson("/api/v1/app/vouchers/claims/{$claim->id}/redeem", [
+                'claim_code' => 'CLM-EXPIRED1',
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('error.code', 'voucher_expired');
+
+        $this->assertDatabaseHas('voucher_claims', [
+            'id' => $claim->id,
+            'status' => 'expired',
+        ]);
+        $this->assertNull($claim->refresh()->used_at);
+
+        $this->withToken($this->token)
+            ->postJson("/api/v1/app/vouchers/claims/{$claim->id}/redeem", [
+                'claim_code' => 'CLM-EXPIRED1',
+            ])
+            ->assertStatus(409)
+            ->assertJsonPath('error.code', 'claim_not_redeemable');
+    }
+
+    public function test_voucher_claim_export_uses_title_relation(): void
+    {
+        $columns = collect(\\Modules\\Voucher\\Filament\\Exports\\VoucherClaimExporter::getColumns())
+            ->map(fn ($column): string => $column->getName())
+            ->all();
+
+        $this->assertContains('voucher.title', $columns);
+        $this->assertNotContains('voucher.name', $columns);
+    }
+
     public function test_redeem_rejects_invalid_claim_code(): void
     {
         $voucher = $this->makeVoucher();
