@@ -173,6 +173,34 @@ class TenantContextWriteSafetyTest extends TestCase
         }
     }
 
+    public function test_known_tenantless_system_job_uses_isolated_global_context(): void
+    {
+        $priorTenant = Tenant::factory()->create();
+        $context = app(CurrentTenant::class);
+        $oldTeam = getPermissionsTeamId();
+        $context->set($priorTenant);
+        setPermissionsTeamId($priorTenant->id);
+
+        try {
+            $processed = (new WithTenantContext(null))->handle(
+                new \\Modules\\Workflow\\Jobs\\CheckWorkflowSlaJob(999),
+                function () use ($context): bool {
+                    $this->assertNull($context->id(), 'Global job must not inherit worker tenant.');
+                    $this->assertSame(0, getPermissionsTeamId());
+
+                    return true;
+                },
+            );
+
+            $this->assertTrue($processed);
+            $this->assertEquals($priorTenant->id, $context->id());
+            $this->assertEquals($priorTenant->id, getPermissionsTeamId());
+        } finally {
+            $context->forget();
+            setPermissionsTeamId($oldTeam);
+        }
+    }
+
     public function test_tenant_job_without_captured_tenant_fails_closed(): void
     {
         $jobWasRun = false;

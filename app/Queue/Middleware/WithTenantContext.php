@@ -13,23 +13,27 @@ class WithTenantContext
 
     public function handle(object $job, Closure $next): mixed
     {
-        // Tenant-bound jobs must never silently run in unrestricted CLI context
-        // or accidentally inherit the previous worker job's tenant.
-        if ($this->tenantId === null) {
+        // Only explicitly reviewed jobs may run without a tenant. They operate
+        // from an isolated NULL context; a previous worker tenant never leaks.
+        $isTenantlessSystemJob = $this->tenantId === null
+            && in_array($job::class, config('tenancy.queue_tenantless_job_types', []), true);
+
+        if ($this->tenantId === null && ! $isTenantlessSystemJob) {
             throw new MissingTenantContextException($job::class);
         }
 
-        $tenant = Tenant::query()->find($this->tenantId);
+        $tenant = $this->tenantId === null ? null : Tenant::query()->find($this->tenantId);
 
-        if ($tenant === null) {
+        if ($this->tenantId !== null && $tenant === null) {
             throw new \RuntimeException('Queued tenant is missing or deleted.');
         }
 
-        // Do not block billing/recovery/cleanup jobs for suspended tenants.
+        // Suspended tenants may still require recovery/cleanup jobs. Even for
+        // explicitly global jobs, reset the Spatie permission team for the call.
         $previousTeamId = getPermissionsTeamId();
 
-        return app(CurrentTenant::class)->forTenant($tenant, function () use ($job, $next, $previousTeamId): mixed {
-            setPermissionsTeamId($this->tenantId);
+        return app(CurrentTenant::class)->forTenant($tenant, function () use ($job, $next, $previousTeamId, $tenant): mixed {
+            setPermissionsTeamId($tenant?->getKey() ?? 0);
 
             try {
                 return $next($job);

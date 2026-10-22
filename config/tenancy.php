@@ -55,6 +55,17 @@ return [
     | Finite trial for NEW self-registered tenants only; existing records,
     | manual activations and previous grandfathered subscriptions are unchanged.
     */
+    /*
+    | Compatibility allowlist of audited-by-name legacy system-wide jobs.
+    | NULL job context never inherits a prior worker's tenant or team.
+    | Any additions require tenant-aware query authorization review.
+    */
+    'queue_tenantless_job_types' => [
+        \\App\\Jobs\\ProcessMoodleSyncOutboxJob::class,
+        \\Modules\\Workflow\\Jobs\\CheckWorkflowSlaJob::class,
+        \\Illuminate\\Events\\CallQueuedListener::class,
+    ],
+
     'self_registration_trial_days' => max(1, (int) env('TENANCY_SELF_REGISTRATION_TRIAL_DAYS', 14)),
 
 ];

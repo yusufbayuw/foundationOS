@@ -74,3 +74,11 @@ CurrentTenant restores the request context with try/finally; Spatie team IDs are
 ### Explicit residual risks
 
 Raw query writes, bulk builder writes, file path authorization, CDN/private uploads, queued jobs that do not adopt InteractsWithTenant, Filament/Livewire direct model access, cache key naming, invoice reactivation, and optional per-module/add-on enforcement are not fully proven safe by these focused tests. These require separate module-owner negative tests, an asset inventory, and isolated PRs. Do not interpret green CI as an exhaustive tenant isolation guarantee.
+
+## CI regression correction (2026-10-23)
+
+The strict NULL-`tenantId` queue rejection introduced in this PR broke existing framework and explicitly global jobs (`ProcessMoodleSyncOutboxJob`, `CheckWorkflowSlaJob`, `CallQueuedListener`). The middleware now permits only those three reviewed-by-name legacy job types to execute with NULL tenant context. Crucially, execution is wrapped in `CurrentTenant::forTenant(null)`, the Spatie permission team is reset to `0` for the callback, and previous context/team are restored in `finally`; unrelated jobs still fail closed. **This is an operational compatibility exception, not proof that all queued listeners are fully tenant-safe.** Audit individual listener targets and target-record authorization before tightening that temporary allowance.
+
+The cross-tenant Eloquent `saving` guard remains strict. Existing integration tests that intentionally construct foreign-tenant fixtures now explicitly enter the foreign tenant context while creating those records, avoiding fake security exceptions during test setup. The subsequent cross-tenant API negative assertions remain unchanged.
+
+Laravel static analysis now has an explicit typed Eloquent `Tenant::$trial_ends_at` property annotation. No migration or persisted tenant data was changed by this corrective patch.

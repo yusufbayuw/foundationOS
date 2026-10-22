@@ -86,6 +86,7 @@ use Modules\School\Models\ViolationType;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
+/** @property \Illuminate\Support\Carbon|null $trial_ends_at */
 class Tenant extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;

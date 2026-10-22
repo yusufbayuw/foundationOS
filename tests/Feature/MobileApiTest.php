@@ -234,11 +234,11 @@ class MobileApiTest extends TestCase
             'created_by' => $otherUser->id,
         ]);
 
-        $otherStudent = Student::create([
+        $otherStudent = app(CurrentTenant::class)->forTenant($otherTenant, fn () => Student::create([
             'tenant_id' => $otherTenant->id,
             'nis' => 'NIS-OTHER-TENANT',
             'status' => 'active',
-        ]);
+        ]));
 
         $response = $this->withToken($this->token)
             ->getJson("/api/v1/students/{$otherStudent->id}/dashboard");

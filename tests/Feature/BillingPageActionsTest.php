@@ -155,7 +155,7 @@ class BillingPageActionsTest extends TestCase
     {
         ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant();
         ['tenant' => $otherTenant] = $this->makeTenantContext(['core'], 'other-billing-plan');
-        $otherInvoice = $this->makeInvoice($otherTenant);
+        $otherInvoice = app(CurrentTenant::class)->forTenant($otherTenant, fn () => $this->makeInvoice($otherTenant));
 
         $billing = Mockery::mock(BillingService::class);
         $billing->shouldReceive('calculateMonthlyAmount')

@@ -192,7 +192,7 @@ class WriteApiTest extends TestCase
     ): void {
         ['tenant' => $otherTenant, 'organization' => $otherOrganization] = $this->otherTenantContext('LEAVE');
         $localEmployee = $this->employeeFor($this->tenant, $this->organization, 'LOCAL');
-        $foreignEmployee = $this->employeeFor($otherTenant, $otherOrganization, 'FOREIGN');
+        $foreignEmployee = app(CurrentTenant::class)->forTenant($otherTenant, fn () => $this->employeeFor($otherTenant, $otherOrganization, 'FOREIGN'));
 
         $payload = [
             'employee_id' => $localEmployee->getKey(),
@@ -235,7 +235,7 @@ class WriteApiTest extends TestCase
     public function test_post_payments_rejects_an_invoice_from_another_tenant(string $endpoint): void
     {
         ['tenant' => $otherTenant] = $this->otherTenantContext('INVOICE');
-        $foreignInvoice = $this->invoiceFor($otherTenant, $this->user, 'FOREIGN');
+        $foreignInvoice = app(CurrentTenant::class)->forTenant($otherTenant, fn () => $this->invoiceFor($otherTenant, $this->user, 'FOREIGN'));
         $localAccount = $this->accountFor($this->tenant, $this->organization, 'LOCAL');
 
         $this->withToken($this->token)
@@ -252,7 +252,7 @@ class WriteApiTest extends TestCase
     {
         ['tenant' => $otherTenant, 'organization' => $otherOrganization] = $this->otherTenantContext('ACCOUNT');
         $localInvoice = $this->invoiceFor($this->tenant, $this->user, 'LOCAL');
-        $foreignAccount = $this->accountFor($otherTenant, $otherOrganization, 'FOREIGN');
+        $foreignAccount = app(CurrentTenant::class)->forTenant($otherTenant, fn () => $this->accountFor($otherTenant, $otherOrganization, 'FOREIGN'));
 
         $this->withToken($this->token)
             ->postJson($endpoint, $this->paymentPayload($localInvoice, $foreignAccount, 'PAY-FOREIGN-ACCOUNT'))
@@ -426,13 +426,13 @@ class WriteApiTest extends TestCase
             'created_by' => $this->user->getKey(),
         ]);
 
-        $organization = Organization::create([
+        $organization = app(CurrentTenant::class)->forTenant($tenant, fn () => Organization::create([
             'tenant_id' => $tenant->getKey(),
             'name' => "Other Organization {$suffix}",
             'code' => "OTHER-{$suffix}",
             'is_active' => true,
             'is_main' => true,
-        ]);
+        ]));
 
         return compact('tenant', 'organization');
     }
