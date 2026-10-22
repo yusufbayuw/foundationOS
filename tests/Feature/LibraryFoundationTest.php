@@ -489,6 +489,7 @@ class LibraryFoundationTest extends TestCase
         $member = Member::create([
             'tenant_id' => $tenant->id,
             'organization_id' => $organization->id,
+            'user_id' => $user->id,
             'member_number' => 'M-LOCKED-CHECKOUT',
             'status' => 'active',
         ]);
@@ -552,6 +553,7 @@ class LibraryFoundationTest extends TestCase
         $member = Member::create([
             'tenant_id' => $tenant->id,
             'organization_id' => $organization->id,
+            'user_id' => $user->id,
             'member_number' => 'M-QUOTA',
             'status' => 'active',
             'current_loans_count' => 0,
