@@ -524,15 +524,51 @@ class PublicOpacController extends Controller
         abort_if($copy->status !== 'available', 422, 'Copy buku ini tidak tersedia untuk dipinjam.');
         abort_if($copy->book && ! $copy->book->is_active, 422, 'Judul buku ini sedang tidak aktif.');
 
-        $policy = $policyResolver->resolveForMember($member);
-        abort_if($member->current_loans_count >= $policy['max_books'], 422, 'Batas peminjaman member sudah tercapai.');
+        // Re-evaluate availability and member quota while holding database
+        // locks. The preflight checks above are UX only and can become stale
+        // when another circulation clerk submits a checkout concurrently.
+        $loan = DB::transaction(function () use ($tenantModel, $member, $copy, $policyResolver, $validated, $request): Loan {
+            $lockedMember = Member::query()
+                ->where('tenant_id', $tenantModel->id)
+                ->whereKey($member->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $loan = DB::transaction(function () use ($member, $copy, $policy, $validated, $request): Loan {
+            $lockedCopy = BookCopy::query()
+                ->where('tenant_id', $tenantModel->id)
+                ->whereKey($copy->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_if($lockedMember->status !== 'active', 422, 'Member tidak aktif untuk transaksi peminjaman.');
+            abort_if($lockedCopy->status !== 'available', 422, 'Copy buku ini tidak tersedia untuk dipinjam.');
+
+            $book = $lockedCopy->book;
+            abort_if($book && ((int) $book->tenant_id !== (int) $tenantModel->id || ! $book->is_active), 422, 'Judul buku ini sedang tidak aktif.');
+
+            // A stale copy status must not permit a second active loan.
+            abort_if(Loan::query()
+                ->where('tenant_id', $tenantModel->id)
+                ->where('book_copy_id', $lockedCopy->id)
+                ->whereNull('return_date')
+                ->whereIn('status', ['borrowed', 'overdue'])
+                ->exists(), 422, 'Copy buku ini sudah memiliki peminjaman aktif.');
+
+            $policy = $policyResolver->resolveForMember($lockedMember);
+            $activeLoanCount = Loan::query()
+                ->where('tenant_id', $tenantModel->id)
+                ->where('member_id', $lockedMember->id)
+                ->whereNull('return_date')
+                ->whereIn('status', ['borrowed', 'overdue'])
+                ->count();
+
+            abort_if($activeLoanCount >= (int) $policy['max_books'], 422, 'Batas peminjaman member sudah tercapai.');
+
             $loan = Loan::query()->create([
-                'tenant_id' => (int) $member->tenant_id,
-                'organization_id' => $member->organization_id ?? $copy->organization_id,
-                'book_copy_id' => (int) $copy->id,
-                'member_id' => (int) $member->id,
+                'tenant_id' => (int) $lockedMember->tenant_id,
+                'organization_id' => $lockedMember->organization_id ?? $lockedCopy->organization_id,
+                'book_copy_id' => (int) $lockedCopy->id,
+                'member_id' => (int) $lockedMember->id,
                 'processed_by' => $request->user()?->id,
                 'loan_date' => now()->toDateString(),
                 'due_date' => now()->addDays($policy['loan_period_days'])->toDateString(),
@@ -545,10 +581,10 @@ class PublicOpacController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            $copy->forceFill(['status' => 'borrowed'])->save();
+            $lockedCopy->forceFill(['status' => 'borrowed'])->save();
 
             return $loan;
-        });
+        }, 3);
 
         $circulationService->refreshMemberCounters((int) $member->id);
         if ($copy->book_id) {
