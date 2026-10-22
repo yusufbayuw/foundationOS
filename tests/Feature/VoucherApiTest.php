@@ -4,11 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\PersonalAccessToken;
 use App\Support\CurrentTenant;
+use Filament\Actions\Exports\Models\Export;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Sales\Filament\Exports\VoucherClaimExporter as SalesVoucherClaimExporter;
 use Modules\Voucher\Filament\Exports\VoucherClaimExporter;
 use Modules\Voucher\Models\Voucher;
 use Modules\Voucher\Models\VoucherClaim;
@@ -187,14 +189,63 @@ class VoucherApiTest extends TestCase
             ->assertJsonPath('error.code', 'claim_not_redeemable');
     }
 
-    public function test_voucher_claim_export_uses_title_relation(): void
+    public function test_voucher_claim_export_matches_the_existing_sales_csv_column_contract(): void
     {
         $columns = collect(VoucherClaimExporter::getColumns())
-            ->map(fn ($column): string => $column->getName())
+            ->map(fn (object $column): string => $column->getName())
             ->all();
 
-        $this->assertContains('voucher.title', $columns);
-        $this->assertNotContains('voucher.name', $columns);
+        $expectedColumns = [
+            'voucher.title',
+            'voucher.code',
+            'user.name',
+            'user.email',
+            'claim_code',
+            'status',
+            'claimed_at',
+            'used_at',
+        ];
+
+        $this->assertSame($expectedColumns, $columns);
+        $this->assertSame(
+            collect(SalesVoucherClaimExporter::getColumns())
+                ->map(fn (object $column): string => $column->getName())
+                ->all(),
+            $columns,
+        );
+    }
+
+    public function test_voucher_claim_export_resolves_all_csv_columns_to_actual_values(): void
+    {
+        $voucher = $this->makeVoucher(['code' => 'DISC-EXPORT']);
+        $claimedAt = now()->subHour()->startOfSecond();
+        $usedAt = now()->startOfSecond();
+
+        $claim = VoucherClaim::query()->create([
+            'voucher_id' => $voucher->id,
+            'user_id' => $this->user->id,
+            'claim_code' => 'CLM-EXPORT1',
+            'status' => 'used',
+            'claimed_at' => $claimedAt,
+            'used_at' => $usedAt,
+        ]);
+
+        $columns = collect(VoucherClaimExporter::getColumns())
+            ->map(fn (object $column): string => $column->getName())
+            ->all();
+
+        $exporter = new VoucherClaimExporter(new Export, array_combine($columns, $columns), []);
+
+        $this->assertSame([
+            'Diskon SPP',
+            'DISC-EXPORT',
+            'Voucher API User',
+            'voucher-api@example.com',
+            'CLM-EXPORT1',
+            'used',
+            $claimedAt->format('Y-m-d H:i:s'),
+            $usedAt->format('Y-m-d H:i:s'),
+        ], $exporter($claim->load(['voucher', 'user'])));
     }
 
     public function test_redeem_rejects_invalid_claim_code(): void
