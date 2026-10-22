@@ -80,3 +80,88 @@ jobs:
             exit 1
           fi
           echo "Fail-closed, encryption, file scope and tamper detection passed."
+
+  postgresql-restore:
+    name: PostgreSQL encrypted isolated restore (CI fixture)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: foundationos_backup_source
+          POSTGRES_USER: fos_ci
+          POSTGRES_PASSWORD: ci-only-ephemeral
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fos_ci -d foundationos_backup_source"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install age and PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y age postgresql-client
+
+      - name: Backup and restore entirely disposable data
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${CI:-}" = true
+          test "${GITHUB_ACTIONS:-}" = true
+          sandbox=$(mktemp -d)
+          trap 'rm -rf -- "$sandbox"' EXIT
+          mkdir -p "$sandbox/app/storage/app/private" "$sandbox/app/storage/app/public" \
+                   "$sandbox/backups" "$sandbox/restore"
+          printf 'private test document\n' > "$sandbox/app/storage/app/private/private.txt"
+          printf 'public test document\n' > "$sandbox/app/storage/app/public/public.txt"
+          age-keygen -o "$sandbox/identity.txt" >/dev/null 2>&1
+          recipient=$(sed -n 's/^# public key: //p' "$sandbox/identity.txt")
+          test -n "$recipient"
+          printf '127.0.0.1:5432:*:fos_ci:ci-only-ephemeral\n' > "$sandbox/pgpass"
+          chmod 600 "$sandbox/pgpass"
+          export PGPASSFILE="$sandbox/pgpass"
+          db=(--host=127.0.0.1 --port=5432 --username=fos_ci --no-password)
+          psql "${db[@]}" --dbname=foundationos_backup_source --set=ON_ERROR_STOP=1 \
+            -c "CREATE TABLE snapshot_fixture (id integer PRIMARY KEY, value text NOT NULL);"
+          psql "${db[@]}" --dbname=foundationos_backup_source --set=ON_ERROR_STOP=1 \
+            -c "INSERT INTO snapshot_fixture VALUES (1, 'restore-verified');"
+
+          export FOS_BACKUP_APP_DIR="$sandbox/app"
+          export FOS_BACKUP_DESTINATION="$sandbox/backups"
+          export FOS_BACKUP_DB_DRIVER=pgsql
+          export FOS_BACKUP_DB_NAME=foundationos_backup_source
+          export FOS_BACKUP_DB_HOST=127.0.0.1
+          export FOS_BACKUP_DB_PORT=5432
+          export FOS_BACKUP_DB_USER=fos_ci
+          export FOS_BACKUP_AGE_RECIPIENT="$recipient"
+          export FOS_BACKUP_PGPASSFILE="$sandbox/pgpass"
+          export FOS_BACKUP_WRITES_QUIESCED=yes
+
+          bash scripts/ops/snapshot-local-encrypted.sh
+          snapshot=$(find "$sandbox/backups" -mindepth 1 -maxdepth 1 -type d -name 'snapshot-*' -print -quit)
+          test -n "$snapshot"
+          bash scripts/ops/verify-encrypted-snapshot.sh "$snapshot" "$sandbox/identity.txt"
+
+          # Restores to a DIFFERENT database; neither source nor production is touched.
+          psql "${db[@]}" --dbname=postgres --set=ON_ERROR_STOP=1 \
+            -c "CREATE DATABASE foundationos_backup_restore;"
+          age -d -i "$sandbox/identity.txt" "$snapshot/database.dump.age" |
+            pg_restore "${db[@]}" --dbname=foundationos_backup_restore \
+              --no-owner --no-privileges --exit-on-error
+          actual=$(psql "${db[@]}" --dbname=foundationos_backup_restore --tuples-only --no-align \
+            -c "SELECT value FROM snapshot_fixture WHERE id = 1;")
+          test "$actual" = restore-verified
+
+          age -d -i "$sandbox/identity.txt" "$snapshot/storage.tar.age" |
+            tar -C "$sandbox/restore" --no-same-owner -xf -
+          cmp "$sandbox/app/storage/app/private/private.txt" \
+            "$sandbox/restore/storage/app/private/private.txt"
+          cmp "$sandbox/app/storage/app/public/public.txt" \
+            "$sandbox/restore/storage/app/public/public.txt"
+          echo "PASS: real PostgreSQL 16, encrypted dump, isolated DB restore, and file restoration."
