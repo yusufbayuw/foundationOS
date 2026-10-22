@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passkeys\Passkeys;
 use Laravel\Sanctum\Sanctum;
 use Modules\Alumni\Models\JobApplication;
 use Modules\Alumni\Models\JobPosting;
@@ -89,6 +90,7 @@ use Modules\School\Models\Student;
 use Modules\School\Models\StudentGrade;
 use Modules\School\Observers\StudentGradeObserver;
 use Modules\Workflow\Models\WorkflowInstance;
+use RuntimeException;
 use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
@@ -98,6 +100,38 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(OtpMessenger::class, LogOtpMessenger::class);
         $this->app->singleton(CurrentTenant::class);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        // Native WebAuthn routes use web sessions, never legacy tenantless API
+        // tokens. Keep the third-party routes absent until explicitly accepted.
+        Passkeys::useUserModel(User::class);
+
+        if (! config('passkeys.enabled', false)) {
+            Passkeys::ignoreRoutes();
+        } else {
+            $rpId = (string) config('passkeys.relying_party_id', '');
+            $origins = config('passkeys.allowed_origins', []);
+
+            if (! is_array($origins) || count($origins) !== 1) {
+                throw new RuntimeException('WebAuthn requires exactly one explicit trusted origin.');
+            }
+
+            $origin = (string) $origins[0];
+            $parsed = parse_url($origin);
+
+            if (
+                ! is_array($parsed)
+                || ($parsed['scheme'] ?? null) !== 'https'
+                || ($parsed['host'] ?? null) !== $rpId
+                || isset($parsed['user'], $parsed['pass'])
+                || isset($parsed['path'])
+                || isset($parsed['query'])
+                || isset($parsed['fragment'])
+                || $rpId === ''
+                || str_contains($rpId, '*')
+            ) {
+                throw new RuntimeException('Invalid WebAuthn origin / RP ID configuration.');
+            }
+        }
         $this->app->bind(PaymentGateway::class, NullPaymentGateway::class);
     }
 
