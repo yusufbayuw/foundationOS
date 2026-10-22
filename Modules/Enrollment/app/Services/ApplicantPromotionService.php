@@ -2,6 +2,8 @@
 
 namespace Modules\Enrollment\Services;
 
+use App\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\TenantSetting;
@@ -26,6 +28,11 @@ class ApplicantPromotionService
     public function promote(Applicant $applicant, ?User $actor = null): ?Student
     {
         $tenantId = (int) $applicant->tenant_id;
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (int) $activeTenantId !== $tenantId) {
+            throw (new ModelNotFoundException)->setModel(Applicant::class, [$applicant->getKey()]);
+        }
 
         if (! $this->isEnabledFor($tenantId)) {
             return null;
