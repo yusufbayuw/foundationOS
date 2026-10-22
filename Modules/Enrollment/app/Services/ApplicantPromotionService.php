@@ -25,29 +25,51 @@ class ApplicantPromotionService
 
     public function promote(Applicant $applicant, ?User $actor = null): ?Student
     {
-        if (! $this->isEnabledFor((int) $applicant->tenant_id)) {
+        $tenantId = (int) $applicant->tenant_id;
+
+        if (! $this->isEnabledFor($tenantId)) {
             return null;
         }
 
-        $applicant = $applicant->fresh(['admissionPeriod']);
+        // Lock the applicant, not just the eventual student. Concurrent queue
+        // deliveries must serialize before checking the conversion pointer.
+        return DB::transaction(function () use ($applicant, $tenantId): ?Student {
+            $applicant = Applicant::withoutTenantScope()
+                ->where('tenant_id', $tenantId)
+                ->whereKey($applicant->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if ($applicant->converted_to_student_id) {
-            return $applicant->convertedStudent;
-        }
+            if ($applicant->converted_to_student_id) {
+                // A stale or corrupt cross-tenant foreign key must not disclose
+                // another tenant's student or silently create a replacement.
+                return Student::withoutTenantScope()
+                    ->where('tenant_id', $tenantId)
+                    ->whereKey($applicant->converted_to_student_id)
+                    ->firstOrFail();
+            }
 
-        return DB::transaction(function () use ($applicant): Student {
-            $period = $applicant->admissionPeriod;
-            $organizationId = $period?->organization_id;
+            // Queued acceptance events can execute after a decision is reverted.
+            if (! in_array((string) $applicant->status, ['accepted', 'enrolled'], true)) {
+                return null;
+            }
 
-            $academicYearId = AcademicYear::query()
-                ->where('tenant_id', $applicant->tenant_id)
+            $period = \Modules\Enrollment\Models\AdmissionPeriod::withoutTenantScope()
+                ->where('tenant_id', $tenantId)
+                ->whereKey($applicant->admission_period_id)
+                ->firstOrFail();
+
+            $organizationId = $period->organization_id;
+
+            $academicYearId = AcademicYear::withoutTenantScope()
+                ->where('tenant_id', $tenantId)
                 ->when($organizationId, fn ($q) => $q->where('organization_id', $organizationId))
                 ->where('is_active', true)
                 ->orderByDesc('start_date')
                 ->value('id');
 
             $student = Student::query()->create([
-                'tenant_id' => $applicant->tenant_id,
+                'tenant_id' => $tenantId,
                 'organization_id' => $organizationId,
                 'academic_year_id' => $academicYearId,
                 'nis' => $this->generateNis($applicant),
@@ -67,7 +89,7 @@ class ApplicantPromotionService
             ])->saveQuietly();
 
             return $student;
-        });
+        }, 3);
     }
 
     protected function generateNis(Applicant $applicant): string
