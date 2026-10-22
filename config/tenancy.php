@@ -39,4 +39,16 @@ return [
     */
     'moodle_processing_stale_minutes' => (int) env('MOODLE_PROCESSING_STALE_MINUTES', 30),
 
+    /*
+    | Human API tokens must retain active tenant membership at request time.
+    | Production default is strict; nonproduction fixtures can opt in explicitly.
+    */
+    'api_enforce_membership' => filter_var(
+        env('TENANCY_API_ENFORCE_MEMBERSHIP', env('APP_ENV') === 'production'),
+        FILTER_VALIDATE_BOOL,
+    ),
+
+    // Never enable this on real HTTP traffic; only existing Sanctum::actingAs tests.
+    'api_allow_transient_test_token' => true,
+
 ];

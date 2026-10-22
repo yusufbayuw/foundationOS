@@ -6,6 +6,7 @@ use App\Events\TenantSwitched;
 use App\Listeners\LogTenantSwitchAudit;
 use App\Models\Permission;
 use App\Models\PersonalAccessToken;
+use App\Models\TenantServiceIntegration;
 use App\Models\Role;
 use App\Models\Voucher;
 use App\Models\VoucherClaim;
@@ -151,6 +152,7 @@ class AppServiceProvider extends ServiceProvider
 
         Relation::enforceMorphMap([
             'user' => User::class,
+            'tenant_service_integration' => TenantServiceIntegration::class,
             'tenant' => Tenant::class,
             'organization' => Organization::class,
             'alumni_job_application' => JobApplication::class,
