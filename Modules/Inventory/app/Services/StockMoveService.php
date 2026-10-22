@@ -46,14 +46,12 @@ class StockMoveService
         ?Model $reference = null,
         ?string $notes = null,
     ): StockMove {
-        $cost = $this->valuation->resolveOutboundCost($stockItem, $warehouse, $quantity);
-
         return $this->commit(
             warehouse: $warehouse,
             stockItem: $stockItem,
             moveType: StockMoveType::Out,
             quantity: $quantity,
-            unitCost: $cost['unit_cost'],
+            unitCost: 0,
             reference: $reference,
             notes: $notes,
         );
@@ -97,6 +95,13 @@ class StockMoveService
 
             if ($moveType === StockMoveType::Out && (float) $level->quantity_on_hand < $quantity) {
                 throw new RuntimeException('Insufficient stock on hand.');
+            }
+
+            if ($moveType === StockMoveType::Out) {
+                // Cost layers must be consumed only inside the stock-level lock
+                // and the same transaction that commits the outbound move.
+                $cost = $this->valuation->resolveOutboundCost($stockItem, $warehouse, $quantity);
+                $unitCost = $cost['unit_cost'];
             }
 
             $totalCost = round($quantity * $unitCost, 2);
