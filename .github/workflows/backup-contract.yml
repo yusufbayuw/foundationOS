@@ -1,0 +1,82 @@
+name: Backup Tool Contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup-contract-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  encrypted-snapshot:
+    name: Encrypted backup contract smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install age encryption tool
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y age
+
+      - name: Validate shell syntax
+        run: |
+          bash -n scripts/ops/snapshot-local-encrypted.sh
+          bash -n scripts/ops/verify-encrypted-snapshot.sh
+
+      - name: Smoke backup with fake database dump (no real DB or secrets)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sandbox=$(mktemp -d)
+          trap 'rm -rf -- "$sandbox"' EXIT
+          mkdir -p "$sandbox/app/storage/app/private" "$sandbox/app/storage/app/public" \
+                   "$sandbox/backups" "$sandbox/bin"
+          printf 'private fixture\n' > "$sandbox/app/storage/app/private/fixture.txt"
+          printf 'public fixture\n' > "$sandbox/app/storage/app/public/fixture.txt"
+          printf '#!/usr/bin/env bash\nprintf "PGDMP fake CI fixture\\n"\n' > "$sandbox/bin/pg_dump"
+          chmod +x "$sandbox/bin/pg_dump"
+          age-keygen -o "$sandbox/identity.txt" >/dev/null 2>&1
+          recipient=$(sed -n 's/^# public key: //p' "$sandbox/identity.txt")
+          test -n "$recipient"
+          printf '*:*:*:*:ci-only\n' > "$sandbox/pgpass"
+          chmod 600 "$sandbox/pgpass"
+          export PATH="$sandbox/bin:$PATH"
+          export FOS_BACKUP_APP_DIR="$sandbox/app"
+          export FOS_BACKUP_DESTINATION="$sandbox/backups"
+          export FOS_BACKUP_DB_DRIVER=pgsql
+          export FOS_BACKUP_DB_NAME=foundationos_ci
+          export FOS_BACKUP_DB_HOST=127.0.0.1
+          export FOS_BACKUP_DB_PORT=5432
+          export FOS_BACKUP_DB_USER=ci
+          export FOS_BACKUP_AGE_RECIPIENT="$recipient"
+          export FOS_BACKUP_PGPASSFILE="$sandbox/pgpass"
+
+          if FOS_BACKUP_WRITES_QUIESCED=no bash scripts/ops/snapshot-local-encrypted.sh > "$sandbox/denied.log" 2>&1; then
+            echo "::error::Snapshot incorrectly allowed without quiesce confirmation"
+            exit 1
+          fi
+
+          FOS_BACKUP_WRITES_QUIESCED=yes bash scripts/ops/snapshot-local-encrypted.sh
+          snapshot=$(find "$sandbox/backups" -mindepth 1 -maxdepth 1 -type d -name 'snapshot-*' -print -quit)
+          test -n "$snapshot"
+          bash scripts/ops/verify-encrypted-snapshot.sh "$snapshot" "$sandbox/identity.txt"
+          listing=$(age -d -i "$sandbox/identity.txt" "$snapshot/storage.tar.age" | tar -tf -)
+          grep -Fq 'storage/app/private/fixture.txt' <<< "$listing"
+          grep -Fq 'storage/app/public/fixture.txt' <<< "$listing"
+
+          printf 'tampered\n' >> "$snapshot/storage.tar.age"
+          if bash scripts/ops/verify-encrypted-snapshot.sh "$snapshot" "$sandbox/identity.txt" > "$sandbox/tampered.log" 2>&1; then
+            echo "::error::Snapshot verifier failed to detect ciphertext tampering"
+            exit 1
+          fi
+          echo "Fail-closed, encryption, file scope and tamper detection passed."
