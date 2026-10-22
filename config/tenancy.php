@@ -51,4 +51,10 @@ return [
     // Never enable this on real HTTP traffic; only existing Sanctum::actingAs tests.
     'api_allow_transient_test_token' => true,
 
+    /*
+    | Finite trial for NEW self-registered tenants only; existing records,
+    | manual activations and previous grandfathered subscriptions are unchanged.
+    */
+    'self_registration_trial_days' => max(1, (int) env('TENANCY_SELF_REGISTRATION_TRIAL_DAYS', 14)),
+
 ];

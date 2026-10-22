@@ -51,3 +51,26 @@ issueReadToken() creates a 30-day token atomically and pins tenant_id in the tok
 ## Remaining broader-scope audits
 
 CurrentTenant restores the request context with try/finally; Spatie team IDs are likewise restored. Console/queue processes still need explicit tenant context for each job. Model scopes do not by themselves protect raw SQL, unscoped relations, cache keys, exports or file URLs. These require separate targeted module reviews, negative tests and decisions coordinated by the Project Manager.
+
+## Hardening and rollout addendum (2026-10-22, issue #85 / #98 / #97)
+
+- API access checks fresh, non-deleted human user status == `active` on every persisted bearer-token request, regardless of membership mode. Changes to user status deny immediately, including platform owners. A cancelled/expired tenant subscription blocks API access regardless of token scope.
+- Filament tenant middleware now uses `CurrentTenant::forTenant()` and restores the previous Spatie permissions team ID on both normal and exceptional completion; null context is explicitly isolated to avoid stale singleton contamination.
+- Tenant-scoped Eloquent model `save()` and `create()` reject explicit foreign `tenant_id` when a CurrentTenant is bound, including attempts to repurpose models originally belonging to a different tenant. Raw DB queries and builder bulk update/delete do not invoke Eloquent lifecycle hooks; those are **not** covered by this mitigation and must be reviewed separately.
+- Jobs adopting `InteractsWithTenant` now fail if no `tenantId` was captured. Explicit tenant-bound queue middleware loads an existing, non-deleted tenant before running and restores tenant and Spatie-team context after execution. Suspended tenants are **not** blocked in this queue middleware: billing recovery, cleanup, and asynchronous reconciliation may still require jobs. Any globally authorized job should not use `InteractsWithTenant`; the PM and DevOps team must review such jobs.
+- New self-registrations begin a finite trial (default 14 days; `TENANCY_SELF_REGISTRATION_TRIAL_DAYS` configures length). Existing tenant status, plan, trial dates, expiry dates and subscriptions are not changed. Trial expiry is enforced by authenticated v1/v2 tenant API middleware. The corresponding Filament billing/activation UX and paid plan entitlement transitions are a separate business-policy integration gate.
+- Subscription module activation requires a plan/add-on entitlement model that accounts for paid-per-module products. No blanket check on `SubscriptionPlan.included_modules` is introduced yet because that alone would disable legitimately paid add-ons. Track with #97 and the Finance agent.
+
+### Manual UAT scenarios before merging
+
+1. A valid user belonging to tenant A uses an A-bound bearer token successfully; remove/expire their role, observe `tenant_membership_required` on both API versions. Try a B tenant_id query/header; B data must remain unavailable.
+2. Disable the user while retaining token and assignment; observe `tenant_user_inactive` on both API versions, including global admin tokens.
+3. Suspend the tenant or expire its trial; observe `tenant_subscription_inactive`. Confirm signed payment webhook and existing billing recovery workflows can still operate.
+4. Sequentially open tenant A and B Filament contexts with the same worker, then cause a controlled exception. The previous CurrentTenant and permission team ID must be restored; no cache bleed may occur.
+5. Attempt create/update of a tenant B model inside A CurrentTenant; expect `AuthorizationException` without any persistence. Repeat from a job with no tenant context: a job using `InteractsWithTenant` must be denied before executing.
+6. Verify that tenant signup assigns an owner and module profile transactionally, and the new record starts in finite trial. Existing tenants must retain prior entitlements.
+7. Check the exact user-token inventory and signed webhook recovery in staging, including 403 monitoring, before approving production enforcement.
+
+### Explicit residual risks
+
+Raw query writes, bulk builder writes, file path authorization, CDN/private uploads, queued jobs that do not adopt InteractsWithTenant, Filament/Livewire direct model access, cache key naming, invoice reactivation, and optional per-module/add-on enforcement are not fully proven safe by these focused tests. These require separate module-owner negative tests, an asset inventory, and isolated PRs. Do not interpret green CI as an exhaustive tenant isolation guarantee.

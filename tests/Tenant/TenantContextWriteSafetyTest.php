@@ -131,7 +131,7 @@ class TenantContextWriteSafetyTest extends TestCase
         $oldTeam = getPermissionsTeamId();
 
         try {
-            (new WithTenantContext($new->id))->handle(new \stdClass(), function () use ($new, $context) {
+            (new WithTenantContext($new->id))->handle((object) [], function () use ($new, $context) {
                 $this->assertEquals($new->id, $context->id());
                 $this->assertEquals($new->id, getPermissionsTeamId());
                 throw new RuntimeException('job failure');
@@ -150,7 +150,7 @@ class TenantContextWriteSafetyTest extends TestCase
         $jobWasRun = false;
 
         try {
-            (new WithTenantContext(null))->handle(new \stdClass(), function () use (&$jobWasRun): void {
+            (new WithTenantContext(null))->handle((object) [], function () use (&$jobWasRun): void {
                 $jobWasRun = true;
             });
 
@@ -167,7 +167,7 @@ class TenantContextWriteSafetyTest extends TestCase
         $ran = false;
 
         try {
-            (new WithTenantContext($tenant->id))->handle(new \stdClass(), function () use (&$ran): void {
+            (new WithTenantContext($tenant->id))->handle((object) [], function () use (&$ran): void {
                 $ran = true;
             });
             $this->fail('Deleted tenant cannot resume queued work.');
