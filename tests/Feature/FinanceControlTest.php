@@ -148,6 +148,29 @@ class FinanceControlTest extends TestCase
 
         $this->assertTrue((bool) $postedJournal->fresh()->is_posted);
         $this->assertTrue((bool) $reversedJournal->is_reversed);
+
+        $reversal = JournalEntry::query()
+            ->where('tenant_id', $tenant->id)
+            ->where('reversed_entry_id', $journal->id)
+            ->sole();
+
+        $this->assertSame('REV-'.$journal->id, $reversal->entry_number);
+        $this->assertTrue((bool) $reversal->is_posted);
+        $this->assertTrue((bool) $reversal->is_balanced);
+        $this->assertEqualsWithDelta(250000, (float) $reversal->total_debit, 0.01);
+        $this->assertEqualsWithDelta(250000, (float) $reversal->total_credit, 0.01);
+        $this->assertDatabaseHas('journal_entry_lines', [
+            'journal_entry_id' => $reversal->id,
+            'chart_of_account_id' => $cashAccount->id,
+            'debit' => 0,
+            'credit' => 250000,
+        ]);
+        $this->assertDatabaseHas('journal_entry_lines', [
+            'journal_entry_id' => $reversal->id,
+            'chart_of_account_id' => $receivableAccount->id,
+            'debit' => 250000,
+            'credit' => 0,
+        ]);
         $this->assertDatabaseHas('audit_logs', [
             'tenant_id' => $tenant->id,
             'auditable_type' => 'budget',
@@ -160,6 +183,70 @@ class FinanceControlTest extends TestCase
             'auditable_id' => $journal->id,
             'action' => 'finance_journal_reversed',
         ]);
+    }
+
+    public function test_reversal_is_atomic_and_cannot_create_a_duplicate_journal(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+        [$cashAccount, $receivableAccount] = $this->makeAccounts($tenant, $organization);
+
+        $journal = JournalEntry::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'entry_number' => 'JE-REVERSAL-ONCE',
+            'date' => now()->toDateString(),
+            'description' => 'Reversal idempotency regression.',
+            'total_debit' => 150000,
+            'total_credit' => 150000,
+            'is_balanced' => true,
+            'is_posted' => true,
+        ]);
+
+        $journal->lines()->createMany([
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $cashAccount->id, 'debit' => 150000, 'credit' => 0],
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $receivableAccount->id, 'debit' => 0, 'credit' => 150000],
+        ]);
+
+        $service = app(FinanceControlService::class);
+        $service->reverseJournalEntry($journal, $actor, 'Correct duplicate booking.');
+
+        try {
+            $service->reverseJournalEntry($journal, $actor, 'Repeated reversal attempt.');
+            $this->fail('An already reversed journal must reject a second reversal.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Only posted and unreversed', $exception->getMessage());
+        }
+
+        $this->assertSame(1, JournalEntry::query()->where('reversed_entry_id', $journal->id)->count());
+        $this->assertSame(2, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+        $this->assertDatabaseCount('journal_entry_lines', 4);
+        $this->assertSame('Correct duplicate booking.', $journal->fresh()->reversal_reason);
+    }
+
+    public function test_empty_journal_cannot_be_posted(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+
+        $journal = JournalEntry::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'entry_number' => 'JE-NO-LINES',
+            'date' => now()->toDateString(),
+            'description' => 'Empty manual journal.',
+            'total_debit' => 0,
+            'total_credit' => 0,
+            'is_balanced' => false,
+            'is_posted' => false,
+        ]);
+
+        try {
+            app(FinanceControlService::class)->postJournalEntry($journal, $actor);
+            $this->fail('A zero-value journal with no lines must not be posted.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('at least two lines', $exception->getMessage());
+        }
+
+        $this->assertFalse((bool) $journal->fresh()->is_posted);
     }
 
     protected function makeFinanceContext(): array
