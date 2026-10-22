@@ -49,9 +49,20 @@ class CampusGradeBridgeService implements GradeBridgeInterface
 
         $componentKey = $definition->grade_sync_target ?? 'final';
 
+        if (StudyResult::withoutTenantScope()
+            ->where('study_plan_item_id', $studyPlanItemId)
+            ->where('tenant_id', '!=', $definition->tenant_id)
+            ->exists()) {
+            $attemptSync->forceFill([
+                'sync_status' => 'grade_bridge_skipped',
+                'error_message' => 'Existing study result belongs to another tenant',
+            ])->save();
+
+            return;
+        }
+
         $studyResult = StudyResult::query()->firstOrCreate(
-            ['study_plan_item_id' => $studyPlanItemId],
-            ['tenant_id' => $definition->tenant_id],
+            ['tenant_id' => $definition->tenant_id, 'study_plan_item_id' => $studyPlanItemId],
         );
 
         $components = $studyResult->components_breakdown ?? [];
@@ -94,9 +105,15 @@ class CampusGradeBridgeService implements GradeBridgeInterface
 
         $graded = $this->gradebookConfig->gradeFor($definition->tenant_id, $percentage);
 
+        if (StudyResult::withoutTenantScope()
+            ->where('study_plan_item_id', $studyPlanItemId)
+            ->where('tenant_id', '!=', $definition->tenant_id)
+            ->exists()) {
+            return GradebookExportOutcome::skipped('An existing grade result belongs to another tenant.');
+        }
+
         $studyResult = StudyResult::query()->firstOrCreate(
-            ['study_plan_item_id' => $studyPlanItemId],
-            ['tenant_id' => $definition->tenant_id],
+            ['tenant_id' => $definition->tenant_id, 'study_plan_item_id' => $studyPlanItemId],
         );
 
         $components = $studyResult->components_breakdown ?? [];
@@ -125,33 +142,40 @@ class CampusGradeBridgeService implements GradeBridgeInterface
 
     protected function resolveStudyPlanItemId(ExamDefinition $definition, ?ExamParticipant $participant): ?int
     {
-        if ($participant === null) {
+        if ($participant === null
+            || (int) $participant->tenant_id !== (int) $definition->tenant_id
+            || (string) $participant->exam_definition_id !== (string) $definition->getKey()
+            || $participant->campus_student_reference === null) {
             return null;
         }
 
         $metadataItemId = $participant->metadata_json['study_plan_item_id'] ?? null;
-        if (is_numeric($metadataItemId)) {
-            return (int) $metadataItemId;
+        $candidateId = is_numeric($metadataItemId) && (int) $metadataItemId > 0
+            ? (int) $metadataItemId
+            : null;
+
+        if ($candidateId === null
+            && in_array($participant->context_reference_type, ['study_plan_item', StudyPlanItem::class], true)
+            && $participant->participant_legacy_id !== null) {
+            $candidateId = (int) $participant->participant_legacy_id;
         }
 
-        if ($participant->context_reference_type !== null
-            && in_array($participant->context_reference_type, ['study_plan_item', StudyPlanItem::class], true)) {
-            $legacyId = $participant->participant_legacy_id;
-
-            return $legacyId !== null ? (int) $legacyId : null;
-        }
-
-        if ($definition->campus_class_reference === null || $participant->campus_student_reference === null) {
+        if ($candidateId === null && $definition->campus_class_reference === null) {
             return null;
         }
 
+        // Metadata and legacy references are untrusted: validate student,
+        // offering, course and tenant before any gradebook write.
         $item = StudyPlanItem::withoutTenantScope()
             ->where('tenant_id', $definition->tenant_id)
-            ->where('course_offering_id', $definition->campus_class_reference)
-            ->whereHas('studyPlan', fn ($query) => $query->where(
-                'collage_student_id',
-                $participant->campus_student_reference,
-            ))
+            ->when($candidateId !== null, fn ($query) => $query->whereKey($candidateId))
+            ->when($definition->campus_class_reference !== null, fn ($query) => $query
+                ->where('course_offering_id', $definition->campus_class_reference))
+            ->when($definition->campus_course_reference !== null, fn ($query) => $query
+                ->where('course_id', $definition->campus_course_reference))
+            ->whereHas('studyPlan', fn ($query) => $query
+                ->where('tenant_id', $definition->tenant_id)
+                ->where('collage_student_id', $participant->campus_student_reference))
             ->first();
 
         return $item !== null ? (int) $item->getKey() : null;
