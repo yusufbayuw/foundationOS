@@ -9,10 +9,17 @@ use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntryLine;
+use Modules\Inventory\Enums\StockAdjustmentReason;
 use Modules\Inventory\Enums\StockMoveType;
+use Modules\Inventory\Enums\ValuationMethod;
+use Modules\Inventory\Models\StockAdjustment;
+use Modules\Inventory\Models\StockAdjustmentLine;
+use Modules\Inventory\Models\StockCostLayer;
 use Modules\Inventory\Models\StockItem;
 use Modules\Inventory\Models\StockLevel;
 use Modules\Inventory\Models\StockMove;
+use Modules\Inventory\Services\GoodsReceiptStockService;
+use Modules\Inventory\Services\StockAdjustmentService;
 use Modules\Inventory\Services\StockMoveService;
 use Modules\Inventory\Services\WarehouseResolver;
 use Modules\Procurement\Models\ProcurementItem;
@@ -133,6 +140,158 @@ class InventoryProcurementIntegrationTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
+    }
+
+    public function test_stock_move_rejects_warehouse_from_another_tenant(): void
+    {
+        [$tenantA, $poA, $procurementItemA] = $this->makePoWithProcurementItem('Notebook A', 2, 10_000);
+        [$tenantB] = $this->makePoWithProcurementItem('Notebook B', 1, 20_000);
+
+        app(GoodsReceiptAutoCreationService::class)->receive($poA);
+        $itemA = StockItem::withoutTenantScope()
+            ->where('tenant_id', $tenantA->id)
+            ->where('procurement_item_id', $procurementItemA->id)
+            ->firstOrFail();
+        $warehouseB = app(WarehouseResolver::class)->defaultForTenant((int) $tenantB->id);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('same tenant');
+
+        app(StockMoveService::class)->commitInbound($warehouseB, $itemA, 1, 10_000);
+    }
+
+    public function test_stock_move_rejects_non_finite_quantity_and_negative_cost(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Marker', 2, 5_000);
+        app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $item = StockItem::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('procurement_item_id', $procurementItem->id)
+            ->firstOrFail();
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+
+        foreach ([[NAN, 5_000], [1.0, -1.0]] as [$quantity, $unitCost]) {
+            try {
+                app(StockMoveService::class)->commitInbound($warehouse, $item, $quantity, $unitCost);
+                $this->fail('Invalid quantity or cost must be rejected.');
+            } catch (\RuntimeException $exception) {
+                $this->assertNotEmpty($exception->getMessage());
+            }
+        }
+    }
+
+    public function test_retried_stock_adjustment_commit_does_not_post_twice(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Pencil', 5, 10_000);
+        app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+        $stockItem = StockItem::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('procurement_item_id', $procurementItem->id)
+            ->firstOrFail();
+
+        $adjustment = StockAdjustment::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'warehouse_id' => $warehouse->id,
+            'adjustment_number' => 'ADJ-'.$procurementItem->id,
+            'reason' => StockAdjustmentReason::CountVariance,
+            'status' => 'approved',
+        ]);
+
+        $line = StockAdjustmentLine::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'stock_adjustment_id' => $adjustment->id,
+            'stock_item_id' => $stockItem->id,
+            'quantity_delta' => -2,
+            'unit_cost' => 10_000,
+        ]);
+
+        $service = app(StockAdjustmentService::class);
+        $first = $service->commit($adjustment);
+        $second = $service->commit($adjustment);
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame('committed', $adjustment->fresh()->status);
+        $this->assertSame(1, StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('reference_id', $line->id)
+            ->where('move_type', StockMoveType::Out->value)
+            ->count());
+
+        $this->assertEqualsWithDelta(
+            3.0,
+            (float) StockLevel::withoutTenantScope()
+                ->where('warehouse_id', $warehouse->id)
+                ->where('stock_item_id', $stockItem->id)
+                ->firstOrFail()->quantity_on_hand,
+            0.01,
+        );
+    }
+
+    public function test_fifo_cost_layers_are_not_consumed_when_outbound_exceeds_on_hand(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Printer Paper', 5, 20_000);
+
+        $stockItem = StockItem::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'procurement_item_id' => $procurementItem->id,
+            'code' => 'FIFO-'.$procurementItem->id,
+            'name' => $procurementItem->name,
+            'valuation_method' => ValuationMethod::Fifo,
+        ]);
+
+        app(GoodsReceiptAutoCreationService::class)->receive($po);
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+
+        $layer = StockCostLayer::withoutTenantScope()
+            ->where('stock_item_id', $stockItem->id)
+            ->firstOrFail();
+
+        $this->assertEqualsWithDelta(5.0, (float) $layer->quantity_remaining, 0.01);
+
+        try {
+            app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 6);
+            $this->fail('Expected insufficient stock exception.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Insufficient stock', $exception->getMessage());
+        }
+
+        $this->assertEqualsWithDelta(5.0, (float) $layer->fresh()->quantity_remaining, 0.01);
+        $this->assertEqualsWithDelta(
+            5.0,
+            (float) StockLevel::withoutTenantScope()
+                ->where('warehouse_id', $warehouse->id)
+                ->where('stock_item_id', $stockItem->id)
+                ->firstOrFail()
+                ->quantity_on_hand,
+            0.01,
+        );
+    }
+
+    public function test_goods_receipt_replay_does_not_double_count_stock(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Paper Ream', 5, 50_000);
+        $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $replayedMoves = app(GoodsReceiptStockService::class)
+            ->receiveFromGoodsReceipt($receipt);
+
+        $this->assertSame([], $replayedMoves);
+
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+        $level = StockLevel::withoutTenantScope()
+            ->where('warehouse_id', $warehouse->id)
+            ->whereHas('stockItem', fn ($query) => $query->where('procurement_item_id', $procurementItem->id))
+            ->firstOrFail();
+
+        $this->assertEqualsWithDelta(5.0, (float) $level->quantity_on_hand, 0.01);
+        $this->assertSame(1, StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('reference_id', $receipt->items->first()->id)
+            ->where('move_type', StockMoveType::In->value)
+            ->count());
     }
 
     /**
