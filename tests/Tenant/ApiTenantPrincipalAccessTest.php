@@ -221,6 +221,38 @@ class ApiTenantPrincipalAccessTest extends TestCase
             ->assertForbidden()->assertJsonPath('error.code', 'tenant_token_required');
     }
 
+    public function test_disabled_user_is_denied_immediately_in_both_api_versions(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $this->addMembership($user, $tenant);
+        $token = $this->userToken($user, $tenant);
+
+        $this->withToken($token)->getJson('/api/v1/me')->assertOk();
+        $user->update(['status' => 'disabled']);
+
+        foreach (['v1', 'v2'] as $version) {
+            $this->withToken($token)->getJson("/api/{$version}/me")
+                ->assertForbidden()->assertJsonPath('error.code', 'tenant_user_inactive');
+        }
+    }
+
+    public function test_suspended_tenant_is_denied_immediately_with_active_membership(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $this->addMembership($user, $tenant);
+        $token = $this->userToken($user, $tenant);
+
+        $this->withToken($token)->getJson('/api/v1/me')->assertOk();
+        $tenant->update(['status' => 'suspended']);
+
+        foreach (['v1', 'v2'] as $version) {
+            $this->withToken($token)->getJson("/api/{$version}/me")
+                ->assertForbidden()->assertJsonPath('error.code', 'tenant_subscription_inactive');
+        }
+    }
+
     private function userToken(User $user, Tenant $tenant, array $abilities = ['*']): string
     {
         $issued = $user->createToken('membership-test', $abilities);

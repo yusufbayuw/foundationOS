@@ -50,7 +50,8 @@ class ResolveApiTenant
             return $next($request);
         }
 
-        $tenant = $token->tenant;
+        // Resolve fresh subscription status so changes take effect on the next request.
+        $tenant = $token->tenant()->first();
 
         if (! $tenant instanceof Tenant || ! $this->subscriptionAllowsAccess($tenant)) {
             return $this->deny('tenant_subscription_inactive', 'Tenant subscription is unavailable.');
@@ -64,9 +65,17 @@ class ResolveApiTenant
 
             try {
                 if ($principal instanceof User) {
+                    // Authentication can hold a stale user instance across requests.
+                    // Status and membership are authorization decisions, not token attributes.
+                    $user = User::query()->whereKey($principal->getKey())->where('status', 'active')->first();
+
+                    if ($user === null) {
+                        return $this->deny('tenant_user_inactive', 'The user account is inactive.');
+                    }
+
                     if (config('tenancy.api_enforce_membership', true)
-                        && ! $principal->canAccessTenant($tenant)
-                        && ! ($principal->isGlobalSuperAdmin()
+                        && ! $user->canAccessTenant($tenant)
+                        && ! ($user->isGlobalSuperAdmin()
                             && in_array('platform:tenants', $token->abilities ?? [], true))) {
                         return $this->deny('tenant_membership_required', 'Active tenant membership is required.');
                     }
