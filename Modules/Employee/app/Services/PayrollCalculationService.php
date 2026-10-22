@@ -183,6 +183,10 @@ class PayrollCalculationService
 
         return SalarySlip::query()->create(
             [
+                'tenant_id' => $employee->tenant_id,
+                'employee_id' => $employee->id,
+                'period_month' => $month,
+                'period_year' => $year,
                 'period_label' => $periodLabel,
                 'basic_salary' => $basicSalary,
                 'earnings_details' => [],
