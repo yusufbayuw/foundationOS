@@ -72,11 +72,14 @@ sudo apt install -y curl wget git unzip
 # Set timezone
 sudo timedatectl set-timezone Asia/Jakarta
 
-# Enable firewall
-sudo ufw enable
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
+# Inspect existing firewall, host/aaPanel/cloud firewall, and actual SSH port BEFORE changes.
+# Do not enable UFW remotely without an authorized console/rollback plan.
+sudo ufw status verbose
+# In an approved maintenance window, add the verified SSH allowance BEFORE enabling:
+# sudo ufw allow VERIFIED_SSH_PORT/tcp
+# sudo ufw allow 80/tcp
+# sudo ufw allow 443/tcp
+# sudo ufw enable
 ```
 
 ### 2. PHP 8.4 Installation
@@ -333,8 +336,10 @@ npm run build
 ### 4. Database Setup
 
 ```bash
-# Run migrations
-php artisan migrate --force
+# Production migrations are NOT an installation default. Inspect status and migration diff.
+php artisan migrate:status
+# Only after documented non-destructive review, staging rehearsal and Owner approval:
+# php artisan migrate --force
 
 # Jangan jalankan seed demo di produksi. Seeder migrasi data hanya boleh berjalan
 # setelah review dan persetujuan eksplisit per kasus.
@@ -342,8 +347,8 @@ php artisan migrate --force
 # Create storage link
 php artisan storage:link
 
-# Generate Filament Shield permissions
-php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
+# Permission regeneration may change authorization. Execute only after review/UAT:
+# php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
 ```
 
 ### 5. Permission Setup
@@ -405,15 +410,18 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
 
-    # PHP-FPM configuration
-    location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    # PHP-FPM TEMPLATE ONLY: replace the FPM socket with observed staging value.
+    # Execute ONLY Laravel public/index.php; never permit PHP execution from uploaded files.
+    location ~ ^/index\.php(/|$) {
+        try_files /index.php =404;
         fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PHP_VALUE "upload_max_filesize=100M \n post_max_size=100M";
+        fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+    }
+    location ~ \.php$ {
+        return 404;
     }
 
     # Block access to hidden files
@@ -439,7 +447,8 @@ server {
 ```bash
 sudo ln -s /etc/nginx/sites-available/foundationos /etc/nginx/sites-enabled/
 sudo nginx -t
-sudo systemctl restart nginx
+# Do not restart actual Nginx until a staging-tested, owner-approved change window.
+# sudo systemctl reload VERIFIED_NGINX_SERVICE
 ```
 
 ### SSL Certificate dengan Let's Encrypt
@@ -723,15 +732,16 @@ npm run build
 ```ini
 ; Increase children processes
 pm = dynamic
-pm.max_children = 50
-pm.start_servers = 10
-pm.min_spare_servers = 5
-pm.max_spare_servers = 35
+; Illustrative values only; measure memory per FPM worker and configure for host capacity.
+; pm.max_children = 50
+; pm.start_servers = 10
+; pm.min_spare_servers = 5
+; pm.max_spare_servers = 35
 
 ; Opcache (built-in PHP caching)
 opcache.enable = 1
 opcache.memory_consumption = 256
-opcache.validate_timestamps = 0
+; opcache.validate_timestamps = 0  # only with verified atomic release and FPM/opcache reset
 opcache.revalidate_freq = 0
 ```
 
