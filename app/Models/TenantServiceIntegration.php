@@ -17,6 +17,8 @@ class TenantServiceIntegration extends Authenticatable
 {
     use HasApiTokens;
 
+    protected $attributes = ['status' => 'active'];
+
     protected $fillable = [
         'tenant_id',
         'name',
