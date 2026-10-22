@@ -42,16 +42,32 @@ if [[ ! "$FOS_BACKUP_DB_NAME" =~ ^[a-zA-Z0-9_]+$ ]]; then
   echo "Unsupported database identifier for safe command invocation." >&2
   exit 2
 fi
+# Local credentials must be protected from other operating-system users.
+# Refuse symlinked or group/world-readable client secrets rather than merely warning.
+check_private_credentials() {
+  local file="$1"
+  if [[ ! -f "$file" || ! -r "$file" || -L "$file" ]]; then
+    echo "Credential file missing, unreadable or a symlink." >&2
+    exit 3
+  fi
+  local perm
+  perm=$(stat -c '%a' -- "$file")
+  if (( (8#$perm & 0077) != 0 )); then
+    echo "Credential file must not be accessible by group or other users." >&2
+    exit 3
+  fi
+}
+
 case "$FOS_BACKUP_DB_DRIVER" in
   mysql|mariadb)
     : "${FOS_BACKUP_MYSQL_DEFAULTS_FILE:?Provide path to private mysql client option file}"
-    [[ -f "$FOS_BACKUP_MYSQL_DEFAULTS_FILE" && -r "$FOS_BACKUP_MYSQL_DEFAULTS_FILE" ]] || exit 2
+    check_private_credentials "$FOS_BACKUP_MYSQL_DEFAULTS_FILE"
     MYSQL_DUMP=$(command -v mariadb-dump || command -v mysqldump || true)
     [[ -n "$MYSQL_DUMP" ]] || { echo "Missing mariadb-dump/mysqldump" >&2; exit 2; }
     ;;
   pgsql)
     : "${FOS_BACKUP_PGPASSFILE:?Provide path to private pgpass file}"
-    [[ -f "$FOS_BACKUP_PGPASSFILE" && -r "$FOS_BACKUP_PGPASSFILE" ]] || exit 2
+    check_private_credentials "$FOS_BACKUP_PGPASSFILE"
     command -v pg_dump >/dev/null || { echo "Missing pg_dump" >&2; exit 2; }
     ;;
   *)
