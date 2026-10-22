@@ -4,12 +4,12 @@ namespace Modules\Employee\Services;
 
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use RuntimeException;
 use Modules\Employee\Models\AttendanceLog;
 use Modules\Employee\Models\Employee;
 use Modules\Employee\Models\PayrollComponent;
 use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Models\SalarySlipComponent;
+use RuntimeException;
 
 /**
  * Calculates payroll for one employee in a given period.
