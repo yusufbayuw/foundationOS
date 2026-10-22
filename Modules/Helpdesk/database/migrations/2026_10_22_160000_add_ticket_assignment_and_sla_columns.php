@@ -42,6 +42,10 @@ return new class extends Migration
             if (! Schema::hasColumn('tickets', 'closed_at')) {
                 $table->timestamp('closed_at')->nullable();
             }
+
+            if (! Schema::hasColumn('tickets', 'ai_suggested_category')) {
+                $table->string('ai_suggested_category')->nullable();
+            }
         });
     }
 
