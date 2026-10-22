@@ -124,6 +124,84 @@ class ProcurementEndToEndPipelineTest extends TestCase
         );
     }
 
+    public function test_auto_vendor_bill_replay_returns_existing_bill_without_another_journal(): void
+    {
+        [, $po] = $this->makePoWithItems([['Monitor', 2, 5_000_000]]);
+        $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $service = app(VendorBillAutoCreationService::class);
+        $first = $service->createFromGoodsReceipt($receipt);
+        $second = $service->createFromGoodsReceipt($receipt);
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame(1, VendorBill::withoutTenantScope()
+            ->where('goods_receipt_id', $receipt->id)
+            ->count());
+        $this->assertSame(1, JournalEntry::withoutTenantScope()
+            ->where('tenant_id', $receipt->tenant_id)
+            ->where('entry_number', 'JE-'.$first->bill_number)
+            ->count());
+    }
+
+    public function test_explicit_rebilling_is_rejected_instead_of_silently_replacing_existing_bill(): void
+    {
+        [, $po] = $this->makePoWithItems([['Monitor', 2, 5_000_000]]);
+        $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        app(VendorBillAutoCreationService::class)->createFromGoodsReceipt($receipt);
+
+        $this->expectException(ThreeWayMatchException::class);
+
+        app(VendorBillAutoCreationService::class)->createFromGoodsReceipt($receipt, [[
+            'purchase_order_item_id' => $po->items->first()->id,
+            'quantity' => 1,
+            'unit_price' => 5_000_000,
+        ]]);
+    }
+
+    public function test_three_way_match_rejects_empty_negative_and_duplicate_bill_lines(): void
+    {
+        [, $po] = $this->makePoWithItems([['Monitor', 2, 5_000_000]]);
+        $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
+        $poItemId = $po->items->first()->id;
+
+        $valid = [
+            'purchase_order_item_id' => $poItemId,
+            'quantity' => 1,
+            'unit_price' => 5_000_000,
+        ];
+
+        foreach ([
+            [],
+            [array_merge($valid, ['quantity' => -1])],
+            [array_merge($valid, ['quantity' => 0])],
+            [array_merge($valid, ['unit_price' => -1])],
+            [$valid, $valid],
+        ] as $invalidLines) {
+            try {
+                app(VendorBillAutoCreationService::class)->createFromGoodsReceipt($receipt, $invalidLines);
+                $this->fail('Expected a three-way match error for invalid bill lines.');
+            } catch (ThreeWayMatchException $exception) {
+                $this->assertNotEmpty($exception->errors);
+            }
+        }
+
+        $this->assertSame(0, VendorBill::withoutTenantScope()
+            ->where('goods_receipt_id', $receipt->id)
+            ->count());
+    }
+
+    public function test_auto_billing_requires_a_confirmed_goods_receipt(): void
+    {
+        [, $po] = $this->makePoWithItems([['Monitor', 1, 5_000_000]]);
+        $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
+        $receipt->forceFill(['status' => 'draft'])->save();
+
+        $this->expectException(ThreeWayMatchException::class);
+
+        app(VendorBillAutoCreationService::class)->createFromGoodsReceipt($receipt);
+    }
+
     /**
      * @param  array<int, array{0:string,1:int,2:int|float}>  $itemSpecs
      * @return array{0:Tenant,1:PurchaseOrder}
