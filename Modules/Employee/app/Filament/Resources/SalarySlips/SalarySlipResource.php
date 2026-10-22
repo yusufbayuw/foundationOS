@@ -36,6 +36,13 @@ class SalarySlipResource extends LocalizedResource
         return SalarySlipsTable::configure($table);
     }
 
+    public static function canCreate(): bool
+    {
+        // Payroll periods must be generated with the employee row lock
+        // rather than by direct CRUD creation.
+        return false;
+    }
+
     public static function canEdit(Model $record): bool
     {
         return $record instanceof SalarySlip
