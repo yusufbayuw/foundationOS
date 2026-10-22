@@ -23,6 +23,7 @@ class AssignTicketToAgent
             ?? $this->leastLoadedAgentId((int) $ticket->tenant_id, $category?->getKey());
 
         $meta = $ticket->meta ?? [];
+        $previousMeta = $meta;
 
         if (! isset($meta['sla_due_at'])) {
             $meta['sla_due_at'] = now()
@@ -36,13 +37,19 @@ class AssignTicketToAgent
                 ->toIso8601String();
         }
 
-        $changes = ['meta' => $meta];
+        $changes = [];
+
+        if ($meta !== $previousMeta) {
+            $changes['meta'] = $meta;
+        }
 
         if (! $ticket->assigned_to_user_id && $assigneeId) {
             $changes['assigned_to_user_id'] = $assigneeId;
         }
 
-        $ticket->update($changes);
+        if ($changes !== []) {
+            $ticket->update($changes);
+        }
     }
 
     protected function leastLoadedAgentId(int $tenantId, ?int $categoryId): ?int
