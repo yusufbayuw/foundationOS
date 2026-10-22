@@ -10,9 +10,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use RuntimeException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
-use RuntimeException;
 
 class JournalEntry extends Model
 {
@@ -27,8 +27,7 @@ class JournalEntry extends Model
                 return;
             }
 
-            if (! $entry->allowReversalMutation
-                || array_diff(array_keys($entry->getDirty()), ['is_reversed', 'reversal_reason', 'updated_at']) !== []) {
+            if (! $entry->allowReversalMutation || array_diff(array_keys($entry->getDirty()), ['is_reversed', 'reversal_reason', 'updated_at']) !== []) {
                 throw new RuntimeException('Posted journals are immutable; use a correcting reversal entry.');
             }
         });
@@ -42,7 +41,7 @@ class JournalEntry extends Model
 
     public function recordReversal(string $reason): void
     {
-        if (! $this->is_posted || $this->is_reversed) {
+        if (! (bool) $this->getAttribute('is_posted') || (bool) $this->getAttribute('is_reversed')) {
             throw new RuntimeException('Only posted and unreversed journal entries can be reversed.');
         }
 
