@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Clinic\Policies;
 
+use App\Scopes\TenantScope;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
-use App\Scopes\TenantScope;
 use Modules\Clinic\Models\HealthRecord;
 
 class HealthRecordPolicy
