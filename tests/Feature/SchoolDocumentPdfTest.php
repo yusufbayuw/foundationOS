@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -20,6 +21,7 @@ use Modules\School\Models\StudentAchievement;
 use Modules\School\Models\StudentGrade;
 use Modules\School\Models\Subject;
 use Modules\School\Models\Teacher;
+use Modules\School\Services\ReportCardService;
 use Tests\Concerns\InteractsWithPdfDocuments;
 use Tests\TestCase;
 
@@ -169,7 +171,7 @@ class SchoolDocumentPdfTest extends TestCase
             'student_id' => $context['student']->id,
         ]);
 
-        $service = app(\Modules\School\Services\ReportCardService::class);
+        $service = app(ReportCardService::class);
 
         $historical = $service->generate($context['student']->id, $context['period']->id);
         $current = $service->generate($context['student']->id, $nextPeriod->id);
@@ -202,9 +204,9 @@ class SchoolDocumentPdfTest extends TestCase
             'end_date' => '2026-12-31',
         ]);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
-        app(\Modules\School\Services\ReportCardService::class)
+        app(ReportCardService::class)
             ->generate($context['student']->id, $otherPeriod->id);
     }
 
