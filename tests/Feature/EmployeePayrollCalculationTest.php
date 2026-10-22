@@ -183,7 +183,14 @@ class EmployeePayrollCalculationTest extends TestCase
         );
 
         $this->assertTrue((bool) $journal->is_balanced);
-        $this->assertFalse((bool) $journal->is_posted);
+        $this->assertTrue((bool) $journal->is_posted);
+        $this->assertNotNull($journal->posted_at);
+        $this->assertSame($organization->id, $journal->organization_id);
+        $this->assertDatabaseHas('audit_logs', [
+            'tenant_id' => $tenant->id,
+            'auditable_id' => $journal->id,
+            'action' => 'payroll_journal_posted',
+        ]);
         $this->assertEqualsWithDelta(5_500_000, (float) $journal->total_debit, 0.01);
         $this->assertEqualsWithDelta(5_500_000, (float) $journal->total_credit, 0.01);
         $this->assertSame($journal->id, $slip->fresh()->journal_entry_id);
@@ -324,6 +331,60 @@ class EmployeePayrollCalculationTest extends TestCase
         }
 
         $this->assertSame(0, SalarySlip::query()->where('employee_id', $employee->id)->count());
+    }
+
+    public function test_payment_with_unmapped_deduction_rolls_back_without_damaging_approved_slip(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-deduction-unmapped');
+        $this->makeAccount($tenant, $organization, '5101', 'Beban Gaji', 'expense');
+        $this->makeAccount($tenant, $organization, '1101', 'Kas Operasional', 'asset');
+
+        PayrollComponent::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'code' => 'TAX-UNMAPPED',
+            'name' => 'PPh21',
+            'type' => 'deduction',
+            'calculation_type' => 'fixed',
+            'amount' => 250000,
+            'is_active' => true,
+        ]);
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        try {
+            app(SalarySlipPaymentService::class)->markAsPaid($slip, '2026-05-31 10:00:00', 'bank');
+            $this->fail('An unmapped payroll deduction must stop posting.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('requires an active account', $exception->getMessage());
+        }
+
+        $this->assertSame('approved', $slip->fresh()->status);
+        $this->assertNull($slip->fresh()->journal_entry_id);
+        $this->assertNull($slip->fresh()->paid_at);
+        $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+        $this->assertSame(0, JournalEntryLine::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_inconsistent_salary_totals_cannot_create_a_posted_journal(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-reconcile-check');
+        $this->makeAccount($tenant, $organization, '5101', 'Beban Gaji', 'expense');
+        $this->makeAccount($tenant, $organization, '1101', 'Kas Operasional', 'asset');
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved', 'net_salary' => 5100000]);
+
+        try {
+            app(SalarySlipPaymentService::class)->markAsPaid($slip, '2026-05-31 10:00:00', 'bank');
+            $this->fail('Incorrect salary totals must not reach the ledger.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('do not reconcile', $exception->getMessage());
+        }
+
+        $this->assertSame('approved', $slip->fresh()->status);
+        $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
     }
 
     /**
