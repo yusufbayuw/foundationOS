@@ -96,7 +96,7 @@ Every tenant-sensitive metric/log must avoid personal data and cross-tenant visi
 
 ### Define RPO/RTO before go-live
 
-Project Owner must approve per data category and institution (student records, finance, private documents, Moodle mappings, outboxes). Initial planning examples only: **RPO ≤24 hours and RTO ≤8 hours** for non-critical staging-like workloads; production commitments require measured successful drills and appropriate backup frequency (daily full backups alone cannot satisfy tighter RPO). Establish retention, legal holds and data residency rules with the data owner.
+Project Owner must approve **explicit numerical RPO and RTO targets** per data category and institution (student records, finance, private documents, Moodle mappings, outboxes) **before any production go-live**. No numerical target is assumed by this runbook. Only a successful measured recovery drill and an appropriate backup/replication interval may support a claim that targets can be achieved. Establish retention, legal holds and data residency rules with the data owner; daily full backups alone cannot satisfy a tighter RPO than their restorable recovery points.
 
 ### Backup standard
 
