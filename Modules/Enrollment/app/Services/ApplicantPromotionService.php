@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\AcademicYear;
 use Modules\Core\Models\TenantSetting;
 use Modules\Core\Models\User;
+use Modules\Enrollment\Models\AdmissionPeriod;
 use Modules\Enrollment\Models\Applicant;
 use Modules\School\Models\Student;
 
@@ -61,7 +62,7 @@ class ApplicantPromotionService
                 return null;
             }
 
-            $period = \Modules\Enrollment\Models\AdmissionPeriod::withoutTenantScope()
+            $period = AdmissionPeriod::withoutTenantScope()
                 ->where('tenant_id', $tenantId)
                 ->whereKey($applicant->admission_period_id)
                 ->firstOrFail();
