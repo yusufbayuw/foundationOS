@@ -128,8 +128,10 @@ class ApiTenantPrincipalAccessTest extends TestCase
         $this->withToken($this->userToken($user, $tenant))
             ->getJson('/api/v1/me')->assertForbidden();
 
-        $this->withToken($this->userToken($user, $tenant, ['api:read', 'platform:tenants']))
-            ->getJson('/api/v1/me')->assertOk();
+        $response = $this->withToken($this->userToken($user, $tenant, ['api:read', 'platform:tenants']))
+            ->getJson('/api/v1/me');
+
+        $this->assertSame(200, $response->status(), $response->getContent());
     }
 
     public function test_expired_tenant_subscription_or_trial_is_denied(): void
