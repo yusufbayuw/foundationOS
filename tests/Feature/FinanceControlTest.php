@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Imports\JournalEntryImporter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -353,6 +354,15 @@ class FinanceControlTest extends TestCase
         $this->assertSame('Protected posted journal regression.', $entry->fresh()->description);
         $this->assertSame(2, $entry->lines()->count());
         $this->assertEqualsWithDelta(30000, (float) $line->fresh()->debit, 0.01);
+    }
+
+    public function test_journal_import_only_accepts_safe_draft_descriptors(): void
+    {
+        $columns = array_map(fn ($column): string => $column->getName(), JournalEntryImporter::getColumns());
+
+        foreach (['is_posted','is_reversed','posted_at','total_debit','total_credit','reversed_entry_id'] as $protectedColumn) {
+            $this->assertNotContains($protectedColumn, $columns);
+        }
     }
 
     protected function makeFinanceContext(): array
