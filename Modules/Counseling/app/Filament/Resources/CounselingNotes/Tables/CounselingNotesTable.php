@@ -45,11 +45,10 @@ class CounselingNotesTable
             ->filters([
                 TrashedFilter::make(),
             ])
+            // Confidential notes do not expose destructive bulk actions.
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
-            ])
-            // Sensitive notes must not be bulk-deleted or permanently purged.
-            ;
+            ]);
     }
 }
