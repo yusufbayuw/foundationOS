@@ -39,10 +39,41 @@ class OtpService
         return new OtpIssue($otpCode, $code);
     }
 
+    /**
+     * Serialize OTP checks, including unsuccessful attempts, so concurrent
+     * requests cannot evade the maximum-attempt limit.
+     */
     public function verify(string $identifier, string|OtpPurpose $purpose, string $code): OtpVerificationResult
     {
-        $otpCode = $this->latestActiveCode($identifier, $purpose);
+        return DB::transaction(function () use ($identifier, $purpose, $code): OtpVerificationResult {
+            $otpCode = $this->latestActiveCode($identifier, $purpose, lockForUpdate: true);
 
+            return $this->evaluateCode($otpCode, $code);
+        });
+    }
+
+    /**
+     * Lock, verify and consume the same OTP row in one transaction.
+     * A second concurrent request must not be able to reuse the code.
+     */
+    public function consume(string $identifier, string|OtpPurpose $purpose, string $code): OtpVerificationResult
+    {
+        return DB::transaction(function () use ($identifier, $purpose, $code): OtpVerificationResult {
+            $otpCode = $this->latestActiveCode($identifier, $purpose, lockForUpdate: true);
+            $result = $this->evaluateCode($otpCode, $code);
+
+            if ($result !== OtpVerificationResult::Valid) {
+                return $result;
+            }
+
+            $otpCode->forceFill(['consumed_at' => now()])->save();
+
+            return OtpVerificationResult::Valid;
+        });
+    }
+
+    private function evaluateCode(?OtpCode $otpCode, string $code): OtpVerificationResult
+    {
         if ($otpCode === null) {
             return OtpVerificationResult::Invalid;
         }
@@ -70,33 +101,21 @@ class OtpService
         return OtpVerificationResult::Valid;
     }
 
-    public function consume(string $identifier, string|OtpPurpose $purpose, string $code): OtpVerificationResult
-    {
-        return DB::transaction(function () use ($identifier, $purpose, $code): OtpVerificationResult {
-            $result = $this->verify($identifier, $purpose, $code);
-
-            if ($result !== OtpVerificationResult::Valid) {
-                return $result;
-            }
-
-            $otpCode = $this->latestActiveCode($identifier, $purpose);
-            $otpCode?->forceFill(['consumed_at' => now()])->save();
-
-            return OtpVerificationResult::Valid;
-        });
-    }
-
-    protected function latestActiveCode(string $identifier, string|OtpPurpose $purpose): ?OtpCode
+    protected function latestActiveCode(string $identifier, string|OtpPurpose $purpose, bool $lockForUpdate = false): ?OtpCode
     {
         $purpose = $this->normalizePurpose($purpose);
         $identifier = $this->normalizeIdentifier($identifier);
 
-        return OtpCode::query()
+        $query = OtpCode::query()
             ->where('identifier', $identifier)
             ->where('purpose', $purpose->value)
-            ->whereNull('consumed_at')
-            ->latest('id')
-            ->first();
+            ->whereNull('consumed_at');
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->latest('id')->first();
     }
 
     protected function normalizePurpose(string|OtpPurpose $purpose): OtpPurpose
