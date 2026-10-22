@@ -124,6 +124,25 @@ class ProcurementEndToEndPipelineTest extends TestCase
         );
     }
 
+    public function test_fully_received_purchase_order_cannot_create_an_empty_second_receipt(): void
+    {
+        [, $po] = $this->makePoWithItems([['Monitor', 2, 5_000_000]]);
+
+        $service = app(GoodsReceiptAutoCreationService::class);
+        $service->receive($po);
+
+        try {
+            $service->receive($po);
+            $this->fail('Expected rejection when no units remain on the PO.');
+        } catch (\DomainException $exception) {
+            $this->assertStringContainsString('at least one item', $exception->getMessage());
+        }
+
+        $this->assertSame(1, \Modules\Procurement\Models\GoodsReceipt::withoutTenantScope()
+            ->where('purchase_order_id', $po->id)
+            ->count());
+    }
+
     public function test_auto_vendor_bill_replay_returns_existing_bill_without_another_journal(): void
     {
         [, $po] = $this->makePoWithItems([['Monitor', 2, 5_000_000]]);
