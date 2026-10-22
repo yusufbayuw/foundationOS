@@ -73,6 +73,42 @@ class SchoolDocumentPdfTest extends TestCase
             ->assertHeader('content-type', 'application/pdf');
     }
 
+    public function test_guest_cannot_download_legacy_report_card_pdf(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+
+        $this->getJson(route('school.report-card.download', [
+            'student' => $context['student']->id,
+            'period' => $context['period']->id,
+        ]))->assertUnauthorized();
+    }
+
+    public function test_unprivileged_user_cannot_download_legacy_report_card_pdf(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('school.report-card.download', [
+                'student' => $context['student']->id,
+                'period' => $context['period']->id,
+            ]))
+            ->assertForbidden();
+    }
+
+    public function test_super_admin_can_download_legacy_report_card_pdf(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+
+        $this->actingAs($context['user'])
+            ->get(route('school.report-card.download', [
+                'student' => $context['student']->id,
+                'period' => $context['period']->id,
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
     public function test_super_admin_can_download_bulk_report_card_zip(): void
     {
         $context = $this->makeSchoolPdfContext();
