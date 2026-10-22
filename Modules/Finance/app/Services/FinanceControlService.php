@@ -279,10 +279,7 @@ class FinanceControlService
 
             $reversal = $this->postJournalEntry($reversal, $actor);
 
-            $entry->forceFill([
-                'is_reversed' => true,
-                'reversal_reason' => $reason,
-            ])->save();
+            $entry->recordReversal($reason);
 
             $this->audit($entry, $actor, 'finance_journal_reversed', [
                 'status' => 'reversed',
