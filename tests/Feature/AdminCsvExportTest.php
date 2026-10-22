@@ -66,7 +66,7 @@ class AdminCsvExportTest extends TestCase
         ]);
 
         $this->assertExporterColumns(VoucherClaimExporter::class, [
-            'voucher.name',
+            'voucher.title',
             'user.name',
             'claim_code',
             'status',
