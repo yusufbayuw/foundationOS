@@ -128,6 +128,9 @@ class ApiTenantPrincipalAccessTest extends TestCase
         $this->withToken($this->userToken($user, $tenant))
             ->getJson('/api/v1/me')->assertForbidden();
 
+        // Simulate a new real HTTP request: test application reuses its guard instance.
+        auth()->forgetGuards();
+
         $response = $this->withToken($this->userToken($user, $tenant, ['api:read', 'platform:tenants']))
             ->getJson('/api/v1/me');
 

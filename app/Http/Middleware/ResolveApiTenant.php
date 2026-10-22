@@ -71,8 +71,12 @@ class ResolveApiTenant
                         return $this->deny('tenant_membership_required', 'Active tenant membership is required.');
                     }
                 } elseif ($principal instanceof TenantServiceIntegration) {
-                    if ((string) $principal->tenant_id !== (string) $tenant->getKey()
-                        || ! $principal->isActive()
+                    // Re-read mutable service state; revocation must not rely on a cached auth actor.
+                    $service = $principal->fresh();
+
+                    if ($service === null
+                        || (string) $service->tenant_id !== (string) $tenant->getKey()
+                        || ! $service->isActive()
                         || $token->expires_at === null
                         || ! in_array('api:read', $token->abilities ?? [], true)
                         || ! in_array($request->method(), ['GET', 'HEAD'], true)
