@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use DomainException;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
