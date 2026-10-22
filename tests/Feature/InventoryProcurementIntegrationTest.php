@@ -13,6 +13,7 @@ use Modules\Inventory\Enums\StockMoveType;
 use Modules\Inventory\Models\StockItem;
 use Modules\Inventory\Models\StockLevel;
 use Modules\Inventory\Models\StockMove;
+use Modules\Inventory\Services\GoodsReceiptStockService;
 use Modules\Inventory\Services\StockMoveService;
 use Modules\Inventory\Services\WarehouseResolver;
 use Modules\Procurement\Models\ProcurementItem;
@@ -140,7 +141,7 @@ class InventoryProcurementIntegrationTest extends TestCase
         [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Paper Ream', 5, 50_000);
         $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
 
-        $replayedMoves = app(\Modules\Inventory\Services\GoodsReceiptStockService::class)
+        $replayedMoves = app(GoodsReceiptStockService::class)
             ->receiveFromGoodsReceipt($receipt);
 
         $this->assertSame([], $replayedMoves);
