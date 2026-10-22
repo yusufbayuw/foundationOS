@@ -6,6 +6,7 @@ namespace Modules\Clinic\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Scopes\TenantScope;
 use Modules\Clinic\Models\HealthRecord;
 
 class HealthRecordPolicy
@@ -19,7 +20,10 @@ class HealthRecordPolicy
 
     public function view(AuthUser $authUser, HealthRecord $healthRecord): bool
     {
-        return $authUser->can('View:HealthRecord');
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        return ($activeTenantId === null || (int) $activeTenantId === (int) $healthRecord->tenant_id)
+            && $authUser->can('View:HealthRecord');
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,42 +33,42 @@ class HealthRecordPolicy
 
     public function update(AuthUser $authUser, HealthRecord $healthRecord): bool
     {
-        return $authUser->can('Update:HealthRecord');
+        return $authUser->can('Update:HealthRecord') && $this->view($authUser, $healthRecord);
     }
 
     public function delete(AuthUser $authUser, HealthRecord $healthRecord): bool
     {
-        return $authUser->can('Delete:HealthRecord');
+        return $authUser->can('Delete:HealthRecord') && $this->view($authUser, $healthRecord);
     }
 
     public function deleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('DeleteAny:HealthRecord');
+        return false;
     }
 
     public function restore(AuthUser $authUser, HealthRecord $healthRecord): bool
     {
-        return $authUser->can('Restore:HealthRecord');
+        return $authUser->can('Restore:HealthRecord') && $this->view($authUser, $healthRecord);
     }
 
     public function forceDelete(AuthUser $authUser, HealthRecord $healthRecord): bool
     {
-        return $authUser->can('ForceDelete:HealthRecord');
+        return false;
     }
 
     public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $authUser->can('ForceDeleteAny:HealthRecord');
+        return false;
     }
 
     public function restoreAny(AuthUser $authUser): bool
     {
-        return $authUser->can('RestoreAny:HealthRecord');
+        return false;
     }
 
     public function replicate(AuthUser $authUser, HealthRecord $healthRecord): bool
     {
-        return $authUser->can('Replicate:HealthRecord');
+        return false;
     }
 
     public function reorder(AuthUser $authUser): bool
