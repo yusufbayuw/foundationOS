@@ -1,0 +1,89 @@
+name: Release Contract Smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-contract-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  application-boot:
+    name: Laravel release contract (PHP 8.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      APP_ENV: testing
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+      PULSE_ENABLED: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Install locked dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare isolated CI environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+
+      - name: Verify production-style configuration compilation
+        run: php artisan config:cache
+
+      - name: Verify routes and health endpoint contract
+        run: |
+          php artisan route:list --json > "${RUNNER_TEMP}/foundationos-routes.json"
+          php -r '
+            $routes = json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($routes) || count($routes) === 0) {
+                fwrite(STDERR, "No routes registered.\n");
+                exit(1);
+            }
+            foreach ($routes as $route) {
+                if (trim((string) ($route["uri"] ?? ""), "/") === "up" &&
+                    in_array("GET", explode("|", (string) ($route["method"] ?? "")), true)) {
+                    echo "Health /up GET route registered.\n";
+                    exit(0);
+                }
+            }
+            fwrite(STDERR, "Required GET /up health route missing.\n");
+            exit(1);
+          ' "${RUNNER_TEMP}/foundationos-routes.json"
+
+      - name: Verify scheduler boot and task registration
+        run: |
+          php artisan schedule:list > "${RUNNER_TEMP}/foundationos-schedule.txt"
+          if ! grep -Fq 'fos:moodle:drain-outbox' "${RUNNER_TEMP}/foundationos-schedule.txt"; then
+            echo "::error::Moodle outbox drain task is missing from scheduler"
+            exit 1
+          fi
+          if ! grep -Fq 'helpdesk:check-sla' "${RUNNER_TEMP}/foundationos-schedule.txt"; then
+            echo "::error::Helpdesk SLA task is missing from scheduler"
+            exit 1
+          fi
+          echo "Scheduler command registration verified."
+
+      - name: Clear compiled configuration
+        if: always()
+        run: php artisan config:clear
