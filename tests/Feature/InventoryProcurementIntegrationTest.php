@@ -135,6 +135,30 @@ class InventoryProcurementIntegrationTest extends TestCase
         app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
     }
 
+    public function test_goods_receipt_replay_does_not_double_count_stock(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Paper Ream', 5, 50_000);
+        $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $replayedMoves = app(\Modules\Inventory\Services\GoodsReceiptStockService::class)
+            ->receiveFromGoodsReceipt($receipt);
+
+        $this->assertSame([], $replayedMoves);
+
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+        $level = StockLevel::withoutTenantScope()
+            ->where('warehouse_id', $warehouse->id)
+            ->whereHas('stockItem', fn ($query) => $query->where('procurement_item_id', $procurementItem->id))
+            ->firstOrFail();
+
+        $this->assertEqualsWithDelta(5.0, (float) $level->quantity_on_hand, 0.01);
+        $this->assertSame(1, StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('reference_id', $receipt->items->first()->id)
+            ->where('move_type', StockMoveType::In->value)
+            ->count());
+    }
+
     /**
      * @return array{0:Tenant,1:PurchaseOrder,2:ProcurementItem}
      */
