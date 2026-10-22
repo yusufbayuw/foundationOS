@@ -8,8 +8,10 @@ use Modules\Asset\Models\Asset;
 use Modules\Asset\Services\AssetDepreciationService;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
+use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
+use Modules\Core\Models\UserTenantRole;
 use Modules\Core\Support\QrCodeGenerator;
 use Modules\EOffice\Models\Letter;
 use Modules\EOffice\Services\LetterNumberingService;
@@ -113,6 +115,18 @@ class RoadmapV05FacilitiesTest extends TestCase
     {
         $tenant = $this->makeTenant();
         $agent = User::factory()->create();
+        $role = TenantRole::withoutTenantScope()->create([
+            'tenant_id' => $tenant->getKey(),
+            'name' => 'Helpdesk Agent',
+            'slug' => 'helpdesk-agent',
+            'permissions' => ['*'],
+        ]);
+        UserTenantRole::withoutTenantScope()->create([
+            'tenant_id' => $tenant->getKey(),
+            'user_id' => $agent->getKey(),
+            'tenant_role_id' => $role->getKey(),
+            'is_primary' => true,
+        ]);
 
         $category = TicketCategory::query()->create([
             'tenant_id' => $tenant->getKey(),
