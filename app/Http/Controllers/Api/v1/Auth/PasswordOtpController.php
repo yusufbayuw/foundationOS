@@ -9,8 +9,10 @@ use App\Services\Auth\OtpPurpose;
 use App\Services\Auth\OtpService;
 use App\Services\Auth\OtpVerificationResult;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordOtpController extends ApiController
@@ -37,19 +39,34 @@ class PasswordOtpController extends ApiController
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $result = $otpService->consume($validated['identifier'], OtpPurpose::ForgotPassword, $validated['code']);
+        $result = DB::transaction(function () use ($validated, $otpService): OtpVerificationResult {
+            $result = $otpService->consume($validated['identifier'], OtpPurpose::ForgotPassword, $validated['code']);
+
+            if ($result !== OtpVerificationResult::Valid) {
+                return $result;
+            }
+
+            $user = User::query()
+                ->where('email', $validated['identifier'])
+                ->orWhere('phone', $validated['identifier'])
+                ->first();
+
+            if ($user !== null) {
+                $user->forceFill([
+                    'password' => Hash::make($validated['password']),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                // A stolen API token must not survive a successful password reset.
+                // Web sessions require a separate, storage-driver-specific strategy.
+                $user->tokens()->delete();
+            }
+
+            return OtpVerificationResult::Valid;
+        });
 
         if ($result !== OtpVerificationResult::Valid) {
             return $this->error($result->value, 'Kode OTP tidak valid atau tidak dapat digunakan.', 422);
-        }
-
-        $user = User::query()
-            ->where('email', $validated['identifier'])
-            ->orWhere('phone', $validated['identifier'])
-            ->first();
-
-        if ($user !== null) {
-            $user->forceFill(['password' => Hash::make($validated['password'])])->save();
         }
 
         return $this->success(['status' => 'password_reset']);
