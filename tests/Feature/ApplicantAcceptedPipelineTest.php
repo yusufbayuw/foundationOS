@@ -140,6 +140,59 @@ class ApplicantAcceptedPipelineTest extends TestCase
         $this->assertNull($applicant->fresh()->converted_to_student_id);
     }
 
+    public function test_repeated_promotion_with_stale_applicant_reuses_original_student(): void
+    {
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+
+        $stale = Applicant::withoutTenantScope()->findOrFail($applicant->id);
+        $service = app(ApplicantPromotionService::class);
+
+        $first = $service->promote($applicant);
+        $second = $service->promote($stale);
+
+        $this->assertNotNull($first);
+        $this->assertSame($first->id, $second?->id);
+        $this->assertSame(1, Student::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->count());
+    }
+
+    public function test_delayed_acceptance_cannot_promote_a_reverted_applicant(): void
+    {
+        Event::fake([ApplicantAccepted::class, ApplicantAcceptanceReverted::class]);
+
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+        $stale = Applicant::withoutTenantScope()->findOrFail($applicant->id);
+
+        $applicant->update(['status' => 'registered']);
+
+        $this->assertNull(app(ApplicantPromotionService::class)->promote($stale));
+        $this->assertNull($applicant->fresh()->converted_to_student_id);
+        $this->assertSame(0, Student::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->count());
+    }
+
+    public function test_promotion_rejects_foreign_tenant_student_pointer(): void
+    {
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+        [$otherTenant] = $this->makeApplicant('accepted');
+
+        $otherStudent = Student::withoutTenantScope()->create([
+            'tenant_id' => $otherTenant->id,
+            'nis' => 'FOREIGN-PROMOTION',
+            'status' => 'active',
+        ]);
+
+        $applicant->forceFill([
+            'converted_to_student_id' => $otherStudent->id,
+        ])->saveQuietly();
+
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+        app(ApplicantPromotionService::class)->promote($applicant);
+    }
+
     /**
      * @return array{0:Tenant,1:Organization,2:Applicant}
      */
