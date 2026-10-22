@@ -10,6 +10,8 @@ use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntryLine;
 use Modules\Inventory\Enums\StockMoveType;
+use Modules\Inventory\Enums\ValuationMethod;
+use Modules\Inventory\Models\StockCostLayer;
 use Modules\Inventory\Models\StockItem;
 use Modules\Inventory\Models\StockLevel;
 use Modules\Inventory\Models\StockMove;
@@ -134,6 +136,46 @@ class InventoryProcurementIntegrationTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
+    }
+
+    public function test_fifo_cost_layers_are_not_consumed_when_outbound_exceeds_on_hand(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Printer Paper', 5, 20_000);
+
+        $stockItem = StockItem::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'procurement_item_id' => $procurementItem->id,
+            'code' => 'FIFO-'.$procurementItem->id,
+            'name' => $procurementItem->name,
+            'valuation_method' => ValuationMethod::Fifo,
+        ]);
+
+        app(GoodsReceiptAutoCreationService::class)->receive($po);
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+
+        $layer = StockCostLayer::withoutTenantScope()
+            ->where('stock_item_id', $stockItem->id)
+            ->firstOrFail();
+
+        $this->assertEqualsWithDelta(5.0, (float) $layer->quantity_remaining, 0.01);
+
+        try {
+            app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 6);
+            $this->fail('Expected insufficient stock exception.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Insufficient stock', $exception->getMessage());
+        }
+
+        $this->assertEqualsWithDelta(5.0, (float) $layer->fresh()->quantity_remaining, 0.01);
+        $this->assertEqualsWithDelta(
+            5.0,
+            (float) StockLevel::withoutTenantScope()
+                ->where('warehouse_id', $warehouse->id)
+                ->where('stock_item_id', $stockItem->id)
+                ->firstOrFail()
+                ->quantity_on_hand,
+            0.01,
+        );
     }
 
     public function test_goods_receipt_replay_does_not_double_count_stock(): void
