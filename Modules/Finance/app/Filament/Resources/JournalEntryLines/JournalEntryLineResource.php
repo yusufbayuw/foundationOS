@@ -4,6 +4,7 @@ namespace Modules\Finance\Filament\Resources\JournalEntryLines;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Finance\Filament\Resources\JournalEntryLines\Pages\CreateJournalEntryLine;
 use Modules\Finance\Filament\Resources\JournalEntryLines\Pages\EditJournalEntryLine;
@@ -33,6 +34,37 @@ class JournalEntryLineResource extends LocalizedResource
     public static function table(Table $table): Table
     {
         return JournalEntryLinesTable::configure($table);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return $record instanceof JournalEntryLine
+            && ! $record->journalEntry?->isLockedForMutation()
+            && parent::canEdit($record);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record instanceof JournalEntryLine
+            && ! $record->journalEntry?->isLockedForMutation()
+            && parent::canDelete($record);
+    }
+
+    public static function canForceDelete(Model $record): bool
+    {
+        return $record instanceof JournalEntryLine
+            && ! $record->journalEntry?->isLockedForMutation()
+            && parent::canForceDelete($record);
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
+    public static function canForceDeleteAny(): bool
+    {
+        return false;
     }
 
     public static function getRelations(): array
