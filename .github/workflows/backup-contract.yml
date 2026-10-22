@@ -165,3 +165,90 @@ jobs:
           cmp "$sandbox/app/storage/app/public/public.txt" \
             "$sandbox/restore/storage/app/public/public.txt"
           echo "PASS: real PostgreSQL 16, encrypted dump, isolated DB restore, and file restoration."
+
+  mariadb-restore:
+    name: MariaDB encrypted isolated restore (CI fixture)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: ci-only-root
+          MARIADB_ROOT_HOST: "%"
+          MARIADB_DATABASE: foundationos_backup_source
+          MARIADB_USER: fos_ci
+          MARIADB_PASSWORD: ci-only-ephemeral
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install age and MariaDB client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y age mariadb-client
+
+      - name: Backup and restore entirely disposable data
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${CI:-}" = true
+          test "${GITHUB_ACTIONS:-}" = true
+          sandbox=$(mktemp -d)
+          trap 'rm -rf -- "$sandbox"' EXIT
+          mkdir -p "$sandbox/app/storage/app/private" "$sandbox/app/storage/app/public" \
+                   "$sandbox/backups" "$sandbox/restore"
+          printf 'MariaDB private fixture\n' > "$sandbox/app/storage/app/private/private.txt"
+          printf 'MariaDB public fixture\n' > "$sandbox/app/storage/app/public/public.txt"
+          age-keygen -o "$sandbox/identity.txt" >/dev/null 2>&1
+          recipient=$(sed -n 's/^# public key: //p' "$sandbox/identity.txt")
+          test -n "$recipient"
+          printf '[client]\nuser=fos_ci\npassword=ci-only-ephemeral\nhost=127.0.0.1\nport=3306\nprotocol=tcp\n' \
+            > "$sandbox/db-client.cnf"
+          printf '[client]\nuser=root\npassword=ci-only-root\nhost=127.0.0.1\nport=3306\nprotocol=tcp\n' \
+            > "$sandbox/db-admin.cnf"
+          chmod 600 "$sandbox/db-client.cnf" "$sandbox/db-admin.cnf"
+
+          mariadb --defaults-extra-file="$sandbox/db-client.cnf" \
+            foundationos_backup_source -e \
+            "CREATE TABLE snapshot_fixture (id INT PRIMARY KEY, value VARCHAR(100) NOT NULL) ENGINE=InnoDB; INSERT INTO snapshot_fixture VALUES (1, 'restore-verified');"
+
+          export FOS_BACKUP_APP_DIR="$sandbox/app"
+          export FOS_BACKUP_DESTINATION="$sandbox/backups"
+          export FOS_BACKUP_DB_DRIVER=mariadb
+          export FOS_BACKUP_DB_NAME=foundationos_backup_source
+          export FOS_BACKUP_DB_HOST=127.0.0.1
+          export FOS_BACKUP_DB_PORT=3306
+          export FOS_BACKUP_DB_USER=fos_ci
+          export FOS_BACKUP_AGE_RECIPIENT="$recipient"
+          export FOS_BACKUP_MYSQL_DEFAULTS_FILE="$sandbox/db-client.cnf"
+          export FOS_BACKUP_WRITES_QUIESCED=yes
+
+          bash scripts/ops/snapshot-local-encrypted.sh
+          snapshot=$(find "$sandbox/backups" -mindepth 1 -maxdepth 1 -type d -name 'snapshot-*' -print -quit)
+          test -n "$snapshot"
+          bash scripts/ops/verify-encrypted-snapshot.sh "$snapshot" "$sandbox/identity.txt"
+
+          # The disposable restore target is separate from the fixture source DB.
+          mariadb --defaults-extra-file="$sandbox/db-admin.cnf" -e \
+            "CREATE DATABASE foundationos_backup_restore; GRANT ALL PRIVILEGES ON foundationos_backup_restore.* TO 'fos_ci'@'%';"
+          age -d -i "$sandbox/identity.txt" "$snapshot/database.dump.age" |
+            mariadb --defaults-extra-file="$sandbox/db-client.cnf" foundationos_backup_restore
+          actual=$(mariadb --defaults-extra-file="$sandbox/db-client.cnf" --batch --skip-column-names \
+            foundationos_backup_restore -e "SELECT value FROM snapshot_fixture WHERE id = 1;")
+          test "$actual" = restore-verified
+
+          age -d -i "$sandbox/identity.txt" "$snapshot/storage.tar.age" |
+            tar -C "$sandbox/restore" --no-same-owner -xf -
+          cmp "$sandbox/app/storage/app/private/private.txt" \
+            "$sandbox/restore/storage/app/private/private.txt"
+          cmp "$sandbox/app/storage/app/public/public.txt" \
+            "$sandbox/restore/storage/app/public/public.txt"
+          echo "PASS: real MariaDB 11.4, encrypted dump, isolated DB restore, and file restoration."
