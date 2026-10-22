@@ -42,11 +42,69 @@ class FinanceControlService
 
     public function verifyPayment(Payment $payment, User $actor, ?string $notes = null): Payment
     {
-        return DB::transaction(function () use ($payment, $actor, $notes): Payment {
-            $payment = $payment->fresh(['studentInvoice', 'chartOfAccount']);
+        if (! $payment->student_invoice_id) {
+            throw new RuntimeException('Only invoice-linked payments can be verified by this finance workflow.');
+        }
 
-            if ($payment->isLockedForMutation()) {
-                throw new RuntimeException('Payment is already finalized and cannot be verified again.');
+        return DB::transaction(function () use ($payment, $actor, $notes): Payment {
+            // Lock the invoice first: payments for the same invoice must be serialized,
+            // including payments with different IDs processed by separate workers.
+            $invoice = StudentInvoice::query()
+                ->whereKey($payment->student_invoice_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $payment = Payment::query()
+                ->whereKey($payment->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ((int) $payment->tenant_id !== (int) $invoice->tenant_id
+                || (int) $payment->student_invoice_id !== (int) $invoice->getKey()) {
+                throw new RuntimeException('Payment and invoice must belong to the same tenant.');
+            }
+
+            $entryNumber = 'PAY-'.$payment->payment_number;
+
+            if ($payment->status === 'verified') {
+                $existingJournal = JournalEntry::query()
+                    ->where('tenant_id', $payment->tenant_id)
+                    ->where('entry_number', $entryNumber)
+                    ->first();
+
+                if (! $existingJournal || ! $existingJournal->is_posted || $existingJournal->is_reversed) {
+                    throw new RuntimeException('Verified payment requires finance journal reconciliation before retry.');
+                }
+
+                return $payment->fresh(['studentInvoice', 'chartOfAccount']);
+            }
+
+            if ($payment->status !== 'pending') {
+                throw new RuntimeException('Only pending payments can be verified.');
+            }
+
+            if (! in_array((string) $invoice->status, ['issued', 'partial'], true)) {
+                throw new RuntimeException('Invoice is not eligible for further payments.');
+            }
+
+            $paymentCents = (int) round((float) $payment->amount * 100);
+            $invoiceCents = (int) round((float) $invoice->total_amount * 100);
+            $alreadyPaidCents = (int) round((float) $invoice->payments()
+                ->where('status', 'verified')
+                ->sum('amount') * 100);
+
+            if ($paymentCents <= 0 || $invoiceCents <= 0 || $alreadyPaidCents + $paymentCents > $invoiceCents) {
+                throw new RuntimeException('Payment amount exceeds the invoice remaining balance or is invalid.');
+            }
+
+            $cashAccount = ChartOfAccount::withoutTenantScope()
+                ->where('tenant_id', $payment->tenant_id)
+                ->where('is_active', true)
+                ->where('type', 'asset')
+                ->find($payment->chart_of_account_id);
+
+            if (! $cashAccount) {
+                throw new RuntimeException('Payment requires an active tenant cash or bank account.');
             }
 
             $payment->forceFill([
@@ -56,7 +114,7 @@ class FinanceControlService
                 'verification_notes' => $this->appendNotes($payment->verification_notes, $notes),
             ])->save();
 
-            $invoice = $this->recalculateInvoice($payment->studentInvoice->fresh(), $actor);
+            $invoice = $this->recalculateInvoice($invoice, $actor);
             $journal = $this->createPaymentJournalEntry($payment->fresh(['studentInvoice', 'chartOfAccount']), $actor);
 
             $this->audit($payment, $actor, 'finance_payment_verified', [
@@ -68,7 +126,7 @@ class FinanceControlService
             NotificationService::paymentVerified($payment->fresh(['studentInvoice']), $actor);
 
             return $payment->fresh(['studentInvoice', 'chartOfAccount']);
-        });
+        }, 3);
     }
 
     public function rejectPayment(Payment $payment, User $actor, ?string $notes = null): Payment
@@ -285,6 +343,10 @@ class FinanceControlService
             ->first();
 
         if ($existing) {
+            if (! $existing->is_posted || $existing->is_reversed) {
+                throw new RuntimeException('Existing payment journal is not a valid posted entry.');
+            }
+
             return $existing;
         }
 
@@ -298,8 +360,7 @@ class FinanceControlService
             'total_debit' => $payment->amount,
             'total_credit' => $payment->amount,
             'is_balanced' => true,
-            'is_posted' => true,
-            'posted_at' => now(),
+            'is_posted' => false,
             'is_reversed' => false,
         ]);
 
@@ -321,7 +382,7 @@ class FinanceControlService
             'credit' => $payment->amount,
         ]);
 
-        return $entry->fresh(['lines']);
+        return $this->postJournalEntry($entry, $actor);
     }
 
     protected function resolveReceivableAccount(Payment $payment): ChartOfAccount
