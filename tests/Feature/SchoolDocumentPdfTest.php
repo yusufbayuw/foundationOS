@@ -140,6 +140,74 @@ class SchoolDocumentPdfTest extends TestCase
             ->assertHeader('content-type', 'application/pdf');
     }
 
+    public function test_report_card_displays_class_for_requested_historical_period(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+
+        $nextPeriod = AcademicPeriod::create([
+            'tenant_id' => $context['tenant']->id,
+            'organization_id' => $context['organization']->id,
+            'academic_year_id' => $context['academicYear']->id,
+            'name' => 'Semester Genap',
+            'code' => '2027-GENAP',
+            'start_date' => '2027-01-01',
+            'end_date' => '2027-06-30',
+        ]);
+
+        $newClass = SchoolClass::create([
+            'tenant_id' => $context['tenant']->id,
+            'organization_id' => $context['organization']->id,
+            'academic_period_id' => $nextPeriod->id,
+            'name' => 'XI-B',
+            'code' => 'XI-B',
+        ]);
+
+        ClassStudent::create([
+            'tenant_id' => $context['tenant']->id,
+            'academic_period_id' => $nextPeriod->id,
+            'class_id' => $newClass->id,
+            'student_id' => $context['student']->id,
+        ]);
+
+        $service = app(\Modules\School\Services\ReportCardService::class);
+
+        $historical = $service->generate($context['student']->id, $context['period']->id);
+        $current = $service->generate($context['student']->id, $nextPeriod->id);
+
+        $this->assertSame('X-A', $historical['class_name']);
+        $this->assertSame('XI-B', $current['class_name']);
+        $this->assertSame(85.0, (float) $historical['overall_average']);
+        $this->assertSame(0.0, (float) $current['overall_average']);
+    }
+
+    public function test_report_card_rejects_a_period_from_another_tenant(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+        $otherTenant = Tenant::factory()->create();
+
+        $otherYear = AcademicYear::create([
+            'tenant_id' => $otherTenant->id,
+            'name' => '2026 / 2027 Other Tenant',
+            'code' => 'AY-OTHER',
+            'start_date' => '2026-07-01',
+            'end_date' => '2027-06-30',
+        ]);
+
+        $otherPeriod = AcademicPeriod::create([
+            'tenant_id' => $otherTenant->id,
+            'academic_year_id' => $otherYear->id,
+            'name' => 'Foreign Semester',
+            'code' => 'FOREIGN',
+            'start_date' => '2026-07-01',
+            'end_date' => '2026-12-31',
+        ]);
+
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+        app(\Modules\School\Services\ReportCardService::class)
+            ->generate($context['student']->id, $otherPeriod->id);
+    }
+
     /**
      * @return array{
      *     tenant: Tenant,
