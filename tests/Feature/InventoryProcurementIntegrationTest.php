@@ -161,7 +161,7 @@ class InventoryProcurementIntegrationTest extends TestCase
             'status' => 'approved',
         ]);
 
-        StockAdjustmentLine::withoutTenantScope()->create([
+        $line = StockAdjustmentLine::withoutTenantScope()->create([
             'tenant_id' => $tenant->id,
             'stock_adjustment_id' => $adjustment->id,
             'stock_item_id' => $stockItem->id,
@@ -177,7 +177,7 @@ class InventoryProcurementIntegrationTest extends TestCase
         $this->assertSame('committed', $adjustment->fresh()->status);
         $this->assertSame(1, StockMove::withoutTenantScope()
             ->where('tenant_id', $tenant->id)
-            ->where('reference_type', (new StockAdjustmentLine)->getMorphClass())
+            ->where('reference_id', $line->id)
             ->where('move_type', StockMoveType::Out->value)
             ->count());
 
