@@ -9,13 +9,17 @@ use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntryLine;
+use Modules\Inventory\Enums\StockAdjustmentReason;
 use Modules\Inventory\Enums\StockMoveType;
 use Modules\Inventory\Enums\ValuationMethod;
+use Modules\Inventory\Models\StockAdjustment;
+use Modules\Inventory\Models\StockAdjustmentLine;
 use Modules\Inventory\Models\StockCostLayer;
 use Modules\Inventory\Models\StockItem;
 use Modules\Inventory\Models\StockLevel;
 use Modules\Inventory\Models\StockMove;
 use Modules\Inventory\Services\GoodsReceiptStockService;
+use Modules\Inventory\Services\StockAdjustmentService;
 use Modules\Inventory\Services\StockMoveService;
 use Modules\Inventory\Services\WarehouseResolver;
 use Modules\Procurement\Models\ProcurementItem;
@@ -136,6 +140,55 @@ class InventoryProcurementIntegrationTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
+    }
+
+    public function test_retried_stock_adjustment_commit_does_not_post_twice(): void
+    {
+        [$tenant, $po, $procurementItem] = $this->makePoWithProcurementItem('Pencil', 5, 10_000);
+        app(GoodsReceiptAutoCreationService::class)->receive($po);
+
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+        $stockItem = StockItem::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('procurement_item_id', $procurementItem->id)
+            ->firstOrFail();
+
+        $adjustment = StockAdjustment::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'warehouse_id' => $warehouse->id,
+            'adjustment_number' => 'ADJ-'.$procurementItem->id,
+            'reason' => StockAdjustmentReason::CountVariance,
+            'status' => 'approved',
+        ]);
+
+        StockAdjustmentLine::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'stock_adjustment_id' => $adjustment->id,
+            'stock_item_id' => $stockItem->id,
+            'quantity_delta' => -2,
+            'unit_cost' => 10_000,
+        ]);
+
+        $service = app(StockAdjustmentService::class);
+        $first = $service->commit($adjustment);
+        $second = $service->commit($adjustment);
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame('committed', $adjustment->fresh()->status);
+        $this->assertSame(1, StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('reference_type', (new StockAdjustmentLine)->getMorphClass())
+            ->where('move_type', StockMoveType::Out->value)
+            ->count());
+
+        $this->assertEqualsWithDelta(
+            3.0,
+            (float) StockLevel::withoutTenantScope()
+                ->where('warehouse_id', $warehouse->id)
+                ->where('stock_item_id', $stockItem->id)
+                ->firstOrFail()->quantity_on_hand,
+            0.01,
+        );
     }
 
     public function test_fifo_cost_layers_are_not_consumed_when_outbound_exceeds_on_hand(): void
