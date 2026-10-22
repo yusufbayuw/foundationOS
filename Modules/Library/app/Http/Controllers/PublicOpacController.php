@@ -614,17 +614,29 @@ class PublicOpacController extends Controller
 
         abort_if(! $loan->isActive(), 422, 'Loan ini tidak lagi aktif untuk proses pengembalian.');
 
-        DB::transaction(function () use ($loan): void {
-            $loan->forceFill([
+        DB::transaction(function () use ($loan, $tenantModel): void {
+            $lockedLoan = Loan::query()
+                ->where('tenant_id', $tenantModel->id)
+                ->whereKey($loan->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_if(! $lockedLoan->isActive(), 422, 'Loan ini tidak lagi aktif untuk proses pengembalian.');
+
+            $lockedCopy = BookCopy::query()
+                ->where('tenant_id', $tenantModel->id)
+                ->whereKey($lockedLoan->book_copy_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedLoan->forceFill([
                 'return_date' => now()->toDateString(),
                 'returned_by' => auth()->id(),
                 'status' => 'returned',
             ])->save();
 
-            if ($loan->bookCopy) {
-                $loan->bookCopy->forceFill(['status' => 'available'])->save();
-            }
-        });
+            $lockedCopy->forceFill(['status' => 'available'])->save();
+        }, 3);
 
         $circulationService->recalculateLoanFine($loan->fresh(['member', 'bookCopy.book']));
 
@@ -659,18 +671,30 @@ class PublicOpacController extends Controller
         abort_if(! $loan->isActive(), 422, 'Loan ini tidak lagi aktif untuk diperpanjang.');
         abort_if(! $loan->member, 422, 'Member untuk loan ini tidak ditemukan.');
 
-        $policy = $policyResolver->resolveForMember($loan->member);
-        abort_if((int) $loan->extension_count >= (int) $policy['max_extensions'], 422, 'Batas perpanjangan untuk loan ini sudah tercapai.');
+        DB::transaction(function () use ($loan, $tenantModel, $policyResolver): void {
+            $lockedLoan = Loan::query()
+                ->with('member')
+                ->where('tenant_id', $tenantModel->id)
+                ->whereKey($loan->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $baseDate = $loan->due_date && $loan->due_date->isFuture()
-            ? $loan->due_date->copy()
-            : now();
+            abort_if(! $lockedLoan->isActive(), 422, 'Loan ini tidak lagi aktif untuk diperpanjang.');
+            abort_if(! $lockedLoan->member, 422, 'Member untuk loan ini tidak ditemukan.');
 
-        $loan->forceFill([
-            'due_date' => $baseDate->addDays($policy['loan_period_days'])->toDateString(),
-            'extension_count' => (int) $loan->extension_count + 1,
-            'status' => 'borrowed',
-        ])->save();
+            $lockedPolicy = $policyResolver->resolveForMember($lockedLoan->member);
+            abort_if((int) $lockedLoan->extension_count >= (int) $lockedPolicy['max_extensions'], 422, 'Batas perpanjangan untuk loan ini sudah tercapai.');
+
+            $baseDate = $lockedLoan->due_date && $lockedLoan->due_date->isFuture()
+                ? $lockedLoan->due_date->copy()
+                : now();
+
+            $lockedLoan->forceFill([
+                'due_date' => $baseDate->addDays($lockedPolicy['loan_period_days'])->toDateString(),
+                'extension_count' => (int) $lockedLoan->extension_count + 1,
+                'status' => 'borrowed',
+            ])->save();
+        }, 3);
 
         return redirect()->back()->with('status', 'Perpanjangan loan berhasil diproses.');
     }
