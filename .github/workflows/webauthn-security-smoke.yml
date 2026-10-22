@@ -1,0 +1,48 @@
+name: WebAuthn Security Smoke
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'app/Providers/AppServiceProvider.php'
+      - 'app/Support/Security/WebAuthnRpConfiguration.php'
+      - 'Modules/Core/app/Models/User.php'
+      - 'app/Models/User.php'
+      - 'config/passkeys.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'database/migrations/*passkey*'
+      - 'tests/Feature/PasskeyAuthTest.php'
+      - 'tests/Feature/Security/WebAuthn*'
+      - '.github/workflows/webauthn-security-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/Feature/Security/WebAuthn*'
+      - '.github/workflows/webauthn-security-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  webauthn-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite
+          tools: composer:v2
+      - name: Install locked dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Prepare test app
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Verify legacy authentication remains disabled
+        run: php artisan test --compact tests/Feature/PasskeyAuthTest.php
+      - name: Verify RP rollout and unsafe-origin rejections
+        run: php artisan test --compact tests/Feature/Security/WebAuthnReadinessTest.php
+      - name: Verify opt-in RP challenge and forged assertion rejection
+        run: php artisan test --compact tests/Feature/Security/WebAuthnEnabledRoutesTest.php

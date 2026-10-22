@@ -25,6 +25,7 @@ use App\Policies\VoucherPolicy;
 use App\Services\Auth\LogOtpMessenger;
 use App\Services\Auth\OtpMessenger;
 use App\Support\CurrentTenant;
+use App\Support\Security\WebAuthnRpConfiguration;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Auth\Events\Login;
@@ -36,6 +37,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passkeys\Passkeys;
 use Laravel\Sanctum\Sanctum;
 use Modules\Alumni\Models\JobApplication;
 use Modules\Alumni\Models\JobPosting;
@@ -98,6 +100,20 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(OtpMessenger::class, LogOtpMessenger::class);
         $this->app->singleton(CurrentTenant::class);
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        // Native WebAuthn routes use web sessions, never legacy tenantless API
+        // tokens. Keep the third-party routes absent until explicitly accepted.
+        Passkeys::useUserModel(User::class);
+
+        if (! config('passkeys.enabled', false)) {
+            Passkeys::ignoreRoutes();
+        } else {
+            WebAuthnRpConfiguration::assertValid(
+                (string) config('passkeys.relying_party_id', ''),
+                config('passkeys.allowed_origins', []),
+            );
+        }
+
         $this->app->bind(PaymentGateway::class, NullPaymentGateway::class);
     }
 

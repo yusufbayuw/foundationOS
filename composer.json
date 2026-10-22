@@ -16,6 +16,7 @@
         "filament/filament": "^5.4",
         "jwadhams/json-logic-php": "^1.5",
         "laravel/framework": "^13.0",
+        "laravel/passkeys": "^0.2.1",
         "laravel/pulse": "^1.7",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",

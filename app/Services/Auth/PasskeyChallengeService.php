@@ -26,7 +26,7 @@ class PasskeyChallengeService
             'timeout' => self::REGISTER_TTL_SECONDS * 1000,
             'attestation' => 'none',
             'authenticatorSelection' => ['residentKey' => 'preferred', 'userVerification' => 'preferred'],
-            'excludeCredentials' => $user->passkeys()->whereNull('disabled_at')->get(['credential_id', 'transports'])->map(fn (UserPasskey $passkey): array => [
+            'excludeCredentials' => $user->legacyPasskeys()->whereNull('disabled_at')->get(['credential_id', 'transports'])->map(fn (UserPasskey $passkey): array => [
                 'type' => 'public-key',
                 'id' => $passkey->credential_id,
                 'transports' => $passkey->transports ?? [],
@@ -44,7 +44,7 @@ class PasskeyChallengeService
             'challenge' => $challenge,
             'timeout' => self::LOGIN_TTL_SECONDS * 1000,
             'userVerification' => 'preferred',
-            'allowCredentials' => $user?->passkeys()->whereNull('disabled_at')->get(['credential_id', 'transports'])->map(fn (UserPasskey $passkey): array => [
+            'allowCredentials' => $user?->legacyPasskeys()->whereNull('disabled_at')->get(['credential_id', 'transports'])->map(fn (UserPasskey $passkey): array => [
                 'type' => 'public-key',
                 'id' => $passkey->credential_id,
                 'transports' => $passkey->transports ?? [],

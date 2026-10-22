@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Laravel\Passkeys\Contracts\PasskeyUser;
+use Laravel\Passkeys\PasskeyAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Campus\Models\FeederLog;
 use Modules\Campus\Models\Lecturer;
@@ -43,9 +45,9 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasDefaultTenant, HasEmailAuthentication, HasTenants, MustVerifyEmail, PasskeyUser
 {
-    use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, MustVerifyEmailTrait, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, HasRoles, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, LogsActivity, MustVerifyEmailTrait, Notifiable, PasskeyAuthenticatable, SoftDeletes;
 
     protected string $guard_name = 'web';
 
@@ -113,7 +115,8 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasMany(Member::class);
     }
 
-    public function passkeys(): HasMany
+    /** Legacy non-WebAuthn credentials, retained solely for audit and migration. */
+    public function legacyPasskeys(): HasMany
     {
         return $this->hasMany(UserPasskey::class);
     }
