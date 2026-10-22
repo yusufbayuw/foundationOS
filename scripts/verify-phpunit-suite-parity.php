@@ -15,7 +15,7 @@ if ($argc !== 3) {
 
 function readConfiguration(string $path): array
 {
-    $doc = new DOMDocument();
+    $doc = new DOMDocument;
     $previous = libxml_use_internal_errors(true);
     $loaded = $doc->load($path, LIBXML_NONET);
     libxml_clear_errors();
@@ -70,7 +70,7 @@ function readConfiguration(string $path): array
         if (! in_array($node->tagName, ['env', 'ini', 'const', 'var', 'server'], true)) {
             throw new RuntimeException("Unsupported PHPUnit php environment directive: {$node->tagName}");
         }
-        $key = $node->tagName . ':' . $node->getAttribute('name');
+        $key = $node->tagName.':'.$node->getAttribute('name');
         if (array_key_exists($key, $environment)) {
             throw new RuntimeException("Duplicate PHPUnit environment key: {$key}");
         }
@@ -101,6 +101,6 @@ try {
 
     echo "Verified exact PHPUnit test suite selection and environment parity.\n";
 } catch (Throwable $e) {
-    fwrite(STDERR, $e->getMessage() . "\n");
+    fwrite(STDERR, $e->getMessage()."\n");
     exit(1);
 }
