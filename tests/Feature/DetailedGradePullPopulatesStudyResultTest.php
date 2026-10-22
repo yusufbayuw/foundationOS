@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Integrations\Moodle\MoodleDetailedGradePullService;
+use App\Support\CurrentTenant;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
 use Modules\Campus\Models\CourseOffering;
@@ -27,6 +30,67 @@ use Tests\TestCase;
 class DetailedGradePullPopulatesStudyResultTest extends TestCase
 {
     use LazilyRefreshDatabase;
+
+    public function test_grade_pull_does_not_overwrite_cross_tenant_result_for_same_item(): void
+    {
+        $ctx = $this->seedContext();
+        $item = $this->makeStudyPlanItem($ctx);
+        $otherTenant = Tenant::factory()->create();
+
+        $foreignResult = StudyResult::create([
+            'tenant_id' => $otherTenant->id,
+            'study_plan_item_id' => $item->id,
+            'grade_letter' => 'C',
+            'grade_point' => 2.0,
+            'weight_score' => 55,
+        ]);
+
+        try {
+            app(MoodleDetailedGradePullService::class)->processGradeItems($item, [
+                ['itemname' => 'UAS', 'graderaw' => 95, 'grademax' => 100],
+            ]);
+            $this->fail('Cross-tenant StudyResult should block grade pull.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('study_plan_item_id', $exception->errors());
+        }
+
+        $foreignResult->refresh();
+        $this->assertSame($otherTenant->id, $foreignResult->tenant_id);
+        $this->assertSame('C', $foreignResult->grade_letter);
+        $this->assertSame(1, StudyResult::withoutTenantScope()
+            ->where('study_plan_item_id', $item->id)->count());
+    }
+
+    public function test_grade_pull_refuses_foreign_item_under_active_tenant(): void
+    {
+        $ctx = $this->seedContext();
+        $item = $this->makeStudyPlanItem($ctx);
+        $foreignTenant = Tenant::factory()->create();
+        app(CurrentTenant::class)->set($foreignTenant);
+
+        try {
+            $this->expectException(ModelNotFoundException::class);
+            app(MoodleDetailedGradePullService::class)->processGradeItems($item, [
+                ['itemname' => 'UTS', 'graderaw' => 70, 'grademax' => 100],
+            ]);
+        } finally {
+            app(CurrentTenant::class)->forget();
+        }
+    }
+
+    public function test_period_grade_pull_refuses_other_active_tenant_without_calling_moodle(): void
+    {
+        $ctx = $this->seedContext();
+        $foreignTenant = Tenant::factory()->create();
+        app(CurrentTenant::class)->set($foreignTenant);
+
+        try {
+            $this->expectException(ModelNotFoundException::class);
+            app(MoodleDetailedGradePullService::class)->pullForPeriod($ctx['period']);
+        } finally {
+            app(CurrentTenant::class)->forget();
+        }
+    }
 
     public function test_grade_items_are_mapped_to_breakdown_and_weighted_score(): void
     {
