@@ -200,7 +200,7 @@ class FinanceControlTest extends TestCase
             'total_debit' => 150000,
             'total_credit' => 150000,
             'is_balanced' => true,
-            'is_posted' => true,
+            'is_posted' => false,
         ]);
 
         $journal->lines()->createMany([
@@ -209,6 +209,7 @@ class FinanceControlTest extends TestCase
         ]);
 
         $service = app(FinanceControlService::class);
+        $service->postJournalEntry($journal, $actor);
         $service->reverseJournalEntry($journal, $actor, 'Correct duplicate booking.');
 
         try {
@@ -301,6 +302,57 @@ class FinanceControlTest extends TestCase
         $this->assertSame('issued', $invoice->fresh()->status);
         $this->assertEqualsWithDelta(0, (float) $invoice->fresh()->paid_amount, 0.01);
         $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_posted_journal_and_lines_cannot_be_mutated_by_eloquent_actions(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+        [$cashAccount, $receivableAccount] = $this->makeAccounts($tenant, $organization);
+
+        $entry = JournalEntry::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'entry_number' => 'JE-IMMUTABLE-TEST',
+            'date' => now()->toDateString(),
+            'description' => 'Protected posted journal regression.',
+            'total_debit' => 0,
+            'total_credit' => 0,
+            'is_balanced' => false,
+            'is_posted' => false,
+        ]);
+
+        $entry->lines()->createMany([
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $cashAccount->id, 'debit' => 30000, 'credit' => 0],
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $receivableAccount->id, 'debit' => 0, 'credit' => 30000],
+        ]);
+
+        app(FinanceControlService::class)->postJournalEntry($entry, $actor);
+        $entry->refresh();
+        $line = $entry->lines()->firstOrFail();
+
+        foreach ([
+            fn () => $entry->update(['description' => 'Unapproved overwrite']),
+            fn () => $entry->delete(),
+            fn () => $line->update(['debit' => 99999]),
+            fn () => $line->delete(),
+            fn () => $entry->lines()->create([
+                'tenant_id' => $tenant->id,
+                'chart_of_account_id' => $cashAccount->id,
+                'debit' => 1,
+                'credit' => 0,
+            ]),
+        ] as $write) {
+            try {
+                $write();
+                $this->fail('Posted GL records must not be mutable.');
+            } catch (\RuntimeException $exception) {
+                $this->assertNotEmpty($exception->getMessage());
+            }
+        }
+
+        $this->assertSame('Protected posted journal regression.', $entry->fresh()->description);
+        $this->assertSame(2, $entry->lines()->count());
+        $this->assertEqualsWithDelta(30000, (float) $line->fresh()->debit, 0.01);
     }
 
     protected function makeFinanceContext(): array
