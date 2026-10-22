@@ -61,9 +61,9 @@ return [
     | Any additions require tenant-aware query authorization review.
     */
     'queue_tenantless_job_types' => [
-        \App\Jobs\ProcessMoodleSyncOutboxJob::class,
-        \Modules\Workflow\Jobs\CheckWorkflowSlaJob::class,
-        \Illuminate\Events\CallQueuedListener::class,
+        'App\\Jobs\\ProcessMoodleSyncOutboxJob',
+        'Modules\\Workflow\\Jobs\\CheckWorkflowSlaJob',
+        'Illuminate\\Events\\CallQueuedListener',
     ],
 
     'self_registration_trial_days' => max(1, (int) env('TENANCY_SELF_REGISTRATION_TRIAL_DAYS', 14)),

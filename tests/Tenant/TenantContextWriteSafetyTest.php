@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Modules\Core\Models\Tenant;
 use Modules\Procurement\Models\Vendor;
+use Modules\Workflow\Jobs\CheckWorkflowSlaJob;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -183,7 +184,7 @@ class TenantContextWriteSafetyTest extends TestCase
 
         try {
             $processed = (new WithTenantContext(null))->handle(
-                new \Modules\Workflow\Jobs\CheckWorkflowSlaJob(999),
+                new CheckWorkflowSlaJob(999),
                 function () use ($context): bool {
                     $this->assertNull($context->id(), 'Global job must not inherit worker tenant.');
                     $this->assertSame(0, getPermissionsTeamId());

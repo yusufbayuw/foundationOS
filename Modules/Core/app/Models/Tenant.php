@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
@@ -86,7 +87,9 @@ use Modules\School\Models\ViolationType;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-/** @property \Illuminate\Support\Carbon|null $trial_ends_at */
+/**
+ * @property Carbon|null $trial_ends_at
+ */
 class Tenant extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
