@@ -4,6 +4,7 @@ namespace Modules\Employee\Filament\Resources\SalarySlips;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\SalarySlips\Pages\CreateSalarySlip;
 use Modules\Employee\Filament\Resources\SalarySlips\Pages\EditSalarySlip;
@@ -33,6 +34,37 @@ class SalarySlipResource extends LocalizedResource
     public static function table(Table $table): Table
     {
         return SalarySlipsTable::configure($table);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return $record instanceof SalarySlip
+            && $record->status === 'draft'
+            && parent::canEdit($record);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record instanceof SalarySlip
+            && $record->status === 'draft'
+            && parent::canDelete($record);
+    }
+
+    public static function canForceDelete(Model $record): bool
+    {
+        return $record instanceof SalarySlip
+            && $record->status === 'draft'
+            && parent::canForceDelete($record);
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
+    public static function canForceDeleteAny(): bool
+    {
+        return false;
     }
 
     public static function getRelations(): array
