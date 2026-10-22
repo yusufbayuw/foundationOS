@@ -12,6 +12,7 @@ if (in_array('*', $proxies, true)) {
 }
 
 return [
-    // Only explicit peers may provide X-Forwarded-* metadata.
-    'trusted_proxies' => $proxies,
+    // Laravel's default TrustProxies middleware reads this at request time.
+    // An empty array intentionally trusts no upstream forwarding headers.
+    'proxies' => $proxies,
 ];

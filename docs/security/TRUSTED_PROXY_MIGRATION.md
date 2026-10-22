@@ -7,7 +7,7 @@ Previously, bootstrap trusted every remote address via `trustProxies('*')`. In i
 
 ## Configuration
 
-The new `config/ingress.php` reads `TRUSTED_PROXIES`, a comma-separated allowlist of **actual immediate proxy peers**, in IP or CIDR notation. Empty means no forwarded-header trust. Wildcard `*` is rejected explicitly.
+The new `config/trustedproxy.php` is read by Laravel's built-in TrustProxies middleware at request time (after configuration has bootstrapped), and reads `TRUSTED_PROXIES`, a comma-separated allowlist of **actual immediate proxy peers**, in IP or CIDR notation. Empty means no forwarded-header trust. Wildcard `*` is rejected explicitly.
 
 Example for a locally co-located reverse proxy (only if it is the immediate HTTP peer):
 

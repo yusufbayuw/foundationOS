@@ -29,6 +29,6 @@ class TrustedProxyIngressTest extends TestCase
 
     public function test_default_ingress_settings_do_not_trust_all_proxies(): void
     {
-        $this->assertNotContains('*', config('ingress.trusted_proxies'));
+        $this->assertNotContains('*', config('trustedproxy.proxies'));
     }
 }
