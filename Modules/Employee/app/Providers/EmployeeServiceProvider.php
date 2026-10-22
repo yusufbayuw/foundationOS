@@ -3,6 +3,7 @@
 namespace Modules\Employee\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Employee\Console\Commands\GeneratePayrollCommand;
 use Modules\Employee\Console\Commands\SetupHrmWorkflowsCommand;
 use Nwidart\Modules\Support\ModuleServiceProvider;
@@ -38,6 +39,15 @@ class EmployeeServiceProvider extends ModuleServiceProvider
         EventServiceProvider::class,
         RouteServiceProvider::class,
     ];
+
+    public function boot(): void
+    {
+        parent::boot();
+
+        Relation::morphMap([
+            'salary_slip' => \Modules\Employee\Models\SalarySlip::class,
+        ]);
+    }
 
     /**
      * Define module schedules.
