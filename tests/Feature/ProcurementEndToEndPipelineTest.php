@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use DomainException;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Procurement\Exceptions\ThreeWayMatchException;
+use Modules\Procurement\Models\GoodsReceipt;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\PurchaseOrderItem;
 use Modules\Procurement\Models\Vendor;
@@ -134,11 +136,11 @@ class ProcurementEndToEndPipelineTest extends TestCase
         try {
             $service->receive($po);
             $this->fail('Expected rejection when no units remain on the PO.');
-        } catch (\DomainException $exception) {
+        } catch (DomainException $exception) {
             $this->assertStringContainsString('at least one item', $exception->getMessage());
         }
 
-        $this->assertSame(1, \Modules\Procurement\Models\GoodsReceipt::withoutTenantScope()
+        $this->assertSame(1, GoodsReceipt::withoutTenantScope()
             ->where('purchase_order_id', $po->id)
             ->count());
     }
