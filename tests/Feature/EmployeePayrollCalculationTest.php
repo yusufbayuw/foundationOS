@@ -476,7 +476,7 @@ class EmployeePayrollCalculationTest extends TestCase
     {
         $columns = array_map(fn ($column): string => $column->getName(), SalarySlipImporter::getColumns());
 
-        foreach (['status','paid_at','paid_via','journal_entry_id','net_salary'] as $protectedColumn) {
+        foreach (['status', 'paid_at', 'paid_via', 'journal_entry_id', 'net_salary'] as $protectedColumn) {
             $this->assertNotContains($protectedColumn, $columns);
         }
     }
