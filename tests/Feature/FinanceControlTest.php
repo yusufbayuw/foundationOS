@@ -360,7 +360,7 @@ class FinanceControlTest extends TestCase
     {
         $columns = array_map(fn ($column): string => $column->getName(), JournalEntryImporter::getColumns());
 
-        foreach (['is_posted','is_reversed','posted_at','total_debit','total_credit','reversed_entry_id'] as $protectedColumn) {
+        foreach (['is_posted', 'is_reversed', 'posted_at', 'total_debit', 'total_credit', 'reversed_entry_id'] as $protectedColumn) {
             $this->assertNotContains($protectedColumn, $columns);
         }
     }
