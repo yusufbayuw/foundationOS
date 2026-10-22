@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Imports\SalarySlipImporter;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -469,6 +470,15 @@ class EmployeePayrollCalculationTest extends TestCase
         }
 
         $this->assertSame('draft', $slip->fresh()->status);
+    }
+
+    public function test_salary_import_excludes_payment_and_approval_fields(): void
+    {
+        $columns = array_map(fn ($column): string => $column->getName(), SalarySlipImporter::getColumns());
+
+        foreach (['status','paid_at','paid_via','journal_entry_id','net_salary'] as $protectedColumn) {
+            $this->assertNotContains($protectedColumn, $columns);
+        }
     }
 
     /**
