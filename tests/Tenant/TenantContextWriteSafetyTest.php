@@ -122,6 +122,34 @@ class TenantContextWriteSafetyTest extends TestCase
         }
     }
 
+    public function test_tenantless_panel_route_cannot_inherit_prior_tenant_or_team(): void
+    {
+        $priorTenant = Tenant::factory()->create();
+        Filament::shouldReceive('getTenant')->andReturn(null);
+
+        $context = app(CurrentTenant::class);
+        $context->set($priorTenant);
+        $oldTeam = getPermissionsTeamId();
+        setPermissionsTeamId($priorTenant->id);
+
+        try {
+            app(BindTenantToContainer::class)->handle(
+                Request::create('/admin/login', 'GET'),
+                function () use ($context) {
+                    $this->assertNull($context->id());
+                    $this->assertSame(0, getPermissionsTeamId());
+
+                    return response('ok');
+                },
+            );
+
+            $this->assertEquals($priorTenant->id, $context->id());
+            $this->assertEquals($priorTenant->id, getPermissionsTeamId());
+        } finally {
+            setPermissionsTeamId($oldTeam);
+        }
+    }
+
     public function test_tenant_job_middleware_restores_previous_state_on_failure(): void
     {
         $old = Tenant::factory()->create();

@@ -32,9 +32,11 @@ class BindTenantToContainer
         // inheriting the preceding request's tenant in persistent processes.
         return $this->currentTenant->forTenant($tenant, function () use ($tenant, $previousTenantId, $previousTeamId, $next, $request): Response {
             try {
-                if ($tenant !== null) {
-                    setPermissionsTeamId($tenant->getKey());
+                // Reset permission teams for tenantless pages as well: a stale
+                // team must not be inherited by registration/login requests.
+                setPermissionsTeamId($tenant?->getKey() ?? 0);
 
+                if ($tenant !== null) {
                     if ((string) $previousTenantId !== (string) $tenant->getKey()) {
                         event(new TenantSwitched(
                             newTenantId: $tenant->getKey(),
