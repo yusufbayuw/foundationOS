@@ -260,6 +260,72 @@ class EmployeePayrollCalculationTest extends TestCase
         }
     }
 
+    public function test_approved_salary_slip_cannot_be_recalculated_or_lose_its_components(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-finalized-guard');
+
+        PayrollComponent::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'code' => 'ALLOWANCE',
+            'name' => 'Allowance',
+            'type' => 'earning',
+            'calculation_type' => 'fixed',
+            'amount' => 300000,
+            'is_active' => true,
+        ]);
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        try {
+            app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+            $this->fail('An approved salary slip must not be recalculated.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('Only draft salary slips', $exception->getMessage());
+        }
+
+        $this->assertSame('approved', $slip->fresh()->status);
+        $this->assertEqualsWithDelta(5300000, (float) $slip->fresh()->total_earnings, 0.01);
+        $this->assertSame(1, SalarySlipComponent::query()->where('salary_slip_id', $slip->id)->count());
+        $this->assertSame(1, SalarySlip::query()->where('employee_id', $employee->id)->count());
+    }
+
+    public function test_repeating_salary_payment_preserves_the_first_payment_and_journal(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-paid-retry');
+        $this->makeAccount($tenant, $organization, '5101', 'Beban Gaji', 'expense');
+        $this->makeAccount($tenant, $organization, '1101', 'Kas Operasional', 'asset');
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        $service = app(SalarySlipPaymentService::class);
+        $first = $service->markAsPaid($slip, '2026-05-31 10:00:00', 'bank');
+        $second = $service->markAsPaid($slip, '2026-06-01 13:00:00', 'cash');
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame('paid', $slip->fresh()->status);
+        $this->assertSame('bank', $slip->fresh()->paid_via);
+        $this->assertSame('2026-05-31 10:00:00', $slip->fresh()->paid_at->format('Y-m-d H:i:s'));
+        $this->assertSame(1, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+        $this->assertSame(2, JournalEntryLine::query()->where('journal_entry_id', $first->id)->count());
+    }
+
+    public function test_invalid_payroll_period_is_rejected_without_writing_slips(): void
+    {
+        [, , $employee] = $this->makeEmployee('payroll-invalid-period');
+
+        try {
+            app(PayrollCalculationService::class)->calculate($employee, 13, 2026);
+            $this->fail('A month outside 1 to 12 must not be accepted.');
+        } catch (\InvalidArgumentException $exception) {
+            $this->assertSame('Invalid payroll month or year.', $exception->getMessage());
+        }
+
+        $this->assertSame(0, SalarySlip::query()->where('employee_id', $employee->id)->count());
+    }
+
     /**
      * @return array{0: Tenant, 1: Organization, 2: Employee}
      */
