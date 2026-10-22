@@ -16,7 +16,7 @@ class VoucherClaimExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('voucher.name')->label(FilamentUi::text('Voucher')),
+            ExportColumn::make('voucher.title')->label(FilamentUi::text('Voucher')),
             ExportColumn::make('user.name')->label(FilamentUi::text('User')),
             ExportColumn::make('claim_code')->label(FilamentUi::text('Claim code')),
             ExportColumn::make('status')->label(FilamentUi::text('Status')),
