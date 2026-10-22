@@ -2,6 +2,7 @@
 
 namespace Modules\Helpdesk\Listeners;
 
+use Modules\Core\Models\UserTenantRole;
 use Modules\Helpdesk\Events\TicketCreated;
 use Modules\Helpdesk\Models\Ticket;
 use Modules\Helpdesk\Models\TicketCategory;
@@ -18,9 +19,10 @@ class AssignTicketToAgent
                 ->find($ticket->ticket_category_id)
             : null;
 
+        $tenantId = (int) $ticket->tenant_id;
         $assigneeId = $ticket->assigned_to_user_id
-            ?? $category?->default_assignee_user_id
-            ?? $this->leastLoadedAgentId((int) $ticket->tenant_id, $category?->getKey());
+            ?? $this->eligibleAgentId($tenantId, $category?->default_assignee_user_id)
+            ?? $this->leastLoadedAgentId($tenantId, $category?->getKey());
 
         $meta = $ticket->meta ?? [];
         $previousMeta = $meta;
@@ -54,7 +56,7 @@ class AssignTicketToAgent
 
     protected function leastLoadedAgentId(int $tenantId, ?int $categoryId): ?int
     {
-        $query = Ticket::query()
+        $query = Ticket::withoutTenantScope()
             ->where('tenant_id', $tenantId)
             ->whereIn('status', ['open', 'in_progress'])
             ->whereNotNull('assigned_to_user_id');
@@ -69,6 +71,20 @@ class AssignTicketToAgent
             ->orderBy('open_count')
             ->first();
 
-        return $row?->assigned_to_user_id;
+        return $this->eligibleAgentId($tenantId, $row?->assigned_to_user_id);
+    }
+
+    protected function eligibleAgentId(int $tenantId, ?int $userId): ?int
+    {
+        if (! $userId) {
+            return null;
+        }
+
+        return UserTenantRole::withoutTenantScope()
+            ->active()
+            ->where('tenant_id', $tenantId)
+            ->where('user_id', $userId)
+            ->whereHas('user', fn ($query) => $query->whereNull('deleted_at'))
+            ->exists() ? $userId : null;
     }
 }
