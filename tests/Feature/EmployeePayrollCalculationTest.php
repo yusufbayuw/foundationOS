@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -19,6 +20,7 @@ use Modules\Employee\Services\SalarySlipPaymentService;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
+use Modules\Finance\Services\FinancialReportService;
 use Modules\Workflow\Models\Workflow;
 use RuntimeException;
 use Tests\TestCase;
@@ -176,7 +178,8 @@ class EmployeePayrollCalculationTest extends TestCase
         ]);
 
         $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
-        $slip->update(['status' => 'approved']);
+        $approver = User::factory()->create();
+        app(SalarySlipApprovalService::class)->approve($slip, $approver);
 
         $journal = app(SalarySlipPaymentService::class)->markAsPaid(
             $slip->fresh(),
@@ -217,6 +220,16 @@ class EmployeePayrollCalculationTest extends TestCase
             'debit' => 0,
             'credit' => 5_250_000,
         ]);
+
+        $profitAndLoss = app(FinancialReportService::class)->profitAndLoss(
+            $tenant->id,
+            Carbon::parse('2026-05-01'),
+            Carbon::parse('2026-05-31'),
+            $organization->id,
+        );
+
+        $this->assertEqualsWithDelta(5_500_000, (float) $profitAndLoss['total_expenses'], 0.01);
+        $this->assertEqualsWithDelta(-5_500_000, (float) $profitAndLoss['net_income'], 0.01);
     }
 
     public function test_mark_paid_rolls_back_status_metadata_and_journal_when_posting_fails(): void
