@@ -173,6 +173,21 @@ class ApplicantAcceptedPipelineTest extends TestCase
             ->count());
     }
 
+    public function test_active_tenant_cannot_promote_another_tenants_applicant(): void
+    {
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+        [$otherTenant] = $this->makeApplicant('accepted');
+
+        app(CurrentTenant::class)->set($otherTenant);
+
+        try {
+            $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+            app(ApplicantPromotionService::class)->promote($applicant);
+        } finally {
+            app(CurrentTenant::class)->forget();
+        }
+    }
+
     public function test_promotion_rejects_foreign_tenant_student_pointer(): void
     {
         [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
