@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Models\UserTenantRole;
 use Modules\Helpdesk\Events\TicketCreated;
 use Modules\Helpdesk\Listeners\AssignTicketToAgent;
 use Modules\Helpdesk\Models\Ticket;
@@ -18,7 +19,7 @@ class HelpdeskTicketAssignmentTest extends TestCase
 
     public function test_ticket_and_category_assignment_columns_are_available_after_migration(): void
     {
-        foreach (['ticket_category_id', 'priority', 'assigned_to_user_id', 'escalated_at', 'closed_at'] as $column) {
+        foreach (['ticket_category_id', 'priority', 'assigned_to_user_id', 'escalated_at', 'closed_at', 'ai_suggested_category'] as $column) {
             $this->assertTrue(Schema::hasColumn('tickets', $column), $column);
         }
 
@@ -75,6 +76,63 @@ class HelpdeskTicketAssignmentTest extends TestCase
 
         $this->assertNull($ticket->assigned_to_user_id);
         $this->assertNotEmpty($ticket->meta['sla_due_at'] ?? null);
+        $this->assertNotEmpty($ticket->meta['sla_response_due_at'] ?? null);
+    }
+
+    public function test_foreign_tenant_default_agent_is_not_auto_assigned(): void
+    {
+        ['tenant' => $tenantA, 'user' => $userA] =
+            $this->makeTenantContext(['core', 'helpdesk']);
+        ['tenant' => $tenantB, 'organization' => $organizationB] =
+            $this->makeTenantContext(['core', 'helpdesk']);
+
+        $categoryB = app(TicketCategoryRegistrationService::class)->register(
+            tenantId: $tenantB->id,
+            organizationId: $organizationB->id,
+            code: 'SEC',
+            name: 'Security',
+            defaultAssigneeUserId: $userA->id,
+        );
+
+        $ticket = Ticket::withoutTenantScope()->create([
+            'tenant_id' => $tenantB->id,
+            'organization_id' => $organizationB->id,
+            'ticket_category_id' => $categoryB->id,
+            'name' => 'Security incident',
+            'status' => 'open',
+        ])->fresh();
+
+        $this->assertNull($ticket->assigned_to_user_id);
+        $this->assertNotEmpty($ticket->meta['sla_due_at'] ?? null);
+    }
+
+    public function test_expired_tenant_membership_cannot_receive_default_assignment(): void
+    {
+        ['tenant' => $tenant, 'organization' => $organization, 'user' => $user] =
+            $this->makeTenantContext(['core', 'helpdesk']);
+
+        UserTenantRole::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)
+            ->update(['expires_at' => now()->subDay()]);
+
+        $category = app(TicketCategoryRegistrationService::class)->register(
+            tenantId: $tenant->id,
+            organizationId: $organization->id,
+            code: 'HR',
+            name: 'HR support',
+            defaultAssigneeUserId: $user->id,
+        );
+
+        $ticket = Ticket::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'ticket_category_id' => $category->id,
+            'name' => 'Leave approval issue',
+            'status' => 'open',
+        ])->fresh();
+
+        $this->assertNull($ticket->assigned_to_user_id);
         $this->assertNotEmpty($ticket->meta['sla_response_due_at'] ?? null);
     }
 
