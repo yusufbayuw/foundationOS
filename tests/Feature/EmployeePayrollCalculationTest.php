@@ -14,10 +14,12 @@ use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Models\SalarySlipComponent;
 use Modules\Employee\Services\PayrollCalculationService;
 use Modules\Employee\Services\PayrollJournalService;
+use Modules\Employee\Services\SalarySlipApprovalService;
 use Modules\Employee\Services\SalarySlipPaymentService;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
+use Modules\Workflow\Models\Workflow;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -385,6 +387,75 @@ class EmployeePayrollCalculationTest extends TestCase
 
         $this->assertSame('approved', $slip->fresh()->status);
         $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_salary_slip_approval_requires_completed_workflow_when_configured(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-hr-finance-approval');
+        $actor = User::factory()->create();
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+
+        $workflow = Workflow::query()->create([
+            'tenant_id' => $tenant->id,
+            'code' => $slip->workflowCode(),
+            'name' => 'HR and Finance Approval',
+            'module' => 'Employee',
+            'subject_type' => SalarySlip::class,
+            'trigger_mode' => 'manual',
+            'version' => 1,
+            'status' => 'active',
+            'is_active' => true,
+        ]);
+
+        $service = app(SalarySlipApprovalService::class);
+
+        try {
+            $service->approve($slip, $actor);
+            $this->fail('An active HR-Finance workflow must finish before approval.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('workflow approval must be completed', $exception->getMessage());
+        }
+
+        $this->assertSame('draft', $slip->fresh()->status);
+
+        $slip->workflowInstances()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'workflow_id' => $workflow->id,
+            'workflow_version' => 1,
+            'workflow_snapshot' => [],
+            'requester_id' => $employee->user_id,
+            'started_by' => $employee->user_id,
+            'status' => 'completed',
+            'started_at' => now()->subDay(),
+            'completed_at' => now(),
+        ]);
+
+        $approved = $service->approve($slip, $actor);
+
+        $this->assertSame('approved', $approved->status);
+        $this->assertSame('approved', $service->approve($approved, $actor)->status);
+        $this->assertDatabaseHas('audit_logs', [
+            'tenant_id' => $tenant->id,
+            'user_id' => $actor->id,
+            'action' => 'payroll_salary_slip_approved',
+        ]);
+    }
+
+    public function test_employee_cannot_self_approve_salary_slip(): void
+    {
+        [, , $employee] = $this->makeEmployee('payroll-self-approval');
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $employeeUser = User::query()->findOrFail($employee->user_id);
+
+        try {
+            app(SalarySlipApprovalService::class)->approve($slip, $employeeUser);
+            $this->fail('Employees cannot self-approve payroll.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('cannot approve their own', $exception->getMessage());
+        }
+
+        $this->assertSame('draft', $slip->fresh()->status);
     }
 
     /**
