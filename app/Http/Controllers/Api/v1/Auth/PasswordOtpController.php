@@ -58,8 +58,17 @@ class PasswordOtpController extends ApiController
                 ])->save();
 
                 // A stolen API token must not survive a successful password reset.
-                // Web sessions require a separate, storage-driver-specific strategy.
                 $user->tokens()->delete();
+
+                // The database session driver indexes sessions by user_id.
+                // Invalidate those sessions without deleting other users' sessions.
+                // Non-database session stores require a separate revocation strategy.
+                if (config('session.driver') === 'database') {
+                    DB::connection(config('session.connection'))
+                        ->table((string) config('session.table', 'sessions'))
+                        ->where('user_id', $user->getKey())
+                        ->delete();
+                }
             }
 
             return OtpVerificationResult::Valid;
