@@ -160,8 +160,11 @@ class Tenant extends Model
 
     public function isSubscriptionActive(): bool
     {
-        return in_array($this->status, ['active', 'trial'], true)
-            && ($this->subscription_expires_at === null || $this->subscription_expires_at->isFuture());
+        return match ($this->status) {
+            'active' => $this->subscription_expires_at === null || $this->subscription_expires_at->isFuture(),
+            'trial' => $this->trial_ends_at === null || $this->trial_ends_at->isFuture(),
+            default => false,
+        };
     }
 
     public function isInGracePeriod(): bool
@@ -173,8 +176,11 @@ class Tenant extends Model
 
     public function isLocked(): bool
     {
-        return $this->status === 'suspended'
-            || ($this->status === 'past_due' && ($this->grace_period_ends_at === null || $this->grace_period_ends_at->isPast()));
+        return match ($this->status) {
+            'active', 'trial' => ! $this->isSubscriptionActive(),
+            'past_due' => ! $this->isInGracePeriod(),
+            default => true,
+        };
     }
 
     public function subscriptionPlan(): BelongsTo

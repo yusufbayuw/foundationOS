@@ -53,7 +53,7 @@ class ResolveApiTenant
         // Resolve fresh subscription status so changes take effect on the next request.
         $tenant = $token->tenant()->first();
 
-        if (! $tenant instanceof Tenant || ! $this->subscriptionAllowsAccess($tenant)) {
+        if (! $tenant instanceof Tenant || $tenant->isLocked()) {
             return $this->deny('tenant_subscription_inactive', 'Tenant subscription is unavailable.');
         }
 
@@ -102,16 +102,6 @@ class ResolveApiTenant
                 $principal?->unsetRelation('roles')->unsetRelation('permissions');
             }
         });
-    }
-
-    private function subscriptionAllowsAccess(Tenant $tenant): bool
-    {
-        return match ($tenant->status) {
-            'active' => $tenant->subscription_expires_at === null || $tenant->subscription_expires_at->isFuture(),
-            'trial' => $tenant->trial_ends_at === null || $tenant->trial_ends_at->isFuture(),
-            'past_due' => $tenant->isInGracePeriod(),
-            default => false,
-        };
     }
 
     private function deny(string $code, string $message): JsonResponse
