@@ -4,7 +4,6 @@ namespace Modules\Employee\Services;
 
 use Illuminate\Support\Facades\DB;
 use Modules\Employee\Models\SalarySlip;
-use Modules\Employee\Models\SalarySlipComponent;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
