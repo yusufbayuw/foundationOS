@@ -8,6 +8,7 @@ use App\Services\Auth\OtpMessenger;
 use App\Services\Auth\OtpPurpose;
 use App\Services\Auth\OtpService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
@@ -110,6 +111,118 @@ class OtpApiTest extends TestCase
 
         $this->postJson('/api/v1/auth/otp/request', $payload)->assertCreated();
         $this->postJson('/api/v1/auth/otp/request', $payload)->assertTooManyRequests();
+    }
+
+    public function test_consumed_otp_cannot_be_reused(): void
+    {
+        $this->postJson('/api/v1/auth/otp/request', [
+            'identifier' => 'otp@example.com',
+            'purpose' => OtpPurpose::Registration->value,
+        ])->assertCreated();
+
+        $code = $this->messenger->lastCode;
+        $service = app(OtpService::class);
+
+        $this->assertSame('valid', $service->consume('otp@example.com', OtpPurpose::Registration, $code)->value);
+        $this->assertNotSame('valid', $service->consume('otp@example.com', OtpPurpose::Registration, $code)->value);
+        $this->assertDatabaseCount('otp_codes', 1);
+        $this->assertNotNull(OtpCode::query()->first()?->consumed_at);
+    }
+
+    public function test_password_reset_revokes_existing_api_tokens_and_rotates_remember_token(): void
+    {
+        $user = User::query()->create([
+            'name' => 'Reset Security User',
+            'email' => 'otp@example.com',
+            'password' => Hash::make('old-password'),
+        ]);
+
+        $user->forceFill(['remember_token' => 'old-remember-token'])->save();
+        $token = $user->createToken('old-session')->plainTextToken;
+
+        $this->postJson('/api/v1/auth/password/forgot', [
+            'identifier' => 'otp@example.com',
+        ])->assertOk();
+
+        $this->postJson('/api/v1/auth/password/reset-with-otp', [
+            'identifier' => 'otp@example.com',
+            'code' => $this->messenger->lastCode,
+            'password' => 'new-strong-password',
+            'password_confirmation' => 'new-strong-password',
+        ])->assertOk();
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertNotSame('old-remember-token', $user->fresh()->remember_token);
+        $this->assertTrue(Hash::check('new-strong-password', $user->fresh()->password));
+
+        $this->withToken($token)
+            ->getJson('/api/v1/me')
+            ->assertUnauthorized();
+    }
+
+    public function test_password_reset_revokes_only_owners_database_sessions(): void
+    {
+        config()->set('session.driver', 'database');
+
+        $owner = User::query()->create([
+            'name' => 'Reset Owner',
+            'email' => 'otp@example.com',
+            'password' => Hash::make('old-password'),
+        ]);
+        $other = User::query()->create([
+            'name' => 'Unaffected User',
+            'email' => 'other@example.com',
+            'password' => Hash::make('other-password'),
+        ]);
+
+        foreach ([
+            ['id' => 'owner-session-before-reset', 'user_id' => $owner->getKey()],
+            ['id' => 'other-user-session', 'user_id' => $other->getKey()],
+        ] as $session) {
+            DB::table('sessions')->insert($session + [
+                'payload' => 'dummy-session-payload',
+                'last_activity' => now()->timestamp,
+            ]);
+        }
+
+        $this->postJson('/api/v1/auth/password/forgot', [
+            'identifier' => 'otp@example.com',
+        ])->assertOk();
+
+        $this->postJson('/api/v1/auth/password/reset-with-otp', [
+            'identifier' => 'otp@example.com',
+            'code' => $this->messenger->lastCode,
+            'password' => 'new-strong-password',
+            'password_confirmation' => 'new-strong-password',
+        ])->assertOk();
+
+        $this->assertDatabaseMissing('sessions', ['id' => 'owner-session-before-reset']);
+        $this->assertDatabaseHas('sessions', ['id' => 'other-user-session']);
+    }
+
+    public function test_invalid_reset_code_preserves_existing_api_tokens(): void
+    {
+        $user = User::query()->create([
+            'name' => 'Reset Security User',
+            'email' => 'otp@example.com',
+            'password' => Hash::make('old-password'),
+        ]);
+
+        $user->createToken('still-authorized');
+
+        $this->postJson('/api/v1/auth/password/forgot', [
+            'identifier' => 'otp@example.com',
+        ])->assertOk();
+
+        $this->postJson('/api/v1/auth/password/reset-with-otp', [
+            'identifier' => 'otp@example.com',
+            'code' => '000000',
+            'password' => 'new-strong-password',
+            'password_confirmation' => 'new-strong-password',
+        ])->assertStatus(422);
+
+        $this->assertDatabaseCount('personal_access_tokens', 1);
+        $this->assertTrue(Hash::check('old-password', $user->fresh()->password));
     }
 
     public function test_password_can_be_reset_with_otp(): void
