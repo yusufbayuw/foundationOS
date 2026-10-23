@@ -5,6 +5,7 @@ namespace Modules\School\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Modules\School\Models\Student;
 use Modules\School\Services\ReportCardService;
 
 class ReportCardController extends Controller
@@ -18,7 +19,12 @@ class ReportCardController extends Controller
             abort(404);
         }
 
-        $data = $service->generate($studentId, $periodId);
+        // The legacy download URL must enforce the same Student print
+        // authorization as the newer route-model-bound PDF endpoint.
+        $student = Student::query()->findOrFail($studentId);
+        $this->authorize('print', $student);
+
+        $data = $service->generate($student->getKey(), (int) $periodId);
 
         $pdf = Pdf::loadView('school::report-card-pdf', ['data' => $data]);
 

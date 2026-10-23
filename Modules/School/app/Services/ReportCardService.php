@@ -18,13 +18,22 @@ class ReportCardService
     public function generate(int $studentId, int $academicPeriodId): array
     {
         $student = Student::with(['user'])->findOrFail($studentId);
-        $period = AcademicPeriod::findOrFail($academicPeriodId);
+        $period = AcademicPeriod::query()
+            ->where('tenant_id', $student->tenant_id)
+            ->findOrFail($academicPeriodId);
 
-        // Identify class logic: fallback to checking any schedule or class link.
-        // Here we just grab the class from an assessment or first class student link.
+        // A historical report must use the class assigned in this period, not
+        // an arbitrary first class from another academic year.
         $className = 'N/A';
-        $classLink = ClassStudent::where('student_id', $studentId)
+        $classLink = ClassStudent::query()
+            ->where('tenant_id', $student->tenant_id)
+            ->where('student_id', $studentId)
+            ->where('academic_period_id', $academicPeriodId)
+            ->whereHas('schoolClass', fn ($query) => $query
+                ->where('tenant_id', $student->tenant_id)
+                ->where('academic_period_id', $academicPeriodId))
             ->with('schoolClass')
+            ->orderByDesc('entry_date')
             ->first();
 
         if ($classLink && $classLink->schoolClass) {
@@ -32,9 +41,11 @@ class ReportCardService
         }
 
         $grades = StudentGrade::with(['assessment.subject'])
+            ->where('tenant_id', $student->tenant_id)
             ->where('student_id', $studentId)
-            ->whereHas('assessment', function ($query) use ($academicPeriodId) {
-                $query->where('academic_period_id', $academicPeriodId);
+            ->whereHas('assessment', function ($query) use ($academicPeriodId, $student) {
+                $query->where('tenant_id', $student->tenant_id)
+                    ->where('academic_period_id', $academicPeriodId);
             })
             ->get();
 
@@ -59,7 +70,11 @@ class ReportCardService
                 ];
             }
 
-            $score = $grade->score ?? 0;
+            // An ungraded assessment is not a score of zero.
+            $score = $grade->score ?? $grade->final_score;
+            if ($score === null) {
+                continue;
+            }
             $subjects[$subjectId]['assessments'][] = [
                 'type' => $assessment->type,
                 'name' => $assessment->name,
@@ -80,9 +95,11 @@ class ReportCardService
 
         $overallAverage = $subjectCount > 0 ? round($totalScore / $subjectCount, 2) : 0;
 
-        $attendances = Attendance::where('student_id', $studentId)
-            ->whereHas('schedule', function ($query) use ($academicPeriodId) {
-                $query->where('academic_period_id', $academicPeriodId);
+        $attendances = Attendance::where('tenant_id', $student->tenant_id)
+            ->where('student_id', $studentId)
+            ->whereHas('schedule', function ($query) use ($academicPeriodId, $student) {
+                $query->where('tenant_id', $student->tenant_id)
+                    ->where('academic_period_id', $academicPeriodId);
             })
             ->get();
 
@@ -96,13 +113,15 @@ class ReportCardService
         $start = $period->start_date;
         $end = $period->end_date;
 
-        $achievements = StudentAchievement::where('student_id', $studentId)
+        $achievements = StudentAchievement::where('tenant_id', $student->tenant_id)
+            ->where('student_id', $studentId)
             ->when($start, fn ($q) => $q->where('event_date', '>=', $start))
             ->when($end, fn ($q) => $q->where('event_date', '<=', $end))
             ->orderBy('event_date', 'desc')
             ->get();
 
-        $violations = Violation::where('student_id', $studentId)
+        $violations = Violation::where('tenant_id', $student->tenant_id)
+            ->where('student_id', $studentId)
             ->when($start, fn ($q) => $q->where('date', '>=', $start))
             ->when($end, fn ($q) => $q->where('date', '<=', $end))
             ->orderBy('date', 'desc')
