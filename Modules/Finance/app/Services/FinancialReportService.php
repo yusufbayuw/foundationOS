@@ -2,7 +2,9 @@
 
 namespace Modules\Finance\Services;
 
+use App\Scopes\TenantScope;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
@@ -130,6 +132,14 @@ class FinancialReportService
     /** Load all posted journal entry lines in the date range. */
     private function postedLines(int $tenantId, Carbon $from, Carbon $to, ?int $organizationId): Collection
     {
+        // A resolved tenant must never read another tenant's ledger, even
+        // when a caller passes an arbitrary tenantId to a finance report.
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (string) $activeTenantId !== (string) $tenantId) {
+            throw new AuthorizationException('Cannot access another tenant\'s financial reports.');
+        }
+
         // Reports receive an explicit tenant ID (including CLI/export callers).
         // Do not let an unrelated ambient tenant scope hide a valid ledger entry.
         // Keep soft-delete scopes intact while restricting both sides of the
