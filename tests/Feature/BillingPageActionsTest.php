@@ -155,6 +155,7 @@ class BillingPageActionsTest extends TestCase
     {
         ['tenant' => $tenant, 'user' => $user] = $this->bootstrapBillingPageTenant();
         ['tenant' => $otherTenant] = $this->makeTenantContext(['core'], 'other-billing-plan');
+        $this->assertSame($tenant->getKey(), app(CurrentTenant::class)->id(), 'The fixture helper must restore the original tenant.');
         $otherInvoice = app(CurrentTenant::class)->forTenant($otherTenant, fn () => $this->makeInvoice($otherTenant));
 
         $billing = Mockery::mock(BillingService::class);
