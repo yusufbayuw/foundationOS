@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\CurrentTenant;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
@@ -138,6 +139,74 @@ class ApplicantAcceptedPipelineTest extends TestCase
 
         $this->assertNull(app(ApplicantPromotionService::class)->promote($applicant));
         $this->assertNull($applicant->fresh()->converted_to_student_id);
+    }
+
+    public function test_repeated_promotion_with_stale_applicant_reuses_original_student(): void
+    {
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+
+        $stale = Applicant::withoutTenantScope()->findOrFail($applicant->id);
+        $service = app(ApplicantPromotionService::class);
+
+        $first = $service->promote($applicant);
+        $second = $service->promote($stale);
+
+        $this->assertNotNull($first);
+        $this->assertSame($first->id, $second?->id);
+        $this->assertSame(1, Student::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->count());
+    }
+
+    public function test_delayed_acceptance_cannot_promote_a_reverted_applicant(): void
+    {
+        Event::fake([ApplicantAccepted::class, ApplicantAcceptanceReverted::class]);
+
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+        $stale = Applicant::withoutTenantScope()->findOrFail($applicant->id);
+
+        $applicant->update(['status' => 'registered']);
+
+        $this->assertNull(app(ApplicantPromotionService::class)->promote($stale));
+        $this->assertNull($applicant->fresh()->converted_to_student_id);
+        $this->assertSame(0, Student::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->count());
+    }
+
+    public function test_active_tenant_cannot_promote_another_tenants_applicant(): void
+    {
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+        [$otherTenant] = $this->makeApplicant('accepted');
+
+        app(CurrentTenant::class)->set($otherTenant);
+
+        try {
+            $this->expectException(ModelNotFoundException::class);
+            app(ApplicantPromotionService::class)->promote($applicant);
+        } finally {
+            app(CurrentTenant::class)->forget();
+        }
+    }
+
+    public function test_promotion_rejects_foreign_tenant_student_pointer(): void
+    {
+        [$tenant, $organization, $applicant] = $this->makeApplicant('accepted');
+        [$otherTenant] = $this->makeApplicant('accepted');
+
+        $otherStudent = Student::withoutTenantScope()->create([
+            'tenant_id' => $otherTenant->id,
+            'nis' => 'FOREIGN-PROMOTION',
+            'status' => 'active',
+        ]);
+
+        $applicant->forceFill([
+            'converted_to_student_id' => $otherStudent->id,
+        ])->saveQuietly();
+
+        $this->expectException(ModelNotFoundException::class);
+
+        app(ApplicantPromotionService::class)->promote($applicant);
     }
 
     /**
