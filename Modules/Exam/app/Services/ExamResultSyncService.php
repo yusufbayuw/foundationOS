@@ -133,6 +133,7 @@ class ExamResultSyncService
                 $existingAttempt = ExamAttempt::withoutTenantScope()
                     ->where('exam_definition_id', $definition->id)
                     ->where('runtime_attempt_id', $runtimeAttemptId)
+                    ->lockForUpdate()
                     ->first();
 
                 if ($existingAttempt !== null && (
@@ -197,11 +198,13 @@ class ExamResultSyncService
                     continue;
                 }
 
-                $existingAnswer = ExamAnswer::withoutTenantScope()->where($match)->first();
+                $existingAnswer = ExamAnswer::withoutTenantScope()->where($match)->lockForUpdate()->first();
 
                 if ($existingAnswer !== null && (
                     (int) $existingAnswer->tenant_id !== (int) $definition->tenant_id
                     || (string) $existingAnswer->exam_definition_id !== (string) $definition->id
+                    || ($questionId !== null && $existingAnswer->exam_question_id !== null
+                        && (string) $existingAnswer->exam_question_id !== $questionId)
                 )) {
                     $stats['errors'][] = 'Answer row '.($index + 1).': answer ownership mismatch.';
 
@@ -213,7 +216,7 @@ class ExamResultSyncService
                     [
                         'tenant_id' => $definition->tenant_id,
                         'exam_definition_id' => $definition->id,
-                        'exam_question_id' => $questionId,
+                        'exam_question_id' => $questionId ?? $existingAnswer?->exam_question_id,
                         'answer_value' => $this->stringifyAnswerValue($row),
                         'is_correct' => isset($row['is_correct']) ? (bool) $row['is_correct'] : null,
                         'score' => $row['score'] ?? null,
@@ -245,8 +248,16 @@ class ExamResultSyncService
                 $participant = $this->resolveParticipant($definition, $row);
                 $attempt = $this->resolveAttempt($definition, $row, $attemptMap);
 
-                if ($participant === null && $attempt !== null) {
+                // Explicitly supplied, foreign/unknown participant IDs must not fall
+                // back to the owner of a valid attempt.
+                if ($participant === null && $attempt !== null && ! $this->hasParticipantReference($row)) {
                     $participant = $attempt->examParticipant;
+                }
+
+                if ($attempt === null && $this->hasAttemptReference($row)) {
+                    $stats['errors'][] = 'Result row '.($index + 1).': referenced attempt not found.';
+
+                    continue;
                 }
 
                 if ($participant === null
@@ -267,11 +278,14 @@ class ExamResultSyncService
                 $existingResult = ExamResult::withoutTenantScope()
                     ->where('exam_definition_id', $definition->id)
                     ->where('runtime_result_id', $runtimeResultId)
+                    ->lockForUpdate()
                     ->first();
 
                 if ($existingResult !== null && (
                     (int) $existingResult->tenant_id !== (int) $definition->tenant_id
                     || (string) $existingResult->exam_participant_id !== (string) $participant->id
+                    || ($attempt !== null && $existingResult->exam_attempt_id !== null
+                        && (string) $existingResult->exam_attempt_id !== (string) $attempt->id)
                 )) {
                     $stats['errors'][] = 'Result row '.($index + 1).': result ownership mismatch.';
 
@@ -286,7 +300,7 @@ class ExamResultSyncService
                     [
                         'tenant_id' => $definition->tenant_id,
                         'exam_participant_id' => $participant->id,
-                        'exam_attempt_id' => $attempt?->id,
+                        'exam_attempt_id' => $attempt?->id ?? $existingResult?->exam_attempt_id,
                         'score' => $row['score'] ?? $attempt?->score,
                         'max_score' => $row['max_score'] ?? $definition->max_score,
                         'is_passed' => isset($row['passed']) ? (bool) $row['passed'] : (isset($row['is_passed']) ? (bool) $row['is_passed'] : null),
@@ -335,6 +349,7 @@ class ExamResultSyncService
                 $existingActivity = ExamActivityLog::withoutTenantScope()
                     ->where('exam_attempt_id', $attempt->id)
                     ->where('runtime_activity_id', $runtimeActivityId)
+                    ->lockForUpdate()
                     ->first();
 
                 if ($existingActivity !== null && (
@@ -433,14 +448,17 @@ class ExamResultSyncService
             } catch (\Throwable $exception) {
                 $runtimeExamId = $definition->runtime_exam_id;
 
-                $this->writeSyncLog(
-                    $definition,
-                    [],
-                    null,
-                    $exception->getMessage(),
-                    Str::isUuid((string) $runtimeExamId) ? $runtimeExamId : null,
-                    ExamRuntimeSyncStatus::Failed,
-                );
+                // Never write a foreign-tenant audit row from an invalid active context.
+                if (! $exception instanceof ModelNotFoundException) {
+                    $this->writeSyncLog(
+                        $definition,
+                        [],
+                        null,
+                        $exception->getMessage(),
+                        Str::isUuid((string) $runtimeExamId) ? $runtimeExamId : null,
+                        ExamRuntimeSyncStatus::Failed,
+                    );
+                }
 
                 $reports[] = [
                     'exam_definition_id' => $definition->id,
@@ -460,6 +478,34 @@ class ExamResultSyncService
         if ($activeTenantId !== null && (int) $activeTenantId !== (int) $definition->tenant_id) {
             throw new ModelNotFoundException;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    protected function hasParticipantReference(array $row): bool
+    {
+        foreach (['participant_external_id', 'participant_foundation_id', 'external_id', 'foundation_id', 'participant_id', 'runtime_participant_id'] as $key) {
+            if (isset($row[$key]) && $row[$key] !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, mixed>  $row
+     */
+    protected function hasAttemptReference(array $row): bool
+    {
+        foreach (['attempt_id', 'runtime_attempt_id', 'attemptId'] as $key) {
+            if (isset($row[$key]) && $row[$key] !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function requireRuntimeExamId(ExamDefinition $definition): string
@@ -677,8 +723,12 @@ class ExamResultSyncService
     protected function dispatchGradebookSyncedEvents(ExamDefinition $definition): void
     {
         ExamResult::withoutTenantScope()
+            ->where('tenant_id', $definition->tenant_id)
             ->where('exam_definition_id', $definition->id)
             ->whereNotNull('exam_participant_id')
+            ->whereHas('examParticipant', fn ($query) => $query
+                ->where('tenant_id', $definition->tenant_id)
+                ->where('exam_definition_id', $definition->id))
             ->each(fn (ExamResult $result): mixed => $this->gradebookEvents->synced($result));
     }
 }
