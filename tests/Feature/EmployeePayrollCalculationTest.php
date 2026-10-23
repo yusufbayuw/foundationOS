@@ -6,6 +6,7 @@ use App\Filament\Imports\SalarySlipImporter;
 use App\Models\User;
 use App\Support\CurrentTenant;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -240,6 +241,30 @@ class EmployeePayrollCalculationTest extends TestCase
 
         $this->assertEqualsWithDelta(5_500_000, (float) $profitAndLoss['total_expenses'], 0.01);
         $this->assertEqualsWithDelta(-5_500_000, (float) $profitAndLoss['net_income'], 0.01);
+        $this->assertCount(1, $profitAndLoss['expenses']);
+        $this->assertSame('5101', $profitAndLoss['expenses']->first()->code);
+    }
+
+    public function test_financial_reporting_denies_cross_tenant_ledger_access(): void
+    {
+        [$tenantA] = $this->makeEmployee('payroll-report-tenant-a');
+        [$tenantB, $organizationB] = $this->makeEmployee('payroll-report-tenant-b');
+
+        try {
+            app(CurrentTenant::class)->forTenant(
+                $tenantA,
+                fn (): array => app(FinancialReportService::class)->profitAndLoss(
+                    $tenantB->id,
+                    Carbon::parse('2026-05-01'),
+                    Carbon::parse('2026-05-31'),
+                    $organizationB->id,
+                ),
+            );
+
+            $this->fail('A tenant must never request another tenant\'s financial report.');
+        } catch (AuthorizationException $exception) {
+            $this->assertStringContainsString('another tenant', $exception->getMessage());
+        }
     }
 
     public function test_mark_paid_rolls_back_status_metadata_and_journal_when_posting_fails(): void
