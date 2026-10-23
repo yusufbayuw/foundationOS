@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Imports\SalarySlipImporter;
+use App\Support\CurrentTenant;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -222,11 +223,19 @@ class EmployeePayrollCalculationTest extends TestCase
             'credit' => 5_250_000,
         ]);
 
-        $profitAndLoss = app(FinancialReportService::class)->profitAndLoss(
-            $tenant->id,
-            Carbon::parse('2026-05-01'),
-            Carbon::parse('2026-05-31'),
-            $organization->id,
+        $this->assertSame('2026-05-31', $journal->date->toDateString());
+        $this->assertSame(3, $journal->lines()->count());
+
+        // Reports run with a resolved tenant, just like the tenant-scoped
+        // Filament panel and queues. This must not depend on unrelated tests.
+        $profitAndLoss = app(CurrentTenant::class)->forTenant(
+            $tenant,
+            fn (): array => app(FinancialReportService::class)->profitAndLoss(
+                $tenant->id,
+                Carbon::parse('2026-05-01'),
+                Carbon::parse('2026-05-31'),
+                $organization->id,
+            ),
         );
 
         $this->assertEqualsWithDelta(5_500_000, (float) $profitAndLoss['total_expenses'], 0.01);
