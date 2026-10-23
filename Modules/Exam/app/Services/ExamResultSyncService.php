@@ -2,6 +2,8 @@
 
 namespace Modules\Exam\Services;
 
+use App\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -38,6 +40,8 @@ class ExamResultSyncService
      */
     public function sync(ExamDefinition $definition): array
     {
+        $this->assertTenantContext($definition);
+
         $runtimeExamId = $this->requireRuntimeExamId($definition);
 
         $payload = $this->runtimeClient->fetchExamResults($runtimeExamId);
@@ -70,6 +74,8 @@ class ExamResultSyncService
      */
     public function ingestPayload(ExamDefinition $definition, array $payload): array
     {
+        $this->assertTenantContext($definition);
+
         $stats = [
             'attempts_synced' => 0,
             'answers_synced' => 0,
@@ -119,6 +125,21 @@ class ExamResultSyncService
 
                 if ($runtimeAttemptId === null) {
                     $stats['errors'][] = 'Row '.($index + 1).': attempt id must be a UUID.';
+
+                    continue;
+                }
+
+                // A stale/corrupt row must never be reassigned to another tenant or participant.
+                $existingAttempt = ExamAttempt::withoutTenantScope()
+                    ->where('exam_definition_id', $definition->id)
+                    ->where('runtime_attempt_id', $runtimeAttemptId)
+                    ->first();
+
+                if ($existingAttempt !== null && (
+                    (int) $existingAttempt->tenant_id !== (int) $definition->tenant_id
+                    || (string) $existingAttempt->exam_participant_id !== (string) $participant->id
+                )) {
+                    $stats['errors'][] = 'Row '.($index + 1).': attempt ownership mismatch.';
 
                     continue;
                 }
@@ -176,6 +197,17 @@ class ExamResultSyncService
                     continue;
                 }
 
+                $existingAnswer = ExamAnswer::withoutTenantScope()->where($match)->first();
+
+                if ($existingAnswer !== null && (
+                    (int) $existingAnswer->tenant_id !== (int) $definition->tenant_id
+                    || (string) $existingAnswer->exam_definition_id !== (string) $definition->id
+                )) {
+                    $stats['errors'][] = 'Answer row '.($index + 1).': answer ownership mismatch.';
+
+                    continue;
+                }
+
                 ExamAnswer::withoutTenantScope()->updateOrCreate(
                     $match,
                     [
@@ -217,8 +249,31 @@ class ExamResultSyncService
                     $participant = $attempt->examParticipant;
                 }
 
-                if ($participant === null) {
+                if ($participant === null
+                    || (int) $participant->tenant_id !== (int) $definition->tenant_id
+                    || (string) $participant->exam_definition_id !== (string) $definition->id
+                ) {
                     $stats['participants_skipped']++;
+
+                    continue;
+                }
+
+                if ($attempt !== null && (string) $attempt->exam_participant_id !== (string) $participant->id) {
+                    $stats['errors'][] = 'Result row '.($index + 1).': attempt participant mismatch.';
+
+                    continue;
+                }
+
+                $existingResult = ExamResult::withoutTenantScope()
+                    ->where('exam_definition_id', $definition->id)
+                    ->where('runtime_result_id', $runtimeResultId)
+                    ->first();
+
+                if ($existingResult !== null && (
+                    (int) $existingResult->tenant_id !== (int) $definition->tenant_id
+                    || (string) $existingResult->exam_participant_id !== (string) $participant->id
+                )) {
+                    $stats['errors'][] = 'Result row '.($index + 1).': result ownership mismatch.';
 
                     continue;
                 }
@@ -277,6 +332,20 @@ class ExamResultSyncService
                     continue;
                 }
 
+                $existingActivity = ExamActivityLog::withoutTenantScope()
+                    ->where('exam_attempt_id', $attempt->id)
+                    ->where('runtime_activity_id', $runtimeActivityId)
+                    ->first();
+
+                if ($existingActivity !== null && (
+                    (int) $existingActivity->tenant_id !== (int) $definition->tenant_id
+                    || (string) $existingActivity->exam_definition_id !== (string) $definition->id
+                )) {
+                    $stats['errors'][] = 'Activity row '.($index + 1).': activity ownership mismatch.';
+
+                    continue;
+                }
+
                 ExamActivityLog::withoutTenantScope()->updateOrCreate(
                     [
                         'exam_attempt_id' => $attempt->id,
@@ -330,12 +399,14 @@ class ExamResultSyncService
         ];
 
         $results = ExamResult::withoutTenantScope()
+            ->where('tenant_id', $definition->tenant_id)
             ->where('exam_definition_id', $definition->id)
             ->whereNotNull('exam_attempt_id')
             ->get();
 
         foreach ($results as $result) {
             $count = ExamActivityLog::withoutTenantScope()
+                ->where('tenant_id', $definition->tenant_id)
                 ->where('exam_attempt_id', $result->exam_attempt_id)
                 ->whereIn('event_type', $suspiciousEvents)
                 ->count();
@@ -382,6 +453,15 @@ class ExamResultSyncService
         return $reports;
     }
 
+    protected function assertTenantContext(ExamDefinition $definition): void
+    {
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (int) $activeTenantId !== (int) $definition->tenant_id) {
+            throw new ModelNotFoundException;
+        }
+    }
+
     protected function requireRuntimeExamId(ExamDefinition $definition): string
     {
         $runtimeExamId = (string) $definition->runtime_exam_id;
@@ -403,6 +483,7 @@ class ExamResultSyncService
 
         if (is_string($foundationId) && Str::isUuid($foundationId)) {
             $participant = ExamParticipant::withoutTenantScope()
+                ->where('tenant_id', $definition->tenant_id)
                 ->where('exam_definition_id', $definition->id)
                 ->where('id', $foundationId)
                 ->first();
@@ -416,6 +497,7 @@ class ExamResultSyncService
 
         if (is_string($runtimeParticipantId) && Str::isUuid($runtimeParticipantId)) {
             return ExamParticipant::withoutTenantScope()
+                ->where('tenant_id', $definition->tenant_id)
                 ->where('exam_definition_id', $definition->id)
                 ->where('metadata_json->runtime_participant_id', $runtimeParticipantId)
                 ->first();
@@ -439,6 +521,7 @@ class ExamResultSyncService
 
         if ($runtimeAttemptId !== null) {
             return ExamAttempt::withoutTenantScope()
+                ->where('tenant_id', $definition->tenant_id)
                 ->where('exam_definition_id', $definition->id)
                 ->where('runtime_attempt_id', $runtimeAttemptId)
                 ->first();
