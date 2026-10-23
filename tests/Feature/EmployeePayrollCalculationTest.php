@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Filament\Imports\SalarySlipImporter;
-use App\Support\CurrentTenant;
 use App\Models\User;
+use App\Support\CurrentTenant;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
