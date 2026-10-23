@@ -87,3 +87,100 @@ Disetujui pemilik proses:
 **PR terkait:** #99 (promotion), #100 (rapor), #104 (GPA), #110 (Counseling), #111 (Clinic), #112 (Library), #113 (Moodle grade pull), #114 (Exam Campus grade bridge). Semuanya harus direview kompatibilitasnya dengan PR hardening Exam runtime sebelum penentuan staging candidate.
 
 **Keputusan per 2026-10-23:** status akademik tetap **UAT PENDING / CROSS-TENANT STAGING PENDING**. Jangan ubah menjadi `PASS` tanpa bukti pengujian sesuai tabel.
+
+## Eksekusi staging yang wajib (PR #118)
+
+**Gate baru:** `.github/workflows/education-staging-uat.yml` dan `scripts/education/uat_staging.py`. Perintah CI PHPUnit/Pint di bagian atas hanya pemeriksaan regresi **di database test terisolasi**, **bukan** perintah menjalankan `migrate:fresh` atau PHPUnit pada database staging yang berisi data operasional.
+
+### Persiapan lingkungan oleh operator berwenang
+
+1. Pastikan staging FoundationOS yang **sesungguhnya** dan bukan URL produksi; dokumentasikan URL/identitas host hanya pada tiket terlindungi. Pastikan backup & rollback, sandbox mail/payment/Moodle, dan akun/objek uji sintetis Tenant A/B + Unit A1/A2 tersedia.
+2. Deploy **kandidat integrasi yang telah direview** menggunakan prosedur DevOps. Di direktori staging yang terverifikasi, operator menjalankan **read-only** `git rev-parse HEAD`, kemudian mencatat full SHA dan tautan tiket bukti deployment. Tidak melakukan deployment dari pekerjaan UAT ini.
+3. Siapkan GitHub Actions **environment bernama `education-staging`**, perlindungan reviewer, dan runner yang **betul-betul dapat mengakses staging** melalui HTTPS tervalidasi. Staging yang hanya bisa diakses lewat VPN dapat memakai pelaksana uji pada workstation/operator runner yang dipercaya; jangan membuka origin hanya demi GitHub Actions.
+4. Konfigurasi variabel environment GitHub berikut setelah diverifikasi operator:
+   - `EDUCATION_STAGING_URL` = **origin HTTPS** staging tanpa path/query
+   - `EDUCATION_STAGING_DEPLOYED_SHA` = SHA penuh hasil pemeriksaan staging
+   - `EDUCATION_STAGING_DEPLOYMENT_PROOF` = tautan/referensi bukti pada tiket terlindungi
+   - `EDUCATION_STAGING_PROBES_JSON` = array JSON skenario GET/HEAD yang benar-benar tersedia dan cocok dengan tenant/role sintetis
+5. Bila diperlukan, simpan authorization/cookie **akun uji staging** (bukan user produksi) sebagai secret `EDUCATION_UAT_AUTH_A` dan `EDUCATION_UAT_AUTH_B`. Nilai header harus lengkap (contoh `Bearer <token staging>`), jangan pernah menaruh token di URL, Git, artefak, atau komentar PR.
+6. Operator akademik dan QA harus menjalankan **semua EDU-01…EDU-14 secara nyata** di UI/API/job/DB staging. Catat data sebelum/sesudah, isolasi lintas tenant, retry/replay, hasil, audit, timestamp dan bukti yang terlindungi. EDU-12/EducationQa dan EDU-13/Moodle **tetap BLOCKED** hingga persyaratan proses dan Moodle sandbox dipenuhi; tidak dapat ditandai PASS dari unit test.
+7. Setelah **semua** benar-benar PASS, masukkan hasil UAT yang ditandatangani pemilik proses ke secret environment `EDUCATION_UAT_EVIDENCE_B64` sebagai JSON UTF-8 dalam base64. Jangan unggah bukti pribadi mentah ke Actions; isi JSON hanya rujukan tiket/tangkapan layar yang sudah disunting. GitHub workflow **tidak akan lulus** bila secret kosong atau ada EDU-xx tanpa bukti.
+8. Dari Actions pilih `Education Staging UAT Evidence Gate` → **Run workflow** pada `main` dengan `candidate_sha` sama persis dengan SHA staging. **Jangan** checkout PR tidak direview di job yang memakai secrets. Catat URL run/artifak HTTP yang disunting dan approval owner. `PASS` workflow saja masih memerlukan pemeriksaan independen atas referensi bukti.
+
+Contoh konfigurasi `EDUCATION_STAGING_PROBES_JSON` (ganti path sesuai hasil `route:list` kandidat staging, dan tambahkan pasangan positif/negatif nyata):
+
+```json
+[
+  {
+    "id": "EDU-04",
+    "label": "school report own tenant",
+    "kind": "positive",
+    "method": "GET",
+    "path": "/REPLACE_WITH_STAGING_SCHOOL_REPORT_ROUTE",
+    "headers_from_env": {"Authorization": "EDUCATION_UAT_AUTH_A"},
+    "expected_status": [200]
+  },
+  {
+    "id": "EDU-04",
+    "label": "school report cross-tenant denied",
+    "kind": "negative",
+    "method": "GET",
+    "path": "/REPLACE_WITH_FOREIGN_TENANT_REPORT_ID",
+    "headers_from_env": {"Authorization": "EDUCATION_UAT_AUTH_A"},
+    "expected_status": [403, 404]
+  }
+]
+```
+
+Probe ini **read-only** dan hanya dapat membuktikan hasil HTTP pada endpoint yang dikonfigurasi. Tidak dapat menyimpulkan transaksi aman, penerimaan siswa hanya sekali, PDF sesuai periode, transaksi perpustakaan serentak, audit atau Moodle sinkron. Pengujian tersebut **wajib dieksekusi langsung oleh penguji** dalam sesi staging dan dibuktikan pada manifest.
+
+Contoh bentuk bukti untuk **satu** kasus (ulangi EDU-01 s/d EDU-14 setelah pengujian nyata, bukan dengan menyalin contoh):
+
+```json
+{
+  "environment": "education-staging",
+  "deployed_sha": "40_CHARACTER_REAL_STAGING_COMMIT_SHA",
+  "deployment_proof": "private-change-ticket-reference",
+  "cases": [
+    {
+      "id": "EDU-01",
+      "status": "PASS",
+      "build_sha": "40_CHARACTER_REAL_STAGING_COMMIT_SHA",
+      "positive": "private-positive-run-reference",
+      "negative": "private-cross-tenant-rejection-reference",
+      "database": "private-before-after-database-reference",
+      "audit": "private-audit-trail-reference",
+      "ticket": "private-evidence-ticket-reference",
+      "tested_by": "assigned QA staff",
+      "approved_by": "independent academic process owner",
+      "executed_at": "2026-10-23T10:00:00+07:00"
+    }
+  ]
+}
+```
+
+**Perintah CLI operator** (membaca bukti, tidak menulis DB):
+
+```bash
+python3 scripts/education/uat_staging.py probe \
+  --spec /protected/education-staging-probe-spec.json \
+  --output /protected/education-staging-http-results.json
+
+python3 scripts/education/uat_staging.py verify \
+  --evidence /protected/education-staging-evidence.json \
+  --expected-sha "$(git rev-parse HEAD)"
+```
+
+**Perhatian:** Contoh JSON di atas **tidak** valid sebagai bukti kelulusan: hanya satu dari 14 kasus dan SHA placeholder. Status seluruh EDU-xx pada dokumen ini tidak boleh diedit menjadi PASS hanya karena gate otomatis tersedia.
+
+### Hasil eksekusi hingga baseline dokumen
+
+| Gerbang | Bukti yang ada | Status |
+| --- | --- | --- |
+| Pemeriksaan skrip/verifier pada PR #118 | CI/pull_request untuk kontrak kode, bukan staging | Verifikasi CI diperlukan |
+| URL staging FoundationOS yang terverifikasi | Tidak tersedia di koneksi Education Engineer | BLOCKED |
+| SHA kandidat terintegrasi yang telah terpasang | Belum ada bukti deployment staging | BLOCKED |
+| Akses QA / akun sintetis Tenant A & B | Belum tersedia pada koneksi ini | BLOCKED |
+| Eksekusi HTTP dan DB/queue/Livewire/Moodle staging | Belum dijalankan | NOT RUN |
+| Bukti 14 skenario dan persetujuan owner | Belum ada | BLOCKED |
+| Keputusan produksi | Tidak ada sign-off UAT | **NO-GO** |
