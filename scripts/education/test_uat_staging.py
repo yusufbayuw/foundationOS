@@ -82,6 +82,36 @@ class StagingUatGateTests(unittest.TestCase):
         # The acceptance officer must independently verify the linked evidence.
         self.assertEqual(uat.verify_evidence(full_evidence(), SHA), [])
 
+    def test_read_only_probe_rejects_successful_foreign_tenant_response(self):
+        with self.assertRaises(ValueError):
+            uat.execute_probe("https://staging.example.test", {
+                "id": "EDU-07",
+                "kind": "negative",
+                "method": "GET",
+                "path": "/exam/foreign-result",
+                "expected_status": [200],
+            }, 2.0)
+
+    def test_positive_probe_must_expect_success(self):
+        with self.assertRaises(ValueError):
+            uat.execute_probe("https://staging.example.test", {
+                "id": "EDU-07",
+                "kind": "positive",
+                "method": "GET",
+                "path": "/exam/own-result",
+                "expected_status": [404],
+            }, 2.0)
+
+    def test_mutating_http_probe_is_refused(self):
+        with self.assertRaises(ValueError):
+            uat.execute_probe("https://staging.example.test", {
+                "id": "EDU-07",
+                "kind": "negative",
+                "method": "POST",
+                "path": "/exam/results",
+                "expected_status": [403],
+            }, 2.0)
+
     def test_rejects_insecure_http_staging(self):
         with self.assertRaises(ValueError):
             uat.staging_base("http://staging.example.test")
