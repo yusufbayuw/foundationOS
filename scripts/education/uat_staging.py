@@ -120,6 +120,14 @@ def execute_probe(base, probe, timeout):
     require(isinstance(statuses, list) and statuses
             and all(isinstance(x, int) and 100 <= x <= 599 for x in statuses),
             f"{ident}: expected_status must contain HTTP status codes.")
+    kind = probe.get("kind")
+    require(kind in ("positive", "negative"), f"{ident}: kind must be positive or negative.")
+    if kind == "positive":
+        require(all(200 <= code < 300 for code in statuses),
+                f"{ident}: positive probes must expect successful 2xx responses.")
+    else:
+        require(all(code in (403, 404, 422) for code in statuses),
+                f"{ident}: authenticated cross-tenant probes must expect 403/404/422.")
     headers = {"User-Agent": "foundationos-education-uat-readonly/1.0", "Accept": "text/html, application/json"}
     for name, var in probe.get("headers_from_env", {}).items():
         require(name.lower() in ("authorization", "cookie", "x-tenant-id"),
@@ -164,13 +172,24 @@ def probe_main(args):
             "Protected deployment SHA verification reference is required.")
     require(isinstance(spec.get("probes"), list) and len(spec["probes"]) > 0,
             "At least one real HTTPS probe is required.")
+    # An isolated /up status or anonymous denial must not be represented as
+    # tenant-isolation coverage: require paired positive/negative role probes.
+    pairs = {(item.get("id"), item.get("kind"),
+              tuple(sorted(item.get("headers_from_env", {}).items())))
+             for item in spec["probes"] if isinstance(item, dict)}
+    require(any((ident, "positive", principal) in pairs
+                and (ident, "negative", principal) in pairs
+                for ident, _, principal in pairs),
+            "At least one scenario requires both own-record and foreign-record probes with identical credentials.")
     results = []
     for item in spec["probes"]:
         try:
+            require(isinstance(item, dict), "Probe configuration must be an object.")
             results.append(execute_probe(base, item, args.timeout))
         except (ValueError, urllib.error.URLError, OSError) as error:
             results.append({
-                "id": item.get("id", "unknown"), "status": "FAIL",
+                "id": item.get("id", "unknown") if isinstance(item, dict) else "unknown",
+                "status": "FAIL",
                 "reason": type(error).__name__,  # never emit secrets or URLs
             })
     result = {
