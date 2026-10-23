@@ -2,9 +2,12 @@
 
 namespace Modules\Finance\Services;
 
+use App\Scopes\TenantScope;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Collection;
 use Modules\Finance\Models\ChartOfAccount;
+use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
 
 /**
@@ -129,15 +132,34 @@ class FinancialReportService
     /** Load all posted journal entry lines in the date range. */
     private function postedLines(int $tenantId, Carbon $from, Carbon $to, ?int $organizationId): Collection
     {
-        return JournalEntryLine::query()
-            ->with('chartOfAccount')
+        // A resolved tenant must never read another tenant's ledger, even
+        // when a caller passes an arbitrary tenantId to a finance report.
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (string) $activeTenantId !== (string) $tenantId) {
+            throw new AuthorizationException('Cannot access another tenant\'s financial reports.');
+        }
+
+        // Reports receive an explicit tenant ID (including CLI/export callers).
+        // Do not let an unrelated ambient tenant scope hide a valid ledger entry.
+        // Keep soft-delete scopes intact while restricting both sides of the
+        // journal relationship and the chart of accounts to the requested tenant.
+        $postedJournalIds = JournalEntry::withoutTenantScope()
             ->where('tenant_id', $tenantId)
-            ->whereHas('journalEntry', function ($q) use ($tenantId, $from, $to, $organizationId): void {
-                $q->where('tenant_id', $tenantId)
-                    ->where('is_posted', true)
-                    ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
-                    ->when($organizationId, fn ($q2) => $q2->where('organization_id', $organizationId));
-            })
+            ->where('is_posted', true)
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->when($organizationId !== null, fn ($query) => $query->where('organization_id', $organizationId))
+            ->select('id');
+
+        return JournalEntryLine::withoutTenantScope()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('journal_entry_id', $postedJournalIds)
+            ->whereHas('chartOfAccount', fn ($query) => $query
+                ->withoutGlobalScope(TenantScope::class)
+                ->where('tenant_id', $tenantId))
+            ->with(['chartOfAccount' => fn ($query) => $query
+                ->withoutGlobalScope(TenantScope::class)
+                ->where('tenant_id', $tenantId)])
             ->get();
     }
 
