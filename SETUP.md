@@ -2,6 +2,8 @@
 
 > 📌 **Dokumen ini adalah panduan lengkap untuk deploy FoundationOS di environment production.**
 > Untuk onboarding system & konfigurasi penggunaan, lihat [ONBOARDING.md](./ONBOARDING.md).
+>
+> **Peringatan 22 Oktober 2026:** Dokumen ini mengandung contoh instalasi lama yang belum diverifikasi pada server produksi. Jangan menjalankan perintah setup/upgrade secara langsung. Gunakan [runbook rilis, backup & recovery](./docs/operations/RELEASE_AND_DR_RUNBOOK.md) dan [validasi ingress staging](./docs/operations/INGRESS_STAGING_VALIDATION.md) sebagai gerbang wajib. Deployment produksi memerlukan persetujuan Project Owner.
 
 ---
 
@@ -36,7 +38,7 @@ Network:       1Gbps uplink
 **Software Requirements**:
 ```
 PHP:           8.4+
-Node.js:       18.x LTS atau lebih baru
+Node.js:       22.x LTS (sejalan dengan CI; verifikasi versi minimum package-lock/Vite)
 Composer:      2.4+
 npm:           9.x+
 Database:      MySQL 8.0+ atau PostgreSQL 12+
@@ -70,17 +72,21 @@ sudo apt install -y curl wget git unzip
 # Set timezone
 sudo timedatectl set-timezone Asia/Jakarta
 
-# Enable firewall
-sudo ufw enable
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
+# Inspect existing firewall, host/aaPanel/cloud firewall, and actual SSH port BEFORE changes.
+# Do not enable UFW remotely without an authorized console/rollback plan.
+sudo ufw status verbose
+# In an approved maintenance window, add the verified SSH allowance BEFORE enabling:
+# sudo ufw allow VERIFIED_SSH_PORT/tcp
+# sudo ufw allow 80/tcp
+# sudo ufw allow 443/tcp
+# sudo ufw enable
 ```
 
 ### 2. PHP 8.4 Installation
 
 ```bash
-# Add PHP repository
+# **Khusus Ubuntu bila memang dibutuhkan**, jangan diterapkan pada Debian/aaPanel.
+# Verifikasi executable PHP 8.4 dan repo OS terlebih dahulu.
 sudo add-apt-repository ppa:ondrej/php
 sudo apt update
 
@@ -143,7 +149,7 @@ sudo systemctl enable apache2
 
 ```bash
 # Using NodeSource repository
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt install -y nodejs
 
 # Verify
@@ -282,7 +288,7 @@ DB_USERNAME=foundationos
 DB_PASSWORD=strong_password_here
 
 # Cache & Session
-CACHE_DRIVER=redis
+CACHE_STORE=redis
 SESSION_DRIVER=redis
 QUEUE_CONNECTION=redis
 
@@ -292,35 +298,36 @@ REDIS_PASSWORD=null
 REDIS_PORT=6379
 
 # Mail configuration
-MAIL_DRIVER=smtp
-MAIL_HOST=smtp.mailtrap.io
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.example.invalid
 MAIL_PORT=465
 MAIL_USERNAME=your_username
 MAIL_PASSWORD=your_password
-MAIL_ENCRYPTION=tls
+MAIL_SCHEME=smtps
 MAIL_FROM_ADDRESS=noreply@institution.edu
 MAIL_FROM_NAME="FoundationOS"
 
 # Moodle Integration (opsional)
-MOODLE_ENABLED=false
-MOODLE_URL=https://moodle.institution.edu
-MOODLE_TOKEN=your_moodle_token
+MOODLE_SYNC_ENABLED=false
+MOODLE_BASE_URL=https://moodle.institution.edu
+MOODLE_WS_TOKEN=configure-in-secret-manager
 
 # Security
-APP_KEY=base64:your_app_key_will_be_generated
+# Generate APP_KEY once for an initial install; restore the existing key for upgrades.
 ```
 
 ### 3. Generate App Key & Install Dependencies
 
 ```bash
-# Generate Laravel app key
+# HANYA untuk instalasi baru dengan APP_KEY kosong. Jangan jalankan saat upgrade.
+# Simpan APP_KEY lama melalui secret management dan backup terenkripsi.
 php artisan key:generate
 
 # Install Composer dependencies
 composer install --optimize-autoloader --no-dev
 
-# Install npm dependencies
-npm install
+# Install frontend dari lockfile yang sudah direview
+npm ci
 
 # Build frontend assets
 npm run build
@@ -329,17 +336,19 @@ npm run build
 ### 4. Database Setup
 
 ```bash
-# Run migrations
-php artisan migrate --force
+# Production migrations are NOT an installation default. Inspect status and migration diff.
+php artisan migrate:status
+# Only after documented non-destructive review, staging rehearsal and Owner approval:
+# php artisan migrate --force
 
-# Run seeders (optional, untuk demo data)
-php artisan db:seed --class=DatabaseSeeder
+# Jangan jalankan seed demo di produksi. Seeder migrasi data hanya boleh berjalan
+# setelah review dan persetujuan eksplisit per kasus.
 
 # Create storage link
 php artisan storage:link
 
-# Generate Filament Shield permissions
-php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
+# Permission regeneration may change authorization. Execute only after review/UAT:
+# php artisan shield:generate --all --panel=admin --option=permissions --no-interaction
 ```
 
 ### 5. Permission Setup
@@ -350,7 +359,7 @@ sudo chown -R www-data:www-data /var/www/foundationos
 chmod -R 755 /var/www/foundationos
 chmod -R 775 /var/www/foundationos/storage
 chmod -R 775 /var/www/foundationos/bootstrap/cache
-chmod -R 775 /var/www/foundationos/public
+# Direktori public cukup dapat dibaca oleh web server, tidak perlu writable secara rekursif
 ```
 
 ---
@@ -358,6 +367,9 @@ chmod -R 775 /var/www/foundationos/public
 ## 🌐 Web Server Configuration
 
 ### Nginx Configuration
+
+**Template ilustratif, bukan konfigurasi aaPanel/Cloudflare yang telah diverifikasi.** Periksa vhost aktual, proxy header, TLS, socket PHP-FPM dan `nginx -t` di staging sebelum adaptasi.
+
 
 **File: `/etc/nginx/sites-available/foundationos`**
 
@@ -398,15 +410,18 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "no-referrer-when-downgrade" always;
 
-    # PHP-FPM configuration
-    location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    # PHP-FPM TEMPLATE ONLY: replace the FPM socket with observed staging value.
+    # Execute ONLY Laravel public/index.php; never permit PHP execution from uploaded files.
+    location ~ ^/index\.php(/|$) {
+        try_files /index.php =404;
         fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_param PHP_VALUE "upload_max_filesize=100M \n post_max_size=100M";
+        fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+    }
+    location ~ \.php$ {
+        return 404;
     }
 
     # Block access to hidden files
@@ -432,7 +447,8 @@ server {
 ```bash
 sudo ln -s /etc/nginx/sites-available/foundationos /etc/nginx/sites-enabled/
 sudo nginx -t
-sudo systemctl restart nginx
+# Do not restart actual Nginx until a staging-tested, owner-approved change window.
+# sudo systemctl reload VERIFIED_NGINX_SERVICE
 ```
 
 ### SSL Certificate dengan Let's Encrypt
@@ -462,12 +478,12 @@ sudo apt install -y supervisor
 sudo nano /etc/supervisor/conf.d/foundationos-queue.conf
 ```
 
-**Config content**:
+**Config content** (contoh saja; pastikan backend yang digunakan, daftar named queues, dan `--timeout` lebih kecil daripada `retry_after` yang berlaku):
 
 ```ini
 [program:foundationos-queue]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/foundationos/artisan queue:work redis --sleep=3 --tries=3 --timeout=90
+command=php /var/www/foundationos/artisan queue:work redis --sleep=3 --tries=3 --timeout=60
 autostart=true
 autorestart=true
 stopasgroup=true
@@ -489,7 +505,7 @@ sudo supervisorctl start foundationos-queue:*
 
 ### Scheduled Tasks
 
-Laravel scheduler otomatis dijalankan jika queue worker aktif. Tapi untuk extra assurance:
+**Queue worker tidak otomatis menjalankan scheduler Laravel.** Konfigurasikan **tepat satu** runner scheduler (`schedule:run` tiap menit atau `schedule:work` terkelola) setelah memeriksa cron/service yang sudah ada. Duplikasi runner berisiko menjalankan tugas berulang:
 
 ```bash
 # Add to crontab
@@ -656,9 +672,9 @@ composer require sentry/sentry-laravel
 
 ```bash
 # Access health check
-curl https://app.institution.edu/health
+curl -fsS https://app.institution.edu/up
 
-# Should return 200 OK with system status
+# Endpoint /up adalah liveness; status 200 bukan jaminan database/queue/Moodle sehat.
 ```
 
 ---
@@ -716,15 +732,16 @@ npm run build
 ```ini
 ; Increase children processes
 pm = dynamic
-pm.max_children = 50
-pm.start_servers = 10
-pm.min_spare_servers = 5
-pm.max_spare_servers = 35
+; Illustrative values only; measure memory per FPM worker and configure for host capacity.
+; pm.max_children = 50
+; pm.start_servers = 10
+; pm.min_spare_servers = 5
+; pm.max_spare_servers = 35
 
 ; Opcache (built-in PHP caching)
 opcache.enable = 1
 opcache.memory_consumption = 256
-opcache.validate_timestamps = 0
+; opcache.validate_timestamps = 0  # only with verified atomic release and FPM/opcache reset
 opcache.revalidate_freq = 0
 ```
 
@@ -738,71 +755,15 @@ sudo systemctl restart php8.4-fpm
 
 ## 💾 Backup & Disaster Recovery
 
-### 1. Database Backup Strategy
+**Jangan gunakan contoh backup lama yang menyimpan password database di cron atau menghapus satu-satunya salinan backup.** Gunakan [RELEASE_AND_DR_RUNBOOK.md](./docs/operations/RELEASE_AND_DR_RUNBOOK.md#6-backup-restore-and-disaster-recovery) untuk pemilihan mekanisme transactional snapshot sesuai engine DB, backup upload privat/publik, enkripsi, rotasi, off-site copy, checksum, serta latihan restore ke staging terisolasi.
 
-**Manual backup**:
-
-```bash
-# MySQL
-mysqldump -u foundationos -p foundationos_prod > /backups/db_$(date +%Y%m%d_%H%M%S).sql
-
-# PostgreSQL
-pg_dump -U foundationos foundationos_prod > /backups/db_$(date +%Y%m%d_%H%M%S).sql
-```
-
-**Automated backup dengan cron**:
-
-```bash
-# Add to crontab (daily at 2 AM)
-0 2 * * * mysqldump -u backup -p'backup_password' foundationos_prod > /backups/db_$(date +\%Y\%m\%d).sql && find /backups -name "db_*.sql" -mtime +7 -delete
-```
-
-### 2. File Backup
-
-```bash
-# Backup storage directory
-tar -czf /backups/storage_$(date +%Y%m%d).tar.gz /var/www/foundationos/storage/
-
-# Setup automatic cleanup (keep 7 days)
-find /backups -name "storage_*.tar.gz" -mtime +7 -delete
-```
-
-### 3. Backup Storage
-
-```bash
-# Create dedicated backup partition or use cloud storage
-sudo mkdir -p /backups
-sudo chmod 700 /backups
-
-# Or use S3/Cloud Storage
-# Install AWS CLI for S3 backup
-aws s3 sync /backups s3://your-bucket/foundationos-backups --delete
-```
-
-### 4. Recovery Procedure
-
-**Database recovery**:
-
-```bash
-# MySQL
-mysql -u foundationos -p foundationos_prod < /backups/db_backup.sql
-
-# PostgreSQL
-psql -U foundationos foundationos_prod < /backups/db_backup.sql
-```
-
-**File recovery**:
-
-```bash
-# Stop application
-sudo systemctl stop php8.4-fpm
-
-# Restore storage
-tar -xzf /backups/storage_backup.tar.gz -C /
-
-# Restart
-sudo systemctl start php8.4-fpm
-```
+- [ ] Penanggung jawab dan target RPO/RTO disetujui
+- [ ] Backup terjadwal serta laporan keberhasilan **diverifikasi**, bukan hanya perintah cron tercatat
+- [ ] Salinan ter-enkripsi off-site terpisah dari akun aplikasi
+- [ ] Snapshot DB dan file storage berasal dari recovery point yang konsisten
+- [ ] Restore uji menggunakan database/bucket baru, tanpa kontak ke payment/Moodle/email produksi
+- [ ] Bukti tes integritas, isolasi tenant dan waktu pemulihan dicatat
+- [ ] Prosedur rollback disetujui sebelum migrasi
 
 ---
 
@@ -929,4 +890,4 @@ fastcgi_read_timeout 60s;
 
 **Last Updated**: 2026-05-23
 **Version**: Production v1.0
-**Status**: ✅ Ready for deployment
+**Status**: ⚠️ Reference only — readiness produksi belum diverifikasi; baca runbook dan approval gate.

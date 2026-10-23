@@ -55,9 +55,11 @@ Configure in GitHub: **Settings → Branches → Branch protection rules → Add
 | Allow force pushes | Disabled |
 | Allow deletions | Disabled |
 
-## Required status checks
+## Required status checks (observed GitHub job names)
 
-Add these exact job names as required checks:
+**Audit 2026-10-22:** GitHub `main` workflow run `39722221185` shows that `Named suites smoke` is **a matrix** whose actual check names include the suite in parentheses. Requiring only the generic `Named suites smoke` can result in a nonexistent required check blocking every PR. Configure the **exact individual job names** in branch protection.
+
+Core checks to require on PRs targeting `main`:
 
 - `Composer validation and autoload`
 - `Laravel Pint`
@@ -66,13 +68,31 @@ Add these exact job names as required checks:
 - `Check tenant_id Select usage (mature modules)`
 - `Check hardcoded UI labels`
 - `PHPUnit (PHP 8.4)`
-- `Named suites smoke`
 - `PostgreSQL integration and migration smoke`
 - `Coverage (80% minimum)`
 - `Frontend production build`
 - `Dependency security (High and Critical)`
 - `Secret scanning`
 - `Dependency review`
+- `Named suites smoke (Unit)`
+- `Named suites smoke (Feature)`
+- `Named suites smoke (Workflow)`
+- `Named suites smoke (Tenant)`
+- `Named suites smoke (Policy)`
+- `Named suites smoke (Permission)`
+- `Named suites smoke (Regression)`
+- `Named suites smoke (Queue)`
+- `Named suites smoke (ParallelWorkflow)`
+- `Named suites smoke (ImportExport)`
+
+When feature PRs #101 and #108 land, also require these newly added PR checks, using the *observed exact job names*:
+
+- `Laravel release contract (PHP 8.4)`
+- `Encrypted backup contract smoke`
+- `PostgreSQL encrypted isolated restore (CI fixture)`
+- `MariaDB encrypted isolated restore (CI fixture)`
+
+**Important:** a required check should be bound to the expected trusted GitHub Actions source/app when GitHub supports this. Do not require the extra checks until the workflows actually exist on `main`; verify check names after merging through authorized normal process. Required PR checks and protected-branch rules must be tested in GitHub Settings, not merely specified in this Markdown document. The connector does not have permission to read branch protection (`403 Resource not accessible by integration` on 2026-10-22), so the enforced settings remain unverified.
 
 ## Notes
 

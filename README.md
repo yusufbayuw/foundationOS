@@ -45,7 +45,7 @@ FoundationOS adalah fondasi aplikasi **ERP (Enterprise Resource Planning) yang d
 ### Prerequisites
 
 - PHP 8.4+
-- Node.js 18+
+- Node.js 22.x (disarankan sama seperti CI dan kebutuhan Vite 8)
 - Composer
 - SQLite atau database relasional lainnya
 
