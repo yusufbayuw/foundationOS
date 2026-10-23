@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
 use Modules\Campus\Models\Course;
@@ -86,6 +87,9 @@ use Modules\School\Models\ViolationType;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
+/**
+ * @property Carbon|null $trial_ends_at
+ */
 class Tenant extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
@@ -160,8 +164,11 @@ class Tenant extends Model
 
     public function isSubscriptionActive(): bool
     {
-        return in_array($this->status, ['active', 'trial'], true)
-            && ($this->subscription_expires_at === null || $this->subscription_expires_at->isFuture());
+        return match ($this->status) {
+            'active' => $this->subscription_expires_at === null || $this->subscription_expires_at->isFuture(),
+            'trial' => $this->trial_ends_at === null || $this->trial_ends_at->isFuture(),
+            default => false,
+        };
     }
 
     public function isInGracePeriod(): bool
@@ -173,8 +180,11 @@ class Tenant extends Model
 
     public function isLocked(): bool
     {
-        return $this->status === 'suspended'
-            || ($this->status === 'past_due' && ($this->grace_period_ends_at === null || $this->grace_period_ends_at->isPast()));
+        return match ($this->status) {
+            'active', 'trial' => ! $this->isSubscriptionActive(),
+            'past_due' => ! $this->isInGracePeriod(),
+            default => true,
+        };
     }
 
     public function subscriptionPlan(): BelongsTo

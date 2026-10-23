@@ -81,6 +81,11 @@ class SelfRegistrationTest extends TestCase
         $this->assertEquals('Yayasan Contoh', $tenant->name);
         $this->assertEquals('yayasan_contoh', $tenant->code);
         $this->assertEquals($user->getKey(), $tenant->created_by);
+        $this->assertSame('trial', $tenant->status);
+        $this->assertNotNull($tenant->trial_ends_at);
+        $this->assertTrue($tenant->trial_ends_at->greaterThan(now()->addDays(13)));
+        $this->assertTrue($tenant->trial_ends_at->lessThanOrEqualTo(now()->addDays(14)));
+
         $this->assertSame('school', $tenant->product_profile_code);
         $this->assertSame('1.0', $tenant->product_profile_version);
 

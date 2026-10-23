@@ -39,4 +39,33 @@ return [
     */
     'moodle_processing_stale_minutes' => (int) env('MOODLE_PROCESSING_STALE_MINUTES', 30),
 
+    /*
+    | Human API tokens must retain active tenant membership at request time.
+    | Production default is strict; nonproduction fixtures can opt in explicitly.
+    */
+    'api_enforce_membership' => filter_var(
+        env('TENANCY_API_ENFORCE_MEMBERSHIP', env('APP_ENV') === 'production'),
+        FILTER_VALIDATE_BOOL,
+    ),
+
+    // Never enable this on real HTTP traffic; only existing Sanctum::actingAs tests.
+    'api_allow_transient_test_token' => true,
+
+    /*
+    | Finite trial for NEW self-registered tenants only; existing records,
+    | manual activations and previous grandfathered subscriptions are unchanged.
+    */
+    /*
+    | Compatibility allowlist of audited-by-name legacy system-wide jobs.
+    | NULL job context never inherits a prior worker's tenant or team.
+    | Any additions require tenant-aware query authorization review.
+    */
+    'queue_tenantless_job_types' => [
+        'App\\Jobs\\ProcessMoodleSyncOutboxJob',
+        'Modules\\Workflow\\Jobs\\CheckWorkflowSlaJob',
+        'Illuminate\\Events\\CallQueuedListener',
+    ],
+
+    'self_registration_trial_days' => max(1, (int) env('TENANCY_SELF_REGISTRATION_TRIAL_DAYS', 14)),
+
 ];
