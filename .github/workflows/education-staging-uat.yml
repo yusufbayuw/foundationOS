@@ -1,0 +1,113 @@
+name: Education Staging UAT Evidence Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/education/uat_staging.py'
+      - 'scripts/education/test_uat_staging.py'
+      - '.github/workflows/education-staging-uat.yml'
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: 'Full 40-character SHA VERIFIED as deployed on education staging'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  evidence-contract:
+    name: Offline UAT gate contract tests (not staging)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and fail-closed gate tests
+        run: |
+          python3 -m py_compile scripts/education/uat_staging.py scripts/education/test_uat_staging.py
+          python3 -m unittest discover -s scripts/education -p 'test_uat_staging.py'
+
+  real-staging:
+    name: Protected staging HTTP probes and 14-case signoff
+    # Never run staging probes or read staging credentials on an unreviewed PR.
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+    needs: evidence-contract
+    environment: education-staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_SHA: ${{ inputs.candidate_sha }}
+      STAGING_URL: ${{ vars.EDUCATION_STAGING_URL }}
+      DEPLOYED_SHA: ${{ vars.EDUCATION_STAGING_DEPLOYED_SHA }}
+      DEPLOYMENT_PROOF: ${{ vars.EDUCATION_STAGING_DEPLOYMENT_PROOF }}
+      READ_ONLY_PROBES_JSON: ${{ vars.EDUCATION_STAGING_PROBES_JSON }}
+      EDUCATION_UAT_AUTH_A: ${{ secrets.EDUCATION_UAT_AUTH_A }}
+      EDUCATION_UAT_AUTH_B: ${{ secrets.EDUCATION_UAT_AUTH_B }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refuse unconfigured or mismatched staging
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+
+          sha = os.environ.get('EXPECTED_SHA', '')
+          observed = os.environ.get('DEPLOYED_SHA', '')
+          assert re.fullmatch(r'[0-9a-fA-F]{40}', sha), 'A full candidate SHA is required'
+          assert sha.lower() == observed.lower(), 'Verified deployed SHA differs from candidate SHA'
+          assert os.environ.get('STAGING_URL'), 'EDUCATION_STAGING_URL must be configured'
+          assert os.environ.get('DEPLOYMENT_PROOF'), 'Protected staging SHA proof must be configured'
+          probe_spec = json.loads(os.environ.get('READ_ONLY_PROBES_JSON', '[]'))
+          assert isinstance(probe_spec, list) and probe_spec, 'Real staging HTTP probes must be configured'
+          spec = {
+              'environment': 'education-staging',
+              'staging_url': os.environ['STAGING_URL'],
+              'expected_sha': sha,
+              'deployed_sha': observed,
+              'deployment_proof': os.environ['DEPLOYMENT_PROOF'],
+              'probes': probe_spec,
+          }
+          with open('education-staging-probe-spec.json', 'w', encoding='utf-8') as stream:
+              json.dump(spec, stream)
+          PY
+
+      - name: Execute actual read-only HTTPS staging probes
+        run: |
+          python3 scripts/education/uat_staging.py probe \
+            --spec education-staging-probe-spec.json \
+            --output education-staging-http-results.json
+
+      - name: Require independently approved evidence for all 14 staged UAT scenarios
+        env:
+          UAT_EVIDENCE_B64: ${{ secrets.EDUCATION_UAT_EVIDENCE_B64 }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+
+          encoded = os.environ.get('UAT_EVIDENCE_B64', '')
+          if not encoded:
+              raise SystemExit('BLOCKED: No actual staging UAT evidence was provided.')
+          with open('education-staging-evidence-private.json', 'wb') as stream:
+              stream.write(base64.b64decode(encoded, validate=True))
+          PY
+          python3 scripts/education/uat_staging.py verify \
+            --evidence education-staging-evidence-private.json \
+            --expected-sha "$EXPECTED_SHA"
+
+      - name: Upload sanitized read-only HTTP status evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: education-staging-http-statuses
+          path: education-staging-http-results.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Do not publish protected staging evidence
+        if: always()
+        run: rm -f education-staging-evidence-private.json education-staging-probe-spec.json
