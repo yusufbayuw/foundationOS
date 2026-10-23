@@ -53,7 +53,7 @@ class PayrollJournalService
 
             $slip->load(['employee', 'components.payrollComponent']);
 
-            if (! $slip->employee || (int) $slip->employee->tenant_id !== (int) $slip->tenant_id) {
+            if ($slip->employee === null || (int) $slip->employee->tenant_id !== (int) $slip->tenant_id) {
                 throw new RuntimeException('Payroll employee is not associated with this tenant.');
             }
 
@@ -103,7 +103,7 @@ class PayrollJournalService
                     ->where('is_active', true)
                     ->find($accountId);
 
-                if (! $account) {
+                if ($account === null) {
                     throw new RuntimeException('Payroll deduction '.$component->component_name.' requires an active account in the employee organization.');
                 }
 
@@ -199,7 +199,7 @@ class PayrollJournalService
             })
             ->first();
 
-        if (! $account) {
+        if ($account === null) {
             throw new RuntimeException($message);
         }
 
