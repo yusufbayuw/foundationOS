@@ -155,10 +155,10 @@ class FinancialReportService
             ->where('tenant_id', $tenantId)
             ->whereIn('journal_entry_id', $postedJournalIds)
             ->whereHas('chartOfAccount', fn ($query) => $query
-                ->withoutTenantScope()
+                ->withoutGlobalScope(TenantScope::class)
                 ->where('tenant_id', $tenantId))
             ->with(['chartOfAccount' => fn ($query) => $query
-                ->withoutTenantScope()
+                ->withoutGlobalScope(TenantScope::class)
                 ->where('tenant_id', $tenantId)])
             ->get();
     }
