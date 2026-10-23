@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Integrations\Moodle\MoodleDetailedGradePullService;
+use App\Support\CurrentTenant;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Campus\Models\CollageStudent;
@@ -161,6 +163,40 @@ class DetailedGradePullPopulatesStudyResultTest extends TestCase
 
         $this->assertEqualsWithDelta(3.20, $gpa, 0.01);
         $this->assertEqualsWithDelta(3.20, (float) $ctx['student']->fresh()->gpa_cached, 0.01);
+    }
+
+    public function test_gpa_calculator_does_not_count_cross_tenant_result(): void
+    {
+        $ctx = $this->seedContext();
+        $item = $this->makeStudyPlanItem($ctx);
+        $otherTenant = Tenant::factory()->create();
+
+        StudyResult::create([
+            'tenant_id' => $otherTenant->id,
+            'study_plan_item_id' => $item->id,
+            'grade_point' => 4.0,
+            'passed' => true,
+        ]);
+
+        $this->assertSame(0.0, app(CampusGpaCalculator::class)
+            ->recalculateForStudent($ctx['student']->id));
+        $this->assertSame(0.0, (float) $ctx['student']->fresh()->gpa_cached);
+    }
+
+    public function test_gpa_calculator_refuses_student_from_another_active_tenant(): void
+    {
+        $ctx = $this->seedContext();
+        $otherTenant = Tenant::factory()->create();
+
+        app(CurrentTenant::class)->set($otherTenant);
+
+        try {
+            $this->expectException(ModelNotFoundException::class);
+
+            app(CampusGpaCalculator::class)->recalculateForStudent($ctx['student']->id);
+        } finally {
+            app(CurrentTenant::class)->forget();
+        }
     }
 
     protected function makeStudyPlanItem(array $ctx, int $credits = 3, string $classCode = 'A'): StudyPlanItem
