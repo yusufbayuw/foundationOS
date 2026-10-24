@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 return new class extends Migration
 {
@@ -39,7 +40,7 @@ return new class extends Migration
                 Schema::table('exam_participants', fn (Blueprint $table) => $table->renameColumn($old, $new));
             }
             if (! Schema::hasColumn('exam_participants', $new)) {
-                throw new \RuntimeException('Exam participants schema missing required column '.$new);
+                throw new RuntimeException('Exam participants schema missing required column '.$new);
             }
         }
 

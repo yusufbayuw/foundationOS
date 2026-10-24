@@ -129,6 +129,7 @@ class MigrationIdentifierLengthTest extends TestCase
     {
         if (str_starts_with(trim($expression), '[')) {
             preg_match_all('/[\'"]([A-Za-z_][A-Za-z0-9_]*)[\'"]/', $expression, $matches);
+
             return $matches[1];
         }
 

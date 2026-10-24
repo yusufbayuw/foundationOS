@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 return new class extends Migration
 {
@@ -29,7 +30,7 @@ return new class extends Migration
 
         foreach (['id', 'workflow_instance_id', 'step_id', 'assigned_to_type', 'assigned_to_id', 'assignment_role', 'status', 'assigned_at', 'claimed_at', 'completed_at', 'due_at', 'meta', 'created_at', 'updated_at'] as $column) {
             if (! Schema::hasColumn('workflow_assignments', $column)) {
-                throw new \RuntimeException('Existing workflow_assignments table is missing column '.$column.'; manual schema review required.');
+                throw new RuntimeException('Existing workflow_assignments table is missing column '.$column.'; manual schema review required.');
             }
         }
 

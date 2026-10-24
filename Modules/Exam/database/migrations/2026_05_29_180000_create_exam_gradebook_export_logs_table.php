@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 return new class extends Migration
 {
@@ -29,7 +30,7 @@ return new class extends Migration
 
         foreach (['id', 'tenant_id', 'exam_definition_id', 'exam_result_id', 'exam_participant_id', 'target_module', 'target_reference_type', 'target_reference_id', 'status', 'error_message', 'pushed_by', 'metadata_json', 'created_at', 'updated_at'] as $column) {
             if (! Schema::hasColumn('exam_gradebook_export_logs', $column)) {
-                throw new \RuntimeException('Existing exam_gradebook_export_logs table is missing column '.$column.'; manual schema review required.');
+                throw new RuntimeException('Existing exam_gradebook_export_logs table is missing column '.$column.'; manual schema review required.');
             }
         }
 

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 return new class extends Migration
 {
@@ -27,7 +28,7 @@ return new class extends Migration
 
         foreach (['id', 'tenant_id', 'fos_user_id', 'fos_course_id', 'moodle_user_id', 'moodle_course_id', 'metric_type', 'payload', 'pulled_at', 'created_at', 'updated_at'] as $column) {
             if (! Schema::hasColumn('moodle_learning_metrics', $column)) {
-                throw new \RuntimeException('Existing moodle_learning_metrics table is missing column '.$column.'; manual schema review required.');
+                throw new RuntimeException('Existing moodle_learning_metrics table is missing column '.$column.'; manual schema review required.');
             }
         }
 

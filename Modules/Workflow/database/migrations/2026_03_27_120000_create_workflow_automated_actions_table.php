@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 return new class extends Migration
 {
@@ -27,7 +28,7 @@ return new class extends Migration
 
         foreach (['id', 'workflow_id', 'step_id', 'trigger_event', 'action_type', 'name', 'config', 'is_active', 'sort_order', 'created_at', 'updated_at', 'deleted_at'] as $column) {
             if (! Schema::hasColumn('workflow_automated_actions', $column)) {
-                throw new \RuntimeException('Existing workflow_automated_actions table is missing column '.$column.'; manual schema review required.');
+                throw new RuntimeException('Existing workflow_automated_actions table is missing column '.$column.'; manual schema review required.');
             }
         }
 
