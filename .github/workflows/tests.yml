@@ -340,6 +340,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
+      - name: Audit all migration identifiers before opening the database
+        run: php vendor/bin/phpunit tests/Unit/MigrationIdentifierLengthTest.php --no-coverage --colors=never
+
       - name: Fresh migration on disposable CI database only
         run: |
           test "$APP_ENV" = "testing"
