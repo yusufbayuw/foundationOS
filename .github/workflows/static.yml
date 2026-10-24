@@ -46,6 +46,14 @@ jobs:
       - name: Run Pint
         run: vendor/bin/pint --test
 
+      # TEMPORARY PR-only diagnostics: inspect Pint's exact suggested edits.
+      - name: Print Pint corrections for migration fix review
+        if: failure()
+        run: |
+          vendor/bin/pint
+          git diff -- database/migrations/2026_03_26_090000_create_moodle_learning_metrics_table.php Modules/Workflow/database/migrations/2026_03_26_210500_create_workflow_assignments_table.php Modules/Workflow/database/migrations/2026_03_27_120000_create_workflow_automated_actions_table.php Modules/Exam/database/migrations/2026_05_28_130000_expand_exam_participants_for_b5.php Modules/Exam/database/migrations/2026_05_29_180000_create_exam_gradebook_export_logs_table.php tests/Unit/MigrationIdentifierLengthTest.php
+
+
   phpstan:
     name: Larastan (level 1 + baseline, all GA modules)
     runs-on: ubuntu-latest
