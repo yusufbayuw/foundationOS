@@ -11,18 +11,17 @@ return new class extends Migration
         // MySQL may leave the table behind when a later ALTER TABLE index fails.
         // Re-run safely without dropping existing records or recreating the table.
         if (! Schema::hasTable('moodle_learning_metrics')) {
-            Schema::create('moodle_learning_metrics', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('tenant_id')->nullable();
-            $table->unsignedBigInteger('fos_user_id')->nullable();
-            $table->unsignedBigInteger('fos_course_id')->nullable();
-            $table->unsignedBigInteger('moodle_user_id')->nullable();
-            $table->unsignedBigInteger('moodle_course_id')->nullable();
-            $table->string('metric_type', 32);
-            $table->json('payload');
-            $table->timestamp('pulled_at')->nullable();
-            $table->timestamps();
-
+            Schema::create('moodle_learning_metrics', function (Blueprint $table): void {
+                $table->id();
+                $table->unsignedBigInteger('tenant_id')->nullable();
+                $table->unsignedBigInteger('fos_user_id')->nullable();
+                $table->unsignedBigInteger('fos_course_id')->nullable();
+                $table->unsignedBigInteger('moodle_user_id')->nullable();
+                $table->unsignedBigInteger('moodle_course_id')->nullable();
+                $table->string('metric_type', 32);
+                $table->json('payload');
+                $table->timestamp('pulled_at')->nullable();
+                $table->timestamps();
             });
         }
 
