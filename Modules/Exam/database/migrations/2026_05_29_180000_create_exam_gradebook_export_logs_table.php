@@ -24,7 +24,6 @@ return new class extends Migration
                 $table->foreignId('pushed_by')->nullable()->constrained('users')->nullOnDelete();
                 $table->json('metadata_json')->nullable();
                 $table->timestamps();
-
             });
         }
 
