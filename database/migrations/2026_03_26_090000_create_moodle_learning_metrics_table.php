@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['tenant_id', 'metric_type']);
-            $table->index(['fos_user_id', 'fos_course_id', 'metric_type']);
+            $table->index(['fos_user_id', 'fos_course_id', 'metric_type'], 'mlm_fos_user_course_metric_idx');
         });
     }
 
