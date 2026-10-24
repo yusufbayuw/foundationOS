@@ -9,32 +9,65 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('exam_participants', function (Blueprint $table) {
-            $table->string('participant_source')->nullable()->after('exam_definition_id');
-            $table->unsignedBigInteger('user_reference')->nullable()->after('participant_source');
-            $table->unsignedBigInteger('school_student_reference')->nullable()->after('user_reference');
-            $table->unsignedBigInteger('campus_student_reference')->nullable()->after('school_student_reference');
-            $table->timestamp('assigned_at')->nullable()->after('status');
+        // MySQL DDL commits independently. Support resuming a migration that
+        // previously failed after some columns were already added or renamed.
+        Schema::table('exam_participants', function (Blueprint $table): void {
+            if (! Schema::hasColumn('exam_participants', 'participant_source')) {
+                $table->string('participant_source')->nullable()->after('exam_definition_id');
+            }
+            if (! Schema::hasColumn('exam_participants', 'user_reference')) {
+                $table->unsignedBigInteger('user_reference')->nullable()->after('participant_source');
+            }
+            if (! Schema::hasColumn('exam_participants', 'school_student_reference')) {
+                $table->unsignedBigInteger('school_student_reference')->nullable()->after('user_reference');
+            }
+            if (! Schema::hasColumn('exam_participants', 'campus_student_reference')) {
+                $table->unsignedBigInteger('campus_student_reference')->nullable()->after('school_student_reference');
+            }
+            if (! Schema::hasColumn('exam_participants', 'assigned_at')) {
+                $table->timestamp('assigned_at')->nullable()->after('status');
+            }
         });
 
-        Schema::table('exam_participants', function (Blueprint $table) {
-            $table->renameColumn('display_name', 'student_name');
-            $table->renameColumn('participant_code', 'student_identifier');
-            $table->renameColumn('context_reference_id', 'participant_legacy_id');
-            $table->renameColumn('context_reference_uuid', 'participant_uuid');
-        });
+        foreach ([
+            'display_name' => 'student_name',
+            'participant_code' => 'student_identifier',
+            'context_reference_id' => 'participant_legacy_id',
+            'context_reference_uuid' => 'participant_uuid',
+        ] as $old => $new) {
+            if (Schema::hasColumn('exam_participants', $old) && ! Schema::hasColumn('exam_participants', $new)) {
+                Schema::table('exam_participants', fn (Blueprint $table) => $table->renameColumn($old, $new));
+            }
+            if (! Schema::hasColumn('exam_participants', $new)) {
+                throw new \RuntimeException('Exam participants schema missing required column '.$new);
+            }
+        }
 
         $this->backfillParticipantFields();
 
-        Schema::table('exam_participants', function (Blueprint $table) {
-            $table->dropUnique('exam_participants_exam_definition_id_participant_code_unique');
-        });
+        // On MariaDB, the old unique constraint is the only index supporting
+        // the exam_definition_id foreign key. Create a replacement first.
+        if (! Schema::hasIndex('exam_participants', 'exam_participants_exam_definition_id_index')) {
+            Schema::table('exam_participants', function (Blueprint $table): void {
+                $table->index('exam_definition_id', 'exam_participants_exam_definition_id_index');
+            });
+        }
 
-        Schema::table('exam_participants', function (Blueprint $table) {
-            $table->unique(['exam_definition_id', 'school_student_reference'], 'exam_participants_exam_school_student_unique');
-            $table->unique(['exam_definition_id', 'campus_student_reference'], 'exam_participants_exam_campus_student_unique');
-            $table->unique(['exam_definition_id', 'user_reference'], 'exam_participants_exam_user_unique');
-        });
+        if (Schema::hasIndex('exam_participants', 'exam_participants_exam_definition_id_participant_code_unique')) {
+            Schema::table('exam_participants', function (Blueprint $table): void {
+                $table->dropUnique('exam_participants_exam_definition_id_participant_code_unique');
+            });
+        }
+
+        foreach ([
+            'exam_participants_exam_school_student_unique' => ['exam_definition_id', 'school_student_reference'],
+            'exam_participants_exam_campus_student_unique' => ['exam_definition_id', 'campus_student_reference'],
+            'exam_participants_exam_user_unique' => ['exam_definition_id', 'user_reference'],
+        ] as $name => $columns) {
+            if (! Schema::hasIndex('exam_participants', $name)) {
+                Schema::table('exam_participants', fn (Blueprint $table) => $table->unique($columns, $name));
+            }
+        }
     }
 
     public function down(): void
