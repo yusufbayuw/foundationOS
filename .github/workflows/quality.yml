@@ -128,6 +128,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Reject hard-coded Laravel APP_KEY in workflow YAML
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          workflows = list(Path('.github/workflows').glob('*.yml'))
+          workflows += list(Path('.github/workflows').glob('*.yaml'))
+          leaked = any(
+              re.search(r'(?m)^\s*APP_KEY\s*:\s*\S+', path.read_text(encoding='utf-8'))
+              for path in workflows
+          )
+          if leaked:
+              print('::error::A GitHub Actions workflow contains a literal Laravel APP_KEY; generate a fresh key per CI job.')
+              sys.exit(1)
+          PY
+
       - name: Show CI context
         run: |
           echo "Commit: $GITHUB_SHA"
