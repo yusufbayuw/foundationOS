@@ -6,7 +6,6 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
-use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Spatie\Permission\Models\Permission;
