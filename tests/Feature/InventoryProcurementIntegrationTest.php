@@ -39,6 +39,9 @@ class InventoryProcurementIntegrationTest extends TestCase
 
         $this->assertCount(1, $moves);
         $this->assertEqualsWithDelta(10.0, (float) $moves->first()->quantity, 0.01);
+        $this->assertEqualsWithDelta(50_000.0, (float) $moves->first()->unit_cost, 0.01);
+        $this->assertEqualsWithDelta(500_000.0, (float) $moves->first()->total_cost, 0.01);
+        $this->assertSame((int) $tenant->id, (int) $moves->first()->tenant_id);
 
         $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
 
@@ -49,6 +52,7 @@ class InventoryProcurementIntegrationTest extends TestCase
 
         $this->assertNotNull($level);
         $this->assertEqualsWithDelta(10.0, (float) $level->quantity_on_hand, 0.01);
+        $this->assertSame((int) $tenant->id, (int) $level->tenant_id);
         $this->assertSame((int) $receipt->items->first()->id, (int) $moves->first()->reference_id);
     }
 
@@ -57,7 +61,7 @@ class InventoryProcurementIntegrationTest extends TestCase
         [$tenant, $po] = $this->makePoWithProcurementItem('Toner', 2, 100_000);
         $org = Organization::withoutTenantScope()->where('tenant_id', $tenant->id)->first();
 
-        ChartOfAccount::withoutTenantScope()->create([
+        $inventoryAccount = ChartOfAccount::withoutTenantScope()->create([
             'tenant_id' => $tenant->id,
             'organization_id' => $org->id,
             'code' => '1401',
@@ -66,7 +70,7 @@ class InventoryProcurementIntegrationTest extends TestCase
             'is_active' => true,
         ]);
 
-        ChartOfAccount::withoutTenantScope()->create([
+        $liabilityAccount = ChartOfAccount::withoutTenantScope()->create([
             'tenant_id' => $tenant->id,
             'organization_id' => $org->id,
             'code' => '2101',
@@ -85,11 +89,23 @@ class InventoryProcurementIntegrationTest extends TestCase
             ->get();
 
         $this->assertCount(2, $lines);
-        $this->assertEqualsWithDelta(
-            $lines->sum('debit'),
-            $lines->sum('credit'),
-            0.01,
-        );
+        $this->assertEqualsWithDelta(200_000.0, (float) $move->total_cost, 0.01);
+        $this->assertEqualsWithDelta(200_000.0, (float) $lines->sum('debit'), 0.01);
+        $this->assertEqualsWithDelta(200_000.0, (float) $lines->sum('credit'), 0.01);
+        $this->assertDatabaseHas(JournalEntryLine::class, [
+            'tenant_id' => $tenant->id,
+            'journal_entry_id' => $move->journal_entry_id,
+            'chart_of_account_id' => $inventoryAccount->id,
+            'debit' => 200_000,
+            'credit' => 0,
+        ]);
+        $this->assertDatabaseHas(JournalEntryLine::class, [
+            'tenant_id' => $tenant->id,
+            'journal_entry_id' => $move->journal_entry_id,
+            'chart_of_account_id' => $liabilityAccount->id,
+            'debit' => 0,
+            'credit' => 200_000,
+        ]);
     }
 
     public function test_stock_out_reduces_on_hand(): void
@@ -118,6 +134,10 @@ class InventoryProcurementIntegrationTest extends TestCase
             ->first();
 
         $this->assertNotNull($outMove);
+        $this->assertSame((int) $tenant->id, (int) $outMove->tenant_id);
+        $this->assertEqualsWithDelta(2.0, (float) $outMove->quantity, 0.01);
+        $this->assertEqualsWithDelta(20_000.0, (float) $outMove->unit_cost, 0.01);
+        $this->assertEqualsWithDelta(40_000.0, (float) $outMove->total_cost, 0.01);
     }
 
     public function test_insufficient_stock_out_is_rejected(): void
@@ -130,9 +150,35 @@ class InventoryProcurementIntegrationTest extends TestCase
         $stockItem = StockItem::withoutTenantScope()
             ->where('procurement_item_id', $procurementItem->id)
             ->first();
+        $level = StockLevel::withoutTenantScope()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('stock_item_id', $stockItem->id)
+            ->firstOrFail();
 
-        $this->expectException(\RuntimeException::class);
-        app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
+        // An exception alone is insufficient: a failed transaction must not
+        // decrement stock or commit an outbound stock movement.
+        $movesBefore = StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('stock_item_id', $stockItem->id)
+            ->count();
+
+        try {
+            app(StockMoveService::class)->commitOutbound($warehouse, $stockItem, 5);
+            $this->fail('Outbound quantity exceeding available stock must be rejected.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Insufficient stock', $exception->getMessage());
+        }
+
+        $this->assertEqualsWithDelta(1.0, (float) $level->fresh()->quantity_on_hand, 0.01);
+        $this->assertSame($movesBefore, StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('stock_item_id', $stockItem->id)
+            ->count());
+        $this->assertSame(0, StockMove::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('stock_item_id', $stockItem->id)
+            ->where('move_type', StockMoveType::Out)
+            ->count());
     }
 
     /**
