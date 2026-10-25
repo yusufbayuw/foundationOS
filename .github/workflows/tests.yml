@@ -108,6 +108,9 @@ jobs:
           mkdir -p coverage
           php -d pcov.directory="${GITHUB_WORKSPACE}" vendor/bin/phpunit -c phpunit.coverage.xml --coverage-clover=coverage/clover.xml --log-junit=coverage/junit.xml --colors=never
 
+      - name: Profile executed test volume and runtime by file
+        run: php scripts/report-phpunit-profile.php coverage/junit.xml
+
       - name: Upload complete suite coverage report
         uses: actions/upload-artifact@v4
         with:
