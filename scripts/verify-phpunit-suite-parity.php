@@ -90,6 +90,20 @@ function readConfiguration(string $path): array
 try {
     $normal = readConfiguration($argv[1]);
     $coverage = readConfiguration($argv[2]);
+
+    // All ten suites previously re-executed by the GitHub Actions matrix
+    // must stay in the complete PHPUnit+coverage run. Matching configs are
+    // not sufficient if BOTH accidentally omit a suite.
+    $requiredSuites = [
+        'Unit', 'Feature', 'Workflow', 'Tenant', 'Policy',
+        'Permission', 'Regression', 'Queue', 'ParallelWorkflow', 'ImportExport',
+    ];
+    foreach ($requiredSuites as $suite) {
+        if (! array_key_exists($suite, $normal['suites'])) {
+            fwrite(STDERR, "Required PHPUnit suite missing: {$suite}\n");
+            exit(1);
+        }
+    }
     if ($normal !== $coverage) {
         foreach (['bootstrap', 'suites', 'environment'] as $key) {
             if ($normal[$key] !== $coverage[$key]) {
