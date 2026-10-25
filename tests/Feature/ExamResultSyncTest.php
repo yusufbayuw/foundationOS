@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Support\CurrentTenant;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -136,6 +138,297 @@ class ExamResultSyncTest extends TestCase
         $service->sync($exam->refresh());
 
         $this->assertSame(1, ExamAttempt::withoutTenantScope()->count());
+    }
+
+    public function test_ingest_refuses_an_exam_outside_active_tenant_context(): void
+    {
+        [$exam] = $this->seedPublishedExam();
+        $foreignTenant = Tenant::factory()->create();
+
+        $this->expectException(ModelNotFoundException::class);
+
+        app(CurrentTenant::class)->forTenant($foreignTenant, function () use ($exam): void {
+            app(ExamResultSyncService::class)->ingestPayload($exam, []);
+        });
+    }
+
+    public function test_ingest_skips_foreign_tenant_participant_even_when_exam_id_matches(): void
+    {
+        [$exam] = $this->seedPublishedExam();
+        $foreignTenant = Tenant::factory()->create();
+
+        $foreignParticipant = ExamParticipant::withoutTenantScope()->create([
+            'tenant_id' => $foreignTenant->id,
+            'exam_definition_id' => $exam->id,
+            'student_name' => 'Foreign Student',
+            'student_identifier' => 'FOREIGN',
+            'participant_source' => ParticipantSource::Manual,
+            'status' => ParticipantStatus::Assigned,
+        ]);
+
+        $summary = app(ExamResultSyncService::class)->ingestPayload($exam, [
+            'attempts' => [[
+                'id' => (string) Str::uuid(),
+                'participant_external_id' => $foreignParticipant->id,
+                'score' => 100,
+            ]],
+        ]);
+
+        $this->assertSame(1, $summary['participants_skipped']);
+        $this->assertSame(0, $summary['attempts_synced']);
+        $this->assertSame(0, ExamAttempt::withoutTenantScope()->count());
+        $this->assertSame($foreignTenant->id, $foreignParticipant->fresh()->tenant_id);
+    }
+
+    public function test_ingest_does_not_reparent_foreign_tenant_attempt_with_same_runtime_id(): void
+    {
+        [$exam, $participant] = $this->seedPublishedExam();
+        $foreignTenant = Tenant::factory()->create();
+        $runtimeAttemptId = (string) Str::uuid();
+
+        $foreignAttempt = ExamAttempt::withoutTenantScope()->create([
+            'tenant_id' => $foreignTenant->id,
+            'exam_definition_id' => $exam->id,
+            'exam_participant_id' => $participant->id,
+            'runtime_attempt_id' => $runtimeAttemptId,
+            'attempt_number' => 1,
+            'status' => 'submitted',
+            'score' => 33,
+        ]);
+
+        $summary = app(ExamResultSyncService::class)->ingestPayload($exam, [
+            'attempts' => [[
+                'id' => $runtimeAttemptId,
+                'participant_external_id' => $participant->id,
+                'score' => 99,
+            ]],
+        ]);
+
+        $this->assertSame(0, $summary['attempts_synced']);
+        $this->assertNotEmpty($summary['errors']);
+        $this->assertSame($foreignTenant->id, $foreignAttempt->fresh()->tenant_id);
+        $this->assertSame('33.00', $foreignAttempt->fresh()->score);
+        $this->assertSame(1, ExamAttempt::withoutTenantScope()->count());
+    }
+
+    public function test_ingest_does_not_overwrite_foreign_tenant_result_with_same_runtime_id(): void
+    {
+        [$exam, $participant] = $this->seedPublishedExam();
+        $foreignTenant = Tenant::factory()->create();
+        $runtimeResultId = (string) Str::uuid();
+
+        $foreignResult = ExamResult::withoutTenantScope()->create([
+            'tenant_id' => $foreignTenant->id,
+            'exam_definition_id' => $exam->id,
+            'exam_participant_id' => $participant->id,
+            'runtime_result_id' => $runtimeResultId,
+            'score' => 44,
+            'max_score' => 100,
+            'status' => 'final',
+        ]);
+
+        $summary = app(ExamResultSyncService::class)->ingestPayload($exam, [
+            'results' => [[
+                'id' => $runtimeResultId,
+                'participant_external_id' => $participant->id,
+                'score' => 99,
+                'max_score' => 100,
+            ]],
+        ]);
+
+        $this->assertSame(0, $summary['results_synced']);
+        $this->assertNotEmpty($summary['errors']);
+        $this->assertSame($foreignTenant->id, $foreignResult->fresh()->tenant_id);
+        $this->assertSame('44.00', $foreignResult->fresh()->score);
+        $this->assertSame(1, ExamResult::withoutTenantScope()->count());
+    }
+
+    public function test_ingest_rejects_result_whose_attempt_belongs_to_another_participant(): void
+    {
+        [$exam, $participant] = $this->seedPublishedExam();
+        $secondParticipant = ExamParticipant::withoutTenantScope()->create([
+            'tenant_id' => $exam->tenant_id,
+            'exam_definition_id' => $exam->id,
+            'student_name' => 'Second Student',
+            'student_identifier' => 'SECOND',
+            'participant_source' => ParticipantSource::Manual,
+            'status' => ParticipantStatus::Assigned,
+        ]);
+
+        $runtimeAttemptId = (string) Str::uuid();
+
+        ExamAttempt::withoutTenantScope()->create([
+            'tenant_id' => $exam->tenant_id,
+            'exam_definition_id' => $exam->id,
+            'exam_participant_id' => $participant->id,
+            'runtime_attempt_id' => $runtimeAttemptId,
+            'attempt_number' => 1,
+            'status' => 'submitted',
+        ]);
+
+        $summary = app(ExamResultSyncService::class)->ingestPayload($exam, [
+            'results' => [[
+                'id' => (string) Str::uuid(),
+                'attempt_id' => $runtimeAttemptId,
+                'participant_external_id' => $secondParticipant->id,
+                'score' => 99,
+            ]],
+        ]);
+
+        $this->assertSame(0, $summary['results_synced']);
+        $this->assertNotEmpty($summary['errors']);
+        $this->assertSame(0, ExamResult::withoutTenantScope()->count());
+    }
+
+    public function test_full_runtime_payload_replay_does_not_duplicate_attempt_answers_results_or_activity(): void
+    {
+        [$exam, $participant, $question] = $this->seedPublishedExam();
+
+        $runtimeAttemptId = (string) Str::uuid();
+        $runtimeAnswerId = (string) Str::uuid();
+        $runtimeResultId = (string) Str::uuid();
+        $runtimeActivityId = (string) Str::uuid();
+
+        $payload = [
+            'attempts' => [[
+                'id' => $runtimeAttemptId,
+                'participant_external_id' => $participant->id,
+                'score' => 85,
+                'status' => 'submitted',
+            ]],
+            'answers' => [[
+                'id' => $runtimeAnswerId,
+                'attempt_id' => $runtimeAttemptId,
+                'question_external_id' => $question->id,
+                'value' => 'A',
+                'score' => 5,
+            ]],
+            'results' => [[
+                'id' => $runtimeResultId,
+                'attempt_id' => $runtimeAttemptId,
+                'participant_external_id' => $participant->id,
+                'score' => 85,
+                'max_score' => 100,
+            ]],
+            'activity_logs' => [[
+                'id' => $runtimeActivityId,
+                'attempt_id' => $runtimeAttemptId,
+                'event_type' => 'submitted',
+            ]],
+        ];
+
+        $service = app(ExamResultSyncService::class);
+        $first = $service->ingestPayload($exam, $payload);
+
+        $initialAttemptId = ExamAttempt::withoutTenantScope()->sole()->id;
+        $initialAnswerId = ExamAnswer::withoutTenantScope()->sole()->id;
+        $initialResultId = ExamResult::withoutTenantScope()->sole()->id;
+        $initialActivityId = ExamActivityLog::withoutTenantScope()->sole()->id;
+
+        $second = $service->ingestPayload($exam, $payload);
+
+        $this->assertSame(1, $first['attempts_synced']);
+        $this->assertSame(1, $first['answers_synced']);
+        $this->assertSame(1, $first['results_synced']);
+        $this->assertSame(1, $first['activity_logs_synced']);
+        $this->assertSame([], $second['errors']);
+
+        $this->assertSame(1, ExamAttempt::withoutTenantScope()->count());
+        $this->assertSame(1, ExamAnswer::withoutTenantScope()->count());
+        $this->assertSame(1, ExamResult::withoutTenantScope()->count());
+        $this->assertSame(1, ExamActivityLog::withoutTenantScope()->count());
+
+        $this->assertSame($initialAttemptId, ExamAttempt::withoutTenantScope()->sole()->id);
+        $this->assertSame($initialAnswerId, ExamAnswer::withoutTenantScope()->sole()->id);
+        $this->assertSame($initialResultId, ExamResult::withoutTenantScope()->sole()->id);
+        $this->assertSame($initialActivityId, ExamActivityLog::withoutTenantScope()->sole()->id);
+
+        $this->assertSame($exam->tenant_id, ExamResult::withoutTenantScope()->sole()->tenant_id);
+        $this->assertSame($participant->id, ExamResult::withoutTenantScope()->sole()->exam_participant_id);
+        $this->assertSame('85.00', ExamResult::withoutTenantScope()->sole()->score);
+    }
+
+    public function test_attempt_replay_cannot_change_owner_between_participants_of_same_tenant(): void
+    {
+        [$exam, $participant] = $this->seedPublishedExam();
+        $secondParticipant = ExamParticipant::withoutTenantScope()->create([
+            'tenant_id' => $exam->tenant_id,
+            'exam_definition_id' => $exam->id,
+            'student_name' => 'Second Student',
+            'student_identifier' => 'SECOND-REPLAY',
+            'participant_source' => ParticipantSource::Manual,
+            'status' => ParticipantStatus::Assigned,
+        ]);
+
+        $attemptId = (string) Str::uuid();
+        $service = app(ExamResultSyncService::class);
+        $first = $service->ingestPayload($exam, [
+            'attempts' => [[
+                'id' => $attemptId,
+                'participant_external_id' => $participant->id,
+                'score' => 61,
+            ]],
+        ]);
+
+        $second = $service->ingestPayload($exam, [
+            'attempts' => [[
+                'id' => $attemptId,
+                'participant_external_id' => $secondParticipant->id,
+                'score' => 99,
+            ]],
+        ]);
+
+        $this->assertSame(1, $first['attempts_synced']);
+        $this->assertSame(0, $second['attempts_synced']);
+        $this->assertNotEmpty($second['errors']);
+        $this->assertSame(1, ExamAttempt::withoutTenantScope()->count());
+        $this->assertSame($participant->id, ExamAttempt::withoutTenantScope()->sole()->exam_participant_id);
+        $this->assertSame('61.00', ExamAttempt::withoutTenantScope()->sole()->score);
+    }
+
+    public function test_unknown_explicit_participant_must_not_fallback_to_valid_attempt(): void
+    {
+        [$exam, $participant] = $this->seedPublishedExam();
+        $attemptId = (string) Str::uuid();
+        ExamAttempt::withoutTenantScope()->create([
+            'tenant_id' => $exam->tenant_id,
+            'exam_definition_id' => $exam->id,
+            'exam_participant_id' => $participant->id,
+            'runtime_attempt_id' => $attemptId,
+            'attempt_number' => 1,
+            'status' => 'submitted',
+        ]);
+
+        $summary = app(ExamResultSyncService::class)->ingestPayload($exam, [
+            'results' => [[
+                'id' => (string) Str::uuid(),
+                'attempt_id' => $attemptId,
+                'participant_external_id' => (string) Str::uuid(),
+                'score' => 100,
+            ]],
+        ]);
+
+        $this->assertSame(0, $summary['results_synced']);
+        $this->assertSame(1, $summary['participants_skipped']);
+        $this->assertSame(0, ExamResult::withoutTenantScope()->count());
+    }
+
+    public function test_unknown_explicit_attempt_must_not_create_result_without_attempt(): void
+    {
+        [$exam, $participant] = $this->seedPublishedExam();
+
+        $summary = app(ExamResultSyncService::class)->ingestPayload($exam, [
+            'results' => [[
+                'id' => (string) Str::uuid(),
+                'attempt_id' => (string) Str::uuid(),
+                'participant_external_id' => $participant->id,
+                'score' => 100,
+            ]],
+        ]);
+
+        $this->assertSame(0, $summary['results_synced']);
+        $this->assertNotEmpty($summary['errors']);
+        $this->assertSame(0, ExamResult::withoutTenantScope()->count());
     }
 
     public function test_command_rejects_invalid_exam_uuid(): void
