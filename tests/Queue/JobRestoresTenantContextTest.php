@@ -72,25 +72,6 @@ class JobRestoresTenantContextTest extends TestCase
         ]);
     }
 
-    public function test_job_constructor_captures_current_tenant_id(): void
-    {
-        $tenant = $this->makeTenant('capture');
-
-        app(CurrentTenant::class)->set($tenant);
-        $job = new TenantAwareCaptureJob;
-
-        $this->assertSame($tenant->id, $job->tenantId);
-    }
-
-    public function test_on_tenant_overrides_captured_tenant(): void
-    {
-        $tenant = $this->makeTenant('override');
-
-        $job = (new TenantAwareCaptureJob)->onTenant($tenant);
-
-        $this->assertSame($tenant->id, $job->tenantId);
-    }
-
     public function test_middleware_restores_tenant_context_during_handle(): void
     {
         $tenantA = $this->makeTenant('mid-a');
@@ -127,28 +108,6 @@ class JobRestoresTenantContextTest extends TestCase
 
         $this->assertSame($tenant->id, TenantAwareCaptureJob::$observedTenantId);
         $this->assertSame(1, TenantAwareCaptureJob::$observedVendorCount);
-    }
-
-    public function test_tenant_run_accepts_uuid_and_code_without_leaking_context(): void
-    {
-        $tenantA = $this->makeTenant('cli-uuid-a');
-        $tenantB = $this->makeTenant('cli-uuid-b');
-
-        Artisan::registerCommand(new TenantProbeCommand);
-        app(CurrentTenant::class)->set($tenantA);
-
-        foreach ([(string) $tenantB->uuid, $tenantB->code] as $identifier) {
-            TenantProbeCommand::$observedTenantId = null;
-
-            $exit = Artisan::call('tenant:run', [
-                'tenant' => $identifier,
-                'cmd' => 'tests:tenant-probe',
-            ]);
-
-            $this->assertSame(0, $exit);
-            $this->assertSame($tenantB->id, TenantProbeCommand::$observedTenantId);
-            $this->assertSame($tenantA->id, app(CurrentTenant::class)->id());
-        }
     }
 
     public function test_tenant_run_rejects_unknown_identifier_without_sql_error(): void

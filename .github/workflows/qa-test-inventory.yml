@@ -1,0 +1,56 @@
+name: QA test inventory (temporary)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/qa-test-inventory.yml'
+      - 'scripts/qa/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Inventory exact PHPUnit discovery
+        run: |
+          php vendor/bin/phpunit -c phpunit.xml --list-tests-xml=/tmp/foundationos-tests.xml --colors=never
+          php <<'PHP'
+          <?php
+          $xml = new DOMDocument();
+          $xml->load('/tmp/foundationos-tests.xml');
+          $xpath = new DOMXPath($xml);
+          $all = $xpath->query('//*[local-name()="testMethod"]');
+          $files = [];
+          $methods = [];
+          foreach ($all as $item) {
+              $method = (string) $item->getAttribute('name');
+              $parent = $item->parentNode;
+              $file = $parent instanceof DOMElement ? (string) $parent->getAttribute('file') : '';
+              $file = str_replace(getcwd().DIRECTORY_SEPARATOR, '', $file);
+              $class = $parent instanceof DOMElement ? (string) $parent->getAttribute('name') : '';
+              $files[$file] = ($files[$file] ?? 0) + 1;
+              $methods[] = ['f' => $file, 'c' => $class, 'm' => $method];
+          }
+          ksort($files);
+          echo 'TEST_METHODS_TOTAL='.count($methods).PHP_EOL;
+          echo 'TEST_FILES_TOTAL='.count($files).PHP_EOL;
+          echo 'GIT_TREE_SHA='.trim(shell_exec('git rev-parse HEAD^{tree}')).PHP_EOL;
+          echo 'INVENTORY_JSON_START'.PHP_EOL;
+          echo json_encode(['files' => $files, 'methods' => $methods], JSON_UNESCAPED_SLASHES).PHP_EOL;
+          echo 'INVENTORY_JSON_END'.PHP_EOL;
+          PHP

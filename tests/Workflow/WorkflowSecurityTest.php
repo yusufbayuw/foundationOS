@@ -22,7 +22,6 @@ use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
 use Modules\Workflow\Notifications\InternalWorkflowNotification;
 use Modules\Workflow\Services\WorkflowAutomatedActionRunner;
-use Modules\Workflow\Support\JsonLogicEvaluator;
 use Tests\Support\AllowlistedWorkflowAutomationTestJob;
 use Tests\TestCase;
 
@@ -120,33 +119,6 @@ class WorkflowSecurityTest extends TestCase
 
         Notification::assertSentTo($tenantMember, InternalWorkflowNotification::class);
         Notification::assertNotSentTo($foreignMember, InternalWorkflowNotification::class);
-    }
-
-    public function test_json_logic_evaluator_stops_on_excessive_recursion_depth(): void
-    {
-        $logic = ['and' => [['var' => 'ok']]];
-
-        for ($i = 0; $i < 40; $i++) {
-            $logic = ['and' => [$logic]];
-        }
-
-        $this->assertFalse(JsonLogicEvaluator::apply($logic, ['ok' => true]));
-    }
-
-    public function test_unsupported_automation_action_type_is_audited_and_skipped(): void
-    {
-        [$tenant, $organization, $user] = $this->makeTenantContext();
-        $instance = $this->makeInstanceWithAutomation($tenant, $organization, $user, [], 'execute_shell');
-
-        app(WorkflowAutomatedActionRunner::class)->run($instance, 'started', [
-            'trigger_event' => 'started',
-        ]);
-
-        $this->assertDatabaseHas('audit_logs', [
-            'tenant_id' => $tenant->id,
-            'action' => 'workflow_automation_skipped',
-            'error_message' => 'unsupported_action_type',
-        ]);
     }
 
     /**

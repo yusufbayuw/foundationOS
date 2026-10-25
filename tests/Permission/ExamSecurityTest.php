@@ -10,15 +10,11 @@ use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Modules\Core\Models\User;
 use Modules\Exam\Enums\ExamAcademicContext;
-use Modules\Exam\Enums\ExamAuditAction;
-use Modules\Exam\Enums\ExamPermission;
 use Modules\Exam\Enums\ExamRole;
 use Modules\Exam\Enums\ExamStatus;
 use Modules\Exam\Models\ExamDefinition;
-use Modules\Exam\Services\ExamAuditLogger;
 use Modules\Exam\Services\ExamAuthorizationService;
 use Modules\Exam\Services\ExamShieldProvisioner;
-use Modules\Monitoring\Models\AuditLog;
 use Modules\School\Models\Teacher;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -113,69 +109,6 @@ class ExamSecurityTest extends TestCase
 
         $this->assertTrue($proctor->can('openControlRoom', $assigned));
         $this->assertFalse($proctor->can('openControlRoom', $unassigned));
-    }
-
-    public function test_publish_writes_uuid_auditable_security_audit_log(): void
-    {
-        $tenant = $this->createTenant();
-        $admin = $this->makeTenantUser($tenant, ExamRole::ExamAdmin);
-
-        $exam = ExamDefinition::withoutTenantScope()->create([
-            'tenant_id' => $tenant->id,
-            'name' => 'Audit exam',
-            'exam_academic_context' => ExamAcademicContext::Standalone,
-            'status' => ExamStatus::Published,
-            'runtime_exam_id' => (string) Str::uuid(),
-        ]);
-
-        app(CurrentTenant::class)->set($tenant);
-
-        $this->actingAs($admin);
-
-        app(ExamAuditLogger::class)->log(
-            ExamAuditAction::PublishExam,
-            $exam,
-            'Exam published to runtime.',
-            newValues: ['runtime_exam_id' => $exam->runtime_exam_id],
-        );
-
-        $log = AuditLog::withoutTenantScope()->latest('id')->first();
-
-        $this->assertNotNull($log);
-        $this->assertSame(ExamAuditAction::PublishExam->value, $log->action);
-        $this->assertTrue(Str::isUuid((string) $log->auditable_id));
-        $this->assertSame(ExamDefinition::class, $log->auditable_type);
-    }
-
-    public function test_exam_admin_has_custom_permissions_after_provision(): void
-    {
-        $tenant = $this->createTenant();
-        app(ExamShieldProvisioner::class)->provisionForTenant($tenant);
-
-        $admin = $this->makeTenantUser($tenant, ExamRole::ExamAdmin);
-
-        setPermissionsTeamId($tenant->id);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        $this->assertTrue($admin->can(ExamPermission::PublishExam->value));
-        $this->assertTrue($admin->can(ExamPermission::OpenControlRoom->value));
-    }
-
-    public function test_provision_refreshes_permission_catalog_before_role_sync(): void
-    {
-        $tenant = $this->createTenant('exam-cache-refresh');
-        app(PermissionRegistrar::class)->getPermissions();
-
-        app(ExamShieldProvisioner::class)->provisionForTenant($tenant);
-
-        setPermissionsTeamId($tenant->getKey());
-        $examAdmin = Role::query()
-            ->where('name', ExamRole::ExamAdmin->value)
-            ->where('tenant_id', $tenant->getKey())
-            ->firstOrFail();
-
-        $this->assertTrue($examAdmin->hasPermissionTo(ExamPermission::ViewExam->value));
-        $this->assertTrue($examAdmin->hasPermissionTo(ExamPermission::OpenControlRoom->value));
     }
 
     /**

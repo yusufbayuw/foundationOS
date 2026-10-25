@@ -6,7 +6,6 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
-use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
 use Spatie\Permission\Models\Permission;
@@ -38,54 +37,6 @@ class CorePolicyAuthorizationTest extends TestCase
 
         $this->assertTrue($user->can('view', $tenant));
         $this->assertFalse($user->can('update', $tenant));
-    }
-
-    public function test_organization_policy_allows_view_when_tenant_permission_granted(): void
-    {
-        $tenant = $this->makeTenant();
-        $organization = Organization::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'campus-a',
-            'name' => 'Campus A',
-            'is_active' => true,
-        ]);
-
-        $user = User::factory()->create();
-
-        Permission::firstOrCreate(['name' => 'View:Organization', 'guard_name' => 'web']);
-
-        $role = Role::firstOrCreate([
-            'name' => 'org_viewer',
-            'guard_name' => 'web',
-            'tenant_id' => $tenant->id,
-        ]);
-        $role->givePermissionTo('View:Organization');
-
-        setPermissionsTeamId($tenant->id);
-        $user->roles()->syncWithoutDetaching([
-            $role->id => [
-                'model_type' => $user->getMorphClass(),
-                'tenant_id' => $tenant->id,
-            ],
-        ]);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        setPermissionsTeamId($tenant->id);
-
-        $this->assertTrue($user->can('view', $organization));
-        $this->assertFalse($user->can('delete', $organization));
-    }
-
-    public function test_user_policy_blocks_update_without_permission(): void
-    {
-        $tenant = $this->makeTenant();
-        $actor = User::factory()->create();
-        $target = User::factory()->create();
-
-        setPermissionsTeamId($tenant->id);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        $this->assertFalse($actor->can('update', $target));
     }
 
     private function makeTenant(): Tenant

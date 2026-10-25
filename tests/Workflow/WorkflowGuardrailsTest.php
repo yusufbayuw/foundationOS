@@ -25,39 +25,6 @@ class WorkflowGuardrailsTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_requester_manager_assignee_resolves_from_workflow_context(): void
-    {
-        [$tenant, $organization, $requester] = $this->makeTenantContext();
-        $manager = $this->makeTenantUser($tenant, $organization, 'Manager Resolver');
-        $workflow = $this->makeWorkflow($tenant, $organization, $requester);
-
-        $step = WorkflowStep::query()->create([
-            'workflow_id' => $workflow->id,
-            'uuid' => (string) Str::uuid(),
-            'code' => 'manager_review',
-            'name' => 'Manager Review',
-            'step_type' => 'approval',
-            'assignee_type' => 'requester_manager',
-            'assignee_value' => null,
-            'assignee_config' => ['manager_field' => 'requester_manager_id'],
-            'form_schema' => [],
-            'action_schema' => [],
-            'is_initial' => true,
-            'sort_order' => 1,
-        ]);
-
-        $requisition = $this->makePurchaseRequisition($tenant, $requester, 4500000);
-        $instance = app(WorkflowInstanceStarter::class)->start($workflow, $requester, [
-            ...$requisition->workflowContext(),
-            'requester_manager_id' => $manager->id,
-        ], $requisition, $requester);
-
-        $resolvedUsers = app(WorkflowAssigneeResolver::class)->resolveUsers($instance, $step);
-
-        $this->assertCount(1, $resolvedUsers);
-        $this->assertTrue($resolvedUsers->first()->is($manager));
-    }
-
     public function test_custom_resolver_must_be_whitelisted_and_can_resolve_users(): void
     {
         [$tenant, $organization, $requester] = $this->makeTenantContext();

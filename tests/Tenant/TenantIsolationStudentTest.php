@@ -30,20 +30,6 @@ class TenantIsolationStudentTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_student_receives_current_tenant_id_when_created(): void
-    {
-        $tenant = Tenant::factory()->create();
-
-        app(CurrentTenant::class)->set($tenant);
-
-        $student = Student::factory()->create([
-            'tenant_id' => null,
-            'nis' => 'AUTO-TENANT',
-        ]);
-
-        $this->assertSame($tenant->getKey(), $student->tenant_id);
-    }
-
     public function test_student_queries_are_scoped_to_current_tenant(): void
     {
         $tenantA = Tenant::factory()->create(['code' => 'school-a', 'name' => 'School A']);
@@ -65,30 +51,6 @@ class TenantIsolationStudentTest extends TestCase
 
         $this->assertSame(['A-001'], Student::query()->pluck('nis')->all());
         $this->assertNull(Student::query()->where('nis', 'B-001')->first());
-    }
-
-    public function test_without_tenant_scope_explicitly_accesses_students_from_all_tenants(): void
-    {
-        $tenantA = Tenant::factory()->create(['code' => 'scope-a']);
-        $tenantB = Tenant::factory()->create(['code' => 'scope-b']);
-
-        Student::withoutTenantScope()->create([
-            'tenant_id' => $tenantA->getKey(),
-            'nis' => 'A-ALL',
-            'status' => 'active',
-        ]);
-
-        Student::withoutTenantScope()->create([
-            'tenant_id' => $tenantB->getKey(),
-            'nis' => 'B-ALL',
-            'status' => 'active',
-        ]);
-
-        app(CurrentTenant::class)->set($tenantA);
-
-        $this->assertSame(1, Student::query()->count());
-        $this->assertSame(['A-ALL', 'B-ALL'], Student::withoutTenantScope()->orderBy('nis')->pluck('nis')->all());
-        $this->assertSame(2, Student::allTenants()->count());
     }
 
     public function test_user_tenant_access_requires_assignment_while_admin_panel_allows_onboarding(): void

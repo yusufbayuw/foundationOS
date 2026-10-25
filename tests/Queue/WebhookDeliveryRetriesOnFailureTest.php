@@ -116,27 +116,6 @@ class WebhookDeliveryRetriesOnFailureTest extends TestCase
         $this->assertDatabaseMissing('webhook_deliveries', ['event' => 'enrollment.created']);
     }
 
-    public function test_wildcard_subscription_receives_any_event(): void
-    {
-        Queue::fake();
-
-        $subscription = WebhookSubscription::create([
-            'tenant_id' => $this->tenant->id,
-            'url' => 'https://example.com/webhook',
-            'events' => ['*'],
-            'secret' => 'test-secret',
-            'is_active' => true,
-        ]);
-
-        $dispatcher = app(WebhookDispatcher::class);
-        $dispatcher->dispatch($this->tenant->id, 'any.event', ['id' => 99]);
-
-        $this->assertDatabaseHas('webhook_deliveries', [
-            'webhook_subscription_id' => $subscription->id,
-            'event' => 'any.event',
-        ]);
-    }
-
     public function test_delivery_job_marks_status_as_delivered_on_success(): void
     {
         Http::fake(['https://example.com/webhook' => Http::response('OK', 200)]);

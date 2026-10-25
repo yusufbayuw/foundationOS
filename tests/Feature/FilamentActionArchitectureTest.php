@@ -2,42 +2,45 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class FilamentActionArchitectureTest extends TestCase
 {
-    #[DataProvider('filamentSourceFiles')]
-    public function test_filament_sources_do_not_call_http_client_directly(string $path): void
+    /**
+     * One PHPUnit case checks every discovered Filament source file.
+     *
+     * Previously two data providers expanded this into 6,744 PHPUnit cases;
+     * the contract is unchanged, but violations are now aggregated by file.
+     */
+    public function test_filament_sources_respect_io_boundaries(): void
     {
-        $source = $this->readSource($path);
+        $violations = [];
+        $filesChecked = 0;
 
-        $this->assertDoesNotMatchRegularExpression(
-            '/\\bHttp::/',
-            $source,
-            "Filament UI code must not call Http:: directly. Move external IO to an injected service or queued job: {$path}",
-        );
-    }
+        foreach (self::filamentSourceFiles() as $file) {
+            $path = $file['path'];
+            $source = $this->readSource($path);
+            $filesChecked++;
 
-    #[DataProvider('filamentSourceFiles')]
-    public function test_bulk_actions_do_not_loop_over_external_io_without_dispatching_jobs(string $path): void
-    {
-        $source = $this->readSource($path);
+            if (preg_match('/\bHttp::/', $source)) {
+                $violations[] = "Filament UI code must not call Http:: directly: {$path}";
+            }
 
-        if (! $this->containsBulkAction($source) || ! $this->containsActionClosure($source)) {
-            $this->addToAssertionCount(1);
+            if (! $this->containsBulkAction($source) || ! $this->containsActionClosure($source)) {
+                continue;
+            }
 
-            return;
+            $hasLoop = (bool) preg_match('/\bforeach\s*\(|->each\s*\(/', $source);
+            $hasExternalIo = (bool) preg_match('/\b(?:Http|Mail)::|Notification::send\s*\(|(?:Import|Export)Action::make\s*\(|Storage::(?:put|copy|move|delete|readStream|writeStream)\s*\(/', $source);
+            $dispatchesJob = (bool) preg_match('/(?:\bdispatch\s*\(|::dispatch\s*\(|Bus::(?:dispatch|batch|chain)\s*\()/', $source);
+
+            if ($hasLoop && $hasExternalIo && ! $dispatchesJob) {
+                $violations[] = "Bulk Filament action loops over external IO without dispatching a job: {$path}";
+            }
         }
 
-        $hasLoop = (bool) preg_match('/\\bforeach\\s*\\(|->each\\s*\\(/', $source);
-        $hasExternalIo = (bool) preg_match('/\\b(?:Http|Mail)::|Notification::send\\s*\\(|(?:Import|Export)Action::make\\s*\\(|Storage::(?:put|copy|move|delete|readStream|writeStream)\\s*\\(/', $source);
-        $dispatchesJob = (bool) preg_match('/(?:\\bdispatch\\s*\\(|::dispatch\\s*\\(|Bus::(?:dispatch|batch|chain)\\s*\\()/', $source);
-
-        $this->assertFalse(
-            $hasLoop && $hasExternalIo && ! $dispatchesJob,
-            "Bulk Filament actions that loop over external IO must dispatch a job instead of processing synchronously: {$path}",
-        );
+        $this->assertGreaterThan(0, $filesChecked, 'No Filament source files were discovered.');
+        $this->assertSame([], $violations, implode("\n", $violations));
     }
 
     /**

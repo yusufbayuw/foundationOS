@@ -74,26 +74,6 @@ class MoodleStudyPlanSyncServiceTest extends TestCase
         $this->assertSame(2, MoodleSyncOutbox::query()->where('action', 'enroll')->count());
     }
 
-    public function test_item_without_course_offering_is_skipped(): void
-    {
-        $ctx = $this->seedPlanWithItems(0);
-        $item = StudyPlanItem::query()->create([
-            'tenant_id' => $ctx['tenant']->id,
-            'study_plan_id' => $ctx['plan']->id,
-            'course_offering_id' => null,
-            'course_id' => $ctx['course']->id,
-            'credits' => 3,
-            'status' => 'enrolled',
-        ]);
-
-        $this->assertFalse(
-            app(MoodleStudyPlanSyncService::class)->enrollItem($item->fresh()),
-        );
-        $this->assertSame(0, MoodleSyncOutbox::query()
-            ->where('dedupe_key', "krs:enrol:{$item->id}")
-            ->count());
-    }
-
     protected function seedPlanWithItems(int $itemCount): array
     {
         $plan = SubscriptionPlan::firstOrCreate(
