@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    # A draft gets fast feedback; making it ready automatically triggers
+    # the complete test / coverage / database integration gates.
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
 
 permissions:
   contents: read
@@ -14,7 +17,59 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  fast-smoke:
+    name: Fast PHP smoke (draft PR)
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+          ini-values: memory_limit=1G
+
+      - name: Get Composer cache directory
+        id: composer-cache-fast
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache-fast.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Prepare disposable CI application
+        run: |
+          cp .env.example .env
+          php artisan key:generate --ansi
+
+      - name: Fail closed on missing or divergent PHPUnit suites
+        run: php scripts/verify-phpunit-suite-parity.php phpunit.xml phpunit.coverage.xml
+
+      - name: Quick security, tenant, and regression feedback
+        run: |
+          php artisan test --compact --testsuite=Unit
+          php artisan test --compact --testsuite=Tenant
+          php artisan test --compact --testsuite=Policy
+          php artisan test --compact --testsuite=Permission
+          php artisan test --compact --testsuite=Queue
+          php artisan test --compact --testsuite=Regression
+
   phpunit:
+    # Full coverage and all ten suites run on every ready PR and main push.
+    # Do not permit merge on a draft/fast-smoke result alone.
+    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
     name: PHPUnit (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -159,6 +214,7 @@ jobs:
 
 
   postgresql:
+    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
     name: PostgreSQL integration and migration smoke
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -254,6 +310,7 @@ jobs:
 
 
   mariadb-migrations:
+    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
     # One disposable MariaDB schema smoke; no duplicate 8k-test suite.
     name: MariaDB migration smoke
     runs-on: ubuntu-latest
