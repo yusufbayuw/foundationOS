@@ -22,7 +22,6 @@ use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
 use Modules\Workflow\Notifications\InternalWorkflowNotification;
 use Modules\Workflow\Services\WorkflowAutomatedActionRunner;
-use Modules\Workflow\Support\JsonLogicEvaluator;
 use Tests\Support\AllowlistedWorkflowAutomationTestJob;
 use Tests\TestCase;
 
