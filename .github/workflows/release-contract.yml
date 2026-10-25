@@ -84,6 +84,19 @@ jobs:
           fi
           echo "Scheduler command registration verified."
 
+      - name: Check read-only runtime preflight contract (isolated CI)
+        run: |
+          bash -n scripts/ops/preflight-readonly.sh
+          FOS_PREFLIGHT_APP_DIR="${GITHUB_WORKSPACE}" FOS_PREFLIGHT_PHP_BIN="$(command -v php)" \
+            bash scripts/ops/preflight-readonly.sh
+
+      - name: Require explicit target path (negative safety test)
+        run: |
+          if env -u FOS_PREFLIGHT_APP_DIR bash scripts/ops/preflight-readonly.sh; then
+            echo "::error::Preflight inspected a server without explicit target authorization"
+            exit 1
+          fi
+
       - name: Clear compiled configuration
         if: always()
         run: php artisan config:clear
