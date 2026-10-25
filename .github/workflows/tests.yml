@@ -4,10 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, agent/devops-ci-duplicate-suite-removal-20261025]
+    # Temporary stacked-PR test target; remove second branch before landing on main.
     # A draft gets fast feedback; making it ready automatically triggers
     # the complete test / coverage / database integration gates.
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,9 +21,47 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  scope:
+    name: CI risk classification (fail closed)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      full: ${{ steps.classify.outputs.full || steps.nonpr.outputs.full }}
+      targets: ${{ steps.classify.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP for scope classification
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Main push, nightly and dispatch always run full regression
+        id: nonpr
+        if: ${{ github.event_name != 'pull_request' }}
+        run: echo "full=true" >> "$GITHUB_OUTPUT"
+
+      - name: Classify exact PR base/head diff
+        id: classify
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          php scripts/ci/test-classify-ci-scope.php
+          git rev-parse --verify "${BASE_SHA}^{commit}"
+          git rev-parse --verify "${HEAD_SHA}^{commit}"
+          git diff --name-only -z "${BASE_SHA}" "${HEAD_SHA}" > "$RUNNER_TEMP/changed-files.nul"
+          php scripts/ci/classify-ci-scope.php "$RUNNER_TEMP/changed-files.nul" >> "$GITHUB_OUTPUT"
+
   fast-smoke:
-    name: Fast PHP smoke (draft PR)
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.draft }}
+    name: Fast PHP smoke (draft/low-risk PR)
+    needs: scope
+    if: ${{ github.event_name == 'pull_request' && (github.event.pull_request.draft || needs.scope.outputs.full == 'false') }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
 
@@ -66,10 +108,22 @@ jobs:
           php artisan test --compact --testsuite=Queue
           php artisan test --compact --testsuite=Regression
 
+      - name: Run explicitly mapped low-risk feature tests
+        if: ${{ !github.event.pull_request.draft && needs.scope.outputs.full == 'false' }}
+        env:
+          TARGETS: ${{ needs.scope.outputs.targets }}
+        run: |
+          set -euo pipefail
+          for file in $TARGETS; do
+            test -f "$file"
+            php artisan test --compact "$file"
+          done
+
   phpunit:
-    # Full coverage and all ten suites run on every ready PR and main push.
-    # Do not permit merge on a draft/fast-smoke result alone.
-    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
+    # All 7,897 tests and coverage run on main/nightly/dispatch and high-risk
+    # ready PRs. Unknown changes default to this full regression gate.
+    needs: scope
+    if: ${{ github.event_name != 'pull_request' || (!github.event.pull_request.draft && needs.scope.outputs.full == 'true') }}
     name: PHPUnit (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -214,7 +268,8 @@ jobs:
 
 
   postgresql:
-    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
+    needs: scope
+    if: ${{ github.event_name != 'pull_request' || (!github.event.pull_request.draft && needs.scope.outputs.full == 'true') }}
     name: PostgreSQL integration and migration smoke
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -310,7 +365,8 @@ jobs:
 
 
   mariadb-migrations:
-    if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
+    needs: scope
+    if: ${{ github.event_name != 'pull_request' || (!github.event.pull_request.draft && needs.scope.outputs.full == 'true') }}
     # One disposable MariaDB schema smoke; no duplicate 8k-test suite.
     name: MariaDB migration smoke
     runs-on: ubuntu-latest
@@ -379,3 +435,41 @@ jobs:
           test "$DB_DATABASE" = "foundationos_migration_ci"
           php artisan migrate:fresh --force --no-interaction
           php artisan migrate:status --no-interaction
+
+  integration-gate:
+    name: CI integration gate (risk-aware)
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [scope, fast-smoke, phpunit, coverage, postgresql, mariadb-migrations]
+    timeout-minutes: 3
+    env:
+      SCOPE_STATUS: ${{ needs.scope.result }}
+      FULL: ${{ needs.scope.outputs.full }}
+      EVENT: ${{ github.event_name }}
+      DRAFT: ${{ github.event.pull_request.draft }}
+      FAST_STATUS: ${{ needs.fast-smoke.result }}
+      PHPUNIT_STATUS: ${{ needs.phpunit.result }}
+      COVERAGE_STATUS: ${{ needs.coverage.result }}
+      PG_STATUS: ${{ needs.postgresql.result }}
+      MARIADB_STATUS: ${{ needs.mariadb-migrations.result }}
+    steps:
+      - name: Reject missing classification or incomplete required test tier
+        run: |
+          set -euo pipefail
+          test "$SCOPE_STATUS" = success
+          case "$FULL" in true|false) ;; *) echo "::error::No valid CI scope"; exit 1 ;; esac
+          if [ "$EVENT" != pull_request ] || { [ "$FULL" = true ] && [ "$DRAFT" != true ]; }; then
+            for result in "$PHPUNIT_STATUS" "$COVERAGE_STATUS" "$PG_STATUS" "$MARIADB_STATUS"; do
+              if [ "$result" != success ]; then
+                echo "::error::Mandatory full regression or database verification did not pass"
+                exit 1
+              fi
+            done
+            echo "Full regression, 80% coverage, PostgreSQL and MariaDB passed."
+          else
+            test "$FAST_STATUS" = success || {
+              echo "::error::Mandatory fast and module-mapped tests did not pass"
+              exit 1
+            }
+            echo "Fast feedback passed; full integration evidence is required for high-risk/release."
+          fi
