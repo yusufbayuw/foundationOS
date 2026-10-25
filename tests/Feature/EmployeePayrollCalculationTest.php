@@ -2,7 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Imports\SalarySlipImporter;
 use App\Models\User;
+use App\Support\CurrentTenant;
+use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -14,10 +18,13 @@ use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Models\SalarySlipComponent;
 use Modules\Employee\Services\PayrollCalculationService;
 use Modules\Employee\Services\PayrollJournalService;
+use Modules\Employee\Services\SalarySlipApprovalService;
 use Modules\Employee\Services\SalarySlipPaymentService;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
+use Modules\Finance\Services\FinancialReportService;
+use Modules\Workflow\Models\Workflow;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -174,7 +181,8 @@ class EmployeePayrollCalculationTest extends TestCase
         ]);
 
         $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
-        $slip->update(['status' => 'approved']);
+        $approver = User::factory()->create();
+        app(SalarySlipApprovalService::class)->approve($slip, $approver);
 
         $journal = app(SalarySlipPaymentService::class)->markAsPaid(
             $slip->fresh(),
@@ -183,7 +191,14 @@ class EmployeePayrollCalculationTest extends TestCase
         );
 
         $this->assertTrue((bool) $journal->is_balanced);
-        $this->assertFalse((bool) $journal->is_posted);
+        $this->assertTrue((bool) $journal->is_posted);
+        $this->assertNotNull($journal->posted_at);
+        $this->assertSame($organization->id, $journal->organization_id);
+        $this->assertDatabaseHas('audit_logs', [
+            'tenant_id' => $tenant->id,
+            'auditable_id' => $journal->id,
+            'action' => 'payroll_journal_posted',
+        ]);
         $this->assertEqualsWithDelta(5_500_000, (float) $journal->total_debit, 0.01);
         $this->assertEqualsWithDelta(5_500_000, (float) $journal->total_credit, 0.01);
         $this->assertSame($journal->id, $slip->fresh()->journal_entry_id);
@@ -208,6 +223,48 @@ class EmployeePayrollCalculationTest extends TestCase
             'debit' => 0,
             'credit' => 5_250_000,
         ]);
+
+        $this->assertSame('2026-05-31', $journal->date->toDateString());
+        $this->assertSame(3, $journal->lines()->count());
+
+        // Reports run with a resolved tenant, just like the tenant-scoped
+        // Filament panel and queues. This must not depend on unrelated tests.
+        $profitAndLoss = app(CurrentTenant::class)->forTenant(
+            $tenant,
+            fn (): array => app(FinancialReportService::class)->profitAndLoss(
+                $tenant->id,
+                Carbon::parse('2026-05-01'),
+                Carbon::parse('2026-05-31'),
+                $organization->id,
+            ),
+        );
+
+        $this->assertEqualsWithDelta(5_500_000, (float) $profitAndLoss['total_expenses'], 0.01);
+        $this->assertEqualsWithDelta(-5_500_000, (float) $profitAndLoss['net_income'], 0.01);
+        $this->assertCount(1, $profitAndLoss['expenses']);
+        $this->assertSame('5101', $profitAndLoss['expenses']->first()->code);
+    }
+
+    public function test_financial_reporting_denies_cross_tenant_ledger_access(): void
+    {
+        [$tenantA] = $this->makeEmployee('payroll-report-tenant-a');
+        [$tenantB, $organizationB] = $this->makeEmployee('payroll-report-tenant-b');
+
+        try {
+            app(CurrentTenant::class)->forTenant(
+                $tenantA,
+                fn (): array => app(FinancialReportService::class)->profitAndLoss(
+                    $tenantB->id,
+                    Carbon::parse('2026-05-01'),
+                    Carbon::parse('2026-05-31'),
+                    $organizationB->id,
+                ),
+            );
+
+            $this->fail('A tenant must never request another tenant\'s financial report.');
+        } catch (AuthorizationException $exception) {
+            $this->assertStringContainsString('another tenant', $exception->getMessage());
+        }
     }
 
     public function test_mark_paid_rolls_back_status_metadata_and_journal_when_posting_fails(): void
@@ -257,6 +314,204 @@ class EmployeePayrollCalculationTest extends TestCase
         } finally {
             $this->assertSame(0, JournalEntry::query()->count());
             $this->assertSame(0, JournalEntryLine::query()->count());
+        }
+    }
+
+    public function test_approved_salary_slip_cannot_be_recalculated_or_lose_its_components(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-finalized-guard');
+
+        PayrollComponent::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'code' => 'ALLOWANCE',
+            'name' => 'Allowance',
+            'type' => 'earning',
+            'calculation_type' => 'fixed',
+            'amount' => 300000,
+            'is_active' => true,
+        ]);
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        try {
+            app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+            $this->fail('An approved salary slip must not be recalculated.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('Only draft salary slips', $exception->getMessage());
+        }
+
+        $this->assertSame('approved', $slip->fresh()->status);
+        $this->assertEqualsWithDelta(5300000, (float) $slip->fresh()->total_earnings, 0.01);
+        $this->assertSame(1, SalarySlipComponent::query()->where('salary_slip_id', $slip->id)->count());
+        $this->assertSame(1, SalarySlip::query()->where('employee_id', $employee->id)->count());
+    }
+
+    public function test_repeating_salary_payment_preserves_the_first_payment_and_journal(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-paid-retry');
+        $this->makeAccount($tenant, $organization, '5101', 'Beban Gaji', 'expense');
+        $this->makeAccount($tenant, $organization, '1101', 'Kas Operasional', 'asset');
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        $service = app(SalarySlipPaymentService::class);
+        $first = $service->markAsPaid($slip, '2026-05-31 10:00:00', 'bank');
+        $second = $service->markAsPaid($slip, '2026-06-01 13:00:00', 'cash');
+
+        $this->assertSame($first->id, $second->id);
+        $this->assertSame('paid', $slip->fresh()->status);
+        $this->assertSame('bank', $slip->fresh()->paid_via);
+        $this->assertSame('2026-05-31 10:00:00', $slip->fresh()->paid_at->format('Y-m-d H:i:s'));
+        $this->assertSame(1, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+        $this->assertSame(2, JournalEntryLine::query()->where('journal_entry_id', $first->id)->count());
+    }
+
+    public function test_invalid_payroll_period_is_rejected_without_writing_slips(): void
+    {
+        [, , $employee] = $this->makeEmployee('payroll-invalid-period');
+
+        try {
+            app(PayrollCalculationService::class)->calculate($employee, 13, 2026);
+            $this->fail('A month outside 1 to 12 must not be accepted.');
+        } catch (\InvalidArgumentException $exception) {
+            $this->assertSame('Invalid payroll month or year.', $exception->getMessage());
+        }
+
+        $this->assertSame(0, SalarySlip::query()->where('employee_id', $employee->id)->count());
+    }
+
+    public function test_payment_with_unmapped_deduction_rolls_back_without_damaging_approved_slip(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-deduction-unmapped');
+        $this->makeAccount($tenant, $organization, '5101', 'Beban Gaji', 'expense');
+        $this->makeAccount($tenant, $organization, '1101', 'Kas Operasional', 'asset');
+
+        PayrollComponent::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'code' => 'TAX-UNMAPPED',
+            'name' => 'PPh21',
+            'type' => 'deduction',
+            'calculation_type' => 'fixed',
+            'amount' => 250000,
+            'is_active' => true,
+        ]);
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved']);
+
+        try {
+            app(SalarySlipPaymentService::class)->markAsPaid($slip, '2026-05-31 10:00:00', 'bank');
+            $this->fail('An unmapped payroll deduction must stop posting.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('requires an active account', $exception->getMessage());
+        }
+
+        $this->assertSame('approved', $slip->fresh()->status);
+        $this->assertNull($slip->fresh()->journal_entry_id);
+        $this->assertNull($slip->fresh()->paid_at);
+        $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+        $this->assertSame(0, JournalEntryLine::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_inconsistent_salary_totals_cannot_create_a_posted_journal(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-reconcile-check');
+        $this->makeAccount($tenant, $organization, '5101', 'Beban Gaji', 'expense');
+        $this->makeAccount($tenant, $organization, '1101', 'Kas Operasional', 'asset');
+
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $slip->update(['status' => 'approved', 'net_salary' => 5100000]);
+
+        try {
+            app(SalarySlipPaymentService::class)->markAsPaid($slip, '2026-05-31 10:00:00', 'bank');
+            $this->fail('Incorrect salary totals must not reach the ledger.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('do not reconcile', $exception->getMessage());
+        }
+
+        $this->assertSame('approved', $slip->fresh()->status);
+        $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_salary_slip_approval_requires_completed_workflow_when_configured(): void
+    {
+        [$tenant, $organization, $employee] = $this->makeEmployee('payroll-hr-finance-approval');
+        $actor = User::factory()->create();
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+
+        $workflow = Workflow::query()->create([
+            'tenant_id' => $tenant->id,
+            'code' => $slip->workflowCode(),
+            'name' => 'HR and Finance Approval',
+            'module' => 'Employee',
+            'subject_type' => SalarySlip::class,
+            'trigger_mode' => 'manual',
+            'version' => 1,
+            'status' => 'active',
+            'is_active' => true,
+        ]);
+
+        $service = app(SalarySlipApprovalService::class);
+
+        try {
+            $service->approve($slip, $actor);
+            $this->fail('An active HR-Finance workflow must finish before approval.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('workflow approval must be completed', $exception->getMessage());
+        }
+
+        $this->assertSame('draft', $slip->fresh()->status);
+
+        $slip->workflowInstances()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'workflow_id' => $workflow->id,
+            'workflow_version' => 1,
+            'workflow_snapshot' => [],
+            'requester_id' => $employee->user_id,
+            'started_by' => $employee->user_id,
+            'status' => 'completed',
+            'started_at' => now()->subDay(),
+            'completed_at' => now(),
+        ]);
+
+        $approved = $service->approve($slip, $actor);
+
+        $this->assertSame('approved', $approved->status);
+        $this->assertSame('approved', $service->approve($approved, $actor)->status);
+        $this->assertDatabaseHas('audit_logs', [
+            'tenant_id' => $tenant->id,
+            'user_id' => $actor->id,
+            'action' => 'payroll_salary_slip_approved',
+        ]);
+    }
+
+    public function test_employee_cannot_self_approve_salary_slip(): void
+    {
+        [, , $employee] = $this->makeEmployee('payroll-self-approval');
+        $slip = app(PayrollCalculationService::class)->calculate($employee, 5, 2026);
+        $employeeUser = User::query()->findOrFail($employee->user_id);
+
+        try {
+            app(SalarySlipApprovalService::class)->approve($slip, $employeeUser);
+            $this->fail('Employees cannot self-approve payroll.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('cannot approve their own', $exception->getMessage());
+        }
+
+        $this->assertSame('draft', $slip->fresh()->status);
+    }
+
+    public function test_salary_import_excludes_payment_and_approval_fields(): void
+    {
+        $columns = array_map(fn ($column): string => $column->getName(), SalarySlipImporter::getColumns());
+
+        foreach (['status', 'paid_at', 'paid_via', 'journal_entry_id', 'net_salary'] as $protectedColumn) {
+            $this->assertNotContains($protectedColumn, $columns);
         }
     }
 
