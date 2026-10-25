@@ -16,9 +16,16 @@ class CampusGpaCalculator
      */
     public function recalculateForStudent(int $collageStudentId): float
     {
-        $items = StudyPlanItem::withoutTenantScope()
-            ->whereHas('studyPlan', fn ($q) => $q->where('collage_student_id', $collageStudentId))
-            ->with('studyResult')
+        // Resolve the student through the active tenant scope before reading
+        // grades or updating the cached GPA.
+        $student = CollageStudent::query()->findOrFail($collageStudentId);
+
+        $items = StudyPlanItem::query()
+            ->where('tenant_id', $student->tenant_id)
+            ->whereHas('studyPlan', fn ($q) => $q
+                ->where('tenant_id', $student->tenant_id)
+                ->where('collage_student_id', $student->getKey()))
+            ->with(['studyResult' => fn ($q) => $q->where('tenant_id', $student->tenant_id)])
             ->get();
 
         $totalWeighted = 0.0;
@@ -41,13 +48,10 @@ class CampusGpaCalculator
 
         $gpa = $totalCredits > 0 ? round($totalWeighted / $totalCredits, 2) : 0.0;
 
-        $student = CollageStudent::withoutTenantScope()->find($collageStudentId);
-        if ($student) {
-            $student->forceFill([
-                'gpa_cached' => $gpa,
-                'gpa_recalculated_at' => now(),
-            ])->save();
-        }
+        $student->forceFill([
+            'gpa_cached' => $gpa,
+            'gpa_recalculated_at' => now(),
+        ])->save();
 
         return $gpa;
     }
