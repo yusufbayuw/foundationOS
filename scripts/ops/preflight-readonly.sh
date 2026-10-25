@@ -31,6 +31,9 @@ if [[ "$PHP_BIN" != */* ]]; then
     exit 2
   }
 fi
+if [[ "$PHP_BIN" == */* ]]; then
+  PHP_BIN=$(realpath -e -- "$PHP_BIN") || { echo "[FAIL] Selected PHP executable is missing." >&2; exit 2; }
+fi
 if [[ ! -x "$PHP_BIN" ]]; then
   echo "[FAIL] Selected PHP executable is not executable." >&2
   exit 2
@@ -58,7 +61,7 @@ check "PHP CLI 8.4" "$PHP_BIN" -r 'exit(PHP_VERSION_ID >= 80400 && PHP_VERSION_I
 check "Laravel boot and non-secret config policies" "$PHP_BIN" -r '
   require $argv[1]."/vendor/autoload.php";
   $app = require $argv[1]."/bootstrap/app.php";
-  $app->make(\\Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();
+  $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
   $environment = (string) config("app.env");
   $production = $environment === "production";
   $queue = (string) config("queue.default");
@@ -95,7 +98,8 @@ check "Scheduled task registrations (no tasks executed)" bash -c '
 
 check "Queue worker command registered (not started)" "$PHP_BIN" artisan queue:work --help --no-ansi
 check "Failed-queue inspection command registered (not executed)" "$PHP_BIN" artisan queue:failed --help --no-ansi
-check "Encrypted snapshot tooling shell syntax" bash -n scripts/ops/snapshot-local-encrypted.sh scripts/ops/verify-encrypted-snapshot.sh
+check "Encrypted snapshot script syntax" bash -n scripts/ops/snapshot-local-encrypted.sh
+check "Encrypted snapshot verification script syntax" bash -n scripts/ops/verify-encrypted-snapshot.sh
 
 echo "[UNVERIFIED] Real HTTPS/ingress, queue backlog/worker health, scheduler ticks, failed jobs and alerts."
 echo "[UNVERIFIED] Live database/file consistency, offsite backup, key escrow, retention, and isolated staging restore."
