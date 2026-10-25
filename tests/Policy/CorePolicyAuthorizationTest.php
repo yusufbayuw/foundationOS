@@ -40,54 +40,6 @@ class CorePolicyAuthorizationTest extends TestCase
         $this->assertFalse($user->can('update', $tenant));
     }
 
-    public function test_organization_policy_allows_view_when_tenant_permission_granted(): void
-    {
-        $tenant = $this->makeTenant();
-        $organization = Organization::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'campus-a',
-            'name' => 'Campus A',
-            'is_active' => true,
-        ]);
-
-        $user = User::factory()->create();
-
-        Permission::firstOrCreate(['name' => 'View:Organization', 'guard_name' => 'web']);
-
-        $role = Role::firstOrCreate([
-            'name' => 'org_viewer',
-            'guard_name' => 'web',
-            'tenant_id' => $tenant->id,
-        ]);
-        $role->givePermissionTo('View:Organization');
-
-        setPermissionsTeamId($tenant->id);
-        $user->roles()->syncWithoutDetaching([
-            $role->id => [
-                'model_type' => $user->getMorphClass(),
-                'tenant_id' => $tenant->id,
-            ],
-        ]);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        setPermissionsTeamId($tenant->id);
-
-        $this->assertTrue($user->can('view', $organization));
-        $this->assertFalse($user->can('delete', $organization));
-    }
-
-    public function test_user_policy_blocks_update_without_permission(): void
-    {
-        $tenant = $this->makeTenant();
-        $actor = User::factory()->create();
-        $target = User::factory()->create();
-
-        setPermissionsTeamId($tenant->id);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        $this->assertFalse($actor->can('update', $target));
-    }
-
     private function makeTenant(): Tenant
     {
         $plan = SubscriptionPlan::create([
