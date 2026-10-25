@@ -219,7 +219,6 @@ jobs:
 
     env:
       APP_ENV: testing
-      APP_KEY: base64:Ai7zE5WyaUMR8UCd76n0Smu/YJZEpFQqa+xBD/pCfh4=
       BCRYPT_ROUNDS: 4
       CACHE_STORE: array
       DB_CONNECTION: pgsql
@@ -251,6 +250,13 @@ jobs:
           tools: composer:v2
           coverage: none
           ini-values: memory_limit=1G
+
+      - name: Generate ephemeral Laravel APP_KEY for this CI job
+        shell: bash
+        run: |
+          key="$(php -r 'echo "base64:".base64_encode(random_bytes(32));')"
+          echo "::add-mask::$key"
+          printf 'APP_KEY=%s\n' "$key" >> "$GITHUB_ENV"
 
       - name: Get Composer cache directory
         id: composer-cache-postgresql
