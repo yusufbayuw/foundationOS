@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, agent/devops-ci-duplicate-suite-removal-20261025]
+    # Temporary stacked-PR test target; remove second branch before landing on main.
     # A draft gets fast feedback; making it ready automatically triggers
     # the complete test / coverage / database integration gates.
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
