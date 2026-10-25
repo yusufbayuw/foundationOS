@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Core\Models\AcademicPeriod;
 use Modules\Core\Models\AcademicYear;
@@ -20,6 +21,7 @@ use Modules\School\Models\StudentAchievement;
 use Modules\School\Models\StudentGrade;
 use Modules\School\Models\Subject;
 use Modules\School\Models\Teacher;
+use Modules\School\Services\ReportCardService;
 use Tests\Concerns\InteractsWithPdfDocuments;
 use Tests\TestCase;
 
@@ -64,6 +66,42 @@ class SchoolDocumentPdfTest extends TestCase
 
         $this->actingAs($context['user'])
             ->get(route('school.report-card.pdf', [
+                'student' => $context['student']->id,
+                'period' => $context['period']->id,
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_guest_cannot_download_legacy_report_card_pdf(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+
+        $this->getJson(route('school.report-card.download', [
+            'student' => $context['student']->id,
+            'period' => $context['period']->id,
+        ]))->assertUnauthorized();
+    }
+
+    public function test_unprivileged_user_cannot_download_legacy_report_card_pdf(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('school.report-card.download', [
+                'student' => $context['student']->id,
+                'period' => $context['period']->id,
+            ]))
+            ->assertForbidden();
+    }
+
+    public function test_super_admin_can_download_legacy_report_card_pdf(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+
+        $this->actingAs($context['user'])
+            ->get(route('school.report-card.download', [
                 'student' => $context['student']->id,
                 'period' => $context['period']->id,
             ]))
@@ -138,6 +176,74 @@ class SchoolDocumentPdfTest extends TestCase
             ]))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_report_card_displays_class_for_requested_historical_period(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+
+        $nextPeriod = AcademicPeriod::create([
+            'tenant_id' => $context['tenant']->id,
+            'organization_id' => $context['organization']->id,
+            'academic_year_id' => $context['academicYear']->id,
+            'name' => 'Semester Genap',
+            'code' => '2027-GENAP',
+            'start_date' => '2027-01-01',
+            'end_date' => '2027-06-30',
+        ]);
+
+        $newClass = SchoolClass::create([
+            'tenant_id' => $context['tenant']->id,
+            'organization_id' => $context['organization']->id,
+            'academic_period_id' => $nextPeriod->id,
+            'name' => 'XI-B',
+            'code' => 'XI-B',
+        ]);
+
+        ClassStudent::create([
+            'tenant_id' => $context['tenant']->id,
+            'academic_period_id' => $nextPeriod->id,
+            'class_id' => $newClass->id,
+            'student_id' => $context['student']->id,
+        ]);
+
+        $service = app(ReportCardService::class);
+
+        $historical = $service->generate($context['student']->id, $context['period']->id);
+        $current = $service->generate($context['student']->id, $nextPeriod->id);
+
+        $this->assertSame('X-A', $historical['class_name']);
+        $this->assertSame('XI-B', $current['class_name']);
+        $this->assertSame(85.0, (float) $historical['overall_average']);
+        $this->assertSame(0.0, (float) $current['overall_average']);
+    }
+
+    public function test_report_card_rejects_a_period_from_another_tenant(): void
+    {
+        $context = $this->makeSchoolPdfContext();
+        $otherTenant = Tenant::factory()->create();
+
+        $otherYear = AcademicYear::create([
+            'tenant_id' => $otherTenant->id,
+            'name' => '2026 / 2027 Other Tenant',
+            'code' => 'AY-OTHER',
+            'start_date' => '2026-07-01',
+            'end_date' => '2027-06-30',
+        ]);
+
+        $otherPeriod = AcademicPeriod::create([
+            'tenant_id' => $otherTenant->id,
+            'academic_year_id' => $otherYear->id,
+            'name' => 'Foreign Semester',
+            'code' => 'FOREIGN',
+            'start_date' => '2026-07-01',
+            'end_date' => '2026-12-31',
+        ]);
+
+        $this->expectException(ModelNotFoundException::class);
+
+        app(ReportCardService::class)
+            ->generate($context['student']->id, $otherPeriod->id);
     }
 
     /**

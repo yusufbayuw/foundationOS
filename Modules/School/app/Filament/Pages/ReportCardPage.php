@@ -51,22 +51,34 @@ class ReportCardPage extends Page implements HasForms
                     ->label(FilamentUi::text('Periode Akademik'))
                     ->options(AcademicPeriod::pluck('name', 'id'))
                     ->required()
-                    ->live(),
+                    ->live()
+                    ->afterStateUpdated(function (callable $set): void {
+                        $set('class_id', null);
+                        $set('student_id', null);
+                    }),
                 Select::make('class_id')
                     ->label(FilamentUi::text('Kelas'))
-                    ->options(SchoolClass::pluck('name', 'id'))
+                    ->options(function (callable $get) {
+                        $periodId = $get('academic_period_id');
+
+                        return $periodId
+                            ? SchoolClass::query()->where('academic_period_id', $periodId)->pluck('name', 'id')
+                            : collect();
+                    })
                     ->live()
                     ->afterStateUpdated(fn (callable $set) => $set('student_id', null)),
                 Select::make('student_id')
                     ->label(FilamentUi::text('Siswa'))
                     ->options(function (callable $get) {
                         $classId = $get('class_id');
-                        if (! $classId) {
+                        $periodId = $get('academic_period_id');
+                        if (! $classId || ! $periodId) {
                             return collect();
                         }
 
-                        return Student::whereHas('classStudents', function ($q) use ($classId) {
-                            $q->where('class_id', $classId);
+                        return Student::whereHas('classStudents', function ($q) use ($classId, $periodId) {
+                            $q->where('class_id', $classId)
+                                ->where('academic_period_id', $periodId);
                         })->with('user')->get()->pluck('user.name', 'id');
                     })
                     ->required()
