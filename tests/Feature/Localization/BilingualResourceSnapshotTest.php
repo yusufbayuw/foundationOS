@@ -96,36 +96,33 @@ class BilingualResourceSnapshotTest extends TestCase
         }
     }
 
-    public function test_field_helper_translates_in_indonesian_locale(): void
+    public function test_field_helper_translates_in_both_locales(): void
     {
-        App::setLocale('id');
-
-        $cases = [
+        $indonesian = [
             'preferred_locale' => 'Bahasa',
             'phone_number' => 'Nomor telepon',
             'academic_year_id' => 'Tahun akademik',
             'workflow_instance' => 'Instans workflow',
             'payment_method' => 'Metode pembayaran',
         ];
-
-        foreach ($cases as $field => $expected) {
-            $this->assertSame($expected, FilamentUi::field($field), "field('$field') failed");
-        }
-    }
-
-    public function test_field_helper_returns_humanised_english_in_en_locale(): void
-    {
-        App::setLocale('en');
-
-        // field() in English returns the title-cased humanised version of the snake_case name
-        $cases = [
+        $english = [
             'preferred_locale' => 'Preferred Locale',
             'phone_number' => 'Phone Number',
             'payment_method' => 'Payment Method',
         ];
 
-        foreach ($cases as $field => $expected) {
-            $this->assertSame($expected, FilamentUi::field($field), "field('$field') failed");
+        try {
+            App::setLocale('id');
+            foreach ($indonesian as $field => $expected) {
+                $this->assertSame($expected, FilamentUi::field($field), "Indonesian field('{$field}') failed");
+            }
+
+            App::setLocale('en');
+            foreach ($english as $field => $expected) {
+                $this->assertSame($expected, FilamentUi::field($field), "English field('{$field}') failed");
+            }
+        } finally {
+            App::setLocale(config('app.fallback_locale', 'en'));
         }
     }
 
