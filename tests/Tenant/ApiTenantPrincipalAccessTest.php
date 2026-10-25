@@ -278,7 +278,7 @@ class ApiTenantPrincipalAccessTest extends TestCase
 
         $this->withToken($token)->getJson('/api/v1/organizations')->assertOk();
 
-        $this->withToken($token)->postJson('/api/v1/organizations', ['name' => 'Forbidden'])
+        $this->withToken($token)->postJson('/api/v1/applicants', ['full_name' => 'Forbidden'])
             ->assertForbidden()->assertJsonPath('error.code', 'service_integration_denied');
 
         $service->update(['status' => 'disabled']);
