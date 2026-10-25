@@ -481,6 +481,126 @@ class LibraryFoundationTest extends TestCase
         $this->assertSame('organization_user', $config['connection']['username']);
     }
 
+    public function test_checkout_rejects_second_active_loan_when_copy_status_is_stale(): void
+    {
+        [$tenant, $organization, , $user] = $this->makeTenantContext();
+        $user->forceFill(['is_super_admin' => true])->save();
+
+        $member = Member::create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'user_id' => $user->id,
+            'member_number' => 'M-LOCKED-CHECKOUT',
+            'status' => 'active',
+        ]);
+
+        $book = Book::create([
+            'tenant_id' => $tenant->id,
+            'title' => 'Concurrent Programming',
+            'authors' => ['Editor'],
+            'is_active' => true,
+        ]);
+
+        $copy = BookCopy::create([
+            'tenant_id' => $tenant->id,
+            'book_id' => $book->id,
+            'copy_number' => 'COPY-CHECKOUT-LOCK',
+            'status' => 'available',
+        ]);
+
+        $this->actingAs($user)->post('/opac/'.$tenant->code.'/circulation/checkout', [
+            'member_id' => $member->id,
+            'book_copy_id' => $copy->id,
+        ])->assertRedirect();
+
+        $this->assertSame(1, Loan::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('book_copy_id', $copy->id)
+            ->count());
+
+        // Simulate an inconsistent copy record; loan history is authoritative.
+        $copy->forceFill(['status' => 'available'])->save();
+
+        $this->actingAs($user)->post('/opac/'.$tenant->code.'/circulation/checkout', [
+            'member_id' => $member->id,
+            'book_copy_id' => $copy->id,
+        ])->assertStatus(422);
+
+        $this->assertSame(1, Loan::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('book_copy_id', $copy->id)
+            ->count());
+    }
+
+    public function test_checkout_enforces_actual_active_loan_count_not_stale_member_counter(): void
+    {
+        [$tenant, $organization, , $user] = $this->makeTenantContext();
+        $user->forceFill(['is_super_admin' => true])->save();
+
+        LibraryPolicy::create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'name' => 'Limit one book',
+            'max_books' => 1,
+            'loan_period_days' => 7,
+            'fine_per_day' => 0,
+            'max_extensions' => 1,
+            'grace_period_days' => 0,
+            'reservation_pickup_days' => 2,
+            'is_active' => true,
+        ]);
+
+        $member = Member::create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'user_id' => $user->id,
+            'member_number' => 'M-QUOTA',
+            'status' => 'active',
+            'current_loans_count' => 0,
+        ]);
+
+        $book = Book::create([
+            'tenant_id' => $tenant->id,
+            'title' => 'Quota book',
+            'authors' => ['Editor'],
+            'is_active' => true,
+        ]);
+
+        $borrowedCopy = BookCopy::create([
+            'tenant_id' => $tenant->id,
+            'book_id' => $book->id,
+            'copy_number' => 'COPY-TAKEN',
+            'status' => 'borrowed',
+        ]);
+
+        $availableCopy = BookCopy::create([
+            'tenant_id' => $tenant->id,
+            'book_id' => $book->id,
+            'copy_number' => 'COPY-AVAILABLE',
+            'status' => 'available',
+        ]);
+
+        Loan::create([
+            'tenant_id' => $tenant->id,
+            'book_copy_id' => $borrowedCopy->id,
+            'member_id' => $member->id,
+            'loan_date' => now()->subDay()->toDateString(),
+            'due_date' => now()->addDays(6)->toDateString(),
+            'status' => 'borrowed',
+        ]);
+
+        $this->actingAs($user)->post('/opac/'.$tenant->code.'/circulation/checkout', [
+            'member_id' => $member->id,
+            'book_copy_id' => $availableCopy->id,
+        ])->assertStatus(422);
+
+        $this->assertSame(1, Loan::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->where('member_id', $member->id)
+            ->count());
+        $this->assertSame('available', $availableCopy->fresh()->status);
+    }
+
     protected function makeTenantContext(): array
     {
         $plan = SubscriptionPlan::create([
