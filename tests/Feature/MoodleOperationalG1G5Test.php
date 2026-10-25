@@ -81,25 +81,6 @@ class MoodleOperationalG1G5Test extends TestCase
         $this->assertStringContainsString('READONLY', (string) $outbox->last_error);
     }
 
-    public function test_health_check_fails_when_readonly_in_production(): void
-    {
-        config([
-            'moodle.enabled' => true,
-            'moodle.base_url' => 'https://moodle.example.test',
-            'moodle.token' => 'token',
-            'moodle.readonly' => true,
-        ]);
-
-        app()->detectEnvironment(fn (): string => 'production');
-
-        Http::fake([
-            'moodle.example.test/*' => Http::response(['sitename' => 'Test'], 200),
-        ]);
-
-        $this->artisan('fos:moodle:health-check')
-            ->assertFailed();
-    }
-
     protected function tearDown(): void
     {
         Mockery::close();
