@@ -29,6 +29,9 @@ jobs:
       - name: Inventory exact PHPUnit discovery
         run: |
           php vendor/bin/phpunit -c phpunit.xml --list-tests-xml=/tmp/foundationos-tests.xml --colors=never
+          echo 'PHPUNIT_XML_PREVIEW_START'
+          head -c 2000 /tmp/foundationos-tests.xml
+          printf '\nPHPUNIT_XML_PREVIEW_END\n'
           php <<'PHP'
           <?php
           $xml = new DOMDocument();
