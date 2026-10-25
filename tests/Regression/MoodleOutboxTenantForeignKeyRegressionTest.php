@@ -2,8 +2,6 @@
 
 namespace Tests\Regression;
 
-use App\Models\MoodleSyncOutbox;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\Concerns\CreatesTenantForTests;
