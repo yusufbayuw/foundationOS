@@ -6,7 +6,9 @@
 ## Verified evidence (without disclosing any secret)
 
 - The old workflow at the commit immediately before PR #120 contained a literal Laravel `APP_KEY`.
-- Current `main` workflows instead generate a random key per CI execution; the static key is no longer present in that tested workflow.
+- Current `main` workflows generate a random key per CI execution; the static value is no longer present in that tested workflow.
+- **Additional confirmed exposure at HEAD:** `phpunit.xml` and `phpunit.coverage.xml` in the 25 October `main` still contain the **same** historical literal key. This PR removes both values; PHPUnit and coverage must use the independently generated CI/runtime key instead.
+- The existing CI secret guard inspected workflow YAML only. This PR extends the guard to PHPUnit XML and tracked dotenv fixtures without printing secret material.
 - The public Git revision remains accessible in history after the mitigation. Removing the current assignment is not key revocation and does not prove whether live instances use the exposed value.
 - No production/staging environment variables or encryption keys have been retrieved for this report.
 
