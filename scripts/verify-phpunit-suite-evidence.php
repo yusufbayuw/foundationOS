@@ -58,7 +58,11 @@ try {
                 continue;
             }
 
-            $selectorPath = realpath(dirname($configuration).'/'.trim($selector->textContent));
+            $rawPath = trim($selector->textContent);
+            $absolutePath = str_starts_with($rawPath, DIRECTORY_SEPARATOR)
+                ? $rawPath
+                : dirname($configuration).'/'.$rawPath;
+            $selectorPath = realpath($absolutePath);
 
             if ($selectorPath === false) {
                 throw new RuntimeException("Missing configured suite selector for {$requested}");
