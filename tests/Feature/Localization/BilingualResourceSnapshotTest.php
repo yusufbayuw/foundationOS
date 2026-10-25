@@ -4,7 +4,6 @@ namespace Tests\Feature\Localization;
 
 use Illuminate\Support\Facades\App;
 use Modules\Core\Support\FilamentUi;
-use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -82,18 +81,19 @@ class BilingualResourceSnapshotTest extends TestCase
         ];
     }
 
-    #[DataProvider('modulePhrasesProvider')]
-    public function test_phrase_resolves_in_indonesian_locale(string $phrase, string $expectedId, string $expectedEn): void
+    public function test_all_catalogued_phrases_resolve_in_both_locales(): void
     {
-        App::setLocale('id');
-        $this->assertSame($expectedId, FilamentUi::text($phrase));
-    }
+        try {
+            foreach (self::modulePhrasesProvider() as $case => [$phrase, $expectedId, $expectedEn]) {
+                App::setLocale('id');
+                $this->assertSame($expectedId, FilamentUi::text($phrase), "Indonesian: {$case}");
 
-    #[DataProvider('modulePhrasesProvider')]
-    public function test_phrase_resolves_in_english_locale(string $phrase, string $expectedId, string $expectedEn): void
-    {
-        App::setLocale('en');
-        $this->assertSame($expectedEn, FilamentUi::text($phrase));
+                App::setLocale('en');
+                $this->assertSame($expectedEn, FilamentUi::text($phrase), "English: {$case}");
+            }
+        } finally {
+            App::setLocale(config('app.fallback_locale', 'en'));
+        }
     }
 
     public function test_field_helper_translates_in_indonesian_locale(): void
