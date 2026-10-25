@@ -3,7 +3,6 @@
 namespace Tests\ParallelWorkflow;
 
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -11,12 +10,10 @@ use Modules\Core\Models\Tenant;
 use Modules\Core\Models\TenantRole;
 use Modules\Core\Models\User;
 use Modules\Core\Models\UserTenantRole;
-use Modules\Workflow\Contracts\WorkflowDynamicAssigneeResolver;
 use Modules\Workflow\Contracts\WorkflowEngine;
 use Modules\Workflow\Contracts\WorkflowInstanceStarter;
 use Modules\Workflow\Models\Workflow;
 use Modules\Workflow\Models\WorkflowAssignment;
-use Modules\Workflow\Models\WorkflowInstance;
 use Modules\Workflow\Models\WorkflowStep;
 use Modules\Workflow\Models\WorkflowTransition;
 use Tests\TestCase;
@@ -246,17 +243,5 @@ class WorkflowParallelGatewayTest extends TestCase
         ]);
 
         return [$tenant, $organization, $managers[0], $managers[1], $managers[2]];
-    }
-}
-
-class InlineMultiUserResolver implements WorkflowDynamicAssigneeResolver
-{
-    public function resolve(WorkflowInstance $instance, WorkflowStep $step): Collection
-    {
-        $ids = (array) data_get($step->assignee_config, 'user_ids', []);
-
-        return User::query()
-            ->whereIn('id', $ids)
-            ->get();
     }
 }
