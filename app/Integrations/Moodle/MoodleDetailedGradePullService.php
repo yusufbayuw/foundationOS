@@ -3,7 +3,11 @@
 namespace App\Integrations\Moodle;
 
 use App\Models\MoodleEntityMapping;
+use App\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Modules\Campus\Models\CourseOffering;
 use Modules\Campus\Models\StudyPlanItem;
 use Modules\Campus\Models\StudyResult;
@@ -29,12 +33,25 @@ class MoodleDetailedGradePullService
     public function pullForPeriod(AcademicPeriod $period, ?int $tenantFilter = null): array
     {
         $tenantId = (int) $period->tenant_id;
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (int) $activeTenantId !== $tenantId) {
+            throw (new ModelNotFoundException)->setModel(AcademicPeriod::class, [$period->getKey()]);
+        }
+
+        $period = AcademicPeriod::query()
+            ->where('tenant_id', $tenantId)
+            ->findOrFail($period->getKey());
+
         if ($tenantFilter !== null && $tenantFilter !== $tenantId) {
             return ['pulled' => 0, 'students_recalculated' => 0];
         }
 
-        $items = StudyPlanItem::withoutTenantScope()
-            ->whereHas('studyPlan', fn ($q) => $q->where('academic_period_id', $period->id))
+        $items = StudyPlanItem::query()
+            ->where('tenant_id', $tenantId)
+            ->whereHas('studyPlan', fn ($q) => $q
+                ->where('tenant_id', $tenantId)
+                ->where('academic_period_id', $period->id))
             ->whereIn('status', ['approved', 'enrolled', 'active', 'completed'])
             ->with([
                 'courseOffering',
@@ -91,16 +108,24 @@ class MoodleDetailedGradePullService
     public function processGradeItems(StudyPlanItem $item, array $gradeItems): StudyResult
     {
         $tenantId = (int) $item->tenant_id;
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (int) $activeTenantId !== $tenantId) {
+            throw (new ModelNotFoundException)->setModel(StudyPlanItem::class, [$item->getKey()]);
+        }
+
+        // Never trust a queued item's stale tenant or cross-tenant plan link.
+        $item = StudyPlanItem::query()
+            ->where('tenant_id', $tenantId)
+            ->whereHas('studyPlan', fn ($q) => $q->where('tenant_id', $tenantId))
+            ->findOrFail($item->getKey());
+
         $components = $this->config->componentsFor($tenantId);
 
         $breakdown = $this->buildBreakdown($gradeItems, $components);
         $weightedScore = $this->computeWeightedScore($breakdown, $components);
         $grade = $this->config->gradeFor($tenantId, $weightedScore);
         $passThreshold = $this->config->passGradePointFor($tenantId);
-
-        $existing = StudyResult::withoutTenantScope()
-            ->where('study_plan_item_id', $item->id)
-            ->first();
 
         $attributes = [
             'tenant_id' => $tenantId,
@@ -114,13 +139,34 @@ class MoodleDetailedGradePullService
             'source' => 'moodle',
         ];
 
-        if ($existing) {
-            $existing->forceFill($attributes)->save();
+        // Lock the parent row so repeated grade pulls cannot create competing
+        // results. Never rewrite an existing result owned by another tenant.
+        return DB::transaction(function () use ($item, $tenantId, $attributes): StudyResult {
+            StudyPlanItem::query()
+                ->where('tenant_id', $tenantId)
+                ->whereKey($item->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            return $existing->fresh();
-        }
+            $existing = StudyResult::withoutTenantScope()
+                ->where('study_plan_item_id', $item->id)
+                ->lockForUpdate()
+                ->first();
 
-        return StudyResult::create($attributes);
+            if ($existing && (int) $existing->tenant_id !== $tenantId) {
+                throw ValidationException::withMessages([
+                    'study_plan_item_id' => 'A grade result for this item belongs to another tenant.',
+                ]);
+            }
+
+            if ($existing) {
+                $existing->forceFill($attributes)->save();
+
+                return $existing->fresh();
+            }
+
+            return StudyResult::query()->create($attributes);
+        }, 3);
     }
 
     /**
