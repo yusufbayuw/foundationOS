@@ -11,7 +11,6 @@ use App\Integrations\Moodle\MoodleSyncService;
 use App\Jobs\ProcessMoodleSyncOutboxJob;
 use App\Models\MoodleSyncOutbox;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\Http;
 use Mockery;
 use Tests\Concerns\CreatesTenantForTests;
 use Tests\TestCase;
