@@ -32,7 +32,10 @@ jobs:
           coverage: none
 
       - name: Update only vulnerable Laravel and necessary transitive packages
-        run: composer update "laravel/framework:13.29.0" --with-all-dependencies --minimal-changes --no-scripts --no-interaction --no-progress
+        run: # Composer 2.10 security-blocks even low-severity advisories and stops the
+          # resolver; this switch applies ONLY to resolution, not acceptance.
+          # The mandatory High/Critical audit below MUST pass with no ignores.
+          composer update "laravel/framework:13.29.0" --with-all-dependencies --minimal-changes --no-security-blocking --no-scripts --no-interaction --no-progress
 
       - name: Verify locked Laravel security patch and mandatory audit
         run: |
