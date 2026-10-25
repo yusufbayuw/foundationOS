@@ -2,6 +2,7 @@
 
 namespace Modules\Counseling\Policies;
 
+use App\Scopes\TenantScope;
 use Modules\Core\Models\User;
 use Modules\Counseling\Models\CounselingNote;
 
@@ -14,6 +15,11 @@ class CounselingNotePolicy
 
     public function view(User $user, CounselingNote $note): bool
     {
+        $tenantId = TenantScope::resolveTenantId();
+        if ($tenantId !== null && (int) $tenantId !== (int) $note->tenant_id) {
+            return false;
+        }
+
         if ($user->isGlobalSuperAdmin()) {
             return true;
         }
@@ -43,7 +49,7 @@ class CounselingNotePolicy
 
     public function deleteAny(User $user): bool
     {
-        return $user->can('DeleteAny:CounselingNote');
+        return false;
     }
 
     public function restore(User $user, CounselingNote $note): bool
@@ -53,22 +59,22 @@ class CounselingNotePolicy
 
     public function forceDelete(User $user, CounselingNote $note): bool
     {
-        return $user->can('ForceDelete:CounselingNote') && $this->view($user, $note);
+        return false;
     }
 
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('ForceDeleteAny:CounselingNote');
+        return false;
     }
 
     public function restoreAny(User $user): bool
     {
-        return $user->can('RestoreAny:CounselingNote');
+        return false;
     }
 
     public function replicate(User $user, CounselingNote $note): bool
     {
-        return $user->can('Replicate:CounselingNote') && $this->view($user, $note);
+        return false;
     }
 
     public function reorder(User $user): bool
