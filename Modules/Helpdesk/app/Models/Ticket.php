@@ -9,21 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
-use Modules\Helpdesk\Events\TicketCreated;
-use Modules\Helpdesk\Listeners\AssignTicketToAgent;
 use Modules\Monitoring\Models\Concerns\HasAuditTrail;
 
 class Ticket extends Model
 {
     use BelongsToTenant, HasAuditTrail, HasFactory, SoftDeletes;
-
-    protected static function booted(): void
-    {
-        static::created(function (Ticket $ticket): void {
-            app(AssignTicketToAgent::class)
-                ->handle(new TicketCreated($ticket));
-        });
-    }
 
     protected $table = 'tickets';
 

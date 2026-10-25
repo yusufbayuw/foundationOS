@@ -14,8 +14,11 @@ class TicketsTable
             ->columns([
                 TextColumn::make('code')->label(FilamentUi::field('code'))->searchable(),
                 TextColumn::make('name')->label(FilamentUi::field('name'))->searchable()->sortable(),
+                TextColumn::make('category.name')->label(FilamentUi::field('ticket_category_id')),
+                TextColumn::make('priority')->label(FilamentUi::field('priority'))->badge(),
                 TextColumn::make('status')->label(FilamentUi::field('status'))->badge(),
+                TextColumn::make('created_at')->dateTime()->sortable(),
             ])
-            ->defaultSort('name');
+            ->defaultSort('created_at', 'desc');
     }
 }

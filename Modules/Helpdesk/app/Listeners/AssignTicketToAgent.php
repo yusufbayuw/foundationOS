@@ -2,6 +2,7 @@
 
 namespace Modules\Helpdesk\Listeners;
 
+use Modules\Core\Models\UserTenantRole;
 use Modules\Helpdesk\Events\TicketCreated;
 use Modules\Helpdesk\Models\Ticket;
 use Modules\Helpdesk\Models\TicketCategory;
@@ -12,34 +13,50 @@ class AssignTicketToAgent
     {
         $ticket = $event->ticket;
 
-        if ($ticket->assigned_to_user_id) {
-            return;
-        }
-
         $category = $ticket->ticket_category_id
-            ? TicketCategory::query()->find($ticket->ticket_category_id)
+            ? TicketCategory::withoutTenantScope()
+                ->where('tenant_id', $ticket->tenant_id)
+                ->find($ticket->ticket_category_id)
             : null;
 
-        $assigneeId = $category?->default_assignee_user_id
-            ?? $this->leastLoadedAgentId($ticket->tenant_id, $category?->getKey());
+        $tenantId = (int) $ticket->tenant_id;
+        $assigneeId = $ticket->assigned_to_user_id
+            ?? $this->eligibleAgentId($tenantId, $category?->default_assignee_user_id)
+            ?? $this->leastLoadedAgentId($tenantId, $category?->getKey());
 
-        if (! $assigneeId) {
-            return;
+        $meta = $ticket->meta ?? [];
+        $previousMeta = $meta;
+
+        if (! isset($meta['sla_due_at'])) {
+            $meta['sla_due_at'] = now()
+                ->addHours(max(1, (int) ($category?->resolution_hours ?? 24)))
+                ->toIso8601String();
         }
 
-        $slaDue = now()->addHours($category?->resolution_hours ?? 24);
+        if (! isset($meta['sla_response_due_at'])) {
+            $meta['sla_response_due_at'] = now()
+                ->addHours(max(1, (int) ($category?->response_hours ?? 4)))
+                ->toIso8601String();
+        }
 
-        $ticket->update([
-            'assigned_to_user_id' => $assigneeId,
-            'meta' => array_merge($ticket->meta ?? [], [
-                'sla_due_at' => $slaDue->toIso8601String(),
-            ]),
-        ]);
+        $changes = [];
+
+        if ($meta !== $previousMeta) {
+            $changes['meta'] = $meta;
+        }
+
+        if (! $ticket->assigned_to_user_id && $assigneeId) {
+            $changes['assigned_to_user_id'] = $assigneeId;
+        }
+
+        if ($changes !== []) {
+            $ticket->update($changes);
+        }
     }
 
     protected function leastLoadedAgentId(int $tenantId, ?int $categoryId): ?int
     {
-        $query = Ticket::query()
+        $query = Ticket::withoutTenantScope()
             ->where('tenant_id', $tenantId)
             ->whereIn('status', ['open', 'in_progress'])
             ->whereNotNull('assigned_to_user_id');
@@ -54,6 +71,20 @@ class AssignTicketToAgent
             ->orderBy('open_count')
             ->first();
 
-        return $row?->assigned_to_user_id;
+        return $this->eligibleAgentId($tenantId, $row?->assigned_to_user_id);
+    }
+
+    protected function eligibleAgentId(int $tenantId, ?int $userId): ?int
+    {
+        if (! $userId) {
+            return null;
+        }
+
+        return UserTenantRole::withoutTenantScope()
+            ->active()
+            ->where('tenant_id', $tenantId)
+            ->where('user_id', $userId)
+            ->whereHas('user', fn ($query) => $query->whereNull('deleted_at'))
+            ->exists() ? $userId : null;
     }
 }
