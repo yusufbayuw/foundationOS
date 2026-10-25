@@ -135,7 +135,10 @@ class RegisterTenant extends BaseRegisterTenant
                 'timezone' => $data['timezone'] ?? 'Asia/Jakarta',
                 'locale' => $data['locale'] ?? 'id',
                 'currency' => $data['currency'] ?? 'IDR',
-                'status' => 'active',
+                // A newly self-registered tenant starts with a finite trial.
+                // Existing manual/perpetual tenants are left unchanged.
+                'status' => 'trial',
+                'trial_ends_at' => now()->addDays(max(1, (int) config('tenancy.self_registration_trial_days', 14))),
                 'product_profile_code' => $profileCode,
                 'product_profile_version' => $productProfiles->version($profileCode),
                 'created_by' => $user->getKey(),

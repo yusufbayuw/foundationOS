@@ -3,6 +3,7 @@
 namespace Modules\Core\Models\Concerns;
 
 use App\Scopes\TenantScope;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\Tenant;
@@ -30,6 +31,25 @@ trait BelongsToTenant
                 if ($tenantId !== null) {
                     $model->tenant_id = $tenantId;
                 }
+            }
+        });
+
+        static::saving(function (Model $model): void {
+            $tenantId = TenantScope::resolveTenantId();
+
+            // Global CLI/system provisioning remains an explicit separate pathway;
+            // when a tenant IS bound, a forged tenant_id must never be accepted.
+            if ($tenantId === null) {
+                return;
+            }
+
+            if ($model->getAttribute('tenant_id') === null) {
+                $model->setAttribute('tenant_id', $tenantId);
+            }
+
+            if ((string) $model->getAttribute('tenant_id') !== (string) $tenantId
+                || ($model->exists && (string) $model->getRawOriginal('tenant_id') !== (string) $tenantId)) {
+                throw new AuthorizationException('Cross-tenant model write is not allowed.');
             }
         });
     }

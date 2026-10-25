@@ -2,6 +2,7 @@
 
 namespace Tests\Concerns;
 
+use App\Support\CurrentTenant;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
@@ -37,36 +38,40 @@ trait CreatesTenantForTests
             'created_by' => $user->id,
         ]);
 
-        $organization = Organization::create([
-            'tenant_id' => $tenant->id,
-            'code' => 'main',
-            'name' => 'Main Organization',
-            'is_active' => true,
-            'is_main' => true,
-        ]);
+        // Provision fixture models under the destination tenant, then restore
+        // the caller's previous tenant context even if a create fails.
+        return app(CurrentTenant::class)->forTenant($tenant, function () use ($tenant, $user): array {
+            $organization = Organization::create([
+                'tenant_id' => $tenant->id,
+                'code' => 'main',
+                'name' => 'Main Organization',
+                'is_active' => true,
+                'is_main' => true,
+            ]);
 
-        $role = TenantRole::create([
-            'tenant_id' => $tenant->id,
-            'name' => 'Admin',
-            'slug' => 'admin-'.Str::lower(Str::random(4)),
-            'permissions' => ['*'],
-            'is_default' => true,
-        ]);
+            $role = TenantRole::create([
+                'tenant_id' => $tenant->id,
+                'name' => 'Admin',
+                'slug' => 'admin-'.Str::lower(Str::random(4)),
+                'permissions' => ['*'],
+                'is_default' => true,
+            ]);
 
-        UserTenantRole::create([
-            'user_id' => $user->id,
-            'tenant_id' => $tenant->id,
-            'organization_id' => $organization->id,
-            'tenant_role_id' => $role->id,
-            'assigned_by' => $user->id,
-            'is_primary' => true,
-        ]);
+            UserTenantRole::create([
+                'user_id' => $user->id,
+                'tenant_id' => $tenant->id,
+                'organization_id' => $organization->id,
+                'tenant_role_id' => $role->id,
+                'assigned_by' => $user->id,
+                'is_primary' => true,
+            ]);
 
-        return [
-            'tenant' => $tenant,
-            'organization' => $organization,
-            'user' => $user,
-            'role' => $role,
-        ];
+            return [
+                'tenant' => $tenant,
+                'organization' => $organization,
+                'user' => $user,
+                'role' => $role,
+            ];
+        });
     }
 }
