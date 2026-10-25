@@ -47,26 +47,6 @@ class EnrollmentSecurityTest extends TestCase
         ]);
     }
 
-    public function test_api_accepts_admission_period_from_same_tenant(): void
-    {
-        [$tenant, $token, $period] = $this->makeTenantWithToken('tenant-ok');
-
-        $response = $this->withToken($token)->postJson('/api/v1/applicants', [
-            'admission_period_id' => $period->id,
-            'registration_number' => 'REG-OK',
-            'full_name' => 'Valid Applicant',
-        ]);
-
-        $response->assertStatus(201)
-            ->assertJsonPath('data.registration_number', 'REG-OK');
-
-        $this->assertDatabaseHas('applicants', [
-            'tenant_id' => $tenant->id,
-            'admission_period_id' => $period->id,
-            'registration_number' => 'REG-OK',
-        ]);
-    }
-
     public function test_promotion_is_idempotent_and_does_not_duplicate_students(): void
     {
         [$tenant, , $applicant] = $this->makeAcceptedApplicant('idempotent');

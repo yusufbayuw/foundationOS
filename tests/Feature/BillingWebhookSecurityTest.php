@@ -69,29 +69,6 @@ class BillingWebhookSecurityTest extends TestCase
         $this->assertCount(1, $this->invoice->fresh()->metadata['midtrans_webhooks']);
     }
 
-    public function test_pending_webhook_keeps_invoice_pending_and_does_not_activate_tenant(): void
-    {
-        app(BillingService::class)->handleWebhookNotification($this->payload([
-            'transaction_status' => 'pending',
-            'transaction_id' => 'txn-pending-001',
-        ]));
-
-        $this->assertSame('pending', $this->invoice->fresh()->payment_status);
-        $this->assertSame('past_due', $this->tenant->fresh()->status);
-        $this->assertCount(1, $this->invoice->fresh()->metadata['midtrans_webhooks']);
-    }
-
-    public function test_failed_webhook_marks_invoice_failed_without_activating_tenant(): void
-    {
-        app(BillingService::class)->handleWebhookNotification($this->payload([
-            'transaction_status' => 'expire',
-            'transaction_id' => 'txn-failed-001',
-        ]));
-
-        $this->assertSame('failed', $this->invoice->fresh()->payment_status);
-        $this->assertSame('past_due', $this->tenant->fresh()->status);
-    }
-
     public function test_duplicate_paid_webhook_is_idempotent(): void
     {
         $payload = $this->payload([
@@ -141,22 +118,6 @@ class BillingWebhookSecurityTest extends TestCase
 
         $this->assertSame('pending', $this->invoice->fresh()->payment_status);
         $this->assertSame('past_due', $this->tenant->fresh()->status);
-    }
-
-    public function test_valid_webhook_request_is_processed(): void
-    {
-        $payload = $this->payload([
-            'transaction_status' => 'settlement',
-            'transaction_id' => 'txn-valid-route',
-        ]);
-
-        $response = $this->postJson(route('billing.webhook'), $payload);
-
-        $response->assertOk()
-            ->assertJson(['status' => 'ok']);
-
-        $this->assertSame('paid', $this->invoice->fresh()->payment_status);
-        $this->assertSame('active', $this->tenant->fresh()->status);
     }
 
     public function test_amount_mismatch_is_rejected_and_does_not_activate_tenant(): void

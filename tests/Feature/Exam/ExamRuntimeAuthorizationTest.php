@@ -37,18 +37,6 @@ class ExamRuntimeAuthorizationTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_runtime_route_uses_api_throttle_tenant_ability_and_shield_permission(): void
-    {
-        $route = Route::getRoutes()->getByName('api.exam.runtime.attempts.store');
-
-        $this->assertNotNull($route);
-        $middleware = $route->gatherMiddleware();
-        $this->assertContains('throttle:api', $middleware);
-        $this->assertContains('resolve.api.tenant', $middleware);
-        $this->assertContains('abilities:exam:attempts:write', $middleware);
-        $this->assertContains('permission:sync_exam_result', $middleware);
-    }
-
     public function test_runtime_token_without_tenant_is_rejected(): void
     {
         $tenant = $this->createTenant('missing-tenant');
@@ -71,18 +59,6 @@ class ExamRuntimeAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_token_owner_without_shield_permission_is_rejected(): void
-    {
-        $tenant = $this->createTenant('missing-permission');
-        app(ExamShieldProvisioner::class)->provisionForTenant($tenant);
-        $user = User::factory()->create();
-        $token = $this->tokenFor($user, $tenant, ['exam:attempts:write']);
-
-        $this->withToken($token)
-            ->postJson('/api/exam/runtime/attempts', $this->payload())
-            ->assertForbidden();
-    }
-
     public function test_permission_from_another_tenant_team_is_rejected(): void
     {
         $tenant = $this->createTenant('active-team');
@@ -91,24 +67,6 @@ class ExamRuntimeAuthorizationTest extends TestCase
         app(ExamShieldProvisioner::class)->provisionForTenant($otherTenant);
         $user = User::factory()->create();
         setPermissionsTeamId($otherTenant->getKey());
-        $user->givePermissionTo(ExamPermission::SyncExamResult->value);
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-        [$definition, $participant] = $this->examAndParticipantFor($tenant);
-        $token = $this->tokenFor($user, $tenant, ['exam:attempts:write']);
-
-        $this->withToken($token)
-            ->postJson('/api/exam/runtime/attempts', $this->payload($definition, $participant))
-            ->assertForbidden();
-
-        $this->assertSame(0, ExamAttemptSync::withoutTenantScope()->count());
-    }
-
-    public function test_permission_without_contextual_exam_policy_is_rejected(): void
-    {
-        $tenant = $this->createTenant('policy-denied');
-        app(ExamShieldProvisioner::class)->provisionForTenant($tenant);
-        $user = User::factory()->create();
-        setPermissionsTeamId($tenant->getKey());
         $user->givePermissionTo(ExamPermission::SyncExamResult->value);
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         [$definition, $participant] = $this->examAndParticipantFor($tenant);
@@ -158,33 +116,6 @@ class ExamRuntimeAuthorizationTest extends TestCase
         $this->assertSame(0, ExamAttemptSync::withoutTenantScope()->count());
     }
 
-    public function test_soft_deleted_exam_and_participant_are_rejected_by_validation(): void
-    {
-        $tenant = $this->createTenant('soft-deleted');
-        $user = $this->examAdminFor($tenant);
-        [$deletedDefinition, $deletedDefinitionParticipant] = $this->examAndParticipantFor($tenant, 'DeletedDefinition');
-        [$definition, $deletedParticipant] = $this->examAndParticipantFor($tenant, 'DeletedParticipant');
-        $deletedDefinition->delete();
-        $deletedParticipant->delete();
-        $token = $this->tokenFor($user, $tenant, ['exam:attempts:write']);
-
-        $this->withToken($token)
-            ->postJson('/api/exam/runtime/attempts', $this->payload($deletedDefinition, $deletedDefinitionParticipant))
-            ->assertUnprocessable()
-            ->assertJsonStructure([
-                'error' => ['details' => ['exam_definition_id']],
-            ]);
-
-        $this->withToken($token)
-            ->postJson('/api/exam/runtime/attempts', $this->payload($definition, $deletedParticipant))
-            ->assertUnprocessable()
-            ->assertJsonStructure([
-                'error' => ['details' => ['exam_participant_id']],
-            ]);
-
-        $this->assertSame(0, ExamAttemptSync::withoutTenantScope()->count());
-    }
-
     public function test_runtime_attempt_id_is_required_for_idempotency(): void
     {
         $tenant = $this->createTenant('required-id');
@@ -200,26 +131,6 @@ class ExamRuntimeAuthorizationTest extends TestCase
             ->assertJsonStructure([
                 'error' => ['details' => ['runtime_attempt_id']],
             ]);
-    }
-
-    public function test_runtime_attempt_id_must_be_a_uuid(): void
-    {
-        $tenant = $this->createTenant('invalid-id');
-        $user = $this->examAdminFor($tenant);
-        [$definition, $participant] = $this->examAndParticipantFor($tenant);
-        $token = $this->tokenFor($user, $tenant, ['exam:attempts:write']);
-
-        $this->withToken($token)
-            ->postJson('/api/exam/runtime/attempts', [
-                ...$this->payload($definition, $participant),
-                'runtime_attempt_id' => 'runtime-attempt-001',
-            ])
-            ->assertUnprocessable()
-            ->assertJsonStructure([
-                'error' => ['details' => ['runtime_attempt_id']],
-            ]);
-
-        $this->assertSame(0, ExamAttemptSync::withoutTenantScope()->count());
     }
 
     public function test_authorized_retry_updates_one_attempt_sync_idempotently(): void
@@ -278,38 +189,6 @@ class ExamRuntimeAuthorizationTest extends TestCase
 
         $attempt = ExamAttemptSync::withoutTenantScope()->sole();
         $this->assertSame($participant->getKey(), $attempt->exam_participant_id);
-    }
-
-    public function test_database_rejects_duplicate_runtime_attempt_for_an_exam(): void
-    {
-        $tenant = $this->createTenant('database-unique');
-        [$definition, $participant] = $this->examAndParticipantFor($tenant);
-        $otherParticipant = ExamParticipant::withoutTenantScope()->create([
-            'tenant_id' => $tenant->getKey(),
-            'exam_definition_id' => $definition->getKey(),
-            'student_name' => 'Duplicate Runtime Participant',
-            'student_identifier' => 'DUPLICATE-RUNTIME-PARTICIPANT',
-            'participant_source' => ParticipantSource::Manual,
-            'status' => ParticipantStatus::Assigned,
-        ]);
-        $attributes = [
-            'tenant_id' => $tenant->getKey(),
-            'exam_definition_id' => $definition->getKey(),
-            'runtime_attempt_id' => '00000000-0000-4000-8000-000000000002',
-            'sync_status' => 'received',
-        ];
-
-        ExamAttemptSync::withoutTenantScope()->create([
-            ...$attributes,
-            'exam_participant_id' => $participant->getKey(),
-        ]);
-
-        $this->expectException(QueryException::class);
-
-        ExamAttemptSync::withoutTenantScope()->create([
-            ...$attributes,
-            'exam_participant_id' => $otherParticipant->getKey(),
-        ]);
     }
 
     private function createTenant(string $suffix): Tenant

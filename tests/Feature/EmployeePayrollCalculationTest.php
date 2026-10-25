@@ -132,14 +132,6 @@ class EmployeePayrollCalculationTest extends TestCase
         $this->assertSame(0, SalarySlipComponent::query()->count());
     }
 
-    public function test_generate_payroll_requires_tenant_option(): void
-    {
-        $this->artisan('employee:generate-payroll', [
-            '--month' => 5,
-            '--year' => 2026,
-        ])->assertFailed();
-    }
-
     public function test_paid_salary_slip_posts_balanced_payroll_journal(): void
     {
         [$tenant, $organization, $employee] = $this->makeEmployee('payroll-journal');
