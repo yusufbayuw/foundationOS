@@ -52,20 +52,20 @@ return [
     'api_allow_transient_test_token' => true,
 
     /*
-    | Finite trial for NEW self-registered tenants only; existing records,
-    | manual activations and previous grandfathered subscriptions are unchanged.
-    */
-    /*
-    | Compatibility allowlist of audited-by-name legacy system-wide jobs.
-    | NULL job context never inherits a prior worker's tenant or team.
-    | Any additions require tenant-aware query authorization review.
+    | Compatibility allowlist for two legacy system dispatch jobs.
+    | Framework queued listeners are NOT allowed here: WithTenantContext
+    | explicitly verifies the underlying listener, event and tenant instead.
+    | No stale tenant or permission team may be inherited from an earlier job.
     */
     'queue_tenantless_job_types' => [
         'App\\Jobs\\ProcessMoodleSyncOutboxJob',
         'Modules\\Workflow\\Jobs\\CheckWorkflowSlaJob',
-        'Illuminate\\Events\\CallQueuedListener',
     ],
 
+    /*
+    | Finite trial for new self-registered tenants. Existing tenant records
+    | and paid subscriptions are not changed.
+    */
     'self_registration_trial_days' => max(1, (int) env('TENANCY_SELF_REGISTRATION_TRIAL_DAYS', 14)),
 
 ];

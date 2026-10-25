@@ -253,6 +253,73 @@ class ApiTenantPrincipalAccessTest extends TestCase
         }
     }
 
+    public function test_human_token_without_a_tenant_is_rejected_even_with_a_valid_membership(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $this->addMembership($user, $tenant);
+        $unscoped = $user->createToken('legacy-unscoped')->plainTextToken;
+
+        foreach (['v1', 'v2'] as $version) {
+            $this->withToken($unscoped)->getJson("/api/{$version}/me")
+                ->assertForbidden()->assertJsonPath('error.code', 'tenant_token_required');
+        }
+    }
+
+    public function test_service_principal_cannot_post_and_is_denied_after_expiry_or_disable(): void
+    {
+        $tenant = Tenant::factory()->create(['status' => 'active']);
+        $service = TenantServiceIntegration::create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Limited directory API',
+        ]);
+        $issued = $service->issueReadToken('directory');
+        $token = $issued->plainTextToken;
+
+        $this->withToken($token)->getJson('/api/v1/organizations')->assertOk();
+
+        $this->withToken($token)->postJson('/api/v1/organizations', ['name' => 'Forbidden'])
+            ->assertForbidden()->assertJsonPath('error.code', 'service_integration_denied');
+
+        $service->update(['status' => 'disabled']);
+        $this->withToken($token)->getJson('/api/v2/organizations')
+            ->assertForbidden()->assertJsonPath('error.code', 'service_integration_denied');
+
+        $service->update(['status' => 'active', 'expires_at' => now()->subMinute()]);
+        $this->withToken($token)->getJson('/api/v1/organizations')
+            ->assertForbidden()->assertJsonPath('error.code', 'service_integration_denied');
+    }
+
+    public function test_successive_tokens_restore_previous_tenant_and_permission_team(): void
+    {
+        $tenantA = Tenant::factory()->create(['status' => 'active']);
+        $tenantB = Tenant::factory()->create(['status' => 'active']);
+        $user = User::factory()->create(['status' => 'active']);
+        $this->addMembership($user, $tenantB);
+        $token = $this->userToken($user, $tenantB);
+
+        $context = app(CurrentTenant::class);
+        $oldTeam = getPermissionsTeamId();
+        $context->set($tenantA);
+        setPermissionsTeamId($tenantA->id);
+
+        try {
+            $this->withToken($token)->getJson('/api/v1/me')->assertOk();
+            $this->assertEquals($tenantA->id, $context->id());
+            $this->assertEquals($tenantA->id, getPermissionsTeamId());
+
+            $user->update(['status' => 'disabled']);
+            $this->withToken($token)->getJson('/api/v2/me')
+                ->assertForbidden()->assertJsonPath('error.code', 'tenant_user_inactive');
+
+            $this->assertEquals($tenantA->id, $context->id());
+            $this->assertEquals($tenantA->id, getPermissionsTeamId());
+        } finally {
+            $context->forget();
+            setPermissionsTeamId($oldTeam);
+        }
+    }
+
     private function userToken(User $user, Tenant $tenant, array $abilities = ['*']): string
     {
         $issued = $user->createToken('membership-test', $abilities);

@@ -75,10 +75,48 @@ CurrentTenant restores the request context with try/finally; Spatie team IDs are
 
 Raw query writes, bulk builder writes, file path authorization, CDN/private uploads, queued jobs that do not adopt InteractsWithTenant, Filament/Livewire direct model access, cache key naming, invoice reactivation, and optional per-module/add-on enforcement are not fully proven safe by these focused tests. These require separate module-owner negative tests, an asset inventory, and isolated PRs. Do not interpret green CI as an exhaustive tenant isolation guarantee.
 
-## CI regression correction (2026-10-23)
+## Queued listener isolation review (2026-10-25)
 
-The strict NULL-`tenantId` queue rejection introduced in this PR broke existing framework and explicitly global jobs (`ProcessMoodleSyncOutboxJob`, `CheckWorkflowSlaJob`, `CallQueuedListener`). The middleware now permits only those three reviewed-by-name legacy job types to execute with NULL tenant context. Crucially, execution is wrapped in `CurrentTenant::forTenant(null)`, the Spatie permission team is reset to `0` for the callback, and previous context/team are restored in `finally`; unrelated jobs still fail closed. **This is an operational compatibility exception, not proof that all queued listeners are fully tenant-safe.** Audit individual listener targets and target-record authorization before tightening that temporary allowance.
+The previous exception for the generic `Illuminate\\Events\\CallQueuedListener` job wrapper has been **removed**. This framework class represents many unrelated listeners and cannot itself establish authorization.
 
-The cross-tenant Eloquent `saving` guard remains strict. Existing integration tests that intentionally construct foreign-tenant fixtures now explicitly enter the foreign tenant context while creating those records, avoiding fake security exceptions during test setup. The subsequent cross-tenant API negative assertions remain unchanged.
+`WithTenantContext` now checks the underlying queued listener class, expected event type and the event subject's tenant before executing. The following are the only accepted combinations:
 
-Laravel static analysis now has an explicit typed Eloquent `Tenant::$trial_ends_at` property annotation. No migration or persisted tenant data was changed by this corrective patch.
+| Queued listener | Accepted event | Tenant source |
+| --- | --- | --- |
+| `RunWorkflowAutomatedActions` | `WorkflowStarted`, `WorkflowAdvanced`, `WorkflowReturned`, `WorkflowCancelled`, `WorkflowSlaBreached` | `event.instance.tenant_id` |
+| `CreateInitialInvoiceFromAcceptedApplicant` | `ApplicantAccepted` | `event.applicant.tenant_id` |
+| `CreateRfqFromApprovedPurchaseRequisition` | `PurchaseRequisitionApproved` | `event.requisition.tenant_id` |
+
+The event subject must be a saved Eloquent model with a tenant ID, the tenant must still exist, and any already captured `tenantId` must match. Otherwise the listener fails closed. The destination tenant and Spatie permission team are restored even when its callback throws. The general `CallQueuedListener` wrapper is never eligible for the system-job NULL-context exception; arbitrary/mismatched queued listeners are covered by negative tests.
+
+Two separately named legacy dispatch jobs (`ProcessMoodleSyncOutboxJob`, `CheckWorkflowSlaJob`) still support isolated NULL context for backward compatibility. These are **not** blanket authorization to read/write any tenant. Their record IDs and tenant propagation require dedicated Workflow/Moodle ownership review before stricter tenant-required rollout. This PR does not change other teams' business jobs.
+
+### Auth and isolation verification matrix
+
+Automated tenant tests enforce membership and expiration on v1/v2 persisted bearer tokens; verify tenant A token cannot read B organization even when B is supplied by query; deny human tokens with NULL tenant; require an explicit `platform:tenants` grant for cross-tenant admins; deny disabled users, suspended/expired subscriptions, revoked/expired machine principals; reject machine writes and non-allowlisted GET endpoints; and restore the preceding HTTP tenant/permission-team context on success and denial.
+
+Queue regression tests additionally cover arbitrary queued listeners, wrong listener/event pairs, mismatched captured tenant, approved workflow/enrollment/procurement dispatch pairs, and state restoration after a listener exception. The full Workflow, Queue, Tenant, SQLite/PHPUnit and PostgreSQL CI suites must all pass on the final commit.
+
+### Production token inventory and staging gate
+
+The production default for `TENANCY_API_ENFORCE_MEMBERSHIP` is true, but staging must explicitly set `TENANCY_API_ENFORCE_MEMBERSHIP=true` and `TENANCY_API_REQUIRE_TENANT=true` to reproduce release policy. Before enabling the production rollout, generate a **read-only count**, not a token-value export, for tenantless or membershipless human Sanctum tokens. For example (set `:human_morph_type` from `(new \\Modules\\Core\\Models\\User)->getMorphClass()` on that installation):
+
+```sql
+SELECT
+    COUNT(*) AS affected_active_human_tokens,
+    SUM(CASE WHEN pat.tenant_id IS NULL THEN 1 ELSE 0 END) AS missing_tenant,
+    SUM(CASE WHEN pat.tenant_id IS NOT NULL AND NOT EXISTS (
+        SELECT 1
+        FROM user_tenant_roles utr
+        WHERE utr.user_id = pat.tokenable_id
+          AND utr.tenant_id = pat.tenant_id
+          AND (utr.expires_at IS NULL OR utr.expires_at > CURRENT_TIMESTAMP)
+    ) THEN 1 ELSE 0 END) AS missing_active_membership
+FROM personal_access_tokens pat
+WHERE pat.tokenable_type = :human_morph_type
+  AND (pat.expires_at IS NULL OR pat.expires_at > CURRENT_TIMESTAMP);
+```
+
+Do not post token secrets, hashed token values, user identities or tenant customer data in PR comments. Review affected token owners offline: provision **only approved legitimate memberships**, rotate/revoke stale user tokens, and use a separate machine principal for integrations. Test revocation, 403 metrics, callback billing recovery and tenant A/B access on staging with representative accounts, then record dated UAT evidence and security sign-off. No staging credentials or deployment authority are available in this PR; green CI **does not** assert these live checks have been performed.
+
+Existing default-null active subscriptions, trial business approval, file/cache/export/raw SQL isolation and paid-module add-ons remain documented separate release gates.
