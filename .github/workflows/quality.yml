@@ -128,7 +128,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Reject hard-coded Laravel APP_KEY in workflow YAML
+      - name: Reject static APP_KEY across workflows and test configuration
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -141,8 +141,19 @@ jobs:
               re.search(r'(?m)^\s*APP_KEY\s*:\s*\S+', path.read_text(encoding='utf-8'))
               for path in workflows
           )
-          if leaked:
-              print('::error::A GitHub Actions workflow contains a literal Laravel APP_KEY; generate a fresh key per CI job.')
+          # PHPUnit config files previously repeated the same public CI key.
+          # Only detect presence: NEVER emit file contents or partial secrets.
+          phpunit_files = list(Path('.').glob('phpunit*.xml'))
+          leaked_phpunit = any(
+              re.search(r'<env\\s+name=[\\x22\\x27]APP_KEY[\\x22\\x27]\\s+value=[\\x22\\x27](?![\\x22\\x27])[^\\x22\\x27]+', path.read_text(encoding='utf-8'))
+              for path in phpunit_files
+          )
+          leaked_dotenv = any(
+              re.search(r'(?m)^APP_KEY=(?!\\s*$)\\S+', path.read_text(encoding='utf-8'))
+              for path in Path('.').glob('.env*') if path.is_file()
+          )
+          if leaked or leaked_phpunit or leaked_dotenv:
+              print('::error::A tracked test/CI configuration contains a non-empty static APP_KEY. Use per-job generated keys.')
               sys.exit(1)
           PY
 
