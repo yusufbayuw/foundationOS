@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Imports\JournalEntryImporter;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
@@ -68,6 +69,7 @@ class FinanceControlTest extends TestCase
         $invoice->refresh();
 
         $this->assertSame('verified', $verified->status);
+        $this->assertSame('verified', app(FinanceControlService::class)->verifyPayment($payment, $actor)->status);
         $this->assertSame('paid', $invoice->status);
         $this->assertSame('1000000.00', number_format((float) $invoice->paid_amount, 2, '.', ''));
         $this->assertSame('0.00', number_format((float) $invoice->remaining_amount, 2, '.', ''));
@@ -148,6 +150,29 @@ class FinanceControlTest extends TestCase
 
         $this->assertTrue((bool) $postedJournal->fresh()->is_posted);
         $this->assertTrue((bool) $reversedJournal->is_reversed);
+
+        $reversal = JournalEntry::query()
+            ->where('tenant_id', $tenant->id)
+            ->where('reversed_entry_id', $journal->id)
+            ->sole();
+
+        $this->assertSame('REV-'.$journal->id, $reversal->entry_number);
+        $this->assertTrue((bool) $reversal->is_posted);
+        $this->assertTrue((bool) $reversal->is_balanced);
+        $this->assertEqualsWithDelta(250000, (float) $reversal->total_debit, 0.01);
+        $this->assertEqualsWithDelta(250000, (float) $reversal->total_credit, 0.01);
+        $this->assertDatabaseHas('journal_entry_lines', [
+            'journal_entry_id' => $reversal->id,
+            'chart_of_account_id' => $cashAccount->id,
+            'debit' => 0,
+            'credit' => 250000,
+        ]);
+        $this->assertDatabaseHas('journal_entry_lines', [
+            'journal_entry_id' => $reversal->id,
+            'chart_of_account_id' => $receivableAccount->id,
+            'debit' => 250000,
+            'credit' => 0,
+        ]);
         $this->assertDatabaseHas('audit_logs', [
             'tenant_id' => $tenant->id,
             'auditable_type' => 'budget',
@@ -160,6 +185,184 @@ class FinanceControlTest extends TestCase
             'auditable_id' => $journal->id,
             'action' => 'finance_journal_reversed',
         ]);
+    }
+
+    public function test_reversal_is_atomic_and_cannot_create_a_duplicate_journal(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+        [$cashAccount, $receivableAccount] = $this->makeAccounts($tenant, $organization);
+
+        $journal = JournalEntry::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'entry_number' => 'JE-REVERSAL-ONCE',
+            'date' => now()->toDateString(),
+            'description' => 'Reversal idempotency regression.',
+            'total_debit' => 150000,
+            'total_credit' => 150000,
+            'is_balanced' => true,
+            'is_posted' => false,
+        ]);
+
+        $journal->lines()->createMany([
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $cashAccount->id, 'debit' => 150000, 'credit' => 0],
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $receivableAccount->id, 'debit' => 0, 'credit' => 150000],
+        ]);
+
+        $service = app(FinanceControlService::class);
+        $service->postJournalEntry($journal, $actor);
+        $service->reverseJournalEntry($journal, $actor, 'Correct duplicate booking.');
+
+        try {
+            $service->reverseJournalEntry($journal, $actor, 'Repeated reversal attempt.');
+            $this->fail('An already reversed journal must reject a second reversal.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('Only posted and unreversed', $exception->getMessage());
+        }
+
+        $this->assertSame(1, JournalEntry::query()->where('reversed_entry_id', $journal->id)->count());
+        $this->assertSame(2, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+        $this->assertDatabaseCount('journal_entry_lines', 4);
+        $this->assertSame('Correct duplicate booking.', $journal->fresh()->reversal_reason);
+    }
+
+    public function test_empty_journal_cannot_be_posted(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+
+        $journal = JournalEntry::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'entry_number' => 'JE-NO-LINES',
+            'date' => now()->toDateString(),
+            'description' => 'Empty manual journal.',
+            'total_debit' => 0,
+            'total_credit' => 0,
+            'is_balanced' => false,
+            'is_posted' => false,
+        ]);
+
+        try {
+            app(FinanceControlService::class)->postJournalEntry($journal, $actor);
+            $this->fail('A zero-value journal with no lines must not be posted.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('at least two lines', $exception->getMessage());
+        }
+
+        $this->assertFalse((bool) $journal->fresh()->is_posted);
+    }
+
+    public function test_overpayment_is_rejected_before_changing_invoice_or_ledger(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+        [$cashAccount, $receivableAccount] = $this->makeAccounts($tenant, $organization);
+
+        TenantSetting::query()->create([
+            'tenant_id' => $tenant->id,
+            'group' => 'finance',
+            'key' => 'default_receivable_account_id',
+            'value' => (string) $receivableAccount->id,
+            'type' => 'integer',
+        ]);
+
+        $invoice = StudentInvoice::query()->create([
+            'tenant_id' => $tenant->id,
+            'invoiceable_type' => Organization::class,
+            'invoiceable_id' => $organization->id,
+            'invoice_number' => 'INV-OVERPAY',
+            'invoice_type' => 'student_invoice',
+            'issue_date' => now()->toDateString(),
+            'due_date' => now()->addDays(14)->toDateString(),
+            'amount' => 100000,
+            'total_amount' => 100000,
+            'paid_amount' => 0,
+            'remaining_amount' => 100000,
+            'status' => 'issued',
+            'description' => 'Overpayment guard regression.',
+        ]);
+
+        $payment = Payment::query()->create([
+            'tenant_id' => $tenant->id,
+            'student_invoice_id' => $invoice->id,
+            'chart_of_account_id' => $cashAccount->id,
+            'payment_number' => 'PAY-OVERPAY',
+            'payment_date' => now()->toDateString(),
+            'amount' => 110000,
+            'payment_method' => 'bank_transfer',
+            'status' => 'pending',
+        ]);
+
+        try {
+            app(FinanceControlService::class)->verifyPayment($payment, $actor);
+            $this->fail('An overpayment must be rejected.');
+        } catch (\RuntimeException $exception) {
+            $this->assertStringContainsString('exceeds the invoice remaining balance', $exception->getMessage());
+        }
+
+        $this->assertSame('pending', $payment->fresh()->status);
+        $this->assertSame('issued', $invoice->fresh()->status);
+        $this->assertEqualsWithDelta(0, (float) $invoice->fresh()->paid_amount, 0.01);
+        $this->assertSame(0, JournalEntry::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_posted_journal_and_lines_cannot_be_mutated_by_eloquent_actions(): void
+    {
+        [$tenant, $organization, $actor] = $this->makeFinanceContext();
+        [$cashAccount, $receivableAccount] = $this->makeAccounts($tenant, $organization);
+
+        $entry = JournalEntry::query()->create([
+            'tenant_id' => $tenant->id,
+            'organization_id' => $organization->id,
+            'entry_number' => 'JE-IMMUTABLE-TEST',
+            'date' => now()->toDateString(),
+            'description' => 'Protected posted journal regression.',
+            'total_debit' => 0,
+            'total_credit' => 0,
+            'is_balanced' => false,
+            'is_posted' => false,
+        ]);
+
+        $entry->lines()->createMany([
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $cashAccount->id, 'debit' => 30000, 'credit' => 0],
+            ['tenant_id' => $tenant->id, 'chart_of_account_id' => $receivableAccount->id, 'debit' => 0, 'credit' => 30000],
+        ]);
+
+        app(FinanceControlService::class)->postJournalEntry($entry, $actor);
+        $entry->refresh();
+        $line = $entry->lines()->firstOrFail();
+
+        foreach ([
+            fn () => $entry->update(['description' => 'Unapproved overwrite']),
+            fn () => $entry->delete(),
+            fn () => $line->update(['debit' => 99999]),
+            fn () => $line->delete(),
+            fn () => $entry->lines()->create([
+                'tenant_id' => $tenant->id,
+                'chart_of_account_id' => $cashAccount->id,
+                'debit' => 1,
+                'credit' => 0,
+            ]),
+        ] as $write) {
+            try {
+                $write();
+                $this->fail('Posted GL records must not be mutable.');
+            } catch (\RuntimeException $exception) {
+                $this->assertNotEmpty($exception->getMessage());
+            }
+        }
+
+        $this->assertSame('Protected posted journal regression.', $entry->fresh()->description);
+        $this->assertSame(2, $entry->lines()->count());
+        $this->assertEqualsWithDelta(30000, (float) $line->fresh()->debit, 0.01);
+    }
+
+    public function test_journal_import_only_accepts_safe_draft_descriptors(): void
+    {
+        $columns = array_map(fn ($column): string => $column->getName(), JournalEntryImporter::getColumns());
+
+        foreach (['is_posted', 'is_reversed', 'posted_at', 'total_debit', 'total_credit', 'reversed_entry_id'] as $protectedColumn) {
+            $this->assertNotContains($protectedColumn, $columns);
+        }
     }
 
     protected function makeFinanceContext(): array

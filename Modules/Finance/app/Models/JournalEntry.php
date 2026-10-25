@@ -10,12 +10,52 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Core\Models\Concerns\BelongsToTenant;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\User;
+use RuntimeException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 class JournalEntry extends Model
 {
     use BelongsToTenant, HasFactory, LogsActivity, SoftDeletes;
+
+    private bool $allowReversalMutation = false;
+
+    protected static function booted(): void
+    {
+        static::updating(function (self $entry): void {
+            if (! $entry->getRawOriginal('is_posted')) {
+                return;
+            }
+
+            if (! $entry->allowReversalMutation || array_diff(array_keys($entry->getDirty()), ['is_reversed', 'reversal_reason', 'updated_at']) !== []) {
+                throw new RuntimeException('Posted journals are immutable; use a correcting reversal entry.');
+            }
+        });
+
+        static::deleting(function (self $entry): void {
+            if ($entry->isLockedForMutation()) {
+                throw new RuntimeException('Posted and reversed journals cannot be deleted.');
+            }
+        });
+    }
+
+    public function recordReversal(string $reason): void
+    {
+        if (! (bool) $this->getAttribute('is_posted') || (bool) $this->getAttribute('is_reversed')) {
+            throw new RuntimeException('Only posted and unreversed journal entries can be reversed.');
+        }
+
+        $this->allowReversalMutation = true;
+
+        try {
+            $this->forceFill([
+                'is_reversed' => true,
+                'reversal_reason' => $reason,
+            ])->save();
+        } finally {
+            $this->allowReversalMutation = false;
+        }
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

@@ -72,6 +72,30 @@ class JournalEntryResource extends LocalizedResource
         ];
     }
 
+    public static function canDelete(Model $record): bool
+    {
+        return $record instanceof JournalEntry
+            && ! $record->isLockedForMutation()
+            && parent::canDelete($record);
+    }
+
+    public static function canForceDelete(Model $record): bool
+    {
+        return $record instanceof JournalEntry
+            && ! $record->isLockedForMutation()
+            && parent::canForceDelete($record);
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
+    public static function canForceDeleteAny(): bool
+    {
+        return false;
+    }
+
     public static function canEdit(Model $record): bool
     {
         return $record instanceof JournalEntry
