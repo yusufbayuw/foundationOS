@@ -106,13 +106,15 @@ jobs:
       - name: Run complete tests with scoped coverage (one PHPUnit execution)
         run: |
           mkdir -p coverage
-          php -d pcov.directory="${GITHUB_WORKSPACE}" vendor/bin/phpunit -c phpunit.coverage.xml --coverage-clover=coverage/clover.xml --colors=never
+          php -d pcov.directory="${GITHUB_WORKSPACE}" vendor/bin/phpunit -c phpunit.coverage.xml --coverage-clover=coverage/clover.xml --log-junit=coverage/junit.xml --colors=never
 
       - name: Upload complete suite coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-clover
-          path: coverage/clover.xml
+          path: |
+            coverage/clover.xml
+            coverage/junit.xml
           if-no-files-found: error
           retention-days: 7
 
@@ -144,10 +146,13 @@ jobs:
         run: php scripts/check-coverage-threshold.php coverage/clover.xml 80
 
   suites:
+    # Preserve existing required check identities until branch-protection rules
+    # are explicitly migrated. These checks VERIFY the successful full-run
+    # evidence instead of redundantly executing the same PHPUnit test cases.
     name: Named suites smoke
     runs-on: ubuntu-latest
     needs: phpunit
-    timeout-minutes: 45
+    timeout-minutes: 10
 
     strategy:
       fail-fast: false
@@ -167,35 +172,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show CI context
-        run: |
-          echo "Commit: $GITHUB_SHA"
-          echo "Environment: SQLite named suite (${{ matrix.suite }})"
-
-      - name: Setup PHP
+      - name: Setup PHP for JUnit attestation
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-          tools: composer:v2
+          extensions: dom, libxml
           coverage: none
-          ini-values: memory_limit=1G
 
-      - name: Install dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Download full PHPUnit execution evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-clover
+          path: coverage
 
-      - name: Prepare application
-        run: |
-          cp .env.example .env
-          php artisan key:generate --ansi
-
-      - name: Show PHP and Composer versions
-        run: |
-          php --version
-          composer --version
-
-      - name: Run ${{ matrix.suite }} suite
-        run: php artisan test --compact --testsuite=${{ matrix.suite }}
+      - name: Verify ${{ matrix.suite }} was executed by full required runner
+        run: php scripts/verify-phpunit-suite-evidence.php phpunit.xml coverage/junit.xml "${{ matrix.suite }}"
 
   postgresql:
     name: PostgreSQL integration and migration smoke
