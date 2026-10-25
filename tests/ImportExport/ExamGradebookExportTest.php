@@ -82,6 +82,62 @@ class ExamGradebookExportTest extends TestCase
         $this->assertSame(StudyResult::class, $log?->target_reference_type);
     }
 
+    public function test_campus_export_rejects_foreign_tenant_study_plan_item_in_metadata(): void
+    {
+        [$tenant, $definition, $participant, $result, $ownItem] = $this->seedCampusExamWithResult(score: 81);
+        $otherTenant = $this->createTenant(['campus', 'exam']);
+
+        $otherStudent = CollageStudent::withoutTenantScope()->create([
+            'tenant_id' => $otherTenant->id,
+            'full_name' => 'Other Tenant Student',
+            'student_number' => 'FOREIGN-EXAM-STUDENT',
+        ]);
+
+        $otherPlan = StudyPlan::withoutTenantScope()->create([
+            'tenant_id' => $otherTenant->id,
+            'collage_student_id' => $otherStudent->id,
+            'plan_number' => 'FOREIGN-PLAN',
+            'status' => 'approved',
+        ]);
+
+        $foreignItem = StudyPlanItem::withoutTenantScope()->create([
+            'tenant_id' => $otherTenant->id,
+            'study_plan_id' => $otherPlan->id,
+            'credits' => 3,
+        ]);
+
+        $participant->forceFill([
+            'metadata_json' => ['study_plan_item_id' => $foreignItem->id],
+        ])->save();
+
+        $summary = app(ExamGradebookExportService::class)->pushToCampusGradebook($definition);
+
+        $this->assertSame(0, $summary['success']);
+        $this->assertSame(1, $summary['skipped']);
+        $this->assertSame(0, StudyResult::withoutTenantScope()->count());
+    }
+
+    public function test_campus_export_refuses_existing_result_owned_by_other_tenant(): void
+    {
+        [$tenant, $definition, $participant, $result, $ownItem] = $this->seedCampusExamWithResult(score: 83);
+        $otherTenant = $this->createTenant(['campus', 'exam']);
+
+        $foreignResult = StudyResult::withoutTenantScope()->create([
+            'tenant_id' => $otherTenant->id,
+            'study_plan_item_id' => $ownItem->id,
+            'grade_letter' => 'D',
+            'grade_point' => 1.0,
+        ]);
+
+        $summary = app(ExamGradebookExportService::class)->pushToCampusGradebook($definition);
+
+        $this->assertSame(0, $summary['success']);
+        $this->assertSame(1, $summary['skipped']);
+        $this->assertSame(1, StudyResult::withoutTenantScope()->count());
+        $this->assertSame($otherTenant->id, $foreignResult->fresh()->tenant_id);
+        $this->assertSame('D', $foreignResult->fresh()->grade_letter);
+    }
+
     public function test_skipped_school_export_dispatches_exam_result_synced_event(): void
     {
         Event::fake([ExamResultSynced::class]);
