@@ -77,8 +77,8 @@ jobs:
 
           # Removing the same suite from BOTH configs must still fail:
           # parity alone cannot catch a coordinated omission.
-          sed '/<testsuite name="Regression">/,/<\\/testsuite>/d' phpunit.xml > "${RUNNER_TEMP}/phpunit.no-regression.xml"
-          sed '/<testsuite name="Regression">/,/<\\/testsuite>/d' phpunit.coverage.xml > "${RUNNER_TEMP}/phpunit.coverage.no-regression.xml"
+          sed '/<testsuite name="Regression">/,/<.testsuite>/d' phpunit.xml > "${RUNNER_TEMP}/phpunit.no-regression.xml"
+          sed '/<testsuite name="Regression">/,/<.testsuite>/d' phpunit.coverage.xml > "${RUNNER_TEMP}/phpunit.coverage.no-regression.xml"
           if php scripts/verify-phpunit-suite-parity.php "${RUNNER_TEMP}/phpunit.no-regression.xml" "${RUNNER_TEMP}/phpunit.coverage.no-regression.xml"; then
             echo "::error::Required-suite guard allowed Regression to be deleted from both configs"
             exit 1
