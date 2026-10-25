@@ -29,21 +29,19 @@ jobs:
       - name: Inventory exact PHPUnit discovery
         run: |
           php vendor/bin/phpunit -c phpunit.xml --list-tests-xml=/tmp/foundationos-tests.xml --colors=never
-          echo 'PHPUNIT_XML_PREVIEW_START'
-          head -c 2000 /tmp/foundationos-tests.xml
-          printf '\nPHPUNIT_XML_PREVIEW_END\n'
           php <<'PHP'
           <?php
           $xml = new DOMDocument();
           $xml->load('/tmp/foundationos-tests.xml');
           $xpath = new DOMXPath($xml);
-          $all = $xpath->query('//*[local-name()="testCaseMethod"]');
+          $all = $xpath->query('//*[local-name()="testMethod"]');
           $files = [];
           $methods = [];
           foreach ($all as $item) {
               $method = (string) $item->getAttribute('name');
               $parent = $item->parentNode;
               $file = $parent instanceof DOMElement ? (string) $parent->getAttribute('file') : '';
+              $file = str_replace(getcwd().DIRECTORY_SEPARATOR, '', $file);
               $class = $parent instanceof DOMElement ? (string) $parent->getAttribute('name') : '';
               $files[$file] = ($files[$file] ?? 0) + 1;
               $methods[] = ['f' => $file, 'c' => $class, 'm' => $method];
