@@ -5,8 +5,7 @@ namespace Tests\Feature {
     use Illuminate\Support\Facades\App;
     use Modules\Core\Support\FilamentUi;
     use Modules\School\Tests\MockSchoolClass;
-    use PHPUnit\Framework\Attributes\DataProvider;
-    use Tests\TestCase;
+        use Tests\TestCase;
 
     class FilamentUiTranslationsTest extends TestCase
     {
@@ -137,10 +136,11 @@ namespace Tests\Feature {
             ];
         }
 
-        #[DataProvider('phraseProvider')]
-        public function test_phrase_translates_correctly(string $input, string $expected): void
+        public function test_all_catalogued_phrases_translate_correctly(): void
         {
-            $this->assertSame($expected, FilamentUi::text($input));
+            foreach (self::phraseProvider() as $case => [$input, $expected]) {
+                $this->assertSame($expected, FilamentUi::text($input), "Phrase: {$case}");
+            }
         }
 
         public function test_proper_noun_abbreviations_stay_unchanged(): void
