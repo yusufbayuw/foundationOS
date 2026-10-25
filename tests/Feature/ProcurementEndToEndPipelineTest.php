@@ -31,7 +31,7 @@ class ProcurementEndToEndPipelineTest extends TestCase
         $poItems = $po->items;
 
         // Partial: receive only 2 of 4 monitors, none of the keyboards.
-        app(GoodsReceiptAutoCreationService::class)->receive(
+        $partialReceipt = app(GoodsReceiptAutoCreationService::class)->receive(
             $po,
             quantities: [
                 $poItems[0]->id => 2,
@@ -40,11 +40,15 @@ class ProcurementEndToEndPipelineTest extends TestCase
             receivedBy: null,
         );
 
+        $this->assertSame('confirmed', $partialReceipt->status);
+        $this->assertSame(1, $partialReceipt->items()->count());
+        $this->assertSame(2, (int) $partialReceipt->items->first()->quantity_accepted);
+        $this->assertEqualsWithDelta(10_000_000.0, (float) $partialReceipt->items->first()->total_amount, 0.01);
         $this->assertSame('partial', $po->fresh()->status);
         $this->assertSame(2, (int) $poItems[0]->fresh()->quantity_received);
 
         // Receive the rest: 2 more monitors + all 6 keyboards.
-        app(GoodsReceiptAutoCreationService::class)->receive(
+        $finalReceipt = app(GoodsReceiptAutoCreationService::class)->receive(
             $po,
             quantities: [
                 $poItems[0]->id => 2,
@@ -52,6 +56,9 @@ class ProcurementEndToEndPipelineTest extends TestCase
             ],
         );
 
+        $this->assertSame('confirmed', $finalReceipt->status);
+        $this->assertSame(2, $finalReceipt->items()->count());
+        $this->assertEqualsWithDelta(16_000_000.0, (float) $finalReceipt->items->sum('total_amount'), 0.01);
         $this->assertSame('received', $po->fresh()->status);
         $this->assertSame(4, (int) $poItems[0]->fresh()->quantity_received);
         $this->assertSame(6, (int) $poItems[1]->fresh()->quantity_received);
@@ -107,21 +114,28 @@ class ProcurementEndToEndPipelineTest extends TestCase
 
     public function test_three_way_mismatch_rejects_price_outside_tolerance(): void
     {
-        [, $po] = $this->makePoWithItems([
+        [$tenant, $po] = $this->makePoWithItems([
             ['Server', 1, 50_000_000],
         ]);
         $receipt = app(GoodsReceiptAutoCreationService::class)->receive($po);
 
-        $this->expectException(ThreeWayMatchException::class);
+        try {
+            app(VendorBillAutoCreationService::class)->createFromGoodsReceipt(
+                $receipt,
+                billLines: [[
+                    'purchase_order_item_id' => $po->items->first()->id,
+                    'quantity' => 1,
+                    'unit_price' => 60_000_000, // 20% above PO price
+                ]],
+            );
+            $this->fail('The price mismatch must reject the invoice.');
+        } catch (ThreeWayMatchException $exception) {
+            $this->assertNotEmpty($exception->errors);
+        }
 
-        app(VendorBillAutoCreationService::class)->createFromGoodsReceipt(
-            $receipt,
-            billLines: [[
-                'purchase_order_item_id' => $po->items->first()->id,
-                'quantity' => 1,
-                'unit_price' => 60_000_000, // 20% above PO price
-            ]],
-        );
+        $this->assertSame(0, VendorBill::withoutTenantScope()
+            ->where('tenant_id', $tenant->id)
+            ->count());
     }
 
     /**
