@@ -46,14 +46,12 @@ class StockMoveService
         ?Model $reference = null,
         ?string $notes = null,
     ): StockMove {
-        $cost = $this->valuation->resolveOutboundCost($stockItem, $warehouse, $quantity);
-
         return $this->commit(
             warehouse: $warehouse,
             stockItem: $stockItem,
             moveType: StockMoveType::Out,
             quantity: $quantity,
-            unitCost: $cost['unit_cost'],
+            unitCost: 0,
             reference: $reference,
             notes: $notes,
         );
@@ -68,8 +66,21 @@ class StockMoveService
         ?Model $reference = null,
         ?string $notes = null,
     ): StockMove {
-        if ($quantity <= 0) {
-            throw new RuntimeException('Stock move quantity must be positive.');
+        if (! is_finite($quantity) || $quantity <= 0) {
+            throw new RuntimeException('Stock move quantity must be positive and finite.');
+        }
+
+        if ($moveType === StockMoveType::In && (! is_finite($unitCost) || $unitCost < 0)) {
+            throw new RuntimeException('Stock move unit cost must be non-negative and finite.');
+        }
+
+        if ((int) $warehouse->tenant_id !== (int) $stockItem->tenant_id) {
+            throw new RuntimeException('Stock item and warehouse must belong to the same tenant.');
+        }
+
+        $referenceTenantId = $reference?->getAttribute('tenant_id');
+        if ($referenceTenantId !== null && (int) $referenceTenantId !== (int) $stockItem->tenant_id) {
+            throw new RuntimeException('Stock move reference must belong to the same tenant.');
         }
 
         return DB::transaction(function () use ($warehouse, $stockItem, $moveType, $quantity, $unitCost, $reference, $notes): StockMove {
@@ -97,6 +108,13 @@ class StockMoveService
 
             if ($moveType === StockMoveType::Out && (float) $level->quantity_on_hand < $quantity) {
                 throw new RuntimeException('Insufficient stock on hand.');
+            }
+
+            if ($moveType === StockMoveType::Out) {
+                // Cost layers must be consumed only inside the stock-level lock
+                // and the same transaction that commits the outbound move.
+                $cost = $this->valuation->resolveOutboundCost($stockItem, $warehouse, $quantity);
+                $unitCost = $cost['unit_cost'];
             }
 
             $totalCost = round($quantity * $unitCost, 2);

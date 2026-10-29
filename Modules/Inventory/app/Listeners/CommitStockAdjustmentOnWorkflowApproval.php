@@ -28,11 +28,8 @@ class CommitStockAdjustmentOnWorkflowApproval
         /** @var StockAdjustment $adjustment */
         $adjustment = $instance->subject;
 
-        if ($adjustment->status === 'committed') {
-            return;
-        }
-
-        $adjustment->forceFill(['status' => 'approved'])->save();
+        // The service serializes the adjustment and rechecks committed status
+        // under a row lock. Do not regress a committed record to approved here.
         $this->adjustmentService->commit($adjustment);
     }
 }
