@@ -2,7 +2,6 @@
 
 namespace Modules\Employee\Filament\Resources\SalarySlips\Tables;
 
-use App\Filament\Imports\SalarySlipImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -14,7 +13,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Modules\Core\Filament\Support\ImportTableActions;
 use Modules\Core\Support\FilamentUi;
 
 class SalarySlipsTable
@@ -115,9 +113,6 @@ class SalarySlipsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
-            ])
-            ->headerActions([
-                ...ImportTableActions::make(SalarySlipImporter::class),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

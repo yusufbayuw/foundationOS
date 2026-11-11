@@ -2,12 +2,10 @@
 
 namespace Modules\Employee\Filament\Resources\SalarySlips\Schemas;
 
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Modules\Core\Filament\Support\TenantField;
@@ -36,10 +34,6 @@ class SalarySlipForm
                         TextInput::make('period_label')
                             ->label(FilamentUi::field('period_label'))
                             ->required(),
-                        TextInput::make('status')
-                            ->label(FilamentUi::field('status'))
-                            ->required()
-                            ->default('draft'),
                     ]),
 
                 Section::make(FilamentUi::text('Salary'))
@@ -48,19 +42,27 @@ class SalarySlipForm
                         TextInput::make('basic_salary')
                             ->label(FilamentUi::field('basic_salary'))
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->default(0)
+                            ->readOnly(),
                         TextInput::make('total_earnings')
                             ->label(FilamentUi::field('total_earnings'))
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->default(0)
+                            ->readOnly(),
                         TextInput::make('total_deductions')
                             ->label(FilamentUi::field('total_deductions'))
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->default(0)
+                            ->readOnly(),
                         TextInput::make('net_salary')
                             ->label(FilamentUi::field('net_salary'))
                             ->required()
-                            ->numeric(),
+                            ->numeric()
+                            ->default(0)
+                            ->readOnly(),
                     ]),
 
                 Section::make(FilamentUi::text('Details'))
@@ -68,7 +70,9 @@ class SalarySlipForm
                     ->schema([
                         Repeater::make('earnings_details')
                             ->label(FilamentUi::field('earnings_details'))
-                            ->required()
+                            ->default([])
+                            ->disabled()
+                            ->dehydrated()
                             ->schema([
                                 TextInput::make('name')
                                     ->label(FilamentUi::text('Component')),
@@ -81,7 +85,9 @@ class SalarySlipForm
                             ->reorderable(),
                         Repeater::make('deductions_details')
                             ->label(FilamentUi::field('deductions_details'))
-                            ->required()
+                            ->default([])
+                            ->disabled()
+                            ->dehydrated()
                             ->schema([
                                 TextInput::make('name')
                                     ->label(FilamentUi::text('Component')),
@@ -151,13 +157,6 @@ class SalarySlipForm
                 Section::make(FilamentUi::text('Payment'))
                     ->columns(2)
                     ->schema([
-                        DateTimePicker::make('paid_at'),
-                        TextInput::make('paid_via')
-                            ->label(FilamentUi::field('paid_via')),
-                        Toggle::make('is_sent')
-                            ->label(FilamentUi::field('is_sent'))
-                            ->required(),
-                        DateTimePicker::make('sent_at'),
                         Textarea::make('notes')
                             ->label(FilamentUi::field('notes'))
                             ->columnSpanFull(),

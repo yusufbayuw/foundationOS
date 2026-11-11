@@ -4,6 +4,7 @@ namespace Modules\Employee\Filament\Resources\SalarySlipComponents;
 
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Core\Filament\Support\ModuleResource as LocalizedResource;
 use Modules\Employee\Filament\Resources\SalarySlipComponents\Pages\CreateSalarySlipComponent;
 use Modules\Employee\Filament\Resources\SalarySlipComponents\Pages\EditSalarySlipComponent;
@@ -33,6 +34,38 @@ class SalarySlipComponentResource extends LocalizedResource
     public static function table(Table $table): Table
     {
         return SalarySlipComponentsTable::configure($table);
+    }
+
+    // Component lines are generated from the payroll calculation service.
+    // The resource remains viewable, but cannot bypass the slip lifecycle.
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canForceDelete(Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
+    public static function canForceDeleteAny(): bool
+    {
+        return false;
     }
 
     public static function getRelations(): array

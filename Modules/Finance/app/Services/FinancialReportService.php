@@ -2,9 +2,14 @@
 
 namespace Modules\Finance\Services;
 
+use App\Scopes\TenantScope;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Modules\Finance\Models\ChartOfAccount;
+use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Models\JournalEntryLine;
 
 /**
@@ -25,13 +30,58 @@ class FinancialReportService
      */
     public function profitAndLoss(int $tenantId, Carbon $from, Carbon $to, ?int $organizationId = null): array
     {
-        $lines = $this->postedLines($tenantId, $from, $to, $organizationId);
+        $this->assertTenantReportAccess($tenantId);
 
-        $revenue = $this->groupByAccount($lines, 'revenue');
-        $expenses = $this->groupByAccount($lines, 'expense');
+        // Read the posted ledger directly rather than relying on nested
+        // relationship scopes that can silently exclude valid payroll lines.
+        // Every join enforces tenant equality; soft-deleted ledger records
+        // and accounts remain excluded from financial statements.
+        $balances = DB::table('journal_entry_lines as line')
+            ->join('journal_entries as entry', function (JoinClause $join): void {
+                $join->on('entry.id', '=', 'line.journal_entry_id')
+                    ->on('entry.tenant_id', '=', 'line.tenant_id');
+            })
+            ->join('chart_of_accounts as account', function (JoinClause $join): void {
+                $join->on('account.id', '=', 'line.chart_of_account_id')
+                    ->on('account.tenant_id', '=', 'line.tenant_id');
+            })
+            ->where('line.tenant_id', $tenantId)
+            ->where('entry.tenant_id', $tenantId)
+            ->where('account.tenant_id', $tenantId)
+            ->where('entry.is_posted', true)
+            ->whereBetween('entry.date', [$from->toDateString(), $to->toDateString()])
+            ->when($organizationId !== null, fn ($query) => $query->where('entry.organization_id', $organizationId))
+            ->whereNull('line.deleted_at')
+            ->whereNull('entry.deleted_at')
+            ->whereNull('account.deleted_at')
+            ->select('account.id', 'account.code', 'account.name', 'account.type')
+            ->selectRaw('SUM(line.debit) as total_debit, SUM(line.credit) as total_credit')
+            ->groupBy('account.id', 'account.code', 'account.name', 'account.type')
+            ->get();
 
-        $totalRevenue = $revenue->sum('balance');
-        $totalExpenses = $expenses->sum('balance');
+        $group = static function (string $type) use ($balances): Collection {
+            return $balances
+                ->filter(fn ($account): bool => strtolower((string) $account->type) === $type)
+                ->map(static function ($account) use ($type): object {
+                    $debit = (float) $account->total_debit;
+                    $credit = (float) $account->total_credit;
+
+                    return (object) [
+                        'id' => $account->id,
+                        'code' => $account->code,
+                        'name' => $account->name,
+                        'balance' => round($type === 'expense' ? $debit - $credit : $credit - $debit, 2),
+                    ];
+                })
+                ->sortBy('code')
+                ->values();
+        };
+
+        $revenue = $group('revenue');
+        $expenses = $group('expense');
+
+        $totalRevenue = (float) $revenue->sum('balance');
+        $totalExpenses = (float) $expenses->sum('balance');
 
         return [
             'period_from' => $from->toDateString(),
@@ -126,18 +176,40 @@ class FinancialReportService
     // Internals
     // ─────────────────────────────────────────────────────
 
+    private function assertTenantReportAccess(int $tenantId): void
+    {
+        $activeTenantId = TenantScope::resolveTenantId();
+
+        if ($activeTenantId !== null && (string) $activeTenantId !== (string) $tenantId) {
+            throw new AuthorizationException('Cannot access another tenant\'s financial reports.');
+        }
+    }
+
     /** Load all posted journal entry lines in the date range. */
     private function postedLines(int $tenantId, Carbon $from, Carbon $to, ?int $organizationId): Collection
     {
-        return JournalEntryLine::query()
-            ->with('chartOfAccount')
+        $this->assertTenantReportAccess($tenantId);
+
+        // Reports receive an explicit tenant ID (including CLI/export callers).
+        // Do not let an unrelated ambient tenant scope hide a valid ledger entry.
+        // Keep soft-delete scopes intact while restricting both sides of the
+        // journal relationship and the chart of accounts to the requested tenant.
+        $postedJournalIds = JournalEntry::withoutTenantScope()
             ->where('tenant_id', $tenantId)
-            ->whereHas('journalEntry', function ($q) use ($tenantId, $from, $to, $organizationId): void {
-                $q->where('tenant_id', $tenantId)
-                    ->where('is_posted', true)
-                    ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
-                    ->when($organizationId, fn ($q2) => $q2->where('organization_id', $organizationId));
-            })
+            ->where('is_posted', true)
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->when($organizationId !== null, fn ($query) => $query->where('organization_id', $organizationId))
+            ->select('id');
+
+        return JournalEntryLine::withoutTenantScope()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('journal_entry_id', $postedJournalIds)
+            ->whereHas('chartOfAccount', fn ($query) => $query
+                ->withoutGlobalScope(TenantScope::class)
+                ->where('tenant_id', $tenantId))
+            ->with(['chartOfAccount' => fn ($query) => $query
+                ->withoutGlobalScope(TenantScope::class)
+                ->where('tenant_id', $tenantId)])
             ->get();
     }
 

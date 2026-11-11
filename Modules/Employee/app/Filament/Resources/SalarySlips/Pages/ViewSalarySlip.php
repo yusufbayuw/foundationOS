@@ -8,11 +8,14 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Modules\Core\Models\User;
 use Modules\Core\Support\FilamentUi;
 use Modules\Employee\Filament\Resources\SalarySlips\SalarySlipResource;
 use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Services\PayrollCalculationService;
+use Modules\Employee\Services\SalarySlipApprovalService;
 use Modules\Employee\Services\SalarySlipPaymentService;
+use Throwable;
 
 class ViewSalarySlip extends ViewRecord
 {
@@ -32,9 +35,16 @@ class ViewSalarySlip extends ViewRecord
                 ->visible(fn (): bool => $record->status === 'draft')
                 ->requiresConfirmation()
                 ->action(function (): void {
-                    $this->getRecord()->update(['status' => 'approved']);
-                    Notification::make()->title('Salary slip approved.')->success()->send();
-                    $this->record = $this->getRecord()->fresh();
+                    try {
+                        /** @var User $actor */
+                        $actor = auth()->user();
+                        app(SalarySlipApprovalService::class)->approve($this->getRecord(), $actor);
+                        Notification::make()->title('Salary slip approved.')->success()->send();
+                        $this->record = $this->getRecord()->fresh();
+                    } catch (Throwable $exception) {
+                        report($exception);
+                        Notification::make()->title('Salary slip approval failed.')->body($exception->getMessage())->danger()->send();
+                    }
                 }),
 
             Action::make('markAsPaid')

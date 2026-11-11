@@ -3,11 +3,13 @@
 namespace Modules\Employee\Services;
 
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Modules\Employee\Models\AttendanceLog;
 use Modules\Employee\Models\Employee;
 use Modules\Employee\Models\PayrollComponent;
 use Modules\Employee\Models\SalarySlip;
 use Modules\Employee\Models\SalarySlipComponent;
+use RuntimeException;
 
 /**
  * Calculates payroll for one employee in a given period.
@@ -32,10 +34,25 @@ class PayrollCalculationService
         int $year,
         bool $dryRun = false,
     ): SalarySlip {
-        $attendanceStats = $this->aggregateAttendance($employee, $month, $year);
+        if ($month < 1 || $month > 12 || $year < 1900 || $year > 2100) {
+            throw new InvalidArgumentException('Invalid payroll month or year.');
+        }
 
-        return DB::transaction(function () use ($employee, $month, $year, $attendanceStats, $dryRun): SalarySlip {
+        return DB::transaction(function () use ($employee, $month, $year, $dryRun): SalarySlip {
+            if (! $dryRun) {
+                // Serialize generation for an employee even when no slip exists yet.
+                $employee = Employee::query()
+                    ->whereKey($employee->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+            }
+
+            $attendanceStats = $this->aggregateAttendance($employee, $month, $year);
             $slip = $this->resolveSlip($employee, $month, $year, $attendanceStats, $dryRun);
+
+            if (! $dryRun && $slip->status !== 'draft') {
+                throw new RuntimeException('Only draft salary slips can be recalculated.');
+            }
 
             $components = PayrollComponent::query()
                 ->where('tenant_id', $employee->tenant_id)
@@ -152,14 +169,24 @@ class PayrollCalculationService
             ]);
         }
 
-        return SalarySlip::query()->firstOrCreate(
+        $existing = SalarySlip::query()
+            ->where('tenant_id', $employee->tenant_id)
+            ->where('employee_id', $employee->id)
+            ->where('period_month', $month)
+            ->where('period_year', $year)
+            ->lockForUpdate()
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        return SalarySlip::query()->create(
             [
                 'tenant_id' => $employee->tenant_id,
                 'employee_id' => $employee->id,
                 'period_month' => $month,
                 'period_year' => $year,
-            ],
-            [
                 'period_label' => $periodLabel,
                 'basic_salary' => $basicSalary,
                 'earnings_details' => [],
