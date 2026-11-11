@@ -7,6 +7,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Modules\Core\Filament\Support\ModuleResource;
+use Modules\Core\Models\User;
 use Modules\Counseling\Filament\Resources\CounselingNotes\Pages\CreateCounselingNote;
 use Modules\Counseling\Filament\Resources\CounselingNotes\Pages\EditCounselingNote;
 use Modules\Counseling\Filament\Resources\CounselingNotes\Pages\ListCounselingNotes;
@@ -50,6 +51,24 @@ class CounselingNoteResource extends ModuleResource
             'view' => ViewCounselingNote::route('/{record}'),
             'edit' => EditCounselingNote::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        // Filament's viewAny permission controls access to the resource but
+        // does not prevent a permitted user from listing confidential rows.
+        if (! $user instanceof User) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->isGlobalSuperAdmin() || $user->hasAnyRole(['counselor', 'principal', 'super_admin'])) {
+            return $query;
+        }
+
+        return $query->where('is_confidential', false);
     }
 
     public static function getRecordRouteBindingEloquentQuery(): Builder
