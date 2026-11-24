@@ -28,11 +28,36 @@ class VendorBillAutoCreationService
     public function createFromGoodsReceipt(GoodsReceipt $receipt, ?array $billLines = null, ?int $processedBy = null): VendorBill
     {
         return DB::transaction(function () use ($receipt, $billLines, $processedBy): VendorBill {
-            $receipt = $receipt->fresh(['items', 'purchaseOrder.items']);
+            $receipt = GoodsReceipt::query()
+                ->whereKey($receipt->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+            $receipt->load(['items', 'purchaseOrder.items']);
             $po = $receipt->purchaseOrder;
 
             if (! $po) {
                 throw new ThreeWayMatchException(['Goods receipt has no parent purchase order.']);
+            }
+
+            if ($receipt->status !== 'confirmed') {
+                throw new ThreeWayMatchException(['Goods receipt must be confirmed before billing.']);
+            }
+
+            // Serialize automatic billing per receipt, including queue/job retries.
+            $existingBill = VendorBill::withoutTenantScope()
+                ->withTrashed()
+                ->where('tenant_id', $receipt->tenant_id)
+                ->where('goods_receipt_id', $receipt->getKey())
+                ->first();
+
+            if ($existingBill) {
+                if ($existingBill->trashed() || $billLines !== null) {
+                    throw new ThreeWayMatchException([
+                        'A vendor bill already exists for this goods receipt; review it before billing again.',
+                    ]);
+                }
+
+                return $existingBill->fresh(['items', 'journalEntry']);
             }
 
             $billLines = $billLines ?? $this->defaultBillLines($po, $receipt);
@@ -99,13 +124,15 @@ class VendorBillAutoCreationService
 
         return $receipt->items
             ->filter(fn ($gr) => $gr->purchase_order_item_id !== null && (int) $gr->quantity_accepted > 0)
-            ->map(function ($gr) use ($poItemsById): array {
-                $poItem = $poItemsById->get($gr->purchase_order_item_id);
+            ->groupBy('purchase_order_item_id')
+            ->map(function ($receiptItems, $poItemId) use ($poItemsById): array {
+                $poItem = $poItemsById->get($poItemId);
+                $firstReceiptItem = $receiptItems->first();
 
                 return [
-                    'purchase_order_item_id' => (int) $gr->purchase_order_item_id,
-                    'quantity' => (int) $gr->quantity_accepted,
-                    'unit_price' => (float) ($poItem?->unit_price ?? $gr->unit_price),
+                    'purchase_order_item_id' => (int) $poItemId,
+                    'quantity' => (int) $receiptItems->sum('quantity_accepted'),
+                    'unit_price' => (float) ($poItem?->unit_price ?? $firstReceiptItem->unit_price),
                     'description' => $poItem?->description,
                     'unit_of_measure' => $poItem?->unit_of_measure,
                 ];

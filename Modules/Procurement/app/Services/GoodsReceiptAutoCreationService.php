@@ -27,7 +27,15 @@ class GoodsReceiptAutoCreationService
     public function receive(PurchaseOrder $purchaseOrder, array $quantities = [], ?int $receivedBy = null, ?string $notes = null): GoodsReceipt
     {
         return DB::transaction(function () use ($purchaseOrder, $quantities, $receivedBy, $notes): GoodsReceipt {
-            $purchaseOrder = $purchaseOrder->fresh(['items']);
+            $purchaseOrder = PurchaseOrder::query()
+                ->whereKey($purchaseOrder->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+            $purchaseOrder->load('items');
+
+            if ($purchaseOrder->status === 'closed') {
+                throw new \DomainException('Closed purchase orders cannot receive goods.');
+            }
 
             $receipt = GoodsReceipt::query()->create([
                 'tenant_id' => $purchaseOrder->tenant_id,
@@ -63,6 +71,10 @@ class GoodsReceiptAutoCreationService
                 $poItem->forceFill([
                     'quantity_received' => (int) $poItem->quantity_received + $qty,
                 ])->save();
+            }
+
+            if (! $receipt->items()->exists()) {
+                throw new \DomainException('Goods receipt must contain at least one item with remaining quantity.');
             }
 
             $this->recomputePoStatus($purchaseOrder);

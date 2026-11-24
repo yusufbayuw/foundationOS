@@ -2,6 +2,9 @@
 
 namespace Modules\Inventory\Services;
 
+use Illuminate\Support\Facades\DB;
+use Modules\Inventory\Enums\StockMoveStatus;
+use Modules\Inventory\Enums\StockMoveType;
 use Modules\Inventory\Models\StockMove;
 use Modules\Inventory\Models\Warehouse;
 use Modules\Procurement\Models\GoodsReceipt;
@@ -20,22 +23,33 @@ class GoodsReceiptStockService
      */
     public function receiveFromGoodsReceipt(GoodsReceipt $receipt): array
     {
-        $receipt = $receipt->fresh(['items.purchaseOrderItem.procurementItem', 'purchaseOrder']);
-        $warehouse = $this->warehouseResolver->defaultForTenant(
-            (int) $receipt->tenant_id,
-            $receipt->purchaseOrder?->organization_id,
-        );
+        return DB::transaction(function () use ($receipt): array {
+            $receipt = GoodsReceipt::query()
+                ->whereKey($receipt->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $moves = [];
-
-        foreach ($receipt->items as $grItem) {
-            $move = $this->receiveLine($warehouse, $grItem);
-            if ($move) {
-                $moves[] = $move;
+            if ($receipt->status !== 'confirmed') {
+                return [];
             }
-        }
 
-        return $moves;
+            $receipt->load(['items.purchaseOrderItem.procurementItem', 'purchaseOrder']);
+            $warehouse = $this->warehouseResolver->defaultForTenant(
+                (int) $receipt->tenant_id,
+                $receipt->purchaseOrder?->organization_id,
+            );
+
+            $moves = [];
+
+            foreach ($receipt->items as $grItem) {
+                $move = $this->receiveLine($warehouse, $grItem);
+                if ($move) {
+                    $moves[] = $move;
+                }
+            }
+
+            return $moves;
+        });
     }
 
     protected function receiveLine(
@@ -44,6 +58,20 @@ class GoodsReceiptStockService
     ): ?StockMove {
         $qty = (int) $grItem->quantity_accepted;
         if ($qty <= 0) {
+            return null;
+        }
+
+        // A replayed receipt-confirmed event must never increase stock twice.
+        $alreadyCommitted = StockMove::withoutTenantScope()
+            ->withTrashed()
+            ->where('tenant_id', $grItem->tenant_id)
+            ->where('reference_type', $grItem->getMorphClass())
+            ->where('reference_id', $grItem->getKey())
+            ->where('move_type', StockMoveType::In->value)
+            ->where('status', StockMoveStatus::Committed->value)
+            ->exists();
+
+        if ($alreadyCommitted) {
             return null;
         }
 

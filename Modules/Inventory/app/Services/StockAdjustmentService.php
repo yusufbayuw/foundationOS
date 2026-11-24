@@ -14,12 +14,17 @@ class StockAdjustmentService
 
     public function commit(StockAdjustment $adjustment): StockAdjustment
     {
-        if ($adjustment->status === 'committed') {
-            return $adjustment;
-        }
-
         return DB::transaction(function () use ($adjustment): StockAdjustment {
-            $adjustment = $adjustment->fresh(['lines.stockItem', 'warehouse']);
+            $adjustment = StockAdjustment::query()
+                ->whereKey($adjustment->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($adjustment->status === 'committed') {
+                return $adjustment;
+            }
+
+            $adjustment->load(['lines.stockItem', 'warehouse']);
 
             if ($adjustment->lines->isEmpty()) {
                 throw new RuntimeException('Stock adjustment has no lines.');
