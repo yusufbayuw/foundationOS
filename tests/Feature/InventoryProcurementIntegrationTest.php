@@ -27,6 +27,7 @@ use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\PurchaseOrderItem;
 use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Services\GoodsReceiptAutoCreationService;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class InventoryProcurementIntegrationTest extends TestCase
@@ -292,6 +293,73 @@ class InventoryProcurementIntegrationTest extends TestCase
             ->where('reference_id', $receipt->items->first()->id)
             ->where('move_type', StockMoveType::In->value)
             ->count());
+    }
+
+    #[DataProvider('layerValuationMethods')]
+    public function test_rejected_layered_outbound_rolls_back_before_a_valid_move(
+        ValuationMethod $method,
+        float $expectedTotalCost,
+        array $expectedRemaining,
+    ): void {
+        [$tenant, , $procurementItem] = $this->makePoWithProcurementItem('Layered supply', 5, 10);
+        $warehouse = app(WarehouseResolver::class)->defaultForTenant((int) $tenant->id);
+        $stockItem = StockItem::withoutTenantScope()->create([
+            'tenant_id' => $tenant->id,
+            'procurement_item_id' => $procurementItem->id,
+            'code' => 'LAYERED',
+            'name' => 'Layered supply',
+            'unit_of_measure' => 'unit',
+            'valuation_method' => $method,
+            'is_active' => true,
+        ]);
+        $service = app(StockMoveService::class);
+        $service->commitInbound($warehouse, $stockItem, 2, 10);
+        $service->commitInbound($warehouse, $stockItem, 3, 30);
+
+        $level = StockLevel::withoutTenantScope()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('stock_item_id', $stockItem->id)
+            ->firstOrFail();
+        $layers = StockCostLayer::withoutTenantScope()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('stock_item_id', $stockItem->id)
+            ->orderBy('id');
+        $outboundMoves = StockMove::withoutTenantScope()
+            ->where('stock_item_id', $stockItem->id)
+            ->where('move_type', StockMoveType::Out);
+
+        // Simulate a stock-level discrepancy so rejection occurs during layer valuation.
+        $level->forceFill(['quantity_on_hand' => 6])->save();
+
+        try {
+            $service->commitOutbound($warehouse, $stockItem, 6);
+            $this->fail('Outbound quantity exceeding available cost layers must be rejected.');
+        } catch (\RuntimeException $exception) {
+            $this->assertSame('Insufficient stock cost layers for outbound move.', $exception->getMessage());
+        }
+
+        $this->assertSame([2.0, 3.0], $layers->pluck('quantity_remaining')->map(fn ($quantity): float => (float) $quantity)->all());
+        $this->assertSame(6.0, (float) $level->fresh()->quantity_on_hand);
+        $this->assertSame(0, $outboundMoves->count());
+
+        $level->forceFill(['quantity_on_hand' => 5])->save();
+        $move = $service->commitOutbound($warehouse, $stockItem, 3);
+
+        $this->assertEqualsWithDelta($expectedTotalCost, (float) $move->total_cost, 0.01);
+        $this->assertSame(2.0, (float) $level->fresh()->quantity_on_hand);
+        $this->assertSame(1, $outboundMoves->count());
+        $this->assertSame($expectedRemaining, $layers->pluck('quantity_remaining')->map(fn ($quantity): float => (float) $quantity)->all());
+    }
+
+    /**
+     * @return array<string, array{ValuationMethod, float, list<float>}>
+     */
+    public static function layerValuationMethods(): array
+    {
+        return [
+            'FIFO' => [ValuationMethod::Fifo, 50.0, [0.0, 2.0]],
+            'LIFO' => [ValuationMethod::Lifo, 90.0, [2.0, 0.0]],
+        ];
     }
 
     /**
