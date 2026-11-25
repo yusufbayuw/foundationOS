@@ -91,7 +91,7 @@ jobs:
 
   postgresql-restore:
     name: PostgreSQL encrypted isolated restore (CI fixture)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       postgres:
@@ -111,10 +111,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install age and PostgreSQL client
+      - name: Install age and PostgreSQL 16 client
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y age postgresql-client
+          sudo apt-get install -y age postgresql-client-16
+          echo '/usr/lib/postgresql/16/bin' >> "$GITHUB_PATH"
+
+      - name: Verify PostgreSQL client major matches the fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          for client in psql pg_dump pg_restore; do
+            version=$("$client" --version)
+            echo "$version"
+            [[ "$version" =~ \(PostgreSQL\)\ 16\. ]]
+          done
 
       - name: Backup and restore entirely disposable data
         shell: bash
