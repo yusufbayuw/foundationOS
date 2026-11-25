@@ -2,12 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Imports\JournalEntryImporter;
+use App\Models\User;
+use Filament\Actions\Imports\Models\Import;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
+use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
+use Modules\Finance\Services\FinanceControlService;
 use Modules\Procurement\Exceptions\ThreeWayMatchException;
 use Modules\Procurement\Models\PurchaseOrder;
 use Modules\Procurement\Models\PurchaseOrderItem;
@@ -15,6 +20,7 @@ use Modules\Procurement\Models\Vendor;
 use Modules\Procurement\Models\VendorBill;
 use Modules\Procurement\Services\GoodsReceiptAutoCreationService;
 use Modules\Procurement\Services\VendorBillAutoCreationService;
+use RuntimeException;
 use Tests\TestCase;
 
 class ProcurementEndToEndPipelineTest extends TestCase
@@ -64,7 +70,7 @@ class ProcurementEndToEndPipelineTest extends TestCase
         $this->assertSame(6, (int) $poItems[1]->fresh()->quantity_received);
     }
 
-    public function test_full_pipeline_receipt_to_bill_posts_balanced_draft_journal(): void
+    public function test_vendor_bill_journal_stays_draft_until_balanced_lines_are_added(): void
     {
         [$tenant, $po] = $this->makePoWithItems([
             ['Monitor', 3, 5_000_000],
@@ -80,10 +86,86 @@ class ProcurementEndToEndPipelineTest extends TestCase
         $journal = JournalEntry::withoutTenantScope()->find($bill->journal_entry_id);
         $this->assertNotNull($journal);
         $this->assertSame((int) $tenant->id, (int) $journal->tenant_id);
-        $this->assertTrue((bool) $journal->is_balanced);
-        $this->assertFalse((bool) $journal->is_posted, 'auto-journal stays draft until Finance posts it');
-        $this->assertEqualsWithDelta(15_000_000.0, (float) $journal->total_debit, 0.01);
-        $this->assertEqualsWithDelta(15_000_000.0, (float) $journal->total_credit, 0.01);
+        $this->assertFalse($journal->is_balanced);
+        $this->assertFalse($journal->is_posted);
+        $this->assertSame('0.00', $journal->total_debit);
+        $this->assertSame('0.00', $journal->total_credit);
+        $this->assertSame(0, $journal->lines()->count());
+
+        $journal->forceFill([
+            'total_debit' => $bill->total_amount,
+            'total_credit' => $bill->total_amount,
+            'is_balanced' => true,
+        ])->save();
+
+        $actor = User::factory()->create();
+        $service = app(FinanceControlService::class);
+
+        try {
+            $service->postJournalEntry($journal, $actor);
+            $this->fail('A journal without ledger lines must not be posted.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('at least two lines', $exception->getMessage());
+        }
+
+        $this->assertEquals($journal->getAttributes(), $journal->fresh()->getAttributes());
+
+        foreach ([['5100', 'Expense', $bill->total_amount, 0], ['2100', 'Payable', 0, $bill->total_amount]] as [$code, $name, $debit, $credit]) {
+            $account = ChartOfAccount::query()->create([
+                'tenant_id' => $tenant->id,
+                'organization_id' => $journal->organization_id,
+                'code' => $code,
+                'name' => $name,
+            ]);
+
+            $journal->lines()->create([
+                'tenant_id' => $tenant->id,
+                'chart_of_account_id' => $account->id,
+                'debit' => $debit,
+                'credit' => $credit,
+            ]);
+        }
+
+        $posted = $service->postJournalEntry($journal, $actor);
+
+        $this->assertTrue($posted->is_balanced);
+        $this->assertTrue($posted->is_posted);
+        $this->assertSame($actor->id, $posted->posted_by);
+        $this->assertCount(2, $posted->lines);
+        $this->assertSame('15000000.00', $posted->total_debit);
+        $this->assertSame('15000000.00', $posted->total_credit);
+    }
+
+    public function test_journal_csv_import_cannot_set_posted_or_reversed_state(): void
+    {
+        [$tenant] = $this->makePoWithItems([]);
+        $organizationId = Organization::query()->where('tenant_id', $tenant->id)->value('id');
+        $row = [
+            'organization_id' => (string) $organizationId,
+            'entry_number' => 'CSV-DRAFT',
+            'date' => now()->toDateString(),
+            'description' => 'Imported draft',
+            'total_debit' => '150.00',
+            'total_credit' => '150.00',
+            'is_balanced' => 'true',
+            'is_posted' => 'true',
+            'is_reversed' => 'true',
+        ];
+
+        $importer = new JournalEntryImporter(
+            new Import,
+            array_combine(array_keys($row), array_keys($row)),
+            ['tenant_id' => $tenant->id],
+        );
+        $importer($row);
+
+        $journal = JournalEntry::query()->where('entry_number', 'CSV-DRAFT')->firstOrFail();
+        $this->assertSame($tenant->id, (int) $journal->tenant_id);
+        $this->assertFalse($journal->is_balanced);
+        $this->assertFalse($journal->is_posted);
+        $this->assertFalse($journal->is_reversed);
+        $this->assertNull($journal->posted_by);
+        $this->assertNull($journal->posted_at);
     }
 
     public function test_three_way_mismatch_is_rejected_with_clear_errors(): void
