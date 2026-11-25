@@ -445,12 +445,6 @@ parameters:
 			path: Modules/Finance/app/Filament/Resources/CustomerInvoices/Tables/CustomerInvoicesTable.php
 
 		-
-			message: '#^Class Modules\\Finance\\Filament\\Resources\\JournalEntries\\RelationManagers\\LinesRelationManager not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: Modules/Finance/app/Filament/Resources/JournalEntries/JournalEntryResource.php
-
-		-
 			message: '#^Class Modules\\Finance\\Filament\\Resources\\StudentInvoices\\RelationManagers\\ItemsRelationManager not found\.$#'
 			identifier: class.notFound
 			count: 1

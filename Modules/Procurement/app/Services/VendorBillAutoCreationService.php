@@ -13,7 +13,7 @@ use Modules\Procurement\Models\VendorBillItem;
 
 /**
  * Creates a VendorBill from a confirmed GoodsReceipt, enforcing three-way
- * matching (PO ↔ GR ↔ Invoice) and posting a draft journal entry.
+ * matching (PO ↔ GR ↔ Invoice) and recording a draft journal entry.
  *
  * If no explicit bill lines are passed, defaults to billing exactly what
  * has been received & accepted at PO unit price.
@@ -83,7 +83,7 @@ class VendorBillAutoCreationService
                 ]);
             }
 
-            $journal = $this->postDraftJournal($bill);
+            $journal = $this->createDraftJournal($bill);
             $bill->forceFill(['journal_entry_id' => $journal->id])->save();
 
             return $bill->fresh(['items', 'journalEntry']);
@@ -114,7 +114,7 @@ class VendorBillAutoCreationService
             ->all();
     }
 
-    protected function postDraftJournal(VendorBill $bill): JournalEntry
+    protected function createDraftJournal(VendorBill $bill): JournalEntry
     {
         $organizationId = Organization::withoutTenantScope()
             ->where('tenant_id', $bill->tenant_id)
@@ -130,9 +130,9 @@ class VendorBillAutoCreationService
                 $bill->bill_number,
                 $bill->purchaseOrder?->po_number,
             ),
-            'total_debit' => $bill->total_amount,
-            'total_credit' => $bill->total_amount,
-            'is_balanced' => true,
+            'total_debit' => 0,
+            'total_credit' => 0,
+            'is_balanced' => false,
             'is_posted' => false,
         ]);
     }

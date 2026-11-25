@@ -128,21 +128,34 @@ class FinanceControlService
     public function postJournalEntry(JournalEntry $entry, User $actor, ?string $notes = null): JournalEntry
     {
         return DB::transaction(function () use ($entry, $actor, $notes): JournalEntry {
-            $entry = $entry->fresh(['lines']);
+            $entry = JournalEntry::query()
+                ->where('tenant_id', $entry->tenant_id)
+                ->lockForUpdate()
+                ->findOrFail($entry->getKey());
 
             if ($entry->isLockedForMutation()) {
                 throw new RuntimeException('Journal entry is already posted or reversed.');
             }
 
-            $totals = $this->calculateJournalTotals($entry);
+            $lines = $entry->lines()
+                ->where('tenant_id', $entry->tenant_id)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+            $debit = round((float) $lines->sum('debit'), 2);
+            $credit = round((float) $lines->sum('credit'), 2);
 
-            if (round((float) $totals['debit'], 2) !== round((float) $totals['credit'], 2)) {
+            if ($lines->count() < 2 || $debit <= 0 || $credit <= 0) {
+                throw new RuntimeException('Journal entry needs at least two lines with positive debit and credit totals.');
+            }
+
+            if ($debit !== $credit) {
                 throw new RuntimeException('Journal entry is not balanced.');
             }
 
             $entry->forceFill([
-                'total_debit' => $totals['debit'],
-                'total_credit' => $totals['credit'],
+                'total_debit' => $debit,
+                'total_credit' => $credit,
                 'is_balanced' => true,
                 'is_posted' => true,
                 'posted_by' => $actor->getKey(),
@@ -284,17 +297,6 @@ class FinanceControlService
         }
 
         return $account;
-    }
-
-    protected function calculateJournalTotals(JournalEntry $entry): array
-    {
-        $debit = (float) $entry->lines()->sum('debit');
-        $credit = (float) $entry->lines()->sum('credit');
-
-        return [
-            'debit' => $debit,
-            'credit' => $credit,
-        ];
     }
 
     protected function audit(object $record, User $actor, string $action, array $newValues = []): void
