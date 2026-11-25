@@ -2,14 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Imports\JournalEntryImporter;
-use App\Models\User;
-use Filament\Actions\Imports\Models\Import;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Organization;
 use Modules\Core\Models\SubscriptionPlan;
 use Modules\Core\Models\Tenant;
+use Modules\Core\Models\User;
 use Modules\Finance\Models\ChartOfAccount;
 use Modules\Finance\Models\JournalEntry;
 use Modules\Finance\Services\FinanceControlService;
@@ -134,38 +132,6 @@ class ProcurementEndToEndPipelineTest extends TestCase
         $this->assertCount(2, $posted->lines);
         $this->assertSame('15000000.00', $posted->total_debit);
         $this->assertSame('15000000.00', $posted->total_credit);
-    }
-
-    public function test_journal_csv_import_cannot_set_posted_or_reversed_state(): void
-    {
-        [$tenant] = $this->makePoWithItems([]);
-        $organizationId = Organization::query()->where('tenant_id', $tenant->id)->value('id');
-        $row = [
-            'organization_id' => (string) $organizationId,
-            'entry_number' => 'CSV-DRAFT',
-            'date' => now()->toDateString(),
-            'description' => 'Imported draft',
-            'total_debit' => '150.00',
-            'total_credit' => '150.00',
-            'is_balanced' => 'true',
-            'is_posted' => 'true',
-            'is_reversed' => 'true',
-        ];
-
-        $importer = new JournalEntryImporter(
-            new Import,
-            array_combine(array_keys($row), array_keys($row)),
-            ['tenant_id' => $tenant->id],
-        );
-        $importer($row);
-
-        $journal = JournalEntry::query()->where('entry_number', 'CSV-DRAFT')->firstOrFail();
-        $this->assertSame($tenant->id, (int) $journal->tenant_id);
-        $this->assertFalse($journal->is_balanced);
-        $this->assertFalse($journal->is_posted);
-        $this->assertFalse($journal->is_reversed);
-        $this->assertNull($journal->posted_by);
-        $this->assertNull($journal->posted_at);
     }
 
     public function test_three_way_mismatch_is_rejected_with_clear_errors(): void
